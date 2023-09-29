@@ -25,7 +25,7 @@ public class LegendsRoll extends LegendsPool {
 		int randomIndex;
 		int rollAmount;
 		boolean rerollOnDupe = true;
-		Random rng = new Random(2029);
+		Random rng = new Random();
 		Characters unit;
 		ArrayList<Characters> pool;
 		EmbedBuilder[] embeds = new EmbedBuilder[6];

@@ -172,6 +172,15 @@ public class CharacterHash extends HashSet<Characters> {
 		return getOccupiedSize() == 0;
 	}
 	
+	@Override
+	public Set<Characters> clone(){
+		CharacterHash hashClone = new CharacterHash();
+		for(int i=0;i<this.size();i++) {
+			hashClone.put(this.get(i));
+		}
+		return hashClone;
+		
+	}
 	public static void printEmptyIDs(List<Characters> list) {
 		CharacterHash characters = (CharacterHash) CharacterHash.toCharacterHash(list);
 		

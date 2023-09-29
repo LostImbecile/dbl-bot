@@ -61,7 +61,7 @@ public class LegendsSearch extends LegendsPool {
 			String gameId = pool.get(9).getGameID();
 
 			// Add page number to the last embed
-			String footer = String.format("%s\n\nPage 0 of %d", gameId, pool.size() / 10);
+			String footer = String.format("%s%n%nPage 0 of %d", gameId, pool.size() / 10);
 
 			embeds[9].setFooter(footer);
 
@@ -127,7 +127,7 @@ public class LegendsSearch extends LegendsPool {
 				String gameId = pool.get(lastEmbedIndex).getGameID();
 
 				// Add page number to the last embed
-				String footer = String.format("%s\n\nPage %d of %d", gameId, pageIndex, lastPage);
+				String footer = String.format("%s%n%nPage %d of %d", gameId, pageIndex, lastPage);
 
 				embeds[lastEmbedIndex % 10].setFooter(footer);
 

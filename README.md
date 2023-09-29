@@ -1,17 +1,21 @@
-# egubot
+# egubot (DBLegends)
 
-Discord bot I've made for a specific server.
+Discord bot I've made for a specific server. Its features mostly have to do with a mobile game called "Dragon Ball Legends".
 
-Bot code:
+Not quite meant to be used or be useful, only up so server members can look at it or add to it.
+
+Notes:
 ---------------------------------
-The classes in egubot.main are implementation specific, you'll want to change some of them as needed (the
-MessageCreateEventHandler in particular), the rest should work as is, but you might have to modify their messages or add more
-to them to fit your use case.
+The classes in main are implementation specific, you'll want to change some of them as needed (the MessageCreateEventHandler in particular), the rest should work as is, but you should modify their messages or add more to them.
 
-You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created for certain things, but you might
-have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
+You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created for certain things, but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
-Compiled with java 17 but can be easily made to run with java 11.
+This bot was made for a single server and stores its data on discord, I didn't consider it getting used for multiple servers or the case where you want the storage to be local only.
+ 
+Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the framework is switching 
+to java 11 soon.
+
+Also works on Linux (tested), but resources have to be next to the bot when exported as a jar, or reconfigured in the Classpath.
 
 Bot commands:
 ---------------------------------
@@ -56,11 +60,11 @@ Example:
 
 b-roll6 sparking old + (zenkai - extreme) & blu
 
-=> Pool is all old sparking characters (year1 + year2), as well as all the blue non-extreme zenkais
+=> Pool is all old (year1 + year2) sparking characters, as well as all the blue non-extreme zenkais
 ‏‏‎
 
 **2) b-template create (name) (filters)**
-- This creates a new template that you can substitute as a tag or set of tags in b-roll.
+- This creates a new template that you can substitute as a tag or set of tags in b-roll or b-search.
 - Brackets surrounding it are added automatically.
 - Template name can't be a tag or another template, and has to be one word.
 - Template must contain real tags or other templates.
@@ -91,10 +95,9 @@ where LoE is a template, ginyu force is a tag
 
 **5) gpt (message)**
 - Gets response from chatgpt.
-- Past 30 messages in the server are read (non-channel specific).
-- Extremely unstable, if it breaks bot needs to be restarted.
-- Use gpt activate channel to keep gpt active for current channel without using invocation.
-- Use gpt deactivate to go back to using invocation.
+- Conversation is saved up to 3300 tokens, where it starts getting deleted (non-channel specific).
+- Use "gpt activate channel" to keep gpt active for current channel without using invocation.
+- Use "gpt deactivate" to go back to using invocation.
 
 **6) b-response create (type) >> (msg) >> (response) >> (reaction) >> (reaction)...**
 - Adds a new automatic response (whether message or reaction).
@@ -104,6 +107,9 @@ where LoE is a template, ginyu force is a tag
 - There are 3 types: match, equal & contain.
 - Contain doesn't trigger if invocation is part of a word or is connected to one.
 
+Example:
+
+b-response create equal >> test >> :&lt;ok_hand&gt;: >> <:emoji:1142482242589950083>
 
 **7) b-response remove (message)**
 - Removes an automatic response.
@@ -121,7 +127,7 @@ where LoE is a template, ginyu force is a tag
 - Search sees if each word in the name is inside the one being checked. 
 - Order in names doesn't matter due to the above.
 - Max of 10 embeds are shown per page, no page limit, however, you
-only have a set amount of time to review the results.
+only have 15 minutes to navigate pages.
 
 Examples:
 

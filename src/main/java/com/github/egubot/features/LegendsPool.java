@@ -93,20 +93,30 @@ public abstract class LegendsPool {
 					operandStack.push("-1");
 				} else {
 					// System.out.println("pop 1");
-					if (operandStack.size() >= 2 && (!operandStack.get(0).equals("-1") || !operandStack.get(1).equals("-1"))) {
-						if (operandStack.get(0).equals("-1"))
-							pop(operandStack);
-
+					if (operandStack.size() >= 2
+							&& (!operandStack.get(0).equals("-1") || !operandStack.get(1).equals("-1"))) {
 						subPoolFilter = new String[1];
-						subPoolFilter[0] = pop(operandStack);
-						pools.push(getSubPool(subPoolFilter, pools.get(0), null, st));
+
+						// Order matters for "-"
+						if (operandStack.get(0).equals("-1")) {
+							pop(operandStack);
+							subPoolFilter[0] = pop(operandStack);
+							operandStack.push("-1");
+							pools.push(getSubPool(subPoolFilter, pools.get(0), null, st));
+						} else {
+							subPoolFilter[0] = pop(operandStack);
+							pools.push(getSubPool(subPoolFilter, null, pools.get(0), st));
+						}
+
 						pools.remove(1);
-						operandStack.push("-1");
+
 					} else if (pools.size() >= 2) {
 
-						pools.push(getSubPool(null, pools.get(1), pools.get(0), st));
+						pools.push(getSubPool(null, pools.get(0), pools.get(1), st));
 						pools.remove(1);
 						pools.remove(1);
+
+						// Pop two "-1" and push another
 						pop(operandStack);
 					}
 				}
@@ -124,7 +134,7 @@ public abstract class LegendsPool {
 
 		// In the case of there being only one tag (no equation/subpools)
 		if (!operandStack.isEmpty() && pools.isEmpty()) {
-
+			// System.out.println("Pop remaining");
 			subPoolFilter = new String[1];
 			subPoolFilter[0] = pop(operandStack);
 			pools.push(getSubPool(subPoolFilter, new CharacterHash(), null, "&"));
@@ -202,6 +212,7 @@ public abstract class LegendsPool {
 			st = st.replaceAll("(\\w+|\\))(\\s)(\\w+|\\()", "$1 & $3").trim();
 		} while (!temp.equals(st));
 
+		// System.out.println(st);
 		return st;
 	}
 
@@ -262,28 +273,41 @@ public abstract class LegendsPool {
 		Tags tag;
 		String tagCondition;
 
-		// System.out.println(operation);
-		if (subPool2 != null) {
-			// System.out.println("Pool compare");
+		if (subPool1 != null && subPool2 != null) {
+			// System.out.println("Pool1 " + operation + " Pool2");
 			combineSubPools(subPool1, subPool2, operation);
 
 		} else if (subPoolFilter != null) {
 			for (int j = 0; j < subPoolFilter.length; j++) {
 				tagCondition = subPoolFilter[j];
-				// System.out.println(tagCondition);
 
 				for (int i = 0; i < getLegendsWebsite().getTags().size(); i++) {
 					tag = getLegendsWebsite().getTags().get(i);
 
 					if (tag.getName().equalsIgnoreCase(tagCondition)) {
+						// System.out.print(tagCondition + " ");
 						// Initialise subPool if it's empty
-						if (subPool1.isEmpty()) {
-							for (int k = 0; k < tag.getCharacters().size(); k++) {
-								if (tag.getCharacters().get(k) != null)
-									((CharacterHash) subPool1).put(tag.getCharacters().get(k));
+						if (subPool1 != null) {
+							if (subPool1.isEmpty()) {
+								for (int k = 0; k < tag.getCharacters().size(); k++) {
+									if (tag.getCharacters().get(k) != null)
+										((CharacterHash) subPool1).put(tag.getCharacters().get(k));
+								}
+							} else {
+								// System.out.println(" " + operation);
+								combineSubPools(subPool1, tag.getCharacters(), operation);
 							}
 						} else {
-							combineSubPools(subPool1, tag.getCharacters(), operation);
+							if (subPool2.isEmpty()) {
+								for (int k = 0; k < tag.getCharacters().size(); k++) {
+									if (tag.getCharacters().get(k) != null)
+										((CharacterHash) subPool2).put(tag.getCharacters().get(k));
+								}
+							} else {
+								subPool1 = tag.getCharacters().clone();
+								// System.out.println(" " + operation);
+								combineSubPools(subPool1, subPool2, operation);
+							}
 						}
 					}
 				}
@@ -297,11 +321,11 @@ public abstract class LegendsPool {
 	static void combineSubPools(Set<Characters> subPool1, Set<Characters> subPool2, String operation) {
 		int siteID;
 		int initialSize;
-		
-		CharacterHash pool1,pool2;
+
+		CharacterHash pool1, pool2;
 		pool1 = (CharacterHash) subPool1;
 		pool2 = (CharacterHash) subPool2;
-		
+
 		if (operation.equals("&")) {
 			initialSize = pool1.size();
 			for (int i = 0; i < initialSize; i++) {
