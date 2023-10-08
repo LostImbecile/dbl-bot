@@ -42,12 +42,13 @@ public class LegendsSearch extends LegendsPool {
 
 		MessageBuilder msg = new MessageBuilder();
 
-		msg.setContent("Found " + pool.size() + " character");
-
+		String textContent = "Found " + pool.size() + " character";
 		if (pool.size() > 1)
-			msg.append("s");
+			textContent = textContent + "s";
 
-		msg.append(".");
+		textContent = textContent + ".";
+
+		msg.setContent(textContent);
 
 		int timeLimit = 15;
 		// Just to make sure buttons don't interfere with each other
@@ -56,20 +57,23 @@ public class LegendsSearch extends LegendsPool {
 		if (pool.size() > 10) {
 			// Adds two buttons to the message to navigate through pages using
 			msg.addComponents(ActionRow.of(Button.secondary(prev, "Previous"), Button.secondary(next, "Next")));
-			msg.append(" Note, you only have <" + timeLimit + " minutes to go through the pages.");
+			msg.append(" Note, you only have " + timeLimit + " minutes to go through the pages.");
 
 			String gameId = pool.get(9).getGameID();
 
 			// Add page number to the last embed
-			String footer = String.format("%s%n%nPage 0 of %d", gameId, pool.size() / 10);
+			String footer = String.format("%s%n%nPage 1 of %d", gameId, (pool.size() + 9) / 10);
 
 			embeds[9].setFooter(footer);
 
 			msg.setEmbeds(embeds);
 
 			// Listener to deal with page navigation
-			MessageComponentCreateListener navigatePageHandler = new NavigatePageHandler(pool, msg.send(e).join(), prev, next);
-			api.addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES);
+			MessageComponentCreateListener navigatePageHandler = new NavigatePageHandler(pool, msg.send(e).join(), prev,
+					next);
+			api.addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES)
+					.addRemoveHandler(() -> msg.removeAllComponents()
+							.setContent("Found " + pool.size() + " characters. Page navigation timed out."));
 		} else {
 			msg.setEmbeds(embeds);
 			msg.send(e);
@@ -79,7 +83,7 @@ public class LegendsSearch extends LegendsPool {
 
 	private class NavigatePageHandler implements MessageComponentCreateListener {
 
-		int pageIndex = 0;
+		int pageIndex = 1;
 		ArrayList<Characters> pool;
 		Message msg;
 		String previous;
@@ -99,7 +103,7 @@ public class LegendsSearch extends LegendsPool {
 				MessageComponentInteraction messageComponentInteraction = event.getMessageComponentInteraction();
 				String customId = messageComponentInteraction.getCustomId();
 
-				int lastPage = pool.size() / 10;
+				int lastPage = (pool.size() + 9) / 10;
 
 				if (customId.equals(next)) {
 					pageIndex++;
@@ -109,8 +113,8 @@ public class LegendsSearch extends LegendsPool {
 					}
 				} else if (customId.equals(previous)) {
 					pageIndex--;
-					if (pageIndex < 0) {
-						pageIndex = 0;
+					if (pageIndex < 1) {
+						pageIndex = 1;
 					}
 				} else {
 					return;
@@ -119,7 +123,7 @@ public class LegendsSearch extends LegendsPool {
 				// Creates 10 or less embeds based on the page number, and saves
 				// the index of the last embed to change the footer of.
 				int lastEmbedIndex = 0;
-				for (int i = pageIndex * 10; i < pool.size() && i < (pageIndex + 1) * 10; i++) {
+				for (int i = (pageIndex - 1) * 10; i < pool.size() && i < pageIndex * 10; i++) {
 					embeds[i % 10] = MessageFormats.createCharacterEmbed(pool.get(i));
 					lastEmbedIndex = i;
 				}

@@ -33,6 +33,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private String sirioMsgID = KeyManager.getID("Sirio_Msg_ID");
 	private String sirioChannelID = KeyManager.getID("Sirio_Msg_Channel_ID");
 	private String gpt2ChannelID = KeyManager.getID("GPT2_Channel_ID");
+	private String timerLengthMessage = KeyManager.getID("Dead_Chat_Timer_Msg");
 	private String sirioMsgContent;
 
 	private boolean isAnimated = true;
@@ -115,8 +116,16 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				// Schedules the message based on the last message sent in
 				// the webhook's chat.
 				try {
+					double length;
+					try {
+						length = Double.parseDouble(
+								api.getMessageById(timerLengthMessage, api.getTextChannelById(sirioChannelID).get())
+										.join().getContent());
+					} catch (Exception e) {
+						length = 24;
+					}
 
-					deadChatTimer = new TimedAction(6 * HOUR, null,
+					deadChatTimer = new TimedAction((long) (length * HOUR), null,
 							egubotWebhook.getChannel().get().getMessages(1).get().first().getCreationTimestamp());
 					deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
 				} catch (Exception e) {
@@ -265,13 +274,11 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				 */
 				try {
 					if (lowCaseTxt.matches("b-search(.*)")) {
-						newThread = new Thread(new Runnable() {
-							public void run() {
+						newThread = new Thread(() ->
 
-								legendsSearch.search(msgText, api, e.getChannel());
+						legendsSearch.search(msgText, api, e.getChannel())
 
-							}
-						});
+						);
 						newThread.start();
 						return;
 					}
@@ -289,13 +296,11 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 					}
 
 					if (lowCaseTxt.matches("b-roll(.*)")) {
-						newThread = new Thread(new Runnable() {
-							public void run() {
+						newThread = new Thread(() ->
 
-								legendsRoll.rollCharacters(lowCaseTxt, e.getChannel(), isAnimated);
+						legendsRoll.rollCharacters(lowCaseTxt, e.getChannel(), isAnimated)
 
-							}
-						});
+						);
 						newThread.start();
 						return;
 					}
@@ -304,7 +309,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 					return;
 				}
 			}
-			
+
 			if (lowCaseTxt.matches("b-response create(.*)")) {
 				if (!lowCaseTxt.contains("sleep"))
 					autoRespond.writeResponse(msgText, e.getChannel());
