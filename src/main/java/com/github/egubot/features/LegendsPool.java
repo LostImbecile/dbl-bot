@@ -33,6 +33,7 @@ public abstract class LegendsPool {
 
 			// Turn to postfix from infix (5 + 3 to 3 5 + or so)
 			turnToPostfix(filters, opStack, conStack);
+			// System.out.println(conStack);
 
 			// System.out.println(conStack.get(0));
 			filters = conStack.get(0).split(" ");
@@ -42,6 +43,7 @@ public abstract class LegendsPool {
 			evaluatePostfix(filters, conStack, pools);
 
 			// System.out.println("return");
+			
 			return pools.get(0);
 		} catch (Exception e) {
 			return null;
@@ -289,6 +291,7 @@ public abstract class LegendsPool {
 						// Initialise subPool if it's empty
 						if (subPool1 != null) {
 							if (subPool1.isEmpty()) {
+								
 								for (int k = 0; k < tag.getCharacters().size(); k++) {
 									if (tag.getCharacters().get(k) != null)
 										((CharacterHash) subPool1).put(tag.getCharacters().get(k));

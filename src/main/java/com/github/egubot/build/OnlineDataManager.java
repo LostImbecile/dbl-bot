@@ -1,10 +1,13 @@
 package com.github.egubot.build;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -23,58 +26,73 @@ public class OnlineDataManager {
 	private String storageMsgID;
 	private Message storageMessage;
 
-	private InputStream localInputStream;
-	private InputStream dataInputStream;
+	private BufferedInputStream localInputStream;
+	private BufferedInputStream dataInputStream;
 
 	// This file is created to send the data to discord
 	private File tempDataFile = new File("TempData.txt");
 
 	private List<String> data = new ArrayList<>(0);
 	private int lockedDataEndIndex;
+	private String lastUpdateDate = null;
 	private String dataName;
 
-	public OnlineDataManager(DiscordApi api, String storageKey, String resourcePath, String dataName) throws Exception {
+	public OnlineDataManager(DiscordApi api, String storageKey, String dataName, InputStream localInput,
+			boolean verbose) throws Exception {
+		this.api = api;
+		this.storageKey = storageKey;
+		this.storageMsgID = KeyManager.getID(storageKey);
+		this.dataName = dataName;
+		this.localInputStream = new BufferedInputStream(localInput);
+		initialise(verbose);
+	}
+
+	public OnlineDataManager(DiscordApi api, String storageKey, String resourcePath, String dataName, boolean verbose)
+			throws Exception {
 		this.api = api;
 		this.storageKey = storageKey;
 		this.storageMsgID = KeyManager.getID(storageKey);
 		this.dataName = dataName;
 		findLocalInput(resourcePath);
-		initialise();
+		initialise(verbose);
 	}
 
 	private void findLocalInput(String resourcePath) {
 		try {
-			localInputStream = getClass().getResourceAsStream(resourcePath);
+			localInputStream = new BufferedInputStream(getClass().getResourceAsStream(resourcePath));
 			if (localInputStream == null) {
-				localInputStream = new FileInputStream(new File(resourcePath));
+				localInputStream = new BufferedInputStream(new FileInputStream(new File(resourcePath)));
 			}
 		} catch (Exception e) {
-			System.err.println("\nWarning: no local " + dataName + " data. Expected " + resourcePath +" to be present.");
+			System.err
+					.println("\nWarning: no local " + dataName + " data. Expected " + resourcePath + " to be present.");
 			localInputStream = null;
 		}
 	}
 
-	private void initialise() throws Exception {
+	private void initialise(boolean verbose) throws Exception {
 		try {
 			storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
 
 		} catch (Exception e) {
-			checkStorageMessage();
+			checkStorageMessage(verbose);
 		}
 
-		getOnlineData(true);
+		getOnlineData(verbose);
 	}
 
-	private void checkStorageMessage() throws Exception {
+	private void checkStorageMessage(boolean verbose) throws Exception {
 		if (!storageChannelID.equals("-1")) {
 			uploadLocalData(true);
 			KeyManager.updateKeys(storageKey, storageMsgID, KeyManager.idsFileName);
 			storageMsgID = KeyManager.getID(storageKey);
 			try {
 				storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
-				System.out.println("\nNew " + dataName + " message was created.");
+				if (verbose)
+					System.out.println("\nNew " + dataName + " message was created.");
 			} catch (Exception e) {
-				System.err.println("\nFailed to create new " + dataName + " message.");
+				if (verbose)
+					System.err.println("\nFailed to create new " + dataName + " message.");
 			}
 		}
 	}
@@ -96,13 +114,15 @@ public class OnlineDataManager {
 
 			}
 
+			// System.out.println(getInputStream().available()/1024 + "KB");
+
 			newID = api.getTextChannelById(storageChannelID).get()
 					.sendMessage(getInputStream(), dataName.replace(" ", "_") + ".txt").join().getIdAsString();
 			
 			try {
 				storageMessage.edit(newID).join();
 			} catch (Exception e) {
-				System.err.println("\nOnline data ID failed to update");
+				storageMsgID = newID;
 			}
 
 			getInputStream().close();
@@ -128,7 +148,7 @@ public class OnlineDataManager {
 		}
 	}
 
-	private void getOnlineData(boolean verbose) {
+	private void getOnlineData(boolean verbose) throws IOException {
 		try {
 			String newID = storageMessage.getContent();
 
@@ -141,29 +161,43 @@ public class OnlineDataManager {
 			String[] date;
 
 			Message newMessage = api.getMessageById(newID, api.getTextChannelById(storageChannelID).get()).join();
-			setInputStream(newMessage.getAttachments().get(0).asInputStream());
+			setInputStream(new BufferedInputStream(newMessage.getAttachments().get(0).asInputStream()));
+
+			// Date
+			date = newMessage.getCreationTimestamp().toString().split("[Tz.]");
+			lastUpdateDate = date[0] + ", " + date[1].substring(0, date[1].length() - 3);
 
 			if (verbose) {
-				date = newMessage.getCreationTimestamp().toString().split("[Tz.]");
-				System.out.println("\n" + dataName + " data successfully loaded!\nDate of last update: " + date[0]
-						+ ", " + date[1].substring(0, date[1].length() - 3));
+				System.out.println(
+						"\n" + dataName + " data successfully loaded!\nDate of last update: " + lastUpdateDate);
 			}
 
-			Scanner read = new Scanner(getInputStream());
+			readInput();
+
+			// Avoid some cases where it's empty
+			setInputStream(new BufferedInputStream(newMessage.getAttachments().get(0).asInputStream()));
+
+		} catch (IOException | NullPointerException e) {
+			if (verbose) {
+				System.err.println("\n" + dataName + " data failed to load, internal backup used.");
+			}
+
+			setInputStream(localInputStream);
+
+			readInput();
+		}
+	}
+
+	private void readInput() throws IOException {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(getInputStream()))) {
 			String st;
 
 			data.clear();
-			while (read.hasNextLine()) {
-				st = read.nextLine().trim().replace("\n", "");
+			while ((st = br.readLine()) != null) {
+				st = st.trim().replace("\n", "").replace("é", "e");
 				if (!st.equals(""))
 					data.add(st);
 			}
-			read.close();
-
-		} catch (IOException | NullPointerException e) {
-			System.err.println("\n" + dataName + " data failed to load, internal backup used.");
-
-			setInputStream(localInputStream);
 		}
 	}
 
@@ -174,13 +208,19 @@ public class OnlineDataManager {
 					file.write(data.get(i).replace("\n", "") + "\n");
 
 			}
-			setInputStream(new FileInputStream(tempDataFile));
+			setInputStream(new BufferedInputStream(new FileInputStream(tempDataFile)));
 
 			uploadLocalData(false);
-			if (!tempDataFile.delete())
-				e.sendMessage("Couldn't update <:sad:1020780174901522442>");
-			else
-				e.sendMessage("Updated <:legudrink:804071006956159008>");
+
+			if (e != null) {
+				if (!tempDataFile.delete())
+					e.sendMessage("Couldn't update <:sad:1020780174901522442>");
+				else
+					e.sendMessage("Updated <:legudrink:804071006956159008>");
+			} else {
+				if (!tempDataFile.delete())
+					System.out.println("Couldn't update");
+			}
 		} catch (Exception e1) {
 			System.err.println("Failed to write and upload data.");
 		}
@@ -200,11 +240,11 @@ public class OnlineDataManager {
 		}
 	}
 
-	private InputStream getInputStream() {
+	private BufferedInputStream getInputStream() {
 		return dataInputStream;
 	}
 
-	private void setInputStream(InputStream dataInputStream) {
+	private void setInputStream(BufferedInputStream dataInputStream) {
 		this.dataInputStream = dataInputStream;
 	}
 
@@ -216,7 +256,7 @@ public class OnlineDataManager {
 		this.lockedDataEndIndex = lockedDataEndIndex;
 	}
 
-	List<String> getData() {
+	public List<String> getData() {
 		return data;
 	}
 
@@ -224,11 +264,19 @@ public class OnlineDataManager {
 		this.data = data;
 	}
 
-	public InputStream getLocalInputStream() {
+	public BufferedInputStream getLocalInputStream() {
 		return localInputStream;
 	}
 
-	public void setLocalInputStream(InputStream localInputStream) {
+	public void setLocalInputStream(BufferedInputStream localInputStream) {
 		this.localInputStream = localInputStream;
+	}
+
+	public String getLastUpdateDate() {
+		return lastUpdateDate;
+	}
+
+	public void setLastUpdateDate(String lastUpdateDate) {
+		this.lastUpdateDate = lastUpdateDate;
 	}
 }

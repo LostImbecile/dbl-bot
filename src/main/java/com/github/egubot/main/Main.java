@@ -54,7 +54,7 @@ public class Main {
 		} else if (!testMode) {
 			testMode = false;
 		}
-		
+
 		// Important to have all keys, some will be created for
 		// you, and the rest could be ignored.
 		KeyManager.checkKeys();
@@ -166,5 +166,4 @@ public class Main {
 
 	}
 
-	
 }

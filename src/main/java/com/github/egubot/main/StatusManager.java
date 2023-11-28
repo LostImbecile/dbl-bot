@@ -9,12 +9,12 @@ public class StatusManager {
 
 	private String statusChannelID = KeyManager.getID("Status_Channel_ID");
 	private String statusMessageID = KeyManager.getID("Status_Message_ID");
-	
+
 	// Create your own message and add its ID, makes it easier to change
 	private String activityMsgID = KeyManager.getID("Activity_Msg_ID");
 	private String activityMsgContent;
 	private String activityMsgType;
-	
+
 	private Message statusMessage;
 	protected boolean testMode;
 	protected DiscordApi api;
@@ -117,8 +117,7 @@ public class StatusManager {
 	public void setStatusOnline() {
 		if (!testMode) {
 			try {
-				if (!testMode)
-					statusMessage.edit("online").join();
+				statusMessage.edit("online").join();
 			} catch (NullPointerException e1) {
 
 			} catch (Exception e) {
@@ -142,9 +141,9 @@ public class StatusManager {
 
 	public void changeActivity() {
 		try {
-			if (!isStatusMsgSet)
+			if (!isStatusMsgSet && !testMode)
 				updateStatusMessage();
-			
+
 			if (!testMode)
 				api.updateActivity(getActivityType(), activityMsgContent);
 			else if (!isOnline())

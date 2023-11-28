@@ -12,7 +12,7 @@ public class RollTemplates extends OnlineDataManager {
 	private LegendsDatabase legendsWebsite;
 
 	public RollTemplates(DiscordApi api, LegendsDatabase legendsWebsite) throws Exception {
-		super(api, idKey, resourcePath, "Filter Templates");
+		super(api, idKey, resourcePath, "Filter Templates", true);
 
 		this.setLockedDataEndIndex(17);
 		this.legendsWebsite = legendsWebsite;

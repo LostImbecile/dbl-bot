@@ -19,30 +19,42 @@ Also works on Linux (tested), but resources have to be next to the bot when expo
 
 Bot commands:
 ---------------------------------
-Notes: 
 
 *Everything is case insensitive. Invocation has to be at the beginning of your message, not read otherwise.*
 
-*Brackets indicate operand*
+*Brackets indicate operand, stars mean optional.*
 
+DBLegends Random Roll:
 - b-roll(n) *(filters)
 - b-template create (name) (filters)
 - b-template remove (name)
 - b-template send
-- b-response create (type) >> (msg) >> (response) >> \*(reaction) >> *(reaction)...
-- b-response remove (message)
+- disable roll animation
+- enable roll animation
+
+DBLegends Character Search:
 - b-search \*(name) *(filters)
+- b-character send
 - b-tag send
 - b-tag create (name) *(characters)
 - b-tag update (name) (characters)
-- b-character send
+
+Automatic Responses:
+- b-response create (type) >> (msg) >> (response) >> \*(reaction) >> *(reaction)...
+- b-response remove (message)
+
+ChatGPT 3.5:
 - gpt (message)
 - gpt activate channel
 - gpt deactivate
+
+Custom AI:
 - ai
 - ai terminate
-- disable roll animation
-- enable roll animation
+
+Bot Control:
+- terminate
+- refresh
 
 ### Active
 **1) b-roll(n) (filters)** 

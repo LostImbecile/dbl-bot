@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +17,37 @@ import com.github.egubot.objects.Tags;
  * this specific one.
  */
 public class LegendsDatabase {
-	private static ArrayList<Characters> charactersList = new ArrayList<>(0);
-	private static ArrayList<Tags> tags = new ArrayList<>();
-	private static ArrayList<String> lines = new ArrayList<>();
+	private ArrayList<Characters> charactersList = new ArrayList<>(0);
+	private ArrayList<Tags> tags = new ArrayList<>(0);
+	private ArrayList<String> lines = new ArrayList<>(0);
+
+	private boolean isDataFetchSuccessfull;
+
+	public LegendsDatabase(List<String> lines) throws IOException {
+		setLines(lines);
+		getData();
+	}
+
+	public LegendsDatabase(InputStream is) throws IOException {
+		// To read from a different input
+		readData(is);
+		getData();
+	}
 
 	public LegendsDatabase() throws IOException {
-		start();
+		// Read from website
+		InputStream is = getWebsiteAsInputStream();
+		readData(is);
+		getData();
+	}
+
+	public static InputStream getWebsiteAsInputStream() throws IOException {
+		// Default constructor reads from the website
+		// Make a URL to the web page
+		URL url = new URL("https://dblegends.net/");
+
+		// Get the input stream through URL Connection
+		return url.openStream();
 	}
 
 	public List<Characters> getCharactersList() {
@@ -38,20 +62,21 @@ public class LegendsDatabase {
 		return lines;
 	}
 
-	public void start() throws IOException {
-		// Make a URL to the web page
-		URL url = new URL("https://dblegends.net/");
+	public void getData() throws IOException {
+		getSpecialTags();
+		getAllTags(lines);
 
-		// Get the input stream through URL Connection
-		URLConnection con = url.openConnection();
-		InputStream is = con.getInputStream();
+		// If 0 then data for all units was fetched, o.w, there's a problem
+		// 546 is the current unit count as an additional measure
+		if (getCharacters(lines) == 0 && charactersList.size() > 545) {
+			setDataFetchSuccessfull(true);
+		} else {
+			setDataFetchSuccessfull(false);
+		}
 
-		/*
-		 * Once you have the Input Stream, it's just plain old Java IO stuff.
-		 * For binary content, it's better to directly read the bytes from stream and
-		 * write to the target file.
-		 */
+	}
 
+	private void readData(InputStream is) throws IOException {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 			String line = null;
 
@@ -62,15 +87,11 @@ public class LegendsDatabase {
 			}
 			// System.out.println("Lines read: " + lines.size());
 
-			getSpecialTags();
-			getAllTags(lines);
-			getCharacters(lines);
-
 		}
 	}
 
 	//
-	private static void getSpecialTags() {
+	private void getSpecialTags() {
 		/*
 		 * Index matters for some of the tags here so don't reorder
 		 * the lines, I can use the IDs to add them, but I want to
@@ -100,10 +121,10 @@ public class LegendsDatabase {
 		tags.add(new Tags(-1, "year8"));// 21
 		tags.add(new Tags(-1, "old"));// 22
 		tags.add(new Tags(-1, "new"));// 23
-		tags.add(new Tags(-1, "event"));//24
+		tags.add(new Tags(-1, "event"));// 24
 	}
 
-	private static void getAllTags(List<String> lines) {
+	private void getAllTags(List<String> lines) {
 		String beginWrite = "- All Tags -";
 		String endWrite = "<br/><br/>";
 
@@ -137,7 +158,7 @@ public class LegendsDatabase {
 		}
 	}
 
-	private static void processTag(String st) {
+	private void processTag(String st) {
 		String name;
 		String value;
 		value = st.substring(st.indexOf("\"") + 1, st.indexOf("\"", st.indexOf("\"") + 1));
@@ -145,7 +166,7 @@ public class LegendsDatabase {
 		tags.add(new Tags(Integer.parseInt(value), name.toLowerCase()));
 	}
 
-	private static void getCharacters(List<String> lines) {
+	private int getCharacters(List<String> lines) {
 		/*
 		 * To get data from a website you just read its HTML content (with say, f12),
 		 * and then identify any patterns you find.
@@ -161,18 +182,21 @@ public class LegendsDatabase {
 		String beginWrite = "\"character-container text-center justify-content-around justify-content-center d-flex flex-wrap\"";
 		String endWrite = "</main>";
 		String newCharacter = "chara-list chara-listing zoom";
-		String lineWithID = "/character.php?";
+		String lineWithID = "/character/";
 		String colour = "data-element";
 		String rarity = "data-rarity";
 		String zenkaiStatus = "data-zenkai";
 		String lfStatus = "data-lf";
 		String ignID = "title=";
 		String image = "src=";
-		String name = "\"card-header name\"";
-		String dataTags = "data-tags=";
+		String name = "\"card-header name";
+		String tags = "data-tags=";
 		String line;
-		boolean writeFlag = false;
+
+		int dataCounter = 0;
 		int characterIndex = 0;
+		boolean writeFlag = false;
+
 		for (int i = 160; i < lines.size(); i++) {
 			line = lines.get(i);
 
@@ -192,57 +216,83 @@ public class LegendsDatabase {
 				}
 
 				if (line.contains(lineWithID) && line.contains("\"")) {
-					setSiteID(line, characterIndex);
+					if (setSiteID(line, characterIndex) != 0) {
+						dataCounter++;
+					}
 
 				} else if (line.contains(colour) && line.contains("=")) {
 
 					setColour(line, characterIndex);
+					dataCounter++;
 
 				} else if (line.contains(rarity) && line.contains("=")) {
 
 					setRarity(line, characterIndex);
+					dataCounter++;
 
 				} else if (line.contains(zenkaiStatus) && line.contains("=")) {
 
 					setZenkaiStatus(line, characterIndex);
+					dataCounter++;
 
 				} else if (line.contains(lfStatus) && line.contains("=")) {
 
 					setLFStatus(line, characterIndex);
+					dataCounter++;
 
 				} else if (line.contains(ignID) && line.contains("=")) {
 
 					setGameID(line, characterIndex);
+					dataCounter++;
 
 				} else if (line.contains(image) && line.contains("=")) {
+
 					setImageLink(line, characterIndex);
 
+					if (!line.contains("alt="))
+						dataCounter++;
+
 				} else if (line.contains(name)) {
+
 					setName(lines, characterIndex, i);
 
-				} else if (line.contains(dataTags) && line.contains("=") && line.contains(">")) {
+					if (!line.contains("Form"))
+						dataCounter++;
 
-					setTags(line, characterIndex);
+				} else if (line.contains(tags) && line.contains("=") && line.contains(">")) {
+
+					if (setTags(line, characterIndex) > 5) {
+						dataCounter++;
+					}
 
 				}
 			}
 
 		}
+
+		// Each unit should have 9 pieces of data related to it
+		// if any is missing there's a problem
+
+		return characterIndex * 9 - dataCounter;
+
 	}
 
-	private static void setTags(String line, int characterIndex) {
+	private int setTags(String line, int characterIndex) {
 		String[] token;
 		String st;
 		st = line.substring(line.indexOf("=") + 1, line.indexOf(">")).replace("\"", "").strip();
 		token = st.split(" ");
 
-		for (int j = 0; j < token.length; j++)
-			getTag(token[j], charactersList.get(characterIndex - 1));
+		int tagNum = 0;
+		for (int j = 0; j < token.length; j++) {
+			tagNum += getTag(token[j], charactersList.get(characterIndex - 1));
+		}
 
-		charactersList.get(characterIndex - 1).setImageLink(st);
+		return tagNum;
+		// charactersList.get(characterIndex - 1).setImageLink(st);
 	}
 
-	private static void setName(List<String> lines, int characterIndex, int i) {
+	private void setName(List<String> lines, int characterIndex, int i) {
 		String st;
 		String line;
 		line = lines.get(i + 1);
@@ -252,57 +302,58 @@ public class LegendsDatabase {
 		}
 	}
 
-	private static void setImageLink(String line, int characterIndex) {
+	private void setImageLink(String line, int characterIndex) {
 		String st;
 		st = line.substring(line.indexOf("src"));
 		st = st.substring(st.indexOf("=") + 1).replace("\"", "").strip();
 		charactersList.get(characterIndex - 1).setImageLink(st);
 	}
 
-	private static void setGameID(String line, int characterIndex) {
+	private void setGameID(String line, int characterIndex) {
 		String st;
 		st = line.substring(line.indexOf("=") + 1, line.length() - 2).replace("\"", "").strip();
 		charactersList.get(characterIndex - 1).setGameID(st);
 		evaluateReleaseDate(st, characterIndex);
 	}
 
-	private static void setLFStatus(String line, int characterIndex) {
+	private void setLFStatus(String line, int characterIndex) {
 		String st;
 		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 		evaluateLFStatus(st, characterIndex);
 	}
 
-	private static void setZenkaiStatus(String line, int characterIndex) {
+	private void setZenkaiStatus(String line, int characterIndex) {
 		String st;
 		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 		evaluateZenkaiStatus(st, characterIndex);
 	}
 
-	private static void setRarity(String line, int characterIndex) {
+	private void setRarity(String line, int characterIndex) {
 		String st;
 		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 		charactersList.get(characterIndex - 1).setRarity(st);
 	}
 
-	private static void setColour(String line, int characterIndex) {
+	private void setColour(String line, int characterIndex) {
 		String st;
 		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 		charactersList.get(characterIndex - 1).setColour(st);
 	}
 
-	private static void setSiteID(String line, int characterIndex) {
+	private int setSiteID(String line, int characterIndex) {
 		String[] token;
 		String st;
-		token = line.split("id=");
+		token = line.split("/character/");
 		if (token.length > 1) {
 
 			st = token[1].substring(0, token[1].indexOf("\"") + 1).replace("\"", "").strip();
 			charactersList.get(characterIndex - 1).setSiteID(Integer.parseInt(st));
-
+			return 1;
 		}
+		return 0;
 	}
 
-	private static void evaluateZenkaiStatus(String st, int characterIndex) {
+	private void evaluateZenkaiStatus(String st, int characterIndex) {
 		if (st.equals("-1"))
 			charactersList.get(characterIndex - 1).setZenkai(false);
 		else {
@@ -311,7 +362,7 @@ public class LegendsDatabase {
 		}
 	}
 
-	private static void evaluateLFStatus(String st, int characterIndex) {
+	private void evaluateLFStatus(String st, int characterIndex) {
 		if (st.equals("0"))
 			charactersList.get(characterIndex - 1).setLF(false);
 		else {
@@ -327,12 +378,12 @@ public class LegendsDatabase {
 		return st;
 	}
 
-	private static void evaluateReleaseDate(String st, int characterIndex) {
+	private void evaluateReleaseDate(String st, int characterIndex) {
 		int releaseDate;
 		int yearIndex;
 		if (!st.contains("EVT")) {
 			try {
-				
+
 				releaseDate = Integer.parseInt(st.substring(st.indexOf("L") + 1, st.indexOf("-")));
 				yearIndex = 13;
 				if (releaseDate == 0)
@@ -342,7 +393,7 @@ public class LegendsDatabase {
 					releaseDate -= 12;
 					yearIndex++;
 				}
-				
+
 				// Years from index 14 to 21
 				if (yearIndex > 13 && yearIndex < 22) {
 					// Adds units on the edge of the year to both years
@@ -351,16 +402,15 @@ public class LegendsDatabase {
 
 					if (releaseDate == -1 && yearIndex < 21)
 						tags.get(yearIndex + 1).getCharacters().put(charactersList.get(characterIndex - 1));
-					
+
 					tags.get(yearIndex).getCharacters().put(charactersList.get(characterIndex - 1));
 				}
-				
+
 				// Add old or new tag
 				if (yearIndex < 16)
 					tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
 				else
 					tags.get(23).getCharacters().put(charactersList.get(characterIndex - 1));
-
 
 			} catch (NumberFormatException e) {
 				System.out.println("Failed to parse: " + st);
@@ -373,19 +423,34 @@ public class LegendsDatabase {
 				tags.get(14).getCharacters().put(charactersList.get(characterIndex - 1));
 				tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
 			}
-			
+
 			// Add to event tag
 			tags.get(24).getCharacters().put(charactersList.get(characterIndex - 1));
 		}
 	}
 
-	private static void getTag(String st, Characters characters) {
+	private int getTag(String st, Characters characters) {
 		int id;
 		id = Integer.parseInt(st);
 		for (int k = 0; k < tags.size(); k++) {
 			if (tags.get(k).getId() == id) {
 				tags.get(k).getCharacters().put(characters);
+				return 1;
 			}
 		}
+		return 0;
+	}
+
+	public boolean isDataFetchSuccessfull() {
+		return isDataFetchSuccessfull;
+	}
+
+	public void setDataFetchSuccessfull(boolean isDataFetchSuccessfull) {
+		this.isDataFetchSuccessfull = isDataFetchSuccessfull;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setLines(List<String> lines) {
+		this.lines = (ArrayList<String>) ((ArrayList<String>) lines).clone();
 	}
 }

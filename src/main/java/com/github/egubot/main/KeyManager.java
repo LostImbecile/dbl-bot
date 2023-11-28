@@ -56,6 +56,8 @@ public class KeyManager {
 			if (st.contains(key)) {
 				st = st.replace(key, "");
 				break;
+			} else {
+				st = "";
 			}
 		}
 		in.close();
@@ -134,8 +136,6 @@ public class KeyManager {
 		InputStream input = getFile(fileName);
 		ArrayList<String> data = new ArrayList<>(0);
 
-		data.add(key + "=" + id);
-
 		String st = "";
 		Scanner in = new Scanner(input);
 		while (in.hasNextLine()) {
@@ -144,6 +144,8 @@ public class KeyManager {
 				data.add(st);
 		}
 		in.close();
+
+		data.add(key + "=" + id);
 
 		try (FileWriter output = new FileWriter(fileName)) {
 			for (int i = 0; i < data.size(); i++) {

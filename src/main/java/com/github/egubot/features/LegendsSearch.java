@@ -71,9 +71,11 @@ public class LegendsSearch extends LegendsPool {
 			// Listener to deal with page navigation
 			MessageComponentCreateListener navigatePageHandler = new NavigatePageHandler(pool, msg.send(e).join(), prev,
 					next);
+
 			api.addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES)
 					.addRemoveHandler(() -> msg.removeAllComponents()
 							.setContent("Found " + pool.size() + " characters. Page navigation timed out."));
+
 		} else {
 			msg.setEmbeds(embeds);
 			msg.send(e);

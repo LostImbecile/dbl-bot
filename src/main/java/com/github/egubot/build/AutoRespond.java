@@ -14,7 +14,7 @@ public class AutoRespond extends OnlineDataManager {
 	private static String parameterSplit = ">>>>>>>>>>";
 
 	public AutoRespond(DiscordApi api) throws Exception {
-		super(api, idKey, resourcePath, "Autorespond");
+		super(api, idKey, resourcePath, "Autorespond", true);
 
 		this.setLockedDataEndIndex(92);
 	}

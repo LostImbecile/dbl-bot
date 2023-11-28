@@ -149,7 +149,8 @@ public class CharacterHash extends HashSet<Characters> {
 	public ArrayList<Characters> toArrayList() {
 		ArrayList<Characters> list = new ArrayList<>(0);
 
-		for (int i = 0; i < table.size(); i++) {
+		// Descending as I prefer that in this case
+		for (int i = table.size() -1 ; i >= 0; i--) {
 			if (get(i) != null) {
 				list.add(get(i));
 			}
