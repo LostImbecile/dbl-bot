@@ -13,11 +13,11 @@ import com.github.egubot.objects.Tags;
 
 public abstract class LegendsPool {
 	private LegendsDatabase legendsWebsite;
-	private ArrayList<String> rollTemplates = new ArrayList<>(0);
+	private ArrayList<String> rollTemplates;
 
 	protected LegendsPool(LegendsDatabase legendsWebsite, List<String> rollTemplates) {
 		this.legendsWebsite = legendsWebsite;
-		this.rollTemplates = (ArrayList<String>) rollTemplates;
+		this.rollTemplates =  (ArrayList<String>) rollTemplates;
 	}
 
 	protected abstract List<Characters> getPool(String msgText);
@@ -215,6 +215,8 @@ public abstract class LegendsPool {
 		} while (!temp.equals(st));
 
 		// System.out.println(st);
+		st = st.replace("frieza_no_brother", "cooler");
+		
 		return st;
 	}
 

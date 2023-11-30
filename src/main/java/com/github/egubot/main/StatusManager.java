@@ -201,8 +201,24 @@ public class StatusManager {
 
 			activityMsgType = activityMsgType.toLowerCase().strip();
 		} catch (Exception e) {
-			activityMsgContent = "";
-			activityMsgType = "";
+			if (!activityMsgID.equals("-1")){
+				@SuppressWarnings("resource")
+				Scanner in = new Scanner(System.in);
+				String id;
+
+				System.err.println("Status Message ID is invalid, please enter a new one, or -1 to always skip"
+						+ "\nNote: Send a message in your status channel and copy its id.");
+
+				id = in.nextLine();
+				KeyManager.updateKeys("Activity_Msg_ID", id, KeyManager.idsFileName);
+
+				activityMsgID = KeyManager.getID("Activity_Msg_ID");
+
+				updateStatusMessage();
+			} else {
+				activityMsgContent = "";
+				activityMsgType = "";
+			}
 		}
 
 		isStatusMsgSet = true;

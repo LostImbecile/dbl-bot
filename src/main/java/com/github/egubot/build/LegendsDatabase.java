@@ -449,8 +449,7 @@ public class LegendsDatabase {
 		this.isDataFetchSuccessfull = isDataFetchSuccessfull;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setLines(List<String> lines) {
-		this.lines = (ArrayList<String>) ((ArrayList<String>) lines).clone();
+		this.lines = new ArrayList<>(lines);
 	}
 }

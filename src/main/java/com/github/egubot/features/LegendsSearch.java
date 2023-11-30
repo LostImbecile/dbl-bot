@@ -140,7 +140,7 @@ public class LegendsSearch extends LegendsPool {
 				msg.edit(embeds).join();
 				messageComponentInteraction.acknowledge();
 			} catch (Exception e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 			}
 
 		}
@@ -196,7 +196,8 @@ public class LegendsSearch extends LegendsPool {
 			return namePool;
 		}
 
-		name = name.toLowerCase().replace("ssb", "ssgss").replace("dbl", "").replace("-", "").strip();
+		name = name.toLowerCase().replace("ssb", "ssgss").replace("dbl", "").replace("-", "")
+				.replace("frieza_no_brother", "cooler").strip();
 
 		ArrayList<Characters> charactersList = (ArrayList<Characters>) getLegendsWebsite().getCharactersList();
 

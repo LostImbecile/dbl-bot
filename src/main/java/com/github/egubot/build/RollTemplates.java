@@ -14,15 +14,16 @@ public class RollTemplates extends OnlineDataManager {
 	public RollTemplates(DiscordApi api, LegendsDatabase legendsWebsite) throws Exception {
 		super(api, idKey, resourcePath, "Filter Templates", true);
 
-		this.setLockedDataEndIndex(17);
 		this.legendsWebsite = legendsWebsite;
 	}
 
 	public void removeTemplate(String msgText, Messageable e, boolean isOwner) {
 
 		try {
+			int startIndex = getLockedDataEndIndex();
+
 			if (isOwner)
-				setLockedDataEndIndex(0);
+				startIndex = 0;
 
 			String st = msgText.substring("b-template remove".length()).strip();
 
@@ -31,13 +32,13 @@ public class RollTemplates extends OnlineDataManager {
 			} catch (Exception e1) {
 
 			}
-			
+
 			if (st.equals(""))
 				throw new Exception();
-			
+
 			boolean isNameExist = false;
 
-			for (int j = getLockedDataEndIndex(); j < getData().size(); j++) {
+			for (int j = startIndex; j < getData().size(); j++) {
 				if (isTemplateEqual(getData().get(j), st)) {
 					isNameExist = true;
 					getData().remove(j);

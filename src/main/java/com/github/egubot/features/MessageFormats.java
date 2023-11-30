@@ -68,6 +68,7 @@ public class MessageFormats {
 
 		String lfStatus;
 		String zenkaiStatus;
+		String coolerStatus;
 
 		if (unit.isZenkai())
 			zenkaiStatus = " (Zenkai)";
@@ -79,8 +80,13 @@ public class MessageFormats {
 		else
 			lfStatus = "";
 
+		if (unit.getCharacterName().toLowerCase().contains("cooler") && !unit.getRarity().equals("EXTREME"))
+			coolerStatus = " (Strongest)";
+		else
+			coolerStatus = "";
+		
 		return new EmbedBuilder().setThumbnail(unit.getImageLink()).setColor(unit.getColour())
-				.setDescription(unit.getRarity() + lfStatus + zenkaiStatus + EQUALISE)
+				.setDescription(unit.getRarity() + lfStatus + zenkaiStatus + coolerStatus + EQUALISE)
 				.setAuthor(unit.getCharacterName(), unit.getPageLink(), unit.getImageLink())
 				.setFooter(unit.getGameID());
 

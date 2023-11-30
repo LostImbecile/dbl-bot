@@ -1,5 +1,8 @@
 package com.github.egubot.main;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.javacord.api.DiscordApi;
 import org.javacord.api.event.connection.ReconnectEvent;
 import org.javacord.api.listener.connection.ReconnectListener;
@@ -12,7 +15,8 @@ public class ReconnectEventHandler extends StatusManager implements ReconnectLis
 	@Override
 	public void onReconnect(ReconnectEvent event) {
 		changeActivity();
-		System.out.println("\nBot reconnected successfully and is active.");
+		String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd-hh:mm:ss"));
+		System.out.println("\n" + date + ": Bot reconnected successfully and is active.");
 	}
 
 }

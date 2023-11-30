@@ -33,7 +33,7 @@ public class OnlineDataManager {
 	private File tempDataFile = new File("TempData.txt");
 
 	private List<String> data = new ArrayList<>(0);
-	private int lockedDataEndIndex;
+	private int lockedDataEndIndex = 0;
 	private String lastUpdateDate = null;
 	private String dataName;
 
@@ -75,6 +75,7 @@ public class OnlineDataManager {
 			storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
 
 		} catch (Exception e) {
+			storageMessage = null;
 			checkStorageMessage(verbose);
 		}
 
@@ -99,34 +100,45 @@ public class OnlineDataManager {
 
 	private void uploadLocalData(boolean fromFile) throws Exception {
 		String newID = "";
+		String oldID = "";
 		try {
 			if (fromFile)
 				setInputStream(localInputStream);
 
 			try {
-				newID = storageMessage.getContent();
-
-				// Deletes old data, remove it if you want everything saved
-				if (!newID.equals(storageMsgID)) {
-					api.getMessageById(newID, api.getTextChannelById(storageChannelID).get()).join().delete();
-				}
+				oldID = storageMessage.getContent();
 			} catch (Exception e) {
-
+				oldID = "-1";
 			}
 
 			// System.out.println(getInputStream().available()/1024 + "KB");
 
 			newID = api.getTextChannelById(storageChannelID).get()
 					.sendMessage(getInputStream(), dataName.replace(" ", "_") + ".txt").join().getIdAsString();
-			
+
 			try {
-				storageMessage.edit(newID).join();
+				if (storageMessage != null) {
+					storageMessage.edit(newID).join();
+				}
+				else {
+					storageMsgID = newID;
+					storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
+				}
 			} catch (Exception e) {
-				storageMsgID = newID;
+				newID = oldID;
 			}
 
 			getInputStream().close();
 			getOnlineData(false);
+
+			try {
+				// Deletes old data, remove it if you want everything saved
+				if (!oldID.equals(storageMsgID) && !oldID.equals(newID)) {
+					api.getMessageById(oldID, api.getTextChannelById(storageChannelID).get()).join().delete();
+				}
+			} catch (Exception e) {
+			}
+
 		} catch (Exception e) {
 			checkStorageChannel();
 		}
@@ -161,7 +173,9 @@ public class OnlineDataManager {
 			String[] date;
 
 			Message newMessage = api.getMessageById(newID, api.getTextChannelById(storageChannelID).get()).join();
-			setInputStream(new BufferedInputStream(newMessage.getAttachments().get(0).asInputStream()));
+			InputStream attachment = newMessage.getAttachments().get(0).asInputStream();
+
+			setInputStream(new BufferedInputStream(attachment));
 
 			// Date
 			date = newMessage.getCreationTimestamp().toString().split("[Tz.]");
@@ -175,7 +189,7 @@ public class OnlineDataManager {
 			readInput();
 
 			// Avoid some cases where it's empty
-			setInputStream(new BufferedInputStream(newMessage.getAttachments().get(0).asInputStream()));
+			setInputStream(new BufferedInputStream(attachment));
 
 		} catch (IOException | NullPointerException e) {
 			if (verbose) {
@@ -195,7 +209,13 @@ public class OnlineDataManager {
 			data.clear();
 			while ((st = br.readLine()) != null) {
 				st = st.trim().replace("\n", "").replace("é", "e");
-				if (!st.equals(""))
+
+				if (st.toLowerCase().matches("lockeddataindex=\\d+$")) {
+					try {
+						this.lockedDataEndIndex = Integer.parseInt(st.replace("lockeddataindex=", ""));
+					} catch (Exception e) {
+					}
+				} else if (!st.equals(""))
 					data.add(st);
 			}
 		}
@@ -204,10 +224,13 @@ public class OnlineDataManager {
 	public void writeData(Messageable e) throws Exception {
 		try {
 			try (FileWriter file = new FileWriter(tempDataFile)) {
-				for (int i = 0; i < data.size(); i++)
+				for (int i = 0; i < data.size(); i++) {
 					file.write(data.get(i).replace("\n", "") + "\n");
+				}
 
+				file.write("LockedDataIndex=" + this.lockedDataEndIndex);
 			}
+
 			setInputStream(new BufferedInputStream(new FileInputStream(tempDataFile)));
 
 			uploadLocalData(false);
@@ -233,7 +256,7 @@ public class OnlineDataManager {
 
 		Message newMessage = api.getMessageById(newID, api.getTextChannelById(storageChannelID).get()).join();
 		try {
-			textChannel.sendMessage(newMessage.getAttachments().get(0).asInputStream(),
+			textChannel.sendMessage(new BufferedInputStream(newMessage.getAttachments().get(0).asInputStream()),
 					dataName.replace(" ", "_") + ".txt").join();
 		} catch (Exception e) {
 			System.err.println("No");

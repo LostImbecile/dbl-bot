@@ -53,7 +53,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private RollTemplates templates;
 	private LegendsSearch legendsSearch;
 
-	private boolean isRollCommandActive = true;
+	private boolean isRollCommandActive;
 	private boolean testMode;
 
 	private TimedAction testTimer;
@@ -63,7 +63,9 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private IncomingWebhook testWebhook;
 	private IncomingWebhook egubotWebhook;
 
-	public MessageCreateEventHandler(DiscordApi api, boolean testMode) throws Exception {
+	private boolean dbLegendsMode;
+
+	public MessageCreateEventHandler(DiscordApi api, boolean testMode, boolean dbLegendsMode) throws Exception {
 		/*
 		 * I store templates, responses and all that stuff online in case someone
 		 * else uses the bot on their end, so the data needs to be initialised
@@ -73,7 +75,9 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		this.api = api;
 		this.testMode = testMode;
 		this.isAnimated = !testMode;
-
+		this.dbLegendsMode = dbLegendsMode;
+		this.isRollCommandActive = dbLegendsMode;
+		
 		initialiseDataStorage();
 		initialiseWebhooks();
 	}
@@ -99,7 +103,6 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 							.updateName(api.getUserById(siriosID).get().getDisplayName(api.getServerById(eguID).get()));
 				} catch (Exception e) {
 					egubotWebhook = null;
-					System.err.println("\nFailed to fetch egubot's webhook.");
 				}
 				try {
 					testWebhookID = Long.parseLong(KeyManager.getID("Test_Webhook_ID"));
@@ -180,52 +183,52 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		 */
 		autoRespond = new AutoRespond(api);
 
-		// Fetches data from the legends website and initialises
-		// classes that are based on it, or doesn't if that fails
-		try {
-			System.out.println("\nFetching characters from dblegends.net...");
-			legendsWebsite = new LegendsDatabase();
-			if (legendsWebsite.isDataFetchSuccessfull()) {
-				System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
-				
-				// Upload current website HTML as backup
-				new Thread(() -> {
-					try {
-						
-						new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
-								LegendsDatabase.getWebsiteAsInputStream(), false).writeData(null);
-						
-					} catch (Exception e) {
+		if (dbLegendsMode) {
+			// Fetches data from the legends website and initialises
+			// classes that are based on it, or doesn't if that fails
+			try {
+				System.out.println("\nFetching characters from dblegends.net...");
+				legendsWebsite = new LegendsDatabase();
+				if (legendsWebsite.isDataFetchSuccessfull()) {
+					System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
 
+					// Upload current website HTML as backup
+					new Thread(() -> {
+						try {
+
+							new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
+									LegendsDatabase.getWebsiteAsInputStream(), false).writeData(null);
+
+						} catch (Exception e) {
+
+						}
+
+					}).start();
+
+				} else {
+					System.err.println("Character database missing information. Trying Backup...");
+
+					OnlineDataManager backup = new OnlineDataManager(api, "Website_Backup_Msg_ID", "Website Backup",
+							LegendsDatabase.getWebsiteAsInputStream(), true);
+
+					legendsWebsite = new LegendsDatabase(backup.getData());
+					if (!legendsWebsite.isDataFetchSuccessfull()) {
+						System.err.println("Warning: Backup is also missing information.");
 					}
-					
-				}).start();
-
-			} else {
-				System.err.println("Character database missing information. Trying Backup...");
-
-			
-				OnlineDataManager backup = new OnlineDataManager(api, "Website_Backup_Msg_ID",
-						"Website Backup", LegendsDatabase.getWebsiteAsInputStream(), true);
-				
-				legendsWebsite = new LegendsDatabase(backup.getData());
-				if(!legendsWebsite.isDataFetchSuccessfull()) {
-					System.err.println("Warning: Backup is also missing information.");
 				}
+
+			} catch (IOException e) {
+				System.err.println("\nFailed to build character database. Relevant commands will be inactive.");
+				isRollCommandActive = false;
 			}
-			
 
-		} catch (IOException e) {
-			System.err.println("\nFailed to build character database. Relevant commands will be inactive.");
-			isRollCommandActive = false;
-		}
+			if (isRollCommandActive) {
+				templates = new RollTemplates(api, legendsWebsite);
 
-		if (isRollCommandActive) {
-			templates = new RollTemplates(api, legendsWebsite);
+				legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
 
-			legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
-
-			legendsSearch = new LegendsSearch(legendsWebsite, templates.getRollTemplates());
+				legendsSearch = new LegendsSearch(legendsWebsite, templates.getRollTemplates());
+			}
 		}
 	}
 
@@ -263,7 +266,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			if (msg.getAuthor().isBotOwner() || msg.getAuthor().isTeamMember()) {
 				isOwner = true;
 			}
-			// This is so I can run a test version and non-test version at the same time
+
+			// This is so I can run a test version and a non-test version at the same time
 			if (testMode && !msg.getServer().get().getIdAsString().equals(testServerID))
 				return;
 			if (!testMode && msg.getServer().get().getIdAsString().equals(testServerID))
@@ -375,7 +379,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 						newThread.start();
 						return;
 					}
-					
+
 					if (lowCaseTxt.matches("b-character send.*")) {
 						Characters.sendCharacters(e.getChannel(), legendsWebsite.getCharactersList());
 					}
@@ -386,6 +390,9 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 						CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
 					}
 					
+					if (lowCaseTxt.matches("b-tag send.*")) {
+						Tags.sendTags(e.getChannel(), legendsWebsite.getTags());
+					}
 
 				} catch (Exception e1) {
 					e.getChannel().sendMessage("Filter couldn't be parsed <:gokuhuh:1009185335881768970>");
@@ -410,12 +417,6 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				autoRespond.sendData(e.getChannel());
 				return;
 			}
-
-			if (lowCaseTxt.matches("b-tag send.*")) {
-				Tags.sendTags(e.getChannel(), legendsWebsite.getTags());
-			}
-
-		
 
 			if (testMode && lowCaseTxt.matches("start task(.*)")) {
 				try {
@@ -466,13 +467,18 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 							// 4096 Token limit that includes sent messages
 							// Important to stay under it
-							if (Integer.parseInt(response[1]) > 3300) {
+							try {
+								if (Integer.parseInt(response[1]) > 3300) {
 
-								for (int i = 0; i < 5; i++) {
-									chatgptConversation.remove(0);
+									for (int i = 0; i < 5; i++) {
+										chatgptConversation.remove(0);
+									}
 								}
+							} catch (Exception e1) {
+								System.err.println("Couldn't parse tokens.");
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 				});
@@ -484,7 +490,11 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				isCustomAIOn = false;
 				return;
 			}
-
+			
+			if(lowCaseTxt.matches("ai activate.*")) {
+				isCustomAIOn = true;
+			}
+			
 			if (autoRespond.respond(msgText, e))
 				return;
 
@@ -507,7 +517,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 									String input = msgText;
 
 									if (lowCaseTxt.matches("ai(.*)"))
-										input = input.replaceFirst("ai", "").strip();
+										input = input.replaceAll("^[Aa][Ii]", "").strip();
 
 									String generatedText = discordAI.generateText(input);
 

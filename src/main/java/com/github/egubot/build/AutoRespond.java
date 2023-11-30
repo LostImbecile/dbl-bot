@@ -15,8 +15,6 @@ public class AutoRespond extends OnlineDataManager {
 
 	public AutoRespond(DiscordApi api) throws Exception {
 		super(api, idKey, resourcePath, "Autorespond", true);
-
-		this.setLockedDataEndIndex(92);
 	}
 
 	public boolean respond(String msgText, MessageCreateEvent e) {
@@ -128,8 +126,10 @@ public class AutoRespond extends OnlineDataManager {
 
 	public void removeResponse(String msgText, Messageable e, boolean isOwner) {
 		try {
+			int startIndex = getLockedDataEndIndex();
+			
 			if (isOwner)
-				setLockedDataEndIndex(0);
+				startIndex = 0;
 
 			String st = msgText.substring("b-response remove".length()).strip();
 
@@ -138,7 +138,7 @@ public class AutoRespond extends OnlineDataManager {
 
 			boolean isNameExist = false;
 
-			for (int j = getLockedDataEndIndex(); j < getData().size(); j++) {
+			for (int j = startIndex; j < getData().size(); j++) {
 				if (isResponseEqual(getData().get(j), st)) {
 					isNameExist = true;
 					getData().remove(j);
