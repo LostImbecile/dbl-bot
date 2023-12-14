@@ -2,7 +2,6 @@ package com.github.egubot.main;
 
 import java.awt.GraphicsEnvironment;
 import java.io.Console;
-import java.util.Arrays;
 
 public class Run {
 
@@ -15,11 +14,22 @@ public class Run {
 			 * commands/cmd
 			 */ Console console = System.console();
 
+			String title = "Discord Bot";
+			for (int i = 0; i < args.length; i++) {
+				if (args[i].toLowerCase().contains("title:")) {
+					title = args[i].replaceAll("[-\"]", "").replaceAll("(?i)title:", "");
+					break;
+				}
+			}
+			if (title.equals("")) {
+				title = "Discord Bot";
+			}
 			// If the bot isn't already in a console it runs the main method
 			if (console == null && !GraphicsEnvironment.isHeadless()) {
 				try {
-					Runtime.getRuntime().exec(new String[] { "cmd", "/K", "Start", "cmd", "/k",
-							"java -Xms40m -Xmx200m -jar bot.jar " + Arrays.toString(args).replaceAll("[\\[\\],]", "")+ " && exit" });
+					Runtime.getRuntime().exec(
+							new String[] { "cmd", "/K", "Start \"" + title + "\" java -Xms40m -Xmx200m -jar bot.jar "
+									+ String.join(" ", args) + "&& exit", });
 				} catch (Exception e) {
 					// If you're not on windows just run the bot through the
 					// terminal or create a shell script for it.

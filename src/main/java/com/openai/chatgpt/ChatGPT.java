@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.github.egubot.gpt2.DiscordAI;
@@ -61,7 +62,8 @@ public class ChatGPT {
 			writer.close();
 
 			// Response from ChatGPT
-			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			BufferedReader br = new BufferedReader(
+					new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
 			String line;
 
 			StringBuffer response = new StringBuffer();
@@ -71,15 +73,32 @@ public class ChatGPT {
 			}
 			br.close();
 
-			// If you need more info from the response, read the full response 
+			// If you need more info from the response, read the full response
 			// and create a method that extracts what you care about
 			evaluatedResponse[0] = reformatResponse(response.toString());
 			evaluatedResponse[1] = getTokensUsed(response.toString());
 			return evaluatedResponse;
 		} catch (Exception e) {
-			
+			return checkErrorCode(e.getStackTrace()[0].toString());
 		}
-		return evaluatedResponse;
+	}
+
+	private static String[] checkErrorCode(String errorMessage) {
+		String errorCode = errorMessage.replaceAll("response code:\\s*(\\d+)", "$1");
+		String error = "error";
+		switch (errorCode) {
+		case "429":
+			return new String[] { "Error: Rate limit or quota reached.", error };
+		case "401":
+			return new String[] { "Error: Invalid Authentication.", error };
+		case "500":
+			return new String[] { "Error: The server had an error while processing your request.", error };
+		case "503":
+			return new String[] { "Error: The engine is currently overloaded.", error };
+		default:
+			return new String[] { "Error: No clue what the problem is, try again later.", error };
+
+		}
 	}
 
 	private static String getTokensUsed(String st) {
@@ -109,10 +128,10 @@ public class ChatGPT {
 	}
 
 	public static String reformatInput(String txt, String author) {
-		if (txt.toLowerCase().matches("gpt(.*)"))
+		if (txt.toLowerCase().matches("gpt.*"))
 			txt = txt.replaceFirst("gpt", "");
 
-		txt = DiscordAI.jsonify(txt).replaceAll("[^\\x00-\\x7F]", "");
+		txt = DiscordAI.jsonify(txt);
 
 		if (!author.equals("assistant")) {
 			return "{\"role\": \"user\"" + ", \"content\": \"" + author + ":" + txt + "\"}";

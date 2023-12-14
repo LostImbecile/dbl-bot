@@ -14,6 +14,8 @@ import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
 
 public class LegendsRoll extends LegendsPool {
+	
+	private Random rng = new Random();
 
 	public LegendsRoll(LegendsDatabase legendsWebsite, List<String> arrayList) {
 		super(legendsWebsite, arrayList);
@@ -25,7 +27,6 @@ public class LegendsRoll extends LegendsPool {
 		int randomIndex;
 		int rollAmount;
 		boolean rerollOnDupe = true;
-		Random rng = new Random();
 		Characters unit;
 		ArrayList<Characters> pool;
 		EmbedBuilder[] embeds = new EmbedBuilder[6];

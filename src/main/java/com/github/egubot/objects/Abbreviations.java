@@ -27,7 +27,7 @@ public class Abbreviations {
 	}
 
 	public static String getReactionId(String id) {
-		if (id.matches("<(.*)>"))
+		if (id.matches("<.*>"))
 			return id.replaceAll("[<>]", "").replace("<a", "").replaceFirst(":", "");
 		
 		return id;

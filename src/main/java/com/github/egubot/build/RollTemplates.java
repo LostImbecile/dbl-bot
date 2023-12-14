@@ -132,7 +132,7 @@ public class RollTemplates extends OnlineDataManager {
 		st = getTemplateName(st).toLowerCase();
 		st2 = getTemplateName(st2).toLowerCase();
 
-		return st.matches(st2 + "(.*)") || st2.matches(st + "(.*)");
+		return st.matches(st2 + ".*") || st2.matches(st + ".*");
 	}
 
 	public List<String> getRollTemplates() {

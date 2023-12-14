@@ -1,6 +1,8 @@
 package com.github.egubot.main;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +31,20 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 	private static final long HOUR = 1000 * 60 * 60L;
 	private String testServerID = KeyManager.getID("Test_Server_ID");
-	private String siriosID = KeyManager.getID("Sirio_User_ID");
-	private String eguID = KeyManager.getID("Egu_Server_ID");
-	private String sirioMsgID = KeyManager.getID("Sirio_Msg_ID");
-	private String sirioChannelID = KeyManager.getID("Sirio_Msg_Channel_ID");
+	private String userTargetID = KeyManager.getID("User_Target_ID");
+	private String mainServerID = KeyManager.getID("Main_Server_ID");
+	private String userTargetMsgID = KeyManager.getID("User_Target_Msg_ID");
+	private String userTargetChannelID = KeyManager.getID("User_Target_Msg_Channel_ID");
 	private String gpt2ChannelID = KeyManager.getID("GPT2_Channel_ID");
 	private String timerLengthMessage = KeyManager.getID("Dead_Chat_Timer_Msg");
 	private String wheelChannelID = KeyManager.getID("Wheel_Channel_ID");
+	private String backupWebsiteFlag = KeyManager.getID("Backup_Website_Flag");
 	private String sirioMsgContent;
 
 	private boolean isAnimated = true;
-	private boolean isCustomAIOn = true;
+	private boolean isCustomAIOn = false;
+	private boolean readBotMessages = false;
+	private boolean isChatGPTOn = false;
 
 	private String chatGPTActiveChannelID = "";
 
@@ -57,7 +62,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private boolean testMode;
 
 	private TimedAction testTimer;
-	private TimedAction sirioTimer;
+	private TimedAction userTargetTimer;
 	private TimedAction deadChatTimer;
 
 	private IncomingWebhook testWebhook;
@@ -77,101 +82,97 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		this.isAnimated = !testMode;
 		this.dbLegendsMode = dbLegendsMode;
 		this.isRollCommandActive = dbLegendsMode;
-		
+
 		initialiseDataStorage();
 		initialiseWebhooks();
 	}
 
-	private void initialiseWebhooks() {
-		/*
-		 * Note, doesn't check for zones, will simply not work as expected
-		 * if discord goes out of sync with your timezone.
-		 * (only in the case of timers that depend on message creation timestamps)
-		 * 
-		 */
-		Thread t = new Thread(new Runnable() {
+	@Override
+	public void onMessageCreate(MessageCreateEvent e) {
+		Message msg = e.getMessage();
+		// Regex replaces non-utf8 characters
+		String msgText = e.getMessageContent().replaceAll("[^\\x00-\\x7F]", "");
+		String lowCaseTxt = msgText.toLowerCase();
 
-			@Override
-			public void run() {
-				long testWebhookID;
-				long egubotWebhookID;
+		try {
+
+			if (checkChatGPTCommands(e, msg, msgText, lowCaseTxt)) {
+				return;
+			}
+			// Ignore bots unless changed
+			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
+				return;
+			}
+
+			if (lowCaseTxt.equals("terminate")) {
+				terminate(e, msg);
+			}
+
+			if (lowCaseTxt.equals("refresh")) {
+				refresh(e, msg);
+				return;
+			}
+
+			// This is so I can run a test version and a non-test version at the same time
+			if (testMode && !msg.getServer().get().getIdAsString().equals(testServerID))
+				return;
+			if (!testMode && msg.getServer().get().getIdAsString().equals(testServerID))
+				return;
+
+			String channelID = e.getChannel().getIdAsString();
+			String authorID = e.getMessageAuthor().getIdAsString();
+
+			checkChannelTimer(channelID);
+
+			if (lowCaseTxt.contains("[attachment text replace]") && !e.getMessage().getAttachments().isEmpty()) {
+				msgText = replaceAttachmentText(e, msgText);
+				lowCaseTxt = msgText.toLowerCase();
+			}
+
+			if (checkDBLegendsCommands(e, msgText, lowCaseTxt, channelID)) {
+				return;
+			}
+
+			if (tryAutoRespondCommands(e, msgText, lowCaseTxt)) {
+				return;
+			}
+
+			if (testMode && (checkTimerTasks(e, msgText, lowCaseTxt))) {
+				return;
+			}
+
+			if (lowCaseTxt.equals("spam mode off")) {
+				readBotMessages = false;
+				return;
+			}
+
+			if (lowCaseTxt.equals("spam mode on")) {
+				readBotMessages = true;
+				return;
+			}
+
+			if (lowCaseTxt.equals("ai activate")) {
+				isCustomAIOn = true;
+				return;
+			}
+
+			if (autoRespond.respond(msgText, e)) {
+				return;
+			}
+
+			if (authorID.equals(userTargetID)) {
 				try {
-					egubotWebhookID = Long.parseLong(KeyManager.getID("Egubot_Webhook_ID"));
-					egubotWebhook = api.getWebhookById(egubotWebhookID).get().asIncomingWebhook().get();
-					egubotWebhook.updateAvatar(api.getUserById(siriosID).get().getAvatar());
-					egubotWebhook
-							.updateName(api.getUserById(siriosID).get().getDisplayName(api.getServerById(eguID).get()));
-				} catch (Exception e) {
-					egubotWebhook = null;
-				}
-				try {
-					testWebhookID = Long.parseLong(KeyManager.getID("Test_Webhook_ID"));
-					testWebhook = api.getWebhookById(testWebhookID).get().asIncomingWebhook().get();
-				} catch (Exception e) {
-					testWebhook = null;
-				}
+					userTargetTimer.sendDelayedRateLimitedMessage(e.getChannel(), sirioMsgContent, true);
+				} catch (Exception e1) {
 
-				try {
-					testTimer = new TimedAction(5000, null, null);
-
-				} catch (Exception e) {
-					testTimer = null;
-				}
-
-				// Schedules the message based on the last message sent in
-				// the webhook's chat.
-				try {
-					double length;
-					try {
-						length = Double.parseDouble(
-								api.getMessageById(timerLengthMessage, api.getTextChannelById(sirioChannelID).get())
-										.join().getContent());
-					} catch (Exception e) {
-						length = 24;
-					}
-
-					deadChatTimer = new TimedAction((long) (length * HOUR), null,
-							egubotWebhook.getChannel().get().getMessages(1).get().first().getCreationTimestamp());
-					deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
-				} catch (Exception e) {
-					deadChatTimer = null;
-				}
-
-				// Checks the first 50 messages in all channels in the server
-				// to see the last time it replied with a specific message
-				try {
-					sirioMsgContent = api.getMessageById(sirioMsgID, api.getTextChannelById(sirioChannelID).get()).get()
-							.getContent();
-
-					List<ServerChannel> channels = api.getServerById(eguID).get().getChannels();
-					Object[] messages;
-					Message temp;
-					Instant lastMessageDate = Instant.now().minusMillis(6 * HOUR);
-					for (int i = 0; i < channels.size(); i++) {
-						if (channels.get(i).asTextChannel().isPresent()) {
-							messages = channels.get(i).asTextChannel().get().getMessages(50).get().toArray();
-							for (int j = 0; j < messages.length; j++) {
-								temp = (Message) messages[j];
-								if (temp != null && temp.getAuthor().isYourself()
-										&& temp.getContent().equals(sirioMsgContent)) {
-									if (temp.getCreationTimestamp().isAfter(lastMessageDate)) {
-										lastMessageDate = temp.getCreationTimestamp();
-										// System.out.println(lastMessageDate);
-									}
-								}
-							}
-						}
-					}
-
-					// Starts a delay timer based on the last time it replied with
-					// a specific message
-					sirioTimer = new TimedAction(6 * HOUR, null, lastMessageDate);
-				} catch (Exception e) {
-					sirioTimer = null;
 				}
 			}
-		});
-		t.start();
+
+			checkCustomAI(e, msgText, lowCaseTxt, channelID);
+
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	private void initialiseDataStorage() throws Exception {
@@ -189,21 +190,27 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			try {
 				System.out.println("\nFetching characters from dblegends.net...");
 				legendsWebsite = new LegendsDatabase();
+
 				if (legendsWebsite.isDataFetchSuccessfull()) {
-					System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
 
-					// Upload current website HTML as backup
-					new Thread(() -> {
-						try {
+					if (backupWebsiteFlag.equals("true")) {
+						System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
 
-							new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
-									LegendsDatabase.getWebsiteAsInputStream(), false).writeData(null);
+						// Upload current website HTML as backup
+						new Thread(() -> {
+							try {
 
-						} catch (Exception e) {
+								new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
+										LegendsDatabase.getWebsiteAsInputStream(), false).writeData(null);
 
-						}
+							} catch (Exception e) {
 
-					}).start();
+							}
+
+						}).start();
+					} else {
+						System.out.println("Character database was successfully built!");
+					}
 
 				} else {
 					System.err.println("Character database missing information. Trying Backup...");
@@ -232,237 +239,221 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		}
 	}
 
-	@Override
-	public void onMessageCreate(MessageCreateEvent e) {
-		Thread newThread;
-		Message msg = e.getMessage();
-		boolean isOwner = false;
-		// Regex replaces non-utf8 characters
-		String msgText = e.getMessageContent().replaceAll("[^\\x00-\\x7F]", "");
-		String lowCaseTxt = msgText.toLowerCase();
+	private void initialiseWebhooks() {
+		/*
+		 * Note, doesn't check for zones, will simply not work as expected
+		 * if discord goes out of sync with your timezone.
+		 * (only in the case of timers that depend on message creation timestamps)
+		 * 
+		 */
+		Thread t = new Thread(new Runnable() {
 
-		try {
-
-			if (msg.getAuthor().isYourself()) {
-				chatgptConversation.add(ChatGPT.reformatInput(msgText, "assistant"));
-				return;
-			}
-
-			if (!msg.getAuthor().isUser())
-				return;
-
-			try {
-				if (e.getChannel().getIdAsString().equals(egubotWebhook.getChannel().get().getIdAsString())) {
-
-					deadChatTimer.cancelRecurringTimer();
-					deadChatTimer.setStartTime(null, null);
-					deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
-
+			@Override
+			public void run() {
+				long testWebhookID;
+				long egubotWebhookID;
+				try {
+					egubotWebhookID = Long.parseLong(KeyManager.getID("Egubot_Webhook_ID"));
+					egubotWebhook = api.getWebhookById(egubotWebhookID).get().asIncomingWebhook().get();
+					egubotWebhook.updateAvatar(api.getUserById(userTargetID).get().getAvatar());
+					egubotWebhook.updateName(
+							api.getUserById(userTargetID).get().getDisplayName(api.getServerById(mainServerID).get()));
+				} catch (Exception e) {
+					egubotWebhook = null;
 				}
+				try {
+					testWebhookID = Long.parseLong(KeyManager.getID("Test_Webhook_ID"));
+					testWebhook = api.getWebhookById(testWebhookID).get().asIncomingWebhook().get();
+				} catch (Exception e) {
+					testWebhook = null;
+				}
+
+				try {
+					testTimer = new TimedAction(5000, null, null);
+
+				} catch (Exception e) {
+					testTimer = null;
+				}
+
+				// Schedules the message based on the last message sent in
+				// the webhook's chat.
+				try {
+					double length;
+					try {
+						length = Double.parseDouble(api
+								.getMessageById(timerLengthMessage, api.getTextChannelById(userTargetChannelID).get())
+								.join().getContent());
+					} catch (Exception e) {
+						length = 24;
+					}
+
+					deadChatTimer = new TimedAction((long) (length * HOUR), null,
+							egubotWebhook.getChannel().get().getMessages(1).get().first().getCreationTimestamp());
+					deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
+				} catch (Exception e) {
+					deadChatTimer = null;
+				}
+
+				// Checks the first 50 messages in all channels in the server
+				// to see the last time it replied with a specific message
+				try {
+					sirioMsgContent = api
+							.getMessageById(userTargetMsgID, api.getTextChannelById(userTargetChannelID).get()).get()
+							.getContent();
+
+					List<ServerChannel> channels = api.getServerById(mainServerID).get().getChannels();
+					Object[] messages;
+					Message temp;
+					Instant lastMessageDate = Instant.now().minusMillis(6 * HOUR);
+					for (int i = 0; i < channels.size(); i++) {
+						if (channels.get(i).asTextChannel().isPresent()) {
+							messages = channels.get(i).asTextChannel().get().getMessages(50).get().toArray();
+							for (int j = 0; j < messages.length; j++) {
+								temp = (Message) messages[j];
+								if (temp != null && temp.getAuthor().isYourself()
+										&& temp.getContent().equals(sirioMsgContent)) {
+									if (temp.getCreationTimestamp().isAfter(lastMessageDate)) {
+										lastMessageDate = temp.getCreationTimestamp();
+										// System.out.println(lastMessageDate);
+									}
+								}
+							}
+						}
+					}
+
+					// Starts a delay timer based on the last time it replied with
+					// a specific message
+					userTargetTimer = new TimedAction(6 * HOUR, null, lastMessageDate);
+				} catch (Exception e) {
+					userTargetTimer = null;
+				}
+			}
+		});
+		t.start();
+	}
+
+	private boolean checkTimerTasks(MessageCreateEvent e, String msgText, String lowCaseTxt) {
+		if (lowCaseTxt.equals("start task")) {
+			try {
+				testWebhook.updateAvatar(e.getMessageAuthor().getAvatar()).join();
+				testWebhook.updateChannel(e.getChannel().asServerTextChannel().get());
+				testTimer.setStartTime(null, e.getMessage().getCreationTimestamp());
+				testTimer.sendScheduledMessage(testWebhook, msgText, true);
+			} catch (Exception e1) {
+			}
+			return true;
+		}
+
+		if (lowCaseTxt.equals("cancel task")) {
+			try {
+				testTimer.cancelRecurringTimer();
 			} catch (Exception e1) {
 
 			}
+			return true;
+		}
 
-			if (msg.getAuthor().isBotOwner() || msg.getAuthor().isTeamMember()) {
-				isOwner = true;
-			}
+		return false;
+	}
 
-			// This is so I can run a test version and a non-test version at the same time
-			if (testMode && !msg.getServer().get().getIdAsString().equals(testServerID))
-				return;
-			if (!testMode && msg.getServer().get().getIdAsString().equals(testServerID))
-				return;
+	private void refresh(MessageCreateEvent e, Message msg) throws Exception {
+		if (!msg.getAuthor().getIdAsString().equals(userTargetID)) {
+			e.getChannel().sendMessage("Refreshing...").join();
+			System.out.println("\nRefreshing MessageCreateEventHandler.");
 
-			if (lowCaseTxt.equals("terminate")) {
+			initialiseDataStorage();
+			initialiseWebhooks();
 
-				if (!msg.getAuthor().getIdAsString().equals(siriosID)) {
-					e.getChannel().sendMessage("Terminating...").join();
-					System.out.println("\nTerminate message invoked.");
-					new StatusManager(api, testMode).exit();
+			e.getChannel().sendMessage("Refreshed :ok_hand:");
+		} else {
+			e.getChannel().sendMessage("no");
+		}
+	}
 
-					System.exit(0);
-				} else {
-					e.getChannel().sendMessage("no");
-				}
-			}
+	private void terminate(MessageCreateEvent e, Message msg) {
+		boolean isOwner = isOwner(msg);
 
-			if (lowCaseTxt.equals("refresh")) {
+		if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
+			e.getChannel().sendMessage("Terminating...").join();
+			System.out.println("\nTerminate message invoked.");
+			new StatusManager(api, testMode).exit();
 
-				if (!msg.getAuthor().getIdAsString().equals(siriosID)) {
-					e.getChannel().sendMessage("Refreshing...").join();
-					System.out.println("\nRefreshing MessageCreateEventHandler.");
+			System.exit(0);
+		} else {
+			e.getChannel().sendMessage("no");
+		}
+	}
 
-					initialiseDataStorage();
-					initialiseWebhooks();
-
-					e.getChannel().sendMessage("Refreshed :ok_hand:");
-					return;
-				} else {
-					e.getChannel().sendMessage("no");
-				}
-			}
-
-			if (isRollCommandActive) {
-				if (lowCaseTxt.matches("b-template create(.*)")) {
-					templates.writeTemplate(lowCaseTxt, e.getChannel());
-					return;
-				}
-
-				if (lowCaseTxt.matches("b-template remove(.*)")) {
-					templates.removeTemplate(lowCaseTxt, e.getChannel(), isOwner);
-					return;
-				}
-
-				if (lowCaseTxt.matches("b-template send(.*)")) {
-					templates.sendData(e.getChannel());
-					return;
-				}
-
-				/*
-				 * Features that introduce a long delay with no consequence
-				 * should be run in a separate thread, or the bot won't be
-				 * able to do anything till they're done.
-				 */
-				try {
-					if (lowCaseTxt.matches("b-search(.*)")) {
-						newThread = new Thread(() ->
-
-						legendsSearch.search(msgText, api, e.getChannel())
-
-						);
-						newThread.start();
-						return;
-					}
-
-					if (e.getChannel().getIdAsString().equals(wheelChannelID)) {
-						if (lowCaseTxt.matches("skip")) {
-							e.getChannel().sendMessage("Disabled roll animation :ok_hand:");
-							isAnimated = false;
-							return;
-						}
-
-						if (lowCaseTxt.matches("unskip")) {
-							e.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
-							isAnimated = true;
-							return;
-						}
-
-						if (lowCaseTxt.matches("roll")) {
-							newThread = new Thread(() ->
-
-							legendsRoll.rollCharacters("b-roll6 t1", e.getChannel(), isAnimated)
-
-							);
-							newThread.start();
-							return;
-						}
-					}
-
-					if (lowCaseTxt.matches("disable roll animation(.*)")) {
-						e.getChannel().sendMessage("Disabled");
-						isAnimated = false;
-						return;
-					}
-
-					if (lowCaseTxt.matches("enable roll animation(.*)")) {
-						e.getChannel().sendMessage("Enabled");
-						isAnimated = true;
-						return;
-					}
-
-					if (lowCaseTxt.matches("b-roll(.*)")) {
-						newThread = new Thread(() ->
-
-						legendsRoll.rollCharacters(lowCaseTxt, e.getChannel(), isAnimated)
-
-						);
-						newThread.start();
-						return;
-					}
-
-					if (lowCaseTxt.matches("b-character send.*")) {
-						Characters.sendCharacters(e.getChannel(), legendsWebsite.getCharactersList());
-					}
-
-					// Prints empty IDs so I can manually change very large IDs to smaller ones
-					// Saves time or memory when working with a hash.
-					if (lowCaseTxt.matches("b-character printemptyids.*")) {
-						CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
-					}
-					
-					if (lowCaseTxt.matches("b-tag send.*")) {
-						Tags.sendTags(e.getChannel(), legendsWebsite.getTags());
-					}
-
-				} catch (Exception e1) {
-					e.getChannel().sendMessage("Filter couldn't be parsed <:gokuhuh:1009185335881768970>");
-					return;
-				}
-			}
-
-			if (lowCaseTxt.matches("b-response create(.*)")) {
-				if (!lowCaseTxt.contains("sleep"))
-					autoRespond.writeResponse(msgText, e.getChannel());
-				else
-					e.getChannel().sendMessage("nah");
+	private void checkCustomAI(MessageCreateEvent e, String msgText, String lowCaseTxt, String channelID) {
+		Thread newThread;
+		// Personal AI, refer to its class for info
+		if (isCustomAIOn) {
+			if (lowCaseTxt.equals("ai terminate")) {
+				isCustomAIOn = false;
 				return;
 			}
 
-			if (lowCaseTxt.matches("b-response remove(.*)")) {
-				autoRespond.removeResponse(msgText, e.getChannel(), isOwner);
-				return;
-			}
-
-			if (lowCaseTxt.matches("b-response send(.*)")) {
-				autoRespond.sendData(e.getChannel());
-				return;
-			}
-
-			if (testMode && lowCaseTxt.matches("start task(.*)")) {
-				try {
-					testWebhook.updateAvatar(e.getMessageAuthor().getAvatar()).join();
-					testWebhook.updateChannel(e.getChannel().asServerTextChannel().get());
-					testTimer.setStartTime(null, e.getMessage().getCreationTimestamp());
-					testTimer.sendScheduledMessage(testWebhook, msgText, true);
-				} catch (Exception e1) {
-				}
-				return;
-			}
-
-			if (lowCaseTxt.matches("cancel task(.*)")) {
-				try {
-					testTimer.cancelRecurringTimer();
-				} catch (Exception e1) {
-
-				}
-				return;
-			}
-
-			if (lowCaseTxt.matches("gpt clear(.*)")) {
-				e.getChannel().sendMessage("Conversation cleared :thumbsup:");
-				chatgptConversation.clear();
-				return;
-			}
-
-			chatgptConversation.add(ChatGPT.reformatInput(msgText, msg.getAuthor().getName()));
-			if (lowCaseTxt.matches("gpt activate channel.*")) {
-				chatGPTActiveChannelID = e.getChannel().getIdAsString();
-				return;
-			}
-
-			if (lowCaseTxt.matches("gpt deactivate.*")) {
-				chatGPTActiveChannelID = "";
-				return;
-			}
-
-			if (lowCaseTxt.matches("gpt(.*)") || chatGPTActiveChannelID.equals(e.getChannel().getIdAsString())) {
-
+			if (testMode || channelID.equals(gpt2ChannelID) || lowCaseTxt.matches("ai.*")) {
+				String st = msgText;
 				newThread = new Thread(new Runnable() {
 					public void run() {
-
 						try {
-							String[] response = ChatGPT.chatGPT(msgText, msg.getAuthor().getName(),
-									chatgptConversation);
+							String aiUrl = "http://localhost:5000"; // Update with your AI server URL
+							try (DiscordAI discordAI = new DiscordAI(aiUrl)) {
+								String input = st.replaceAll("^[Aa][Ii]", "").strip();
+
+								String generatedText = discordAI.generateText(input);
+
+								if (!generatedText.matches("Error:.*")) {
+									e.getChannel().sendMessage(generatedText);
+								} else if (!generatedText.contains("Connect to localhost:5000"))
+									System.err.println("AI Response: " + generatedText);
+							}
+						} catch (Exception e) {
+							// not worth bothering with
+						}
+					}
+				});
+				newThread.start();
+			}
+		}
+	}
+
+	private boolean checkChatGPTCommands(MessageCreateEvent e, Message msg, String msgText, String lowCaseTxt) {
+		Thread newThread;
+		if (lowCaseTxt.equals("chatgpt activate")) {
+			isChatGPTOn = true;
+			return true;
+		}
+
+		if (isChatGPTOn) {
+			if (lowCaseTxt.equals("chatgpt deactivate")) {
+				isChatGPTOn = false;
+				return true;
+			}
+
+			if (lowCaseTxt.matches("gpt.*") || e.getChannel().getIdAsString().equals(chatGPTActiveChannelID)) {
+				if (lowCaseTxt.equals("gpt clear")) {
+					e.getChannel().sendMessage("Conversation cleared :thumbsup:");
+					chatgptConversation.clear();
+					return true;
+				}
+
+				if (lowCaseTxt.equals("gpt channel on")) {
+					chatGPTActiveChannelID = e.getChannel().getIdAsString();
+					return true;
+				}
+
+				if (lowCaseTxt.equals("gpt channel off")) {
+					chatGPTActiveChannelID = "";
+					return true;
+				}
+
+				String st = msgText;
+				newThread = new Thread(new Runnable() {
+					public void run() {
+						try {
+							String[] response = ChatGPT.chatGPT(st, msg.getAuthor().getName(), chatgptConversation);
 							e.getChannel().sendMessage(response[0]);
 
 							// 4096 Token limit that includes sent messages
@@ -483,61 +474,217 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 					}
 				});
 				newThread.start();
-				return;
+				return true;
 			}
 
-			if (lowCaseTxt.matches("ai terminate(.*)")) {
-				isCustomAIOn = false;
-				return;
+			if (msg.getAuthor().isYourself()) {
+				chatgptConversation.add(ChatGPT.reformatInput(msgText, "assistant"));
+				return false;
 			}
-			
-			if(lowCaseTxt.matches("ai activate.*")) {
-				isCustomAIOn = true;
-			}
-			
-			if (autoRespond.respond(msgText, e))
-				return;
 
-			if (e.getMessageAuthor().getIdAsString().equals(siriosID)) {
+			chatgptConversation.add(ChatGPT.reformatInput(msgText, msg.getAuthor().getName()));
+		}
+		return false;
+	}
+
+	private boolean tryAutoRespondCommands(MessageCreateEvent e, String msgText, String lowCaseTxt) {
+
+		if (lowCaseTxt.matches("b-.*")) {
+			boolean isOwner = isOwner(e.getMessage());
+			if (lowCaseTxt.matches("b-response create.*")) {
+				if (!lowCaseTxt.contains("sleep"))
+					autoRespond.writeResponse(msgText, e.getChannel(), isOwner);
+				else
+					e.getChannel().sendMessage("nah");
+				return true;
+			}
+
+			if (lowCaseTxt.matches("b-response remove.*")) {
+				autoRespond.removeResponse(msgText, e.getChannel(), isOwner);
+				return true;
+			}
+
+			if (lowCaseTxt.equals("b-response send")) {
+				autoRespond.sendData(e.getChannel());
+				return true;
+			}
+
+			if (lowCaseTxt.matches("b-response lock.*") && isOwner) {
 				try {
-					sirioTimer.sendDelayedRateLimitedMessage(e.getChannel(), sirioMsgContent, true);
+					int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
+					autoRespond.setLockedDataEndIndex(x);
+					autoRespond.writeData(e.getChannel());
 				} catch (Exception e1) {
 
 				}
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean checkDBLegendsCommands(MessageCreateEvent e, String msgText, String lowCaseTxt, String channelID) {
+		Thread newThread;
+		if (isRollCommandActive) {
+			if (lowCaseTxt.matches("b-.*")) {
+
+				if (lowCaseTxt.matches("b-template create.*")) {
+					templates.writeTemplate(lowCaseTxt, e.getChannel());
+					return true;
+				}
+
+				if (lowCaseTxt.matches("b-template remove.*")) {
+					templates.removeTemplate(lowCaseTxt, e.getChannel(), isOwner(e.getMessage()));
+					return true;
+				}
+
+				if (lowCaseTxt.equals("b-template send")) {
+					templates.sendData(e.getChannel());
+					return true;
+				}
+
+				if (lowCaseTxt.matches("b-template lock.*") && isOwner(e.getMessage())) {
+					try {
+						int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
+						templates.setLockedDataEndIndex(x);
+						templates.writeData(e.getChannel());
+					} catch (Exception e1) {
+					}
+
+					return true;
+				}
+
+				/*
+				 * Features that introduce a long delay with no consequence
+				 * should be run in a separate thread, or the bot won't be
+				 * able to do anything till they're done.
+				 */
+				try {
+					if (lowCaseTxt.matches("b-search.*")) {
+						String st = msgText;
+						newThread = new Thread(() ->
+
+						legendsSearch.search(st, api, e.getChannel())
+
+						);
+						newThread.start();
+						return true;
+					}
+
+					if (lowCaseTxt.matches("b-roll.*")) {
+						String st = lowCaseTxt;
+						newThread = new Thread(() ->
+
+						legendsRoll.rollCharacters(st, e.getChannel(), isAnimated)
+
+						);
+						newThread.start();
+						return true;
+					}
+
+				} catch (Exception e1) {
+					e.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
+					return true;
+				}
+
+				if (lowCaseTxt.equals("b-character send")) {
+					Characters.sendCharacters(e.getChannel(), legendsWebsite.getCharactersList());
+					return true;
+				}
+
+				// Prints empty IDs so I can manually change very large IDs to smaller ones
+				// Saves time or memory when working with a hash.
+				if (lowCaseTxt.equals("b-character printemptyids")) {
+					CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
+					return true;
+				}
+
+				if (lowCaseTxt.equals("b-tag send")) {
+					Tags.sendTags(e.getChannel(), legendsWebsite.getTags());
+					return true;
+				}
+
 			}
 
-			// Personal AI, refer to its class for info
-			if (isCustomAIOn) {
-				if (testMode || e.getChannel().getIdAsString().equals(gpt2ChannelID) || lowCaseTxt.matches("ai(.*)")) {
-					newThread = new Thread(new Runnable() {
-						public void run() {
-							try {
-								String aiUrl = "http://localhost:5000"; // Update with your AI server URL
-								try (DiscordAI discordAI = new DiscordAI(aiUrl)) {
-									String input = msgText;
+			if (channelID.equals(wheelChannelID)) {
+				if (lowCaseTxt.equals("skip")) {
+					e.getChannel().sendMessage("Disabled roll animation :ok_hand:");
+					isAnimated = false;
+					return true;
+				}
 
-									if (lowCaseTxt.matches("ai(.*)"))
-										input = input.replaceAll("^[Aa][Ii]", "").strip();
+				if (lowCaseTxt.equals("unskip")) {
+					e.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
+					isAnimated = true;
+					return true;
+				}
 
-									String generatedText = discordAI.generateText(input);
+				if (lowCaseTxt.equals("roll")) {
+					newThread = new Thread(() ->
 
-									if (!generatedText.matches("Error:(.*)")) {
-										e.getChannel().sendMessage(generatedText);
-									} else if (!generatedText.contains("Connect to localhost:5000"))
-										System.err.println("AI Response: " + generatedText);
-								}
-							} catch (Exception e) {
-								// not worth bothering with
-							}
-						}
-					});
+					legendsRoll.rollCharacters("b-roll6 t1", e.getChannel(), isAnimated)
+
+					);
 					newThread.start();
+					return true;
 				}
 			}
 
-		} catch (Exception e1) {
-			e1.printStackTrace();
+			if (lowCaseTxt.equals("disable roll animation")) {
+				e.getChannel().sendMessage("Disabled");
+				isAnimated = false;
+				return true;
+			}
+
+			if (lowCaseTxt.equals("enable roll animation")) {
+				e.getChannel().sendMessage("Enabled");
+				isAnimated = true;
+				return true;
+			}
 		}
+
+		return false;
+	}
+
+	private void checkChannelTimer(String channelID) {
+		try {
+			if (channelID.equals(egubotWebhook.getChannel().get().getIdAsString())) {
+
+				deadChatTimer.cancelRecurringTimer();
+				deadChatTimer.setStartTime(null, null);
+				deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
+
+			}
+		} catch (Exception e1) {
+
+		}
+	}
+
+	private boolean isOwner(Message msg) {
+		boolean isOwner = false;
+		if (msg.getAuthor().isBotOwner() || msg.getAuthor().isTeamMember()) {
+			isOwner = true;
+		}
+		return isOwner;
+	}
+
+	private String replaceAttachmentText(MessageCreateEvent e, String msgText) {
+		StringBuilder st2 = new StringBuilder();
+		try (BufferedReader br = new BufferedReader(
+				new InputStreamReader(e.getMessage().getAttachments().get(0).asInputStream()))) {
+			String st;
+
+			while ((st = br.readLine()) != null) {
+				st2.append(st);
+			}
+
+		} catch (IOException e2) {
+
+		}
+
+		return msgText.replace("[attachment text replace]", st2);
 	}
 
 }

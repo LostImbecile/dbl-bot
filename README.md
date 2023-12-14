@@ -40,7 +40,7 @@ DBLegends Character Search:
 - b-tag update (name) (characters)
 
 Automatic Responses:
-- b-response create (type) >> (msg) >> (response) >> \*(reaction) >> *(reaction)...
+- b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> *(reaction)...
 - b-response remove (message)
 
 ChatGPT 3.5:
@@ -117,11 +117,16 @@ where LoE is a template, ginyu force is a tag
 - Standard (unicode) emojis can't be directly used. If you want to use them in a message, do :&lt;thumbsup&gt;:.
 - Unicode emojis can't be used in reactions.
 - There are 3 types: match, equal & contain.
-- Contain doesn't trigger if invocation is part of a word or is connected to one.
-
+- "Contain" doesn't trigger if invocation is part of a word or is connected to one.
+- Regex can be used for "match" and "contain" (you can type it as is to remove it, or anything that it matches).
+- For a random response use "??" to separate options.
 Example:
 
 b-response create equal >> test >> :&lt;ok_hand&gt;: >> <:emoji:1142482242589950083>
+
+b-response create contain >> test >> op1 ?? op2 ?? op3
+
+=> Responds with op1 or op2 or op3
 
 **7) b-response remove (message)**
 - Removes an automatic response.

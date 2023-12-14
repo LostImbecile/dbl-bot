@@ -49,7 +49,7 @@ public class StatusManager {
 				if (!statusMessageID.equals("-1")) {
 					System.out.println("No valid status message ID, send message? y/n");
 
-					if (in.nextLine().toLowerCase().matches("y")) {
+					if (in.nextLine().equalsIgnoreCase("y")) {
 						try {
 							statusMessageID = api.getTextChannelById(KeyManager.getID("Status_Channel_ID")).get()
 									.sendMessage("status").join().getIdAsString();
@@ -63,7 +63,7 @@ public class StatusManager {
 						}
 					} else {
 						System.out.println("\nAlways skip this? y/n");
-						if (in.nextLine().toLowerCase().matches("y")) {
+						if (in.nextLine().equalsIgnoreCase("y")) {
 							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.idsFileName);
 						}
 					}

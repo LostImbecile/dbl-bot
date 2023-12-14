@@ -31,7 +31,7 @@ public class LegendsSearch extends LegendsPool {
 		EmbedBuilder[] embeds = new EmbedBuilder[10];
 		ArrayList<Characters> pool = (ArrayList<Characters>) getPool(msgText);
 		if (pool == null || pool.isEmpty()) {
-			e.sendMessage("<:gokuhuh:1009185335881768970>");
+			e.sendMessage("<:huh:1184466187938185286>");
 			return;
 		}
 

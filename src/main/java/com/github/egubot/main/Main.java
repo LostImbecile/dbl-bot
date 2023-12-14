@@ -1,7 +1,6 @@
 package com.github.egubot.main;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Scanner;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -25,7 +24,7 @@ public class Main {
 	 * Javacord documentation:
 	 * https://javadoc.io/doc/org.javacord/javacord-api
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		boolean testMode = false;
 
 		DiscordApi api = null;
@@ -33,18 +32,14 @@ public class Main {
 
 		// Current arguments:
 		// dbl_off , test , sendmessages
-		String arguments = Arrays.toString(args).toLowerCase();
+		String arguments = String.join(" ", args).toLowerCase();
 
 		/*
 		 * Send "test" as an argument to activate test mode.
-		 * Second condition is to avoid changing your arguments each time
-		 * while running from your compiler, ignored otherwise.
 		 */
 		if (arguments.contains("test")) {
 			testMode = true;
-		} else if (!testMode) {
-			testMode = false;
-		}
+		} 
 
 		// Important to have all keys, some will be created for
 		// you, and the rest could be ignored.

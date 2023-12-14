@@ -140,7 +140,7 @@ public class SendMessagesFromConsole {
 
 		emojis.add(new Abbreviations("shinsmug", "<:ShinSmug:792523496726331434>"));
 		emojis.add(new Abbreviations("friezasmug", "<:FriezaSmug:789862857206530098>"));
-		emojis.add(new Abbreviations("gokuhuh", "<:gokuhuh:1009185335881768970>"));
+		emojis.add(new Abbreviations("gokuhuh", "<:huh:1184466187938185286>"));
 		emojis.add(new Abbreviations("nohoney", "<:nohoney:879731892818174012>"));
 		emojis.add(new Abbreviations(":sad:", "<:sad:1020780174901522442>"));
 		emojis.add(new Abbreviations("pecansmug", "<:PikkonSmug:789966590649040946>"));
