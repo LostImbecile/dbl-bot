@@ -3,10 +3,12 @@ package com.github.egubot.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.message.Message;
@@ -14,6 +16,7 @@ import org.javacord.api.entity.webhook.IncomingWebhook;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
+import com.azure.services.Translate;
 import com.github.egubot.build.AutoRespond;
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.build.OnlineDataManager;
@@ -45,6 +48,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private boolean isCustomAIOn = false;
 	private boolean readBotMessages = false;
 	private boolean isChatGPTOn = false;
+	private boolean isTranslateOn = false;
 
 	private String chatGPTActiveChannelID = "";
 
@@ -57,6 +61,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private AutoRespond autoRespond;
 	private RollTemplates templates;
 	private LegendsSearch legendsSearch;
+	private Translate translate = new Translate();
 
 	private boolean isRollCommandActive;
 	private boolean testMode;
@@ -91,7 +96,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	public void onMessageCreate(MessageCreateEvent e) {
 		Message msg = e.getMessage();
 		// Regex replaces non-utf8 characters
-		String msgText = e.getMessageContent().replaceAll("[^\\x00-\\x7F]", "");
+		String msgText = e.getMessageContent();
 		String lowCaseTxt = msgText.toLowerCase();
 
 		try {
@@ -119,8 +124,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			if (!testMode && msg.getServer().get().getIdAsString().equals(testServerID))
 				return;
 
-			String channelID = e.getChannel().getIdAsString();
-			String authorID = e.getMessageAuthor().getIdAsString();
+			String channelID = msg.getChannel().getIdAsString();
+			String authorID = msg.getAuthor().getIdAsString();
 
 			checkChannelTimer(channelID);
 
@@ -130,6 +135,10 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			}
 
 			if (checkDBLegendsCommands(e, msgText, lowCaseTxt, channelID)) {
+				return;
+			}
+
+			if (checkTranslateCommands(e, msg, lowCaseTxt)) {
 				return;
 			}
 
@@ -149,6 +158,10 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			if (lowCaseTxt.equals("spam mode on")) {
 				readBotMessages = true;
 				return;
+			}
+
+			if (lowCaseTxt.matches("parrot.*")) {
+				e.getChannel().sendMessage(msgText.replace("parrot", ""));
 			}
 
 			if (lowCaseTxt.equals("ai activate")) {
@@ -332,6 +345,65 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		t.start();
 	}
 
+	private boolean checkTranslateCommands(MessageCreateEvent e, Message msg, String lowCaseTxt) {
+		if(isTranslateOn) {
+			try {
+				if(lowCaseTxt.length() < 140 && !translate.detectLanguage(lowCaseTxt, true).matches("(?:en)|(?:Error.*)")) {
+					e.getChannel().sendMessage(translate.post(lowCaseTxt));
+				}
+			} catch (IOException e1) {
+			}
+		}
+		if (lowCaseTxt.matches("b-translate.*")) {
+			if (lowCaseTxt.equals("b-translate set on")) {
+				isTranslateOn = true;
+				return true;
+			}
+			if (lowCaseTxt.equals("b-translate set off")) {
+				isTranslateOn = false;
+				return true;
+			}
+			if (lowCaseTxt.contains("b-translate set")) {
+				String st = lowCaseTxt.replace("b-translate set", "").strip();
+				if (st.contains("-")) {
+					String[] toFrom = st.split("-");
+					translate.setFrom(toFrom[0]);
+					translate.setTo(toFrom[1]);
+				} else {
+					translate.setTo(st);
+				}
+				return true;
+			}
+			if (lowCaseTxt.contains("b-translate languages")) {
+				try {
+					e.getChannel().sendMessage(IOUtils.toInputStream(Translate.getLanguages(), StandardCharsets.UTF_8),
+							"languages.txt");
+				} catch (IOException e1) {
+					e.getChannel().sendMessage("Failed to send :thumbs_down");
+				}
+				return true;
+			}
+
+			try {
+				if (msg.getMessageReference().isPresent()) {
+
+					e.getChannel().sendMessage(
+							translate.post(msg.getMessageReference().get().getMessage().get().getContent()));
+
+				} else {
+					String st = lowCaseTxt.replace("b-translate", "").strip();
+
+					e.getChannel().sendMessage(translate.post(st));
+
+				}
+			} catch (IOException e1) {
+				e.getChannel().sendMessage("Failed to connect to endpoint :thumbs_down:");
+			}
+			return true;
+		}
+		return false;
+	}
+
 	private boolean checkTimerTasks(MessageCreateEvent e, String msgText, String lowCaseTxt) {
 		if (lowCaseTxt.equals("start task")) {
 			try {
@@ -455,7 +527,6 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 						try {
 							String[] response = ChatGPT.chatGPT(st, msg.getAuthor().getName(), chatgptConversation);
 							e.getChannel().sendMessage(response[0]);
-
 							// 4096 Token limit that includes sent messages
 							// Important to stay under it
 							try {
@@ -466,7 +537,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 									}
 								}
 							} catch (Exception e1) {
-								System.err.println("Couldn't parse tokens.");
+
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -491,7 +562,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 		if (lowCaseTxt.matches("b-.*")) {
 			boolean isOwner = isOwner(e.getMessage());
-			if (lowCaseTxt.matches("b-response create.*")) {
+			if (lowCaseTxt.contains("b-response create")) {
 				if (!lowCaseTxt.contains("sleep"))
 					autoRespond.writeResponse(msgText, e.getChannel(), isOwner);
 				else
@@ -499,7 +570,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				return true;
 			}
 
-			if (lowCaseTxt.matches("b-response remove.*")) {
+			if (lowCaseTxt.contains("b-response remove")) {
 				autoRespond.removeResponse(msgText, e.getChannel(), isOwner);
 				return true;
 			}
@@ -509,7 +580,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				return true;
 			}
 
-			if (lowCaseTxt.matches("b-response lock.*") && isOwner) {
+			if (lowCaseTxt.contains("b-response lock") && isOwner) {
 				try {
 					int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
 					autoRespond.setLockedDataEndIndex(x);
@@ -530,22 +601,22 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		if (isRollCommandActive) {
 			if (lowCaseTxt.matches("b-.*")) {
 
-				if (lowCaseTxt.matches("b-template create.*")) {
+				if (lowCaseTxt.contains("b-template create")) {
 					templates.writeTemplate(lowCaseTxt, e.getChannel());
 					return true;
 				}
 
-				if (lowCaseTxt.matches("b-template remove.*")) {
+				if (lowCaseTxt.contains("b-template remove")) {
 					templates.removeTemplate(lowCaseTxt, e.getChannel(), isOwner(e.getMessage()));
 					return true;
 				}
 
-				if (lowCaseTxt.equals("b-template send")) {
+				if (lowCaseTxt.contains("b-template send")) {
 					templates.sendData(e.getChannel());
 					return true;
 				}
 
-				if (lowCaseTxt.matches("b-template lock.*") && isOwner(e.getMessage())) {
+				if (lowCaseTxt.contains("b-template lock") && isOwner(e.getMessage())) {
 					try {
 						int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
 						templates.setLockedDataEndIndex(x);
@@ -562,7 +633,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				 * able to do anything till they're done.
 				 */
 				try {
-					if (lowCaseTxt.matches("b-search.*")) {
+					if (lowCaseTxt.contains("b-search")) {
 						String st = msgText;
 						newThread = new Thread(() ->
 
@@ -573,7 +644,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 						return true;
 					}
 
-					if (lowCaseTxt.matches("b-roll.*")) {
+					if (lowCaseTxt.contains("b-roll")) {
 						String st = lowCaseTxt;
 						newThread = new Thread(() ->
 
@@ -672,8 +743,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 	private String replaceAttachmentText(MessageCreateEvent e, String msgText) {
 		StringBuilder st2 = new StringBuilder();
-		try (BufferedReader br = new BufferedReader(
-				new InputStreamReader(e.getMessage().getAttachments().get(0).asInputStream()))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(
+				e.getMessage().getAttachments().get(0).asInputStream(), StandardCharsets.UTF_8))) {
 			String st;
 
 			while ((st = br.readLine()) != null) {
