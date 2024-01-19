@@ -22,7 +22,7 @@ Bot commands:
 
 *Everything is case insensitive. Invocation has to be at the beginning of your message, not read otherwise.*
 
-*Brackets indicate operand, stars mean optional.*
+*Brackets indicate operand, stars mean optional, everything else needs to be there.*
 
 DBLegends Random Roll:
 - b-roll(n) *(filters)
@@ -42,6 +42,15 @@ DBLegends Character Search:
 Automatic Responses:
 - b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> *(reaction)...
 - b-response remove (message)
+
+Translate:
+- b-translate set (on)/(off)
+- b-translate set (to)/(from-to)
+- b-translate languages
+- b-translate (text)/(reply to message)
+
+Weather:
+- b-weather (city) *detailed
 
 ChatGPT 3.5:
 - gpt (message)

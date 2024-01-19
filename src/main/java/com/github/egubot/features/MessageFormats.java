@@ -7,6 +7,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.objects.Characters;
+import com.weatherapi.forecast.Weather;
 
 public class MessageFormats {
 
@@ -84,11 +85,77 @@ public class MessageFormats {
 			coolerStatus = " (Strongest)";
 		else
 			coolerStatus = "";
-		
+
 		return new EmbedBuilder().setThumbnail(unit.getImageLink()).setColor(unit.getColour())
 				.setDescription(unit.getRarity() + lfStatus + zenkaiStatus + coolerStatus + EQUALISE)
 				.setAuthor(unit.getCharacterName(), unit.getPageLink(), unit.getImageLink())
 				.setFooter(unit.getGameID());
 
+	}
+
+	public static EmbedBuilder[] createWeatherEmbed(Weather weather, boolean minimal) {
+		if (weather.isNull() || weather.isError())
+			return new EmbedBuilder[0];
+		
+		String equalise = EQUALISE + "‎‏‏‎                    ‎‎";
+		EmbedBuilder[] embeds = new EmbedBuilder[3];
+		String title = weather.getName() + ", " + weather.getCountry();
+		embeds[0] = new EmbedBuilder();
+		embeds[0].setAuthor(title, null, weather.getCurrentIcon());
+		embeds[0].setThumbnail(weather.getCurrentIcon());
+		embeds[0].setColor(weather.getTodayColour());
+		embeds[0].setFooter(weather.getTodayDate());
+		String description;
+		if (!minimal) {
+			description = "Today " + weather.getLocaltime().replaceAll(".* ", "") + ", "
+					+ weather.getCurrentConditionText() + "\nNow: " + weather.getCurrentTempC() + "C" + "\nFeels Like: "
+					+ weather.getCurrentFeelslikeC() + "C\nHumidty: " + weather.getCurrentHumidity() + "%\nWind: "
+					+ weather.getCurrentWindMph() + "mph, " + weather.getCurrentWindDir() + "\n\nChance of Rain: "
+					+ weather.getTodayChanceOfRain() + "%\nChance of Snow: " + weather.getAfterTomorrowChanceOfSnow()
+					+ "%" + equalise;
+		} else {
+			description = "Today " + weather.getLocaltime().replaceAll(".* ", "") + ", "
+					+ weather.getCurrentConditionText() + "\nNow: " + weather.getCurrentTempC() + "C\nWind: "
+					+ weather.getCurrentWindMph() + "mph" + "\nRain: " + weather.getTodayChanceOfRain() + "%, Snow: "
+					+ weather.getAfterTomorrowChanceOfSnow() + "%" + equalise;
+		}
+		embeds[0].setDescription(description);
+		if (weather.getNumDays() > 2) {
+			embeds[1] = new EmbedBuilder();
+			embeds[1].setAuthor(title, null, weather.getTomorrowIcon());
+			embeds[1].setThumbnail(weather.getTomorrowIcon());
+			embeds[1].setColor(weather.getTomorrowColor());
+			embeds[1].setFooter(weather.getTomorrowDate());
+			if (!minimal) {
+				description = "Tomorrow, " + weather.getConditionTomorrow() + "\nMax: " + weather.getMaxTempTomorrow()
+						+ "C\nMin: " + weather.getMinTempTomorrow() + "C\nHumidity: " + weather.getTomorrowHumidity()
+						+ "%\nWind: " + weather.getTomorrowWind() + "mph\n\nChance of Rain: "
+						+ weather.getTomorrowChanceOfRain() + "%\nChance of Snow: " + weather.getTomorrowChanceOfSnow()
+						+ "%" + equalise;
+			} else {
+				description = "Tomorrow, " + weather.getConditionTomorrow() + "\nMax: " + weather.getMaxTempTomorrow()
+						+ "C, Min: " + weather.getMinTempTomorrow() + "C\nWind: " + weather.getTomorrowWind()
+						+ "mph\nRain: " + weather.getTomorrowChanceOfRain() + "%, Snow: "
+						+ weather.getTomorrowChanceOfSnow() + "%" + equalise;
+			}
+			embeds[1].setDescription(description);
+
+			if (!minimal) {
+				embeds[2] = new EmbedBuilder();
+				embeds[2].setAuthor(title, null, weather.getAfterTomorrowIcon());
+				embeds[2].setThumbnail(weather.getAfterTomorrowIcon());
+				embeds[2].setColor(weather.getAfterTomorrowColor());
+				embeds[2].setFooter(weather.getAfterTomorrowDate());
+				description = "After Tomorrow, " + weather.getConditionAfterTomorrow() + "\nMax: "
+						+ weather.getMaxTempAfterTomorrow() + "C\nMin: " + weather.getMinTempAfterTomorrow()
+						+ "C\nHumidity: " + weather.getAfterTomorrowHumidity() + "%\nWind: "
+						+ weather.getAfterTomorrowWind() + "mph\n\nChance of Rain: "
+						+ weather.getAfterTomorrowChanceOfRain() + "%\nChance of Snow: "
+						+ weather.getAfterTomorrowChanceOfSnow() + "%" + equalise;
+				embeds[2].setDescription(description);
+			}
+
+		}
+		return embeds;
 	}
 }

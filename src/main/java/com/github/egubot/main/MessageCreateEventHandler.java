@@ -29,6 +29,7 @@ import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.Tags;
 import com.openai.chatgpt.ChatGPT;
+import com.weatherapi.forecast.WeatherForecast;
 
 public class MessageCreateEventHandler implements MessageCreateListener {
 
@@ -62,6 +63,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private RollTemplates templates;
 	private LegendsSearch legendsSearch;
 	private Translate translate = new Translate();
+	private WeatherForecast weather = new WeatherForecast();
 
 	private boolean isRollCommandActive;
 	private boolean testMode;
@@ -144,6 +146,10 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				return;
 			}
 
+			if (checkWeatherCommands(msg, lowCaseTxt)) {
+				return;
+			}
+
 			if (tryAutoRespondCommands(e, msgText, lowCaseTxt)) {
 				return;
 			}
@@ -216,7 +222,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 							try {
 
 								new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
-										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), false).writeData(null);
+										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), false)
+										.writeData(null);
 
 							} catch (Exception e) {
 
@@ -347,10 +354,19 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		t.start();
 	}
 
+	private boolean checkWeatherCommands(Message msg, String lowCaseTxt) {
+		if (lowCaseTxt.matches("b-weather.*")) {
+			weather.sendWeather(msg, lowCaseTxt);
+			return true;
+		}
+		return false;
+	}
+
 	private boolean checkTranslateCommands(MessageCreateEvent e, Message msg, String lowCaseTxt) {
-		if(isTranslateOn) {
+		if (isTranslateOn) {
 			try {
-				if(lowCaseTxt.length() < 140 && !translate.detectLanguage(lowCaseTxt, true).matches("(?:en)|(?:Error.*)")) {
+				if (lowCaseTxt.length() < 140
+						&& !translate.detectLanguage(lowCaseTxt, true).matches("(?:en)|(?:Error.*)")) {
 					e.getChannel().sendMessage(translate.post(lowCaseTxt));
 				}
 			} catch (IOException e1) {
@@ -379,7 +395,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			}
 			if (lowCaseTxt.contains("b-translate languages")) {
 				try {
-					e.getChannel().sendMessage(IOUtils.toInputStream(Translate.getTranslateLanguages(), StandardCharsets.UTF_8),
+					e.getChannel().sendMessage(
+							IOUtils.toInputStream(Translate.getTranslateLanguages(), StandardCharsets.UTF_8),
 							"languages.txt");
 				} catch (IOException e1) {
 					e.getChannel().sendMessage("Failed to send :thumbs_down");
