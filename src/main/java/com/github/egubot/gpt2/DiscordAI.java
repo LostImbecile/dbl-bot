@@ -6,6 +6,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import com.github.egubot.shared.JSONUtilities;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +32,7 @@ public class DiscordAI implements AutoCloseable {
 			HttpPost request = new HttpPost(aiUrl + "/generate");
 
 			// Important step to avoid format induced errors
-			input = jsonify(input);
+			input = JSONUtilities.jsonify(input);
 
 			// You set all of these by yourself, the two sides need to be compatible
 			StringEntity params = new StringEntity("{\"data\": \"" + input + "\"}");
@@ -55,7 +57,7 @@ public class DiscordAI implements AutoCloseable {
 
 			String st = result.toString();
 
-			st = dejsonify(st);
+			st = JSONUtilities.dejsonify(st);
 			st = cleanDuplicates(st);
 
 			st = st.replace("{\"generated_text\":\"", "");
@@ -74,18 +76,6 @@ public class DiscordAI implements AutoCloseable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static String jsonify(String input) {
-		input = input.replace("\\", "\\\\");
-		input = input.replace("\n", "\\n").replace("\"", "\\\"").replace("\t", "\\t").replace("/", "\\/");
-		return input.strip();
-	}
-
-	public static String dejsonify(String input) {
-		input = input.replace("\\\\", "\\");
-		input = input.replace("\\n", "\n").replace("\\\"", "\"").replace("\\t", "\t").replace("\\/", "/");
-		return input.strip();
 	}
 
 	public static String cleanDuplicates(String input) {

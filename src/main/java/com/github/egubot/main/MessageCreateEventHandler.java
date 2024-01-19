@@ -129,6 +129,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 			checkChannelTimer(channelID);
 
+			// Replaces the sentence below with the contents of the attachment
+			// No real purpose besides avoiding character limits currently
 			if (lowCaseTxt.contains("[attachment text replace]") && !e.getMessage().getAttachments().isEmpty()) {
 				msgText = replaceAttachmentText(e, msgText);
 				lowCaseTxt = msgText.toLowerCase();
@@ -214,7 +216,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 							try {
 
 								new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
-										LegendsDatabase.getWebsiteAsInputStream(), false).writeData(null);
+										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), false).writeData(null);
 
 							} catch (Exception e) {
 
@@ -229,7 +231,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 					System.err.println("Character database missing information. Trying Backup...");
 
 					OnlineDataManager backup = new OnlineDataManager(api, "Website_Backup_Msg_ID", "Website Backup",
-							LegendsDatabase.getWebsiteAsInputStream(), true);
+							LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), true);
 
 					legendsWebsite = new LegendsDatabase(backup.getData());
 					if (!legendsWebsite.isDataFetchSuccessfull()) {
@@ -371,12 +373,13 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 					translate.setTo(toFrom[1]);
 				} else {
 					translate.setTo(st);
+					translate.setFrom("");
 				}
 				return true;
 			}
 			if (lowCaseTxt.contains("b-translate languages")) {
 				try {
-					e.getChannel().sendMessage(IOUtils.toInputStream(Translate.getLanguages(), StandardCharsets.UTF_8),
+					e.getChannel().sendMessage(IOUtils.toInputStream(Translate.getTranslateLanguages(), StandardCharsets.UTF_8),
 							"languages.txt");
 				} catch (IOException e1) {
 					e.getChannel().sendMessage("Failed to send :thumbs_down");

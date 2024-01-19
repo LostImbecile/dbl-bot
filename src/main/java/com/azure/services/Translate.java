@@ -6,12 +6,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 
-import com.github.egubot.gpt2.DiscordAI;
 import com.github.egubot.main.KeyManager;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.github.egubot.shared.JSONUtilities;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
@@ -47,7 +44,7 @@ public class Translate {
 
 	public String post(String text) throws IOException {
 		HttpClient client = HttpClients.createDefault();
-		String requestBody = "[{\"Text\": \"" + DiscordAI.jsonify(text) + "\"}]";
+		String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
 		HttpPost httpPost = new HttpPost(url);
 
 		// Set headers
@@ -64,14 +61,15 @@ public class Translate {
 		// Process the response
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 200) {
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
 			StringBuilder result = new StringBuilder();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				result.append(line);
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
+				
+				String line;
+				while ((line = reader.readLine()) != null) {
+					result.append(line);
+				}
 			}
-
 			return extractTranslationFromResponse(result.toString());
 		} else {
 			return checkStatusCode(statusCode);
@@ -118,7 +116,7 @@ public class Translate {
 		} catch (Exception e) {
 		}
 
-		if(getLanguageOnly) {
+		if (getLanguageOnly) {
 			return language;
 		}
 		try {
@@ -133,7 +131,7 @@ public class Translate {
 		this.url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=" + from + "&to=" + to;
 	}
 
-	public static String getLanguages() throws IOException {
+	public static String getTranslateLanguages() throws IOException {
 		String url = "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation";
 		StringBuilder result = new StringBuilder(500);
 		try (BufferedReader br = new BufferedReader(
@@ -149,12 +147,31 @@ public class Translate {
 
 		}
 
-		return prettify(result.toString());
+		return JSONUtilities.prettify(result.toString()).replace("\"", "").replace("dir: ltr\n ", "").replace("dir: rtl\n ", "");
+	}
+
+	public static String getTransliterateLanguages() throws IOException {
+		String url = "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=transliteration";
+		StringBuilder result = new StringBuilder(500);
+		try (BufferedReader br = new BufferedReader(
+				new InputStreamReader(new URL(url).openStream(), StandardCharsets.UTF_8))) {
+			String line = null;
+
+			// You can process the text as you read it instead of adding it first
+			// depending on what you want to do
+			while ((line = br.readLine()) != null) {
+				result.append(line);
+			}
+			// System.out.println("Lines read: " + lines.size());
+
+		}
+
+		return JSONUtilities.prettify(result.toString()).replace("\"", "");
 	}
 
 	public String detectLanguage(String text, boolean getLanguageOnly) throws IOException {
 		HttpClient client = HttpClients.createDefault();
-		String requestBody = "[{\"Text\": \"" + DiscordAI.jsonify(text) + "\"}]";
+		String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
 		HttpPost httpPost = new HttpPost("https://api.cognitive.microsofttranslator.com/detect?api-version=3.0");
 
 		// Set headers
@@ -204,13 +221,6 @@ public class Translate {
 		}
 	}
 
-	public static String prettify(String jsonText) {
-		JsonObject jsonObject = JsonParser.parseString(jsonText).getAsJsonObject();
-
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		return gson.toJson(jsonObject).replace("\"", "").replace("dir: ltr\n ", "").replace("dir: rtl\n ", "");
-	}
-
 	public void setTo(String to) {
 		this.to = to;
 		buildURL();
@@ -223,7 +233,9 @@ public class Translate {
 
 	public static void main(String[] args) {
 		try {
-			System.out.println(new Translate().post("J’aimerais vraiment conduire votre voiture autour du pâté de maisons plusieurs fois!"));
+			// System.out.println(new Translate().post("J’aimerais vraiment conduire votre
+			// voiture autour du pâté de maisons plusieurs fois!"));
+			System.out.println(Translate.getTransliterateLanguages());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -37,15 +37,15 @@ public class LegendsDatabase {
 
 	public LegendsDatabase() throws IOException {
 		// Read from website
-		InputStream is = getWebsiteAsInputStream();
+		InputStream is = getWebsiteAsInputStream("https://dblegends.net/");
 		readData(is);
 		getData();
 	}
 
-	public static InputStream getWebsiteAsInputStream() throws IOException {
+	public static InputStream getWebsiteAsInputStream(String address) throws IOException {
 		// Default constructor reads from the website
 		// Make a URL to the web page
-		URL url = new URL("https://dblegends.net/");
+		URL url = new URL(address);
 
 		// Get the input stream through URL Connection
 		return url.openStream();

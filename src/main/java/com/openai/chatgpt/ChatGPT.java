@@ -8,8 +8,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import com.github.egubot.gpt2.DiscordAI;
 import com.github.egubot.main.KeyManager;
+import com.github.egubot.shared.JSONUtilities;
 
 public class ChatGPT {
 
@@ -79,12 +79,12 @@ public class ChatGPT {
 			evaluatedResponse[1] = getTokensUsed(response.toString());
 			return evaluatedResponse;
 		} catch (Exception e) {
-			return checkErrorCode(e.getStackTrace()[0].toString());
+			return checkErrorCode(e.getMessage());
 		}
 	}
 
 	private static String[] checkErrorCode(String errorMessage) {
-		String errorCode = errorMessage.replaceAll("response code:\\s*(\\d+)", "$1");
+		String errorCode = errorMessage.replaceAll(".*response code:\\s*(\\d+).*", "$1");
 		String error = "error";
 		switch (errorCode) {
 		case "429":
@@ -131,7 +131,7 @@ public class ChatGPT {
 		if (txt.toLowerCase().matches("gpt.*"))
 			txt = txt.replaceFirst("gpt", "");
 
-		txt = DiscordAI.jsonify(txt);
+		txt = JSONUtilities.jsonify(txt);
 
 		if (!author.equals("assistant")) {
 			return "{\"role\": \"user\"" + ", \"content\": \"" + author + ":" + txt + "\"}";
@@ -142,7 +142,7 @@ public class ChatGPT {
 
 	public static String reformatResponse(String response) {
 		response = extractMessageFromJSONResponse(response);
-		response = DiscordAI.dejsonify(response);
+		response = JSONUtilities.dejsonify(response);
 		return response;
 	}
 }
