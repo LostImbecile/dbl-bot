@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Random;
 
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
+import com.azure.services.Translate;
 import com.github.egubot.objects.Characters;
 import com.weatherapi.forecast.Weather;
 
@@ -96,7 +98,7 @@ public class MessageFormats {
 	public static EmbedBuilder[] createWeatherEmbed(Weather weather, boolean minimal) {
 		if (weather.isNull() || weather.isError())
 			return new EmbedBuilder[0];
-		
+
 		String equalise = EQUALISE + "‎‏‏‎                    ‎‎";
 		EmbedBuilder[] embeds = new EmbedBuilder[3];
 		String title = weather.getName() + ", " + weather.getCountry();
@@ -157,5 +159,66 @@ public class MessageFormats {
 
 		}
 		return embeds;
+	}
+
+	public static EmbedBuilder[] createTranslateEmbed(Message msg, Translate translate) {
+		String content;
+		List<Embed> embeds = msg.getEmbeds();
+		EmbedBuilder[] translatedEmbeds = new EmbedBuilder[10];
+		
+		if (!embeds.isEmpty()) {
+			Embed embed;
+			boolean isError = true;
+			for (int i = 0; i < embeds.size() && i < 10; i++) {
+				embed = embeds.get(i);
+				translatedEmbeds[i] = new EmbedBuilder();
+
+				try {
+					content = embed.getDescription().get();
+					content = translate.post(content, true);
+					translatedEmbeds[i].setDescription(content);
+					isError = false;
+				} catch (Exception e) {
+
+				}
+
+				try {
+					content = embed.getAuthor().get().getName();
+					content = translate.post(content, false);
+					translatedEmbeds[i].setAuthor(content);
+					isError = false;
+				} catch (Exception e) {
+				}
+
+				try {
+					content = embed.getTitle().get();
+					content = translate.post(content, false);
+					translatedEmbeds[i].setTitle(content);
+					isError = false;
+				} catch (Exception e) {
+				}
+
+				try {
+					translatedEmbeds[i].setThumbnail(embed.getThumbnail().get().getUrl().toExternalForm());
+				} catch (Exception e) {
+				}
+
+				try {
+					translatedEmbeds[i].setImage(embed.getImage().get().getUrl().toExternalForm());
+				} catch (Exception e) {
+				}
+				try {
+					translatedEmbeds[i].setColor(embed.getColor().get());
+				} catch (Exception e) {
+				}
+
+			}
+			if (isError) {
+				msg.getChannel().sendMessage("Error: Translating Embed Failed.");
+				return new EmbedBuilder[0];
+			}
+			return translatedEmbeds;
+		} 
+		return new EmbedBuilder[0];
 	}
 }

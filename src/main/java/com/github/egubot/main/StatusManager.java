@@ -154,19 +154,19 @@ public class StatusManager {
 	}
 
 	private ActivityType getActivityType() {
-		if (activityMsgType.matches("watch.*")) {
+		if (activityMsgType.matches("watch(?s).*")) {
 
 			return ActivityType.WATCHING;
 
-		} else if (activityMsgType.matches("listen.*")) {
+		} else if (activityMsgType.matches("listen(?s).*")) {
 
 			return ActivityType.LISTENING;
 
-		} else if (activityMsgType.matches("stream.*")) {
+		} else if (activityMsgType.matches("stream(?s).*")) {
 
 			return ActivityType.STREAMING;
 
-		} else if (activityMsgType.matches("compet.*")) {
+		} else if (activityMsgType.matches("compet(?s).*")) {
 
 			return ActivityType.COMPETING;
 

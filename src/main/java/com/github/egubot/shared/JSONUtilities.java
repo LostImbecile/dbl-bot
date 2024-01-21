@@ -15,6 +15,7 @@ public class JSONUtilities {
 	}
 	
 	public static String jsonify(String input) {
+		// new Gson().toJson(input) also works
 		input = input.replace("\\", "\\\\");
 		input = input.replace("\n", "\\n").replace("\"", "\\\"").replace("\t", "\\t").replace("/", "\\/");
 		return input.strip();

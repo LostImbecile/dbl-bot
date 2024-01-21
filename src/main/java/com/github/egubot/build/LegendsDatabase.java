@@ -37,7 +37,7 @@ public class LegendsDatabase {
 
 	public LegendsDatabase() throws IOException {
 		// Read from website
-		InputStream is = getWebsiteAsInputStream("https://dblegends.net/");
+		InputStream is = getWebsiteAsInputStream("https://dblegends.net/characters");
 		readData(is);
 		getData();
 	}
@@ -78,7 +78,7 @@ public class LegendsDatabase {
 	}
 
 	private void readData(InputStream is) throws IOException {
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(is , StandardCharsets.UTF_8))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 			String line = null;
 
 			// You can process the text as you read it instead of adding it first
@@ -294,139 +294,188 @@ public class LegendsDatabase {
 	}
 
 	private void setName(List<String> lines, int characterIndex, int i) {
-		String st;
-		String line;
-		line = lines.get(i + 1);
-		if (line.contains(">") && line.contains("<")) {
-			st = processName(line);
-			charactersList.get(characterIndex - 1).setCharacterName(st);
+		try {
+			String st;
+			String line;
+			line = lines.get(i + 1);
+			if (line.contains(">") && line.contains("<")) {
+				st = processName(line);
+				charactersList.get(characterIndex - 1).setCharacterName(st);
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
 	}
 
 	private void setImageLink(String line, int characterIndex) {
-		String st;
-		st = line.substring(line.indexOf("src"));
-		st = st.substring(st.indexOf("=") + 1).replace("\"", "").strip();
-		charactersList.get(characterIndex - 1).setImageLink(st);
+		try {
+			String st;
+			st = line.substring(line.indexOf("src"));
+			st = st.substring(st.indexOf("=") + 1).replace("\"", "").strip();
+			charactersList.get(characterIndex - 1).setImageLink(st);
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void setGameID(String line, int characterIndex) {
-		String st;
-		st = line.substring(line.indexOf("=") + 1, line.length() - 2).replace("\"", "").strip();
-		charactersList.get(characterIndex - 1).setGameID(st);
-		evaluateReleaseDate(st, characterIndex);
+		try {
+			String st;
+			st = line.substring(line.indexOf("=") + 1, line.length() - 2).replace("\"", "").strip();
+			charactersList.get(characterIndex - 1).setGameID(st);
+			evaluateReleaseDate(st, characterIndex);
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void setLFStatus(String line, int characterIndex) {
-		String st;
-		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-		evaluateLFStatus(st, characterIndex);
+		try {
+			String st;
+			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
+			evaluateLFStatus(st, characterIndex);
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void setZenkaiStatus(String line, int characterIndex) {
-		String st;
-		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-		evaluateZenkaiStatus(st, characterIndex);
+		try {
+			String st;
+			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
+			evaluateZenkaiStatus(st, characterIndex);
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void setRarity(String line, int characterIndex) {
-		String st;
-		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-		charactersList.get(characterIndex - 1).setRarity(st);
+		try {
+			String st;
+			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
+			charactersList.get(characterIndex - 1).setRarity(st);
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void setColour(String line, int characterIndex) {
-		String st;
-		st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-		charactersList.get(characterIndex - 1).setColour(st);
+		try {
+			String st;
+			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
+			charactersList.get(characterIndex - 1).setColour(st);
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private int setSiteID(String line, int characterIndex) {
-		String[] token;
-		String st;
-		token = line.split("/character/");
-		if (token.length > 1) {
+		try {
+			String[] token;
+			String st;
+			token = line.split("/character/");
+			if (token.length > 1) {
 
-			st = token[1].substring(0, token[1].indexOf("\"") + 1).replace("\"", "").strip();
-			charactersList.get(characterIndex - 1).setSiteID(Integer.parseInt(st));
-			return 1;
+				st = token[1].substring(0, token[1].indexOf("\"") + 1).replace("\"", "").strip();
+				charactersList.get(characterIndex - 1).setSiteID(Integer.parseInt(st));
+				return 1;
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
 		return 0;
 	}
 
 	private void evaluateZenkaiStatus(String st, int characterIndex) {
-		if (st.equals("-1"))
-			charactersList.get(characterIndex - 1).setZenkai(false);
-		else {
-			charactersList.get(characterIndex - 1).setZenkai(true);
-			tags.get(12).getCharacters().put(charactersList.get(characterIndex - 1));
+		try {
+			if (st.equals("-1"))
+				charactersList.get(characterIndex - 1).setZenkai(false);
+			else {
+				charactersList.get(characterIndex - 1).setZenkai(true);
+				tags.get(12).getCharacters().put(charactersList.get(characterIndex - 1));
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
 	}
 
 	private void evaluateLFStatus(String st, int characterIndex) {
-		if (st.equals("0"))
-			charactersList.get(characterIndex - 1).setLF(false);
-		else {
-			charactersList.get(characterIndex - 1).setLF(true);
-			tags.get(13).getCharacters().put(charactersList.get(characterIndex - 1));
+		try {
+			if (st.equals("0"))
+				charactersList.get(characterIndex - 1).setLF(false);
+			else {
+				charactersList.get(characterIndex - 1).setLF(true);
+				tags.get(13).getCharacters().put(charactersList.get(characterIndex - 1));
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
 	}
 
 	private static String processName(String line) {
-		String st;
-		st = line.substring(line.indexOf(">") + 1, line.indexOf("<")).replace("\"", "").replace("Super Saiyan ", "SSJ")
-				.replace("SSJGod", "SSG").replace("SSG SS", "SSGSS").strip();
-		return st;
+		try {
+			String st;
+			st = line.substring(line.indexOf(">") + 1, line.indexOf("<")).replace("\"", "")
+					.replace("Super Saiyan ", "SSJ").replace("SSJGod", "SSG").replace("SSG SS", "SSGSS").strip();
+			return st;
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+			return "Error";
+		}
 	}
 
 	private void evaluateReleaseDate(String st, int characterIndex) {
-		int releaseDate;
-		int yearIndex;
-		if (!st.contains("EVT")) {
-			try {
+		try {
+			int releaseDate;
+			int yearIndex;
+			if (!st.contains("EVT")) {
+				try {
 
-				releaseDate = Integer.parseInt(st.substring(st.indexOf("L") + 1, st.indexOf("-")));
-				yearIndex = 13;
-				if (releaseDate == 0)
-					yearIndex++;
+					releaseDate = Integer.parseInt(st.substring(st.indexOf("L") + 1, st.indexOf("-")));
+					yearIndex = 13;
+					if (releaseDate == 0)
+						yearIndex++;
 
-				while (releaseDate > 0) {
-					releaseDate -= 12;
-					yearIndex++;
+					while (releaseDate > 0) {
+						releaseDate -= 12;
+						yearIndex++;
+					}
+
+					// Years from index 14 to 21
+					if (yearIndex > 13 && yearIndex < 22) {
+						// Adds units on the edge of the year to both years
+						if (releaseDate == 1 && yearIndex > 14)
+							tags.get(yearIndex - 1).getCharacters().put(charactersList.get(characterIndex - 1));
+
+						if (releaseDate == -1 && yearIndex < 21)
+							tags.get(yearIndex + 1).getCharacters().put(charactersList.get(characterIndex - 1));
+
+						tags.get(yearIndex).getCharacters().put(charactersList.get(characterIndex - 1));
+					}
+
+					// Add old or new tag
+					if (yearIndex < 16)
+						tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
+					else
+						tags.get(23).getCharacters().put(charactersList.get(characterIndex - 1));
+
+				} catch (NumberFormatException e) {
+					System.out.println("Failed to parse: " + st);
 				}
-
-				// Years from index 14 to 21
-				if (yearIndex > 13 && yearIndex < 22) {
-					// Adds units on the edge of the year to both years
-					if (releaseDate == 1 && yearIndex > 14)
-						tags.get(yearIndex - 1).getCharacters().put(charactersList.get(characterIndex - 1));
-
-					if (releaseDate == -1 && yearIndex < 21)
-						tags.get(yearIndex + 1).getCharacters().put(charactersList.get(characterIndex - 1));
-
-					tags.get(yearIndex).getCharacters().put(charactersList.get(characterIndex - 1));
-				}
-
-				// Add old or new tag
-				if (yearIndex < 16)
+			} else {
+				// Specific units someone wanted added
+				releaseDate = charactersList.get(characterIndex - 1).getSiteID();
+				if (releaseDate == 45 || releaseDate == 162 || releaseDate == 157 || releaseDate == 183
+						|| releaseDate == 201 || releaseDate == 246) {
+					tags.get(14).getCharacters().put(charactersList.get(characterIndex - 1));
 					tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
-				else
-					tags.get(23).getCharacters().put(charactersList.get(characterIndex - 1));
+				}
 
-			} catch (NumberFormatException e) {
-				System.out.println("Failed to parse: " + st);
+				// Add to event tag
+				tags.get(24).getCharacters().put(charactersList.get(characterIndex - 1));
 			}
-		} else {
-			// Specific units someone wanted added
-			releaseDate = charactersList.get(characterIndex - 1).getSiteID();
-			if (releaseDate == 45 || releaseDate == 162 || releaseDate == 157 || releaseDate == 183
-					|| releaseDate == 201 || releaseDate == 246) {
-				tags.get(14).getCharacters().put(charactersList.get(characterIndex - 1));
-				tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
-			}
-
-			// Add to event tag
-			tags.get(24).getCharacters().put(charactersList.get(characterIndex - 1));
+		} catch (StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -84,7 +84,7 @@ public class ChatGPT {
 	}
 
 	private static String[] checkErrorCode(String errorMessage) {
-		String errorCode = errorMessage.replaceAll(".*response code:\\s*(\\d+).*", "$1");
+		String errorCode = errorMessage.replaceAll(".*response code:\\s*(\\d+)(?s).*", "$1");
 		String error = "error";
 		switch (errorCode) {
 		case "429":
@@ -128,7 +128,7 @@ public class ChatGPT {
 	}
 
 	public static String reformatInput(String txt, String author) {
-		if (txt.toLowerCase().matches("gpt.*"))
+		if (txt.toLowerCase().matches("gpt(?s).*"))
 			txt = txt.replaceFirst("gpt", "");
 
 		txt = JSONUtilities.jsonify(txt);

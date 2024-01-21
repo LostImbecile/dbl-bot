@@ -42,7 +42,7 @@ public class Translate {
 		buildURL();
 	}
 
-	public String post(String text) throws IOException {
+	public String post(String text, boolean appendLanguage) throws IOException {
 		HttpClient client = HttpClients.createDefault();
 		String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
 		HttpPost httpPost = new HttpPost(url);
@@ -64,38 +64,42 @@ public class Translate {
 			StringBuilder result = new StringBuilder();
 			try (BufferedReader reader = new BufferedReader(
 					new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
-				
+
 				String line;
 				while ((line = reader.readLine()) != null) {
 					result.append(line);
 				}
 			}
-			return extractTranslationFromResponse(result.toString());
+			return extractTranslationFromResponse(result.toString(), appendLanguage);
 		} else {
 			return checkStatusCode(statusCode);
 		}
 	}
 
-	public String extractTranslationFromResponse(String response) {
+	public String extractTranslationFromResponse(String response, boolean appendLanguage) {
 		JsonElement jsonElement = JsonParser.parseString(response.replace("\\u00A0", ""));
 
-		String originalLanguage;
-		String outputLanguage;
 		String translationText;
-		try {
-			originalLanguage = jsonElement.getAsJsonArray().get(0).getAsJsonObject().get("detectedLanguage")
-					.getAsJsonObject().get("language").getAsString();
-		} catch (Exception e) {
-			originalLanguage = from;
-		}
+		String output = "";
+		if (appendLanguage) {
+			String originalLanguage;
+			String outputLanguage;
 
-		try {
-			outputLanguage = jsonElement.getAsJsonArray().get(0).getAsJsonObject().get("translations").getAsJsonArray()
-					.get(0).getAsJsonObject().get("to").getAsString();
-		} catch (Exception e) {
-			outputLanguage = to;
-		}
+			try {
+				originalLanguage = jsonElement.getAsJsonArray().get(0).getAsJsonObject().get("detectedLanguage")
+						.getAsJsonObject().get("language").getAsString();
+			} catch (Exception e) {
+				originalLanguage = from;
+			}
 
+			try {
+				outputLanguage = jsonElement.getAsJsonArray().get(0).getAsJsonObject().get("translations")
+						.getAsJsonArray().get(0).getAsJsonObject().get("to").getAsString();
+			} catch (Exception e) {
+				outputLanguage = to;
+			}
+			output = originalLanguage + "-" + outputLanguage + ":\n";
+		}
 		try {
 			translationText = jsonElement.getAsJsonArray().get(0).getAsJsonObject().get("translations").getAsJsonArray()
 					.get(0).getAsJsonObject().get("text").getAsString();
@@ -103,7 +107,7 @@ public class Translate {
 			return null;
 		}
 
-		return originalLanguage + "-" + outputLanguage + ":\n" + translationText;
+		return output + translationText;
 	}
 
 	public String extractDetectedLanguageFromResponse(String response, boolean getLanguageOnly) {
@@ -147,7 +151,8 @@ public class Translate {
 
 		}
 
-		return JSONUtilities.prettify(result.toString()).replace("\"", "").replace("dir: ltr\n ", "").replace("dir: rtl\n ", "");
+		return JSONUtilities.prettify(result.toString()).replace("\"", "").replace("dir: ltr\n ", "")
+				.replace("dir: rtl\n ", "");
 	}
 
 	public static String getTransliterateLanguages() throws IOException {
@@ -233,9 +238,9 @@ public class Translate {
 
 	public static void main(String[] args) {
 		try {
-			// System.out.println(new Translate().post("J’aimerais vraiment conduire votre
-			// voiture autour du pâté de maisons plusieurs fois!"));
-			System.out.println(Translate.getTransliterateLanguages());
+			System.out.println(new Translate("","en")
+					.post("J’aimerais vraiment conduire votre voiture autour du pâté de maisons plusieurs fois!", true));
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

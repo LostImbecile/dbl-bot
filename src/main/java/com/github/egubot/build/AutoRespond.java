@@ -42,7 +42,7 @@ public class AutoRespond extends OnlineDataManager {
 						replyFlag = true;
 
 				} else if (responseContents[0].equals("contain")) {
-					if (msgText.matches(".*(?i)(?<![\\w-.])(?:" + responseContents[2] + ")(?![\\w-.]).*"))
+					if (msgText.matches("(?s).*?(?i)(?<![\\w-.])(?:" + responseContents[2] + ")(?![\\w-.])(?s).*+"))
 						replyFlag = true;
 
 				} else if (responseContents[0].equals("match")) {
@@ -50,7 +50,7 @@ public class AutoRespond extends OnlineDataManager {
 						replyFlag = true;
 
 				} else if (responseContents[0].equals("msg delete")) {
-					if (msgText.matches(".*" + responseContents[2] + ".*"))
+					if (msgText.matches("(?s).*?" + responseContents[2] + "(?s).*+"))
 						deleteFlag = true;
 				} else if (responseContents[0].equals("user delete")) {
 					if (e.getMessageAuthor().getIdAsString().matches(responseContents[2].replaceAll("[<>@]", "")))

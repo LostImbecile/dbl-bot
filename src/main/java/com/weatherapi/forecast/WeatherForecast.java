@@ -53,7 +53,7 @@ public class WeatherForecast {
 	}
 
 	private static String checkErrorCode(String errorMessage) {
-		String errorCode = errorMessage.replaceAll(".*response code:\\s*(\\d+).*", "$1");
+		String errorCode = errorMessage.replaceAll(".*response code:\\s*(\\d+)(?s).*", "$1");
 		switch (errorCode) {
 		case "401":
 			return "Error: Invalid Authentication.";
