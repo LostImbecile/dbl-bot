@@ -5,7 +5,9 @@ import java.util.List;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Messageable;
 
-public class RollTemplates extends OnlineDataManager {
+import com.github.egubot.storage.DataManagerSwitcher;
+
+public class RollTemplates extends DataManagerSwitcher {
 	private static String idKey = "Templates_Message_ID";
 	private static String resourcePath = "/RollTemplates.txt";
 
@@ -47,7 +49,7 @@ public class RollTemplates extends OnlineDataManager {
 			}
 
 			if (isNameExist) {
-				writeData(e);
+				writeData(e, false);
 			} else {
 				e.sendMessage("\"" + st + "\" is not a template <a:L:1155894861644435516>");
 			}
@@ -103,7 +105,7 @@ public class RollTemplates extends OnlineDataManager {
 
 			if (isTag) {
 				getData().add(newTemplate);
-				writeData(e);
+				writeData(e, false);
 			}
 		} catch (Exception e1) {
 			e.sendMessage("Correct format:" + "\nb-template create name filters");

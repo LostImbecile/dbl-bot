@@ -1,14 +1,5 @@
 package com.github.egubot.objects;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import org.javacord.api.entity.message.Messageable;
-
 public class Tags {
 	private static final String MAIN_TAG = "Main Tag";
 	private static final String RARITY = "Rarity";
@@ -82,37 +73,6 @@ public class Tags {
 
 	public void setCharacters(CharacterHash characters) {
 		this.characters = characters;
-	}
-
-	public static void sendTags(Messageable e, List<Tags> tags) {
-		try {
-			File tempFile = new File("Tags.txt");
-
-			try (FileWriter file = new FileWriter(tempFile)) {
-				String prevCategory = tags.get(0).category;
-				// Numbers likely won't exceed the thousand (less than 100 units are added yearly)
-				String formattedSize = String.format("%1$3d", tags.get(0).getCharacters().getOccupiedSize());
-				
-				file.write(prevCategory + ":\n");
-				file.write("[" + formattedSize + "]" + " - " + tags.get(0).name + "\n");
-				for (int i = 1; i < tags.size(); i++) {
-					formattedSize = String.format("%1$3d", tags.get(i).getCharacters().getOccupiedSize());
-					if (!prevCategory.equals(tags.get(i).category)) {
-						prevCategory = tags.get(i).category;
-						file.write("\n" + prevCategory + ":\n");
-					}
-					file.write("[" + formattedSize + "]" + " - " + tags.get(i).name + "\n");
-				}
-			}
-			InputStream stream = new FileInputStream("Tags.txt");
-			e.sendMessage(stream, "Tags.txt").join();
-
-			stream.close();
-
-			tempFile.delete();
-		} catch (IOException e1) {
-			e.sendMessage("Failed to send");
-		}
 	}
 
 	public String getCategory() {

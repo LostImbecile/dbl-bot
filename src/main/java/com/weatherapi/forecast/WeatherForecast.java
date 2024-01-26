@@ -6,10 +6,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-
-import com.github.egubot.features.MessageFormats;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.shared.JSONUtilities;
 import com.google.gson.Gson;
@@ -83,23 +79,6 @@ public class WeatherForecast {
 	public static void main(String[] args) {
 
 		getForecastData("", "paris").printWeather();
-	}
-
-	public void sendWeather(Message msg, String lowCaseTxt) {
-		String[] args = lowCaseTxt.replace("b-weather","").strip().split(" ");
-		String city = args[0];
-		String minimal = "";
-		if (args.length == 2) {
-			minimal = args[1];
-		}
-		Weather response = WeatherForecast.getForecastData("3", city);
-		if (response.isError) {
-			msg.getChannel().sendMessage(response.getErrorMessage());
-		} else {
-			boolean isMinimal = !minimal.equals("detailed");
-			EmbedBuilder[] embeds = MessageFormats.createWeatherEmbed(response, isMinimal);
-			msg.getChannel().sendMessage(embeds);
-		}
 	}
 
 }

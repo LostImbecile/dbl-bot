@@ -7,6 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.javacord.api.DiscordApi;
@@ -19,20 +22,19 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import com.azure.services.Translate;
 import com.github.egubot.build.AutoRespond;
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.build.OnlineDataManager;
 import com.github.egubot.build.RollTemplates;
 import com.github.egubot.features.LegendsRoll;
 import com.github.egubot.features.LegendsSearch;
 import com.github.egubot.features.MessageFormats;
-import com.github.egubot.features.TimedAction;
+import com.github.egubot.features.MessageTimers;
 import com.github.egubot.gpt2.DiscordAI;
+import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.objects.CharacterHash;
-import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.Tags;
+import com.github.egubot.shared.SendObjects;
+import com.github.egubot.storage.OnlineDataManager;
 import com.openai.chatgpt.ChatGPT;
-import com.weatherapi.forecast.WeatherForecast;
 
-public class MessageCreateEventHandler implements MessageCreateListener {
+public class MessageCreateEventHandler implements MessageCreateListener, Shutdownable {
 
 	private static final long HOUR = 1000 * 60 * 60L;
 	private String testServerID = KeyManager.getID("Test_Server_ID");
@@ -64,21 +66,24 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 	private RollTemplates templates;
 	private LegendsSearch legendsSearch;
 	private Translate translate = new Translate();
-	private WeatherForecast weather = new WeatherForecast();
 
 	private boolean isRollCommandActive;
 	private boolean testMode;
 
-	private TimedAction testTimer;
-	private TimedAction userTargetTimer;
-	private TimedAction deadChatTimer;
+	private MessageTimers testTimer;
+	private MessageTimers userTargetTimer;
+	private MessageTimers deadChatTimer;
 
 	private IncomingWebhook testWebhook;
 	private IncomingWebhook egubotWebhook;
 
 	private boolean dbLegendsMode;
 
-	public MessageCreateEventHandler(DiscordApi api, boolean testMode, boolean dbLegendsMode) throws Exception {
+	private final ExecutorService executorService;
+	private ShutdownManager shutdownManager;
+
+	public MessageCreateEventHandler(DiscordApi api, ShutdownManager shutdownManager, boolean testMode,
+			boolean dbLegendsMode) throws Exception {
 		/*
 		 * I store templates, responses and all that stuff online in case someone
 		 * else uses the bot on their end, so the data needs to be initialised
@@ -90,6 +95,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		this.isAnimated = !testMode;
 		this.dbLegendsMode = dbLegendsMode;
 		this.isRollCommandActive = dbLegendsMode;
+		this.executorService = Executors.newFixedThreadPool(10);
+		this.shutdownManager = shutdownManager;
 
 		initialiseDataStorage();
 		initialiseWebhooks();
@@ -97,6 +104,11 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 	@Override
 	public void onMessageCreate(MessageCreateEvent e) {
+		executorService.submit(() -> handleOnMessageCreate(e));
+
+	}
+
+	private void handleOnMessageCreate(MessageCreateEvent e) {
 		Message msg = e.getMessage();
 		// Regex replaces non-utf8 characters
 		String msgText = msg.getContent();
@@ -104,59 +116,67 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 		try {
 
-			if (checkChatGPTCommands(e, msg, msgText, lowCaseTxt)) {
+			if (checkChatGPTCommands(msg, msgText, lowCaseTxt)) {
 				return;
 			}
-			
+
 			// Ignore bots unless changed
 			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
 				return;
 			}
-			
-			if (lowCaseTxt.equals("terminate")) {
-				terminate(e, msg);
+
+			if (lowCaseTxt.contains("terminate")) {
+				terminate(msg);
 			}
-			
+
 			if (lowCaseTxt.equals("refresh")) {
-				refresh(e, msg);
+				refresh(msg);
 				return;
 			}
 			
+			if (isOwner(msg) && lowCaseTxt.matches("b-message edit(?s).*")) {
+				String st = lowCaseTxt.replace("b-message edit", "").strip();
+				String id = st.substring(0, st.indexOf(" "));
+				String edit = st.substring(st.indexOf(" "));
+				api.getMessageById(id, e.getChannel()).get().edit(edit);
+			}
+
+
 			// This is so I can run a test version and a non-test version at the same time
 			if (testMode && !msg.getServer().get().getIdAsString().equals(testServerID))
 				return;
 			if (!testMode && msg.getServer().get().getIdAsString().equals(testServerID))
 				return;
-			
+
 			String channelID = msg.getChannel().getIdAsString();
 			String authorID = msg.getAuthor().getIdAsString();
 
 			checkChannelTimer(channelID);
-			
+
 			// Replaces the sentence below with the contents of the attachment
 			// No real purpose besides avoiding character limits currently
 			if (lowCaseTxt.contains("[attachment text replace]") && !e.getMessage().getAttachments().isEmpty()) {
 				msgText = replaceAttachmentText(e, msgText);
 				lowCaseTxt = msgText.toLowerCase();
 			}
-			
-			if (checkDBLegendsCommands(e, msgText, lowCaseTxt, channelID)) {
-				return;
-			}
-			
-			if (checkTranslateCommands(msg, lowCaseTxt)) {
-				return;
-			}
-			
-			if (checkWeatherCommands(msg, lowCaseTxt)) {
-				return;
-			}
-			
-			if (tryAutoRespondCommands(e, msgText, lowCaseTxt)) {
+
+			if (checkDBLegendsCommands(msg, lowCaseTxt, channelID)) {
 				return;
 			}
 
-			if (testMode && (checkTimerTasks(e, msgText, lowCaseTxt))) {
+			if (checkTranslateCommands(msg, lowCaseTxt)) {
+				return;
+			}
+
+			if (checkWeatherCommands(msg, lowCaseTxt)) {
+				return;
+			}
+
+			if (tryAutoRespondCommands(msg, msgText, lowCaseTxt)) {
+				return;
+			}
+
+			if (testMode && (checkTimerTasks(msg, msgText, lowCaseTxt))) {
 				return;
 			}
 
@@ -179,6 +199,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				return;
 			}
 
+			checkCustomAI(msg, lowCaseTxt, channelID);
+
 			if (autoRespond.respond(msgText, e)) {
 				return;
 			}
@@ -190,8 +212,6 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 				}
 			}
-
-			checkCustomAI(e, msgText, lowCaseTxt, channelID);
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -206,6 +226,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		 * 
 		 */
 		autoRespond = new AutoRespond(api);
+		autoRespond.toggleManager(true);
+		shutdownManager.registerShutdownable(autoRespond);
 
 		if (dbLegendsMode) {
 			// Fetches data from the legends website and initialises
@@ -224,8 +246,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 							try {
 
 								new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
-										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), false)
-										.writeData(null);
+										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/characters"),
+										false).writeData(null);
 
 							} catch (Exception e) {
 
@@ -255,6 +277,8 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 			if (isRollCommandActive) {
 				templates = new RollTemplates(api, legendsWebsite);
+				templates.toggleManager(true);
+				shutdownManager.registerShutdownable(templates);
 
 				legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
 
@@ -293,7 +317,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				}
 
 				try {
-					testTimer = new TimedAction(5000, null, null);
+					testTimer = new MessageTimers(5000, null, null);
 
 				} catch (Exception e) {
 					testTimer = null;
@@ -311,7 +335,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 						length = 24;
 					}
 
-					deadChatTimer = new TimedAction((long) (length * HOUR), null,
+					deadChatTimer = new MessageTimers((long) (length * HOUR), null,
 							egubotWebhook.getChannel().get().getMessages(1).get().first().getCreationTimestamp());
 					deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
 				} catch (Exception e) {
@@ -347,7 +371,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 					// Starts a delay timer based on the last time it replied with
 					// a specific message
-					userTargetTimer = new TimedAction(6 * HOUR, null, lastMessageDate);
+					userTargetTimer = new MessageTimers(6 * HOUR, null, lastMessageDate);
 				} catch (Exception e) {
 					userTargetTimer = null;
 				}
@@ -358,30 +382,26 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 	private boolean checkWeatherCommands(Message msg, String lowCaseTxt) {
 		if (lowCaseTxt.matches("b-weather(?s).*")) {
-			Thread newThread = new Thread(() -> {
-			weather.sendWeather(msg, lowCaseTxt);
-			});
-			newThread.start();
+
+			SendObjects.sendWeather(msg, lowCaseTxt);
+
 			return true;
 		}
 		return false;
 	}
 
 	private boolean checkTranslateCommands(Message msg, String lowCaseTxt) {
-		Thread newThread;
 		if (isTranslateOn) {
-			newThread = new Thread(() -> {
 
-				try {
-					if (lowCaseTxt.length() < 140
-							&& !translate.detectLanguage(lowCaseTxt, true).matches("(?:en)|(?:Error.*)")) {
-						msg.getChannel().sendMessage(translate.post(lowCaseTxt, true));
-					}
-
-				} catch (IOException e1) {
+			try {
+				if (lowCaseTxt.length() < 140
+						&& !translate.detectLanguage(lowCaseTxt, true).matches("(?:en)|(?:Error.*)")) {
+					msg.getChannel().sendMessage(translate.post(lowCaseTxt, true));
 				}
-			});
-			newThread.start();
+
+			} catch (IOException e1) {
+			}
+
 		}
 		if (lowCaseTxt.matches("b-translate(?s).*")) {
 			if (lowCaseTxt.equals("b-translate set on")) {
@@ -405,60 +425,56 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				return true;
 			}
 			if (lowCaseTxt.contains("b-translate languages")) {
-				newThread = new Thread(() -> {
-					try {
-						msg.getChannel().sendMessage(
-								IOUtils.toInputStream(Translate.getTranslateLanguages(), StandardCharsets.UTF_8),
-								"languages.txt");
-					} catch (IOException e1) {
-						msg.getChannel().sendMessage("Failed to send :thumbs_down");
-					}
 
-				});
-				newThread.start();
-				return true;
-			}
-			newThread = new Thread(() -> {
 				try {
-					if (msg.getMessageReference().isPresent()) {
-						
-						Message ref = msg.getMessageReference().get().getMessage().get();
-						String content = ref.getContent();
-						if (content.equals("")) {
-							msg.getChannel().sendMessage(MessageFormats.createTranslateEmbed(ref, translate));
-						} else {
-							msg.getChannel().sendMessage(translate.post(content, true),
-									MessageFormats.createTranslateEmbed(ref, translate));
-						}
-					} else {
-						String content = lowCaseTxt.replace("b-translate", "").strip();
-						
-						if (content.equals("")) {
-							msg.getChannel().sendMessage(MessageFormats.createTranslateEmbed(msg, translate));
-						} else {
-							msg.getChannel().sendMessage(translate.post(content, true),
-									MessageFormats.createTranslateEmbed(msg, translate));
-							
-						}
-
-					}
+					msg.getChannel().sendMessage(
+							IOUtils.toInputStream(Translate.getTranslateLanguages(), StandardCharsets.UTF_8),
+							"languages.txt");
 				} catch (IOException e1) {
-					msg.getChannel().sendMessage("Failed to connect to endpoint :thumbs_down:");
+					msg.getChannel().sendMessage("Failed to send :thumbs_down");
 				}
 
-			});
-			newThread.start();
+				return true;
+			}
+
+			try {
+				if (msg.getMessageReference().isPresent()) {
+
+					Message ref = msg.getMessageReference().get().getMessage().get();
+					String content = ref.getContent();
+					if (content.equals("")) {
+						msg.getChannel().sendMessage(MessageFormats.createTranslateEmbed(ref, translate));
+					} else {
+						msg.getChannel().sendMessage(translate.post(content, true),
+								MessageFormats.createTranslateEmbed(ref, translate));
+					}
+				} else {
+					String content = lowCaseTxt.replace("b-translate", "").strip();
+
+					if (content.equals("")) {
+						msg.getChannel().sendMessage(MessageFormats.createTranslateEmbed(msg, translate));
+					} else {
+						msg.getChannel().sendMessage(translate.post(content, true),
+								MessageFormats.createTranslateEmbed(msg, translate));
+
+					}
+
+				}
+			} catch (IOException e1) {
+				msg.getChannel().sendMessage("Failed to connect to endpoint :thumbs_down:");
+			}
+
 			return true;
 		}
 		return false;
 	}
 
-	private boolean checkTimerTasks(MessageCreateEvent e, String msgText, String lowCaseTxt) {
+	private boolean checkTimerTasks(Message msg, String msgText, String lowCaseTxt) {
 		if (lowCaseTxt.equals("start task")) {
 			try {
-				testWebhook.updateAvatar(e.getMessageAuthor().getAvatar()).join();
-				testWebhook.updateChannel(e.getChannel().asServerTextChannel().get());
-				testTimer.setStartTime(null, e.getMessage().getCreationTimestamp());
+				testWebhook.updateAvatar(msg.getAuthor().getAvatar()).join();
+				testWebhook.updateChannel(msg.getChannel().asServerTextChannel().get());
+				testTimer.setStartTime(null, msg.getCreationTimestamp());
 				testTimer.sendScheduledMessage(testWebhook, msgText, true);
 			} catch (Exception e1) {
 			}
@@ -477,36 +493,35 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		return false;
 	}
 
-	private void refresh(MessageCreateEvent e, Message msg) throws Exception {
+	private void refresh(Message msg) throws Exception {
 		if (!msg.getAuthor().getIdAsString().equals(userTargetID)) {
-			e.getChannel().sendMessage("Refreshing...").join();
+			msg.getChannel().sendMessage("Refreshing...").join();
 			System.out.println("\nRefreshing MessageCreateEventHandler.");
 
 			initialiseDataStorage();
 			initialiseWebhooks();
 
-			e.getChannel().sendMessage("Refreshed :ok_hand:");
+			msg.getChannel().sendMessage("Refreshed :ok_hand:");
 		} else {
-			e.getChannel().sendMessage("no");
+			msg.getChannel().sendMessage("no");
 		}
 	}
 
-	private void terminate(MessageCreateEvent e, Message msg) {
+	private void terminate(Message msg) {
 		boolean isOwner = isOwner(msg);
-
-		if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
-			e.getChannel().sendMessage("Terminating...").join();
-			System.out.println("\nTerminate message invoked.");
-			new StatusManager(api, testMode).exit();
-
-			System.exit(0);
-		} else {
-			e.getChannel().sendMessage("no");
+		String st = msg.getContent().toLowerCase().replace("terminate", "").strip();
+		if (st.equals("") || st.equals(api.getYourself().getMentionTag())) {
+			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
+				msg.getChannel().sendMessage("Terminating...").join();
+				System.out.println("\nTerminate message invoked.");
+				shutdownManager.initiateShutdown(0);
+			} else {
+				msg.getChannel().sendMessage("<a:no:1195656310356717689>");
+			}
 		}
 	}
 
-	private void checkCustomAI(MessageCreateEvent e, String msgText, String lowCaseTxt, String channelID) {
-		Thread newThread;
+	private void checkCustomAI(Message msg, String lowCaseTxt, String channelID) {
 		// Personal AI, refer to its class for info
 		if (isCustomAIOn) {
 			if (lowCaseTxt.equals("ai terminate")) {
@@ -515,33 +530,28 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			}
 
 			if (testMode || channelID.equals(gpt2ChannelID) || lowCaseTxt.matches("ai(?s).*")) {
-				String st = msgText;
-				newThread = new Thread(new Runnable() {
-					public void run() {
-						try {
-							String aiUrl = "http://localhost:5000"; // Update with your AI server URL
-							try (DiscordAI discordAI = new DiscordAI(aiUrl)) {
-								String input = st.replaceAll("^[Aa][Ii]", "").strip();
 
-								String generatedText = discordAI.generateText(input);
+				try {
+					String aiUrl = "http://localhost:5000"; // Update with your AI server URL
+					try (DiscordAI discordAI = new DiscordAI(aiUrl)) {
+						String input = lowCaseTxt.replace("ai", "").strip();
 
-								if (!generatedText.matches("Error:(?s).*")) {
-									e.getChannel().sendMessage(generatedText);
-								} else if (!generatedText.contains("Connect to localhost:5000"))
-									System.err.println("AI Response: " + generatedText);
-							}
-						} catch (Exception e) {
-							// not worth bothering with
-						}
+						String generatedText = discordAI.generateText(input);
+
+						if (!generatedText.matches("Error:(?s).*")) {
+							msg.getChannel().sendMessage(generatedText);
+						} else if (!generatedText.contains("Connect to localhost:5000"))
+							System.err.println("AI Response: " + generatedText);
 					}
-				});
-				newThread.start();
+				} catch (Exception e1) {
+					// not worth bothering with
+				}
+
 			}
 		}
 	}
 
-	private boolean checkChatGPTCommands(MessageCreateEvent e, Message msg, String msgText, String lowCaseTxt) {
-		Thread newThread;
+	private boolean checkChatGPTCommands(Message msg, String msgText, String lowCaseTxt) {
 		if (lowCaseTxt.equals("chatgpt activate")) {
 			isChatGPTOn = true;
 			return true;
@@ -553,15 +563,15 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				return true;
 			}
 
-			if (lowCaseTxt.matches("gpt(?s).*") || e.getChannel().getIdAsString().equals(chatGPTActiveChannelID)) {
+			if (lowCaseTxt.matches("gpt(?s).*") || msg.getChannel().getIdAsString().equals(chatGPTActiveChannelID)) {
 				if (lowCaseTxt.equals("gpt clear")) {
-					e.getChannel().sendMessage("Conversation cleared :thumbsup:");
+					msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
 					chatgptConversation.clear();
 					return true;
 				}
 
 				if (lowCaseTxt.equals("gpt channel on")) {
-					chatGPTActiveChannelID = e.getChannel().getIdAsString();
+					chatGPTActiveChannelID = msg.getChannel().getIdAsString();
 					return true;
 				}
 
@@ -570,30 +580,25 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 					return true;
 				}
 
-				String st = msgText;
-				newThread = new Thread(new Runnable() {
-					public void run() {
-						try {
-							String[] response = ChatGPT.chatGPT(st, msg.getAuthor().getName(), chatgptConversation);
-							e.getChannel().sendMessage(response[0]);
-							// 4096 Token limit that includes sent messages
-							// Important to stay under it
-							try {
-								if (Integer.parseInt(response[1]) > 3300) {
+				try {
+					String[] response = ChatGPT.chatGPT(msgText, msg.getAuthor().getName(), chatgptConversation);
+					msg.getChannel().sendMessage(response[0]);
+					// 4096 Token limit that includes sent messages
+					// Important to stay under it
+					try {
+						if (Integer.parseInt(response[1]) > 3300) {
 
-									for (int i = 0; i < 5; i++) {
-										chatgptConversation.remove(0);
-									}
-								}
-							} catch (Exception e1) {
-
+							for (int i = 0; i < 5; i++) {
+								chatgptConversation.remove(0);
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
 						}
+					} catch (Exception e1) {
+
 					}
-				});
-				newThread.start();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+
 				return true;
 			}
 
@@ -605,27 +610,28 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			chatgptConversation.add(ChatGPT.reformatInput(msgText, msg.getAuthor().getName()));
 		}
 		return false;
+
 	}
 
-	private boolean tryAutoRespondCommands(MessageCreateEvent e, String msgText, String lowCaseTxt) {
+	private boolean tryAutoRespondCommands(Message msg, String msgText, String lowCaseTxt) {
 
-		if (lowCaseTxt.matches("b-(?s).*")) {
-			boolean isOwner = isOwner(e.getMessage());
+		if (lowCaseTxt.matches("b-response(?s).*")) {
+			boolean isOwner = isOwner(msg);
 			if (lowCaseTxt.contains("b-response create")) {
 				if (!lowCaseTxt.contains("sleep"))
-					autoRespond.writeResponse(msgText, e.getChannel(), isOwner);
+					autoRespond.writeResponse(msgText, msg, isOwner);
 				else
-					e.getChannel().sendMessage("nah");
+					msg.getChannel().sendMessage("nah");
 				return true;
 			}
 
 			if (lowCaseTxt.contains("b-response remove")) {
-				autoRespond.removeResponse(msgText, e.getChannel(), isOwner);
+				autoRespond.removeResponse(msgText, msg.getChannel(), isOwner);
 				return true;
 			}
 
 			if (lowCaseTxt.equals("b-response send")) {
-				autoRespond.sendData(e.getChannel());
+				autoRespond.sendData(msg.getChannel());
 				return true;
 			}
 
@@ -633,96 +639,61 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 				try {
 					int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
 					autoRespond.setLockedDataEndIndex(x);
-					autoRespond.writeData(e.getChannel());
+					autoRespond.writeData(msg.getChannel(), false);
 				} catch (Exception e1) {
 
 				}
-
 				return true;
 			}
+			if (lowCaseTxt.equals("b-response update")) {
+				try {
+					autoRespond.writeData(msg.getChannel());
+				} catch (Exception e1) {
+				}
+			}
+
 		}
 
 		return false;
 	}
 
-	private boolean checkDBLegendsCommands(MessageCreateEvent e, String msgText, String lowCaseTxt, String channelID) {
-		Thread newThread;
+	private boolean checkDBLegendsCommands(Message msg, String lowCaseTxt, String channelID) {
 		if (isRollCommandActive) {
 			if (lowCaseTxt.matches("b-(?s).*")) {
 
-				if (lowCaseTxt.contains("b-template create")) {
-					templates.writeTemplate(lowCaseTxt, e.getChannel());
+				if (checkTemplateCommands(msg, lowCaseTxt)) {
 					return true;
 				}
 
-				if (lowCaseTxt.contains("b-template remove")) {
-					templates.removeTemplate(lowCaseTxt, e.getChannel(), isOwner(e.getMessage()));
-					return true;
-				}
-
-				if (lowCaseTxt.contains("b-template send")) {
-					templates.sendData(e.getChannel());
-					return true;
-				}
-
-				if (lowCaseTxt.contains("b-template lock") && isOwner(e.getMessage())) {
-					try {
-						int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
-						templates.setLockedDataEndIndex(x);
-						templates.writeData(e.getChannel());
-					} catch (Exception e1) {
-					}
-
-					return true;
-				}
-
-				/*
-				 * Features that introduce a long delay with no consequence
-				 * should be run in a separate thread, or the bot won't be
-				 * able to do anything till they're done.
-				 */
 				try {
 					if (lowCaseTxt.contains("b-search")) {
-						String st = msgText;
-						newThread = new Thread(() ->
-
-						legendsSearch.search(st, api, e.getChannel())
-
-						);
-						newThread.start();
+						legendsSearch.search(lowCaseTxt, api, msg.getChannel());
 						return true;
 					}
 
 					if (lowCaseTxt.contains("b-roll")) {
 						String st = lowCaseTxt;
-						newThread = new Thread(() ->
-
-						legendsRoll.rollCharacters(st, e.getChannel(), isAnimated)
-
-						);
-						newThread.start();
+						legendsRoll.rollCharacters(st, msg.getChannel(), isAnimated);
 						return true;
 					}
 
 				} catch (Exception e1) {
-					e.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
+					msg.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
 					return true;
 				}
 
 				if (lowCaseTxt.equals("b-character send")) {
-					Characters.sendCharacters(e.getChannel(), legendsWebsite.getCharactersList());
+					SendObjects.sendCharacters(msg.getChannel(), legendsWebsite.getCharactersList());
 					return true;
 				}
 
-				// Prints empty IDs so I can manually change very large IDs to smaller ones
-				// Saves time or memory when working with a hash.
 				if (lowCaseTxt.equals("b-character printemptyids")) {
 					CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
 					return true;
 				}
 
 				if (lowCaseTxt.equals("b-tag send")) {
-					Tags.sendTags(e.getChannel(), legendsWebsite.getTags());
+					SendObjects.sendTags(msg.getChannel(), legendsWebsite.getTags());
 					return true;
 				}
 
@@ -730,39 +701,64 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 
 			if (channelID.equals(wheelChannelID)) {
 				if (lowCaseTxt.equals("skip")) {
-					e.getChannel().sendMessage("Disabled roll animation :ok_hand:");
+					msg.getChannel().sendMessage("Disabled roll animation :ok_hand:");
 					isAnimated = false;
 					return true;
 				}
 
 				if (lowCaseTxt.equals("unskip")) {
-					e.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
+					msg.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
 					isAnimated = true;
 					return true;
 				}
 
 				if (lowCaseTxt.equals("roll")) {
-					newThread = new Thread(() ->
-
-					legendsRoll.rollCharacters("b-roll6 t1", e.getChannel(), isAnimated)
-
-					);
-					newThread.start();
+					legendsRoll.rollCharacters("b-roll6 t1", msg.getChannel(), isAnimated);
 					return true;
 				}
 			}
 
 			if (lowCaseTxt.equals("disable roll animation")) {
-				e.getChannel().sendMessage("Disabled");
+				msg.getChannel().sendMessage("Disabled");
 				isAnimated = false;
 				return true;
 			}
 
 			if (lowCaseTxt.equals("enable roll animation")) {
-				e.getChannel().sendMessage("Enabled");
+				msg.getChannel().sendMessage("Enabled");
 				isAnimated = true;
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	private boolean checkTemplateCommands(Message msg, String lowCaseTxt) {
+		if (lowCaseTxt.contains("b-template create")) {
+			templates.writeTemplate(lowCaseTxt, msg.getChannel());
+			return true;
+		}
+
+		if (lowCaseTxt.contains("b-template remove")) {
+			templates.removeTemplate(lowCaseTxt, msg.getChannel(), isOwner(msg));
+			return true;
+		}
+
+		if (lowCaseTxt.contains("b-template send")) {
+			templates.sendData(msg.getChannel());
+			return true;
+		}
+
+		if (lowCaseTxt.contains("b-template lock") && isOwner(msg)) {
+			try {
+				int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
+				templates.setLockedDataEndIndex(x);
+				templates.writeData(msg.getChannel(), false);
+			} catch (Exception e1) {
+			}
+
+			return true;
 		}
 
 		return false;
@@ -790,6 +786,29 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		return isOwner;
 	}
 
+	public void shutdown() {
+		executorService.shutdown();
+		try {
+			if (deadChatTimer != null)
+				deadChatTimer.terminateTimer();
+			if (testTimer != null)
+				testTimer.terminateTimer();
+			if (userTargetTimer != null)
+				userTargetTimer.terminateTimer();
+		} catch (Exception e) {
+
+		}
+		try {
+			if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+				// If tasks don't finish within time, forceful shutdown
+				executorService.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			e.printStackTrace();
+		}
+	}
+
 	private String replaceAttachmentText(MessageCreateEvent e, String msgText) {
 		StringBuilder st2 = new StringBuilder();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -797,7 +816,7 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 			String st;
 
 			while ((st = br.readLine()) != null) {
-				st2.append(st);
+				st2.append(st + "\n");
 			}
 
 		} catch (IOException e2) {
@@ -805,6 +824,12 @@ public class MessageCreateEventHandler implements MessageCreateListener {
 		}
 
 		return msgText.replace("[attachment text replace]", st2);
+	}
+
+	@Override
+	public int getShutdownPriority() {
+		// TODO Auto-generated method stub
+		return 10;
 	}
 
 }

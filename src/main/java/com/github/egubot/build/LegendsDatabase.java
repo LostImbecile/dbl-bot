@@ -18,9 +18,9 @@ import com.github.egubot.objects.Tags;
  * this specific one.
  */
 public class LegendsDatabase {
-	private ArrayList<Characters> charactersList = new ArrayList<>(0);
-	private ArrayList<Tags> tags = new ArrayList<>(0);
-	private ArrayList<String> lines = new ArrayList<>(0);
+	private ArrayList<Characters> charactersList = new ArrayList<>(500);
+	private ArrayList<Tags> tags = new ArrayList<>(100);
+	private ArrayList<String> lines = new ArrayList<>(1000);
 
 	private boolean isDataFetchSuccessfull;
 

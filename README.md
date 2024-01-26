@@ -47,19 +47,20 @@ Translate:
 - b-translate set (on)/(off)
 - b-translate set (to)/(from-to)
 - b-translate languages
-- b-translate (text)/(reply to message)
+- b-translate (text)/(reply to message)/(embed)
 
 Weather:
 - b-weather (city) *detailed
 
 ChatGPT 3.5:
+- chatgpt activate
+- chatgpt deactivate
 - gpt (message)
-- gpt activate channel
-- gpt deactivate
+- gpt channel on/off
 
 Custom AI:
 - ai
-- ai terminate
+- ai terminate/activate
 
 Bot Control:
 - terminate

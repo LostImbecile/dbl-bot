@@ -10,6 +10,8 @@ import org.javacord.api.exception.MissingIntentException;
 import com.github.egubot.features.SendMessagesFromConsole;
 
 public class Main {
+	static ShutdownManager shutdown = new ShutdownManager();
+	static StatusManager status = new StatusManager();
 	/*
 	 * You can create your own bot and gets its token from here:
 	 * https://discord.com/developers/applications
@@ -25,21 +27,17 @@ public class Main {
 	 * https://javadoc.io/doc/org.javacord/javacord-api
 	 */
 	public static void main(String[] args) throws IOException {
-		boolean testMode = false;
-
-		DiscordApi api = null;
-		StatusManager status = new StatusManager();
+		shutdown.registerShutdownable(status);
+		DiscordApi api = null;	
 
 		// Current arguments:
 		// dbl_off , test , sendmessages
 		String arguments = String.join(" ", args).toLowerCase();
-
-		/*
-		 * Send "test" as an argument to activate test mode.
-		 */
-		if (arguments.contains("test")) {
+		boolean testMode = false;
+		int exitCode = 0;
+		
+		if (arguments.contains("test"))
 			testMode = true;
-		} 
 
 		// Important to have all keys, some will be created for
 		// you, and the rest could be ignored.
@@ -92,10 +90,7 @@ public class Main {
 					System.out.println("\nRestarting...\n");
 
 					Main.main(args);
-				} else {
-					status.disconnect();
 				}
-
 			} else {
 
 				System.out.println("You can invite the bot by using the following url:\n" + api.createBotInvite());
@@ -112,7 +107,10 @@ public class Main {
 				 * my personal use, best to write your own, but you can
 				 * use these as an example.
 				 */
-				api.addMessageCreateListener(new MessageCreateEventHandler(api, testMode, dbLegendsMode));
+				MessageCreateEventHandler messageHandler = new MessageCreateEventHandler(api, shutdown, testMode,
+						dbLegendsMode);
+				shutdown.registerShutdownable(messageHandler);
+				api.addMessageCreateListener(messageHandler);
 				api.addReconnectListener(new ReconnectEventHandler(testMode, api));
 				api.addResumeListener(new ResumeEventHandler(testMode, api));
 				api.addLostConnectionListener(new LostConnectionHandler());
@@ -141,33 +139,23 @@ public class Main {
 				} else {
 					SendMessagesFromConsole.start(api, input);
 				}
-
-				status.exit();
 			}
-
-			System.exit(0);
 
 		} catch (MissingIntentException e) {
 			System.err.println("\nMissing intent. Program will exit.");
-
-			status.exit();
 			e.printStackTrace();
-			System.exit(1);
-
+			exitCode = 1;
 		} catch (IOException e) {
 			System.err.println("\nFatal Error: Database Not Found. Program will exit.");
-
-			status.exit();
-			System.exit(1);
-
+			e.printStackTrace();
+			exitCode = 1;
 		} catch (Exception e) {
 			System.err.println("\nFatal uncaught error. Program will exit.");
-
-			status.exit();
 			e.printStackTrace();
-			System.exit(1);
+			exitCode = 1;
+		} finally {
+			shutdown.initiateShutdown(exitCode);
 		}
-
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.github.egubot.build;
+package com.github.egubot.storage;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -17,10 +17,11 @@ import java.util.regex.Pattern;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
+
+import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.main.KeyManager;
 
-public class OnlineDataManager {
-
+public class OnlineDataManager implements DataManager{
 	private DiscordApi api;
 
 	private String storageChannelID = KeyManager.getID("Storage_Channel_ID");
@@ -34,7 +35,7 @@ public class OnlineDataManager {
 	// This file is created to send the data to discord
 	private File tempDataFile = new File("TempData.txt");
 
-	private List<String> data = new ArrayList<>(0);
+	private List<String> data = new ArrayList<>(100);
 	private int lockedDataEndIndex = 0;
 	private String lastUpdateDate = null;
 	private String dataName;
@@ -121,10 +122,10 @@ public class OnlineDataManager {
 			try {
 				if (storageMessage != null) {
 					storageMessage.edit(newID).join();
-				}
-				else {
+				} else {
 					storageMsgID = newID;
-					storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
+					storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get())
+							.get();
 				}
 			} catch (Exception e) {
 				newID = oldID;
@@ -201,7 +202,7 @@ public class OnlineDataManager {
 			setInputStream(localInputStream);
 
 			readInput();
-		}
+		} 
 	}
 
 	private void readInput() throws IOException {
@@ -210,33 +211,33 @@ public class OnlineDataManager {
 
 			data.clear();
 			Pattern lockedDataPattern = Pattern.compile("lockeddataindex=(\\d+)$");
-		
+
 			while ((st = br.readLine()) != null) {
-				st = st.trim().replace("\n", "");
-				
+				st = st.strip().replace("\n", "");
+
+				if (st.equals(""))
+					break;
 				if (lockedDataPattern.matcher(st.toLowerCase()).matches()) {
 					try {
 						this.lockedDataEndIndex = Integer.parseInt(st.replaceAll("\\D", ""));
 					} catch (Exception e) {
 					}
-				} else if (!st.equals(""))
-					data.add(st);
+				}
+				
+				data.add(st);
 			}
 		}
 	}
 
-	public void writeData(Messageable e) throws Exception {
+	public void writeData(Messageable e) {
 		try {
 			try (FileWriter file = new FileWriter(tempDataFile)) {
 				for (int i = 0; i < data.size(); i++) {
-					file.write(data.get(i).replace("\n", "") + "\n");
+					file.write(data.get(i) + "\n");
 				}
-
-				file.write("LockedDataIndex=" + this.lockedDataEndIndex);
 			}
 
 			setInputStream(new BufferedInputStream(new FileInputStream(tempDataFile)));
-
 			uploadLocalData(false);
 
 			if (e != null) {
@@ -287,7 +288,7 @@ public class OnlineDataManager {
 		return data;
 	}
 
-	void setData(List<String> data) {
+	public void setData(List<String> data) {
 		this.data = data;
 	}
 

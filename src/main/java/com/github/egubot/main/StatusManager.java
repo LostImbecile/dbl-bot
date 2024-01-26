@@ -5,7 +5,9 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.message.Message;
 
-public class StatusManager {
+import com.github.egubot.interfaces.Shutdownable;
+
+public class StatusManager implements Shutdownable {
 
 	private String statusChannelID = KeyManager.getID("Status_Channel_ID");
 	private String statusMessageID = KeyManager.getID("Status_Message_ID");
@@ -222,5 +224,16 @@ public class StatusManager {
 		}
 
 		isStatusMsgSet = true;
+	}
+
+	@Override
+	public void shutdown() {
+		exit();
+	}
+
+	@Override
+	public int getShutdownPriority() {
+		// TODO Auto-generated method stub
+		return 50;
 	}
 }

@@ -1,14 +1,6 @@
 package com.github.egubot.objects;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import org.javacord.api.entity.message.Messageable;
 
 public class Characters {
 	private String characterName;
@@ -123,28 +115,5 @@ public class Characters {
 
 	public boolean isZenkai() {
 		return isZenkai;
-	}
-
-	public static void sendCharacters(Messageable e, List<Characters> characters) {
-		try {
-			File tempFile = new File("Characters.txt");
-
-			try (FileWriter file = new FileWriter(tempFile)) {
-				String gameID;
-				String name;
-				for (int i = 0; i < characters.size(); i++) {
-					gameID = "[" + characters.get(i).getGameID();
-					name = characters.get(i).getCharacterName();
-					file.write(String.format("%-12s] - %s%n", gameID, name));
-				}
-			}
-			InputStream stream = new FileInputStream("Characters.txt");
-			e.sendMessage(stream, "Characters.txt").join();
-
-			stream.close();
-			tempFile.delete();
-		} catch (IOException e1) {
-			e.sendMessage("Failed to send");
-		}
 	}
 }

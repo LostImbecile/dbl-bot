@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.github.egubot.shared.ConvertObjects;
+
 public class CharacterHash extends HashSet<Characters> {
 
 	private static final long serialVersionUID = 1659741544544868218L;
@@ -145,7 +147,7 @@ public class CharacterHash extends HashSet<Characters> {
 			this.value = value;
 		}
 	}
-
+	
 	public ArrayList<Characters> toArrayList() {
 		ArrayList<Characters> list = new ArrayList<>(0);
 
@@ -156,16 +158,6 @@ public class CharacterHash extends HashSet<Characters> {
 			}
 		}
 		return list;
-	}
-
-	public static Set<Characters> toCharacterHash(List<Characters> arr) {
-		CharacterHash hash = new CharacterHash();
-
-		for (int i = 0; i < arr.size(); i++) {
-			if(hash.put(arr.get(i)))
-				System.err.println("\nSite ID clash for: " + arr.get(i).getSiteID());
-		}
-		return hash;
 	}
 
 	@Override
@@ -183,7 +175,7 @@ public class CharacterHash extends HashSet<Characters> {
 		
 	}
 	public static void printEmptyIDs(List<Characters> list) {
-		CharacterHash characters = (CharacterHash) CharacterHash.toCharacterHash(list);
+		CharacterHash characters = ConvertObjects.arraytoCharacterHash(list);
 		
 		for(int i=0;i<characters.size();i++) {
 			if(characters.get(i) == null) {

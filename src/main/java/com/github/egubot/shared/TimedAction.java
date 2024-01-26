@@ -1,11 +1,9 @@
-package com.github.egubot.features;
+package com.github.egubot.shared;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import org.javacord.api.entity.message.Messageable;
 
 /*
  * This class has bot specific implementations, while
@@ -140,80 +138,52 @@ public class TimedAction {
 		startSingleTimer(updateStatusTask);
 	}
 
-	public void sendDelayedMessage(Messageable e, String text, boolean isOneInstanceOnly) {
-		// Sends a message after a set amount of time
-		if (isOneInstanceOnly && isTimerOn || e == null) {
+	public void startOneInstanceSingleTimer(TimerTask task, int maxRetries) {
+		if (isTimerOn)
 			return;
-		}
 
-		TimerTask sendTask = new TimerTask() {
-
+		TimerTask timertask = new TimerTask() {
+			int retryCount = 0;
 			@Override
 			public void run() {
-				e.sendMessage(text);
-				cancelSingleTimer();
+				try {
+					task.run();
+					isTimerOn = false;
+				} catch (Exception e) {
+					// Set to false so the task can run again
+					isTimerOn = false;
+					if (retryCount < maxRetries) {
+                        retryCount++;
+                        System.out.println("Retrying... (Attempt " + retryCount + ")");
+                        startOneInstanceSingleTimer(task, maxRetries);
+                    } else {
+                        System.out.println("Max retries reached. Task failed.");
+                    }
+				}
+				
+
 			}
 		};
-
-		startSingleTimer(sendTask);
+		startSingleTimer(timertask);
 	}
 
-	public void sendScheduledMessage(Messageable e, String text, boolean isOneInstanceOnly) {
-		// Schedules a message to be sent every set amount of time
-		// Date is adjusted once only in this.
-		if (isOneInstanceOnly && isRecurringTimerOn || e == null) {
+	public void startOneInstanceRecurringimer(TimerTask task, boolean adjustDate, boolean tillNow) {
+		if (isRecurringTimerOn)
 			return;
-		}
+		
 
-		// System.out.println("Message is getting scheduled");
-		TimerTask sendTask = new TimerTask() {
-
+		TimerTask timertask = new TimerTask() {
 			@Override
 			public void run() {
-				e.sendMessage(text);
+				try {
+					task.run();
+				} catch (Exception e) {
+				}
+				isRecurringTimerOn = false;
+
 			}
 		};
-
-		startRecurringTimer(sendTask, true, false);
-	}
-
-	public void sendDelayedRateLimitedMessage(Messageable e, String text, boolean isOneInstanceOnly) {
-		// Sends a message after a set amount of time
-		// or a date, where date is not adjusted.
-		if (isOneInstanceOnly && isTimerOn || e == null) {
-			return;
-		}
-
-		startDelayTimer();
-		TimerTask delayedStartTask = new TimerTask() {
-
-			@Override
-			public void run() {
-				e.sendMessage(text).join();
-				cancelRecurringTimer();
-			}
-		};
-
-		startRecurringTimer(delayedStartTask, true, false);
-	}
-
-	public void sendRateLimitedMessage(Messageable e, String text, boolean isOneInstanceOnly) {
-		// Sends a message immediately.
-		// A new message can't be sent again for a set amount of time.
-		if (isOneInstanceOnly && isTimerOn || e == null) {
-			return;
-		}
-
-		TimerTask sendTask = new TimerTask() {
-
-			@Override
-			public void run() {
-				e.sendMessage(text);
-			}
-		};
-
-		startDelayTimer();
-		sendTask.run();
+		startRecurringTimer(timertask, adjustDate, tillNow);
 	}
 
 	public Date getStartTime() {
@@ -305,5 +275,13 @@ public class TimedAction {
 
 	public boolean isRecurringTimerOn() {
 		return isRecurringTimerOn;
+	}
+
+	public void setTimerOn(boolean isTimerOn) {
+		this.isTimerOn = isTimerOn;
+	}
+
+	public void setRecurringTimerOn(boolean isRecurringTimerOn) {
+		this.isRecurringTimerOn = isRecurringTimerOn;
 	}
 }
