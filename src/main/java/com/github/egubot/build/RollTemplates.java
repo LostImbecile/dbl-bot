@@ -35,7 +35,7 @@ public class RollTemplates extends DataManagerSwitcher {
 
 			}
 
-			if (st.equals(""))
+			if (st.isBlank())
 				throw new Exception();
 
 			boolean isNameExist = false;

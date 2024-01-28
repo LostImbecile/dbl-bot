@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Properties>
+		<Property name="filename">./logs</Property>
+	</Properties>
+	<Appenders>
+
+		<Console name="ConsoleBare" target="SYSTEM_OUT">
+			<PatternLayout pattern="%msg%n" />
+		</Console>
+
+		<Console name="ConsoleWithInfo" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{HH:mm:ss} [%t] %-5level %logger{3} - %msg%n" />
+		</Console>
+
+		<RollingFile name="LogFile"
+			fileName="${filename}/errorLog.log"
+			filePattern="${filename}/errorLog-%d{yyyy-MM-dd-HH}-%i.log">
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss} [%t] %-5level %logger{3} - %msg%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<OnStartupTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="50 KB" />
+			</Policies>
+		</RollingFile>
+
+		<RollingFile name="JavacordLogFile"
+			fileName="${filename}/javacordLog.log"
+			filePattern="${filename}/javacordLog-%d{yyyy-MM-dd-HH}-%i.log">
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss} [%t] %-5level %logger{3} - %msg%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<OnStartupTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="1 MB" />
+			</Policies>
+		</RollingFile>
+
+	</Appenders>
+	<Loggers>
+		<Root level="info">
+		</Root>
+		<Logger name="com.github" level="fatal" additivity="false">
+			<AppenderRef ref="LogFile" />
+			<AppenderRef ref="ConsoleWithInfo" />
+		</Logger>
+		<Logger name="com.github" level="error" additivity="false">
+			<AppenderRef ref="LogFile" level="error"/>
+		</Logger>
+		<Logger name="com" level="warn" additivity="false">
+			<AppenderRef ref="ConsoleWithInfo" level="warn"/>
+		</Logger>
+		<Logger name="com.github.egubot.main.ShutdownManager"
+			level="info" additivity="false">
+			<AppenderRef ref="ConsoleWithInfo"/>
+		</Logger>
+		<Logger name="org.javacord" level="info" additivity="false">
+			<AppenderRef ref="JavacordLogFile" />
+		</Logger>
+	</Loggers>
+</Configuration>

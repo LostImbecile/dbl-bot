@@ -3,6 +3,8 @@ package com.github.egubot.storage;
 import java.util.List;
 import java.util.TimerTask;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Messageable;
 
@@ -11,6 +13,7 @@ import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.shared.TimedAction;
 
 public class DataManagerSwitcher implements DataManager, Shutdownable {
+	protected static final Logger logger = LogManager.getLogger(DataManagerSwitcher.class.getName());
 	private static final int MINUTE = 60 * 1000;
 	private boolean isOnlineCapable = false;
 	private boolean isOnline = false;
@@ -39,17 +42,17 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 	}
 
 	public void toggleManager(boolean isOnline) {
-		if(isOnline && !isOnlineCapable)
-			System.out.println("Not enough info to use online storage.");
-		
+		if (isOnline && !isOnlineCapable)
+			logger.warn("Not enough info to use online storage.");
+
 		if (isOnline && isOnlineCapable) {
 			try {
 				manager = new OnlineDataManager(api, storageKey, resourcePath, dataName, verbose);
 				this.isOnline = true;
 			} catch (Exception e) {
 				this.isOnline = false;
-				e.printStackTrace();
-				System.out.println("Switching to local storage...");
+				logger.error(e);
+				logger.warn("Error occurred; switching to local storage...");
 				manager = new LocalDataManager();
 			}
 		} else {
@@ -73,15 +76,16 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 			e.sendMessage("Updated <:drink:1184466286944735272>");
 		}
 	}
+
 	@Override
-	public void writeData(Messageable e) {
+	public synchronized void writeData(Messageable e) {
+		// Make sure any running timer stops
+		if (uploadTimer != null && uploadTimer.isTimerOn())
+			uploadTimer.cancelSingleTimer();
+		
 		updateDataFromObjects();
 		manager.writeData(e);
 		updateObjects();
-		
-		// Make sure any running timer stops
-		if(uploadTimer != null && uploadTimer.isTimerOn())
-			uploadTimer.cancelSingleTimer();
 	}
 
 	public void sendData(Messageable e) {
@@ -116,12 +120,10 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 	@Override
 	public void shutdown() {
 		if (uploadTimer != null) {
-			uploadTimer.terminateTimer();
 			if (uploadTimer.isTimerOn()) {
-				uploadTimer = null;
 				writeData(null);
 			}
-
+			uploadTimer.terminateTimer();
 		}
 	}
 

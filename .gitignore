@@ -1,2 +1,6 @@
 /target/
-/src/main/resources/
+/src/main/resources/IDs.txt
+/src/main/resources/Tokens.txt
+/src/main/resources/MessageResponses.txt
+/src/main/resources/RollTemplates.txt
+/logs

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
@@ -21,7 +23,8 @@ import org.javacord.api.entity.message.Messageable;
 import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.main.KeyManager;
 
-public class OnlineDataManager implements DataManager{
+public class OnlineDataManager implements DataManager {
+	private static final Logger logger = LogManager.getLogger(DataManager.class.getName());
 	private DiscordApi api;
 
 	private String storageChannelID = KeyManager.getID("Storage_Channel_ID");
@@ -69,6 +72,7 @@ public class OnlineDataManager implements DataManager{
 		} catch (Exception e) {
 			System.err
 					.println("\nWarning: no local " + dataName + " data. Expected " + resourcePath + " to be present.");
+			logger.warn("No local data.", e);
 			localInputStream = null;
 		}
 	}
@@ -88,7 +92,7 @@ public class OnlineDataManager implements DataManager{
 	private void checkStorageMessage(boolean verbose) throws Exception {
 		if (!storageChannelID.equals("-1")) {
 			uploadLocalData(true);
-			KeyManager.updateKeys(storageKey, storageMsgID, KeyManager.idsFileName);
+			KeyManager.updateKeys(storageKey, storageMsgID, KeyManager.IDS_FILE_NAME);
 			storageMsgID = KeyManager.getID(storageKey);
 			try {
 				storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
@@ -96,7 +100,8 @@ public class OnlineDataManager implements DataManager{
 					System.out.println("\nNew " + dataName + " message was created.");
 			} catch (Exception e) {
 				if (verbose)
-					System.err.println("\nFailed to create new " + dataName + " message.");
+					logger.warn("\nFailed to create new {} message.", dataName);
+				logger.error("\nFailed to create new {} message.", dataName, e);
 			}
 		}
 	}
@@ -143,6 +148,7 @@ public class OnlineDataManager implements DataManager{
 			}
 
 		} catch (Exception e) {
+			logger.error("Uploading data failed.", e);
 			checkStorageChannel();
 		}
 	}
@@ -152,12 +158,12 @@ public class OnlineDataManager implements DataManager{
 			if (api.getTextChannelById(storageChannelID).isPresent()) {
 				throw new IOException();
 			} else {
-				System.err.println("\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
+				System.out.println("\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
 				@SuppressWarnings("resource")
 				Scanner in = new Scanner(System.in);
 
 				storageChannelID = in.nextLine();
-				KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);
+				KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.IDS_FILE_NAME);
 				storageChannelID = KeyManager.getID("Storage_Channel_ID");
 			}
 		}
@@ -196,13 +202,13 @@ public class OnlineDataManager implements DataManager{
 
 		} catch (IOException | NullPointerException e) {
 			if (verbose) {
-				System.err.println("\n" + dataName + " data failed to load, internal backup used.");
+				System.out.println("\n" + dataName + " data failed to load, internal backup used.");
 			}
-
+			logger.error("Reading online data failed.", e);
 			setInputStream(localInputStream);
 
 			readInput();
-		} 
+		}
 	}
 
 	private void readInput() throws IOException {
@@ -215,7 +221,7 @@ public class OnlineDataManager implements DataManager{
 			while ((st = br.readLine()) != null) {
 				st = st.strip().replace("\n", "");
 
-				if (st.equals(""))
+				if (st.isBlank())
 					break;
 				if (lockedDataPattern.matcher(st.toLowerCase()).matches()) {
 					try {
@@ -223,7 +229,7 @@ public class OnlineDataManager implements DataManager{
 					} catch (Exception e) {
 					}
 				}
-				
+
 				data.add(st);
 			}
 		}
@@ -250,7 +256,7 @@ public class OnlineDataManager implements DataManager{
 					System.out.println("Couldn't update");
 			}
 		} catch (Exception e1) {
-			System.err.println("Failed to write and upload data.");
+			logger.error("Failed to write and upload data.", e1);
 		}
 	}
 
@@ -264,7 +270,8 @@ public class OnlineDataManager implements DataManager{
 			textChannel.sendMessage(new BufferedInputStream(newMessage.getAttachments().get(0).asInputStream()),
 					dataName.replace(" ", "_") + ".txt").join();
 		} catch (Exception e) {
-			System.err.println("No");
+			textChannel.sendMessage("Failed");
+			logger.error("Failed to send data online.", e);
 		}
 	}
 

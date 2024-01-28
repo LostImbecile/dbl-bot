@@ -16,10 +16,10 @@ public class WeatherForecast {
 	private static String url = "http://api.weatherapi.com/v1/forecast.json?key=" + apiKey;
 
 	public static String getForecastJSON(String days, String city) {
-		if (days == null || days.equals("")) {
+		if (days == null || days.isBlank()) {
 			days = "3";
 		}
-		if (city == null || city.equals("")) {
+		if (city == null || city.isBlank()) {
 			city = "London";
 		}
 		days = days.strip();

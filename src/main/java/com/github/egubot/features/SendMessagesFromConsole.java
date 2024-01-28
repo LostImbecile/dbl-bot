@@ -23,7 +23,7 @@ public class SendMessagesFromConsole {
 		String testChannelID = KeyManager.getID("Test_Channel_ID");
 		if (!api.getTextChannelById(testChannelID).isPresent()) {
 			System.out.println("No default starting channel was set, enter a channel ID below:");
-			KeyManager.updateKeys("Test_Channel_ID", in.nextLine(), KeyManager.idsFileName);
+			KeyManager.updateKeys("Test_Channel_ID", in.nextLine(), KeyManager.IDS_FILE_NAME);
 			testChannelID = KeyManager.getID("Test_Channel_ID");
 		}
 
@@ -40,7 +40,7 @@ public class SendMessagesFromConsole {
 
 				message = in.nextLine();
 
-				if (message.equals("") || message.equals("\n") || message.equals("exit"))
+				if (message.isBlank() || message.equals("\n") || message.equals("exit"))
 					break;
 
 				if (message.length() >= 17 && message.matches("[\\d+]+")) {

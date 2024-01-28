@@ -21,7 +21,7 @@ public class Run {
 					break;
 				}
 			}
-			if (title.equals("")) {
+			if (title.isBlank()) {
 				title = "Discord Bot";
 			}
 			// If the bot isn't already in a console it runs the main method

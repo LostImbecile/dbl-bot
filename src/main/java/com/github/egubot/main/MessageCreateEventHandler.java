@@ -1,8 +1,6 @@
 package com.github.egubot.main;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -10,8 +8,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.message.Message;
@@ -30,13 +29,17 @@ import com.github.egubot.features.MessageTimers;
 import com.github.egubot.gpt2.DiscordAI;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.objects.CharacterHash;
+import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.SendObjects;
+import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.OnlineDataManager;
+import com.github.egubot.webautomation.AIResponseGenerator;
 import com.openai.chatgpt.ChatGPT;
 
 public class MessageCreateEventHandler implements MessageCreateListener, Shutdownable {
-
+	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
 	private static final long HOUR = 1000 * 60 * 60L;
+
 	private String testServerID = KeyManager.getID("Test_Server_ID");
 	private String userTargetID = KeyManager.getID("User_Target_ID");
 	private String mainServerID = KeyManager.getID("Main_Server_ID");
@@ -45,7 +48,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private String gpt2ChannelID = KeyManager.getID("GPT2_Channel_ID");
 	private String timerLengthMessage = KeyManager.getID("Dead_Chat_Timer_Msg");
 	private String wheelChannelID = KeyManager.getID("Wheel_Channel_ID");
-	private String backupWebsiteFlag = KeyManager.getID("Backup_Website_Flag");
+	private boolean backupWebsiteFlag = ConfigManager.getBooleanProperty("Backup_Website_Flag");
 	private String sirioMsgContent;
 
 	private boolean isAnimated = true;
@@ -99,7 +102,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		this.shutdownManager = shutdownManager;
 
 		initialiseDataStorage();
-		initialiseWebhooks();
+		executorService.submit(this::initialiseWebhooks);
 	}
 
 	@Override
@@ -133,7 +136,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				refresh(msg);
 				return;
 			}
-			
+
 			if (isOwner(msg) && lowCaseTxt.matches("b-message edit(?s).*")) {
 				String st = lowCaseTxt.replace("b-message edit", "").strip();
 				String id = st.substring(0, st.indexOf(" "));
@@ -141,11 +144,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				api.getMessageById(id, e.getChannel()).get().edit(edit);
 			}
 
-
 			// This is so I can run a test version and a non-test version at the same time
-			if (testMode && !msg.getServer().get().getIdAsString().equals(testServerID))
+			if (testMode && !isTestServer(msg))
 				return;
-			if (!testMode && msg.getServer().get().getIdAsString().equals(testServerID))
+			if (!testMode && isTestServer(msg))
 				return;
 
 			String channelID = msg.getChannel().getIdAsString();
@@ -155,8 +157,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			// Replaces the sentence below with the contents of the attachment
 			// No real purpose besides avoiding character limits currently
-			if (lowCaseTxt.contains("[attachment text replace]") && !e.getMessage().getAttachments().isEmpty()) {
-				msgText = replaceAttachmentText(e, msgText);
+			if (lowCaseTxt.contains("[attachment text replace]") && !msg.getAttachments().isEmpty()) {
+				msgText = replaceAttachmentText(msg, msgText);
 				lowCaseTxt = msgText.toLowerCase();
 			}
 
@@ -172,7 +174,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				return;
 			}
 
-			if (tryAutoRespondCommands(msg, msgText, lowCaseTxt)) {
+			if (checkAutoRespondCommands(msg, msgText)) {
+				return;
+			}
+
+			if (checkWebDriverCommands(msg, lowCaseTxt)) {
 				return;
 			}
 
@@ -192,6 +198,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			if (lowCaseTxt.matches("parrot(?s).*")) {
 				e.getChannel().sendMessage(msgText.replace("parrot", ""));
+				return;
 			}
 
 			if (lowCaseTxt.equals("ai activate")) {
@@ -201,11 +208,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			checkCustomAI(msg, lowCaseTxt, channelID);
 
-			if (autoRespond.respond(msgText, e)) {
+			if (autoRespond.respond(msgText, msg)) {
 				return;
 			}
 
-			if (authorID.equals(userTargetID)) {
+			if (userTargetTimer != null && authorID.equals(userTargetID)) {
 				try {
 					userTargetTimer.sendDelayedRateLimitedMessage(e.getChannel(), sirioMsgContent, true);
 				} catch (Exception e1) {
@@ -214,8 +221,15 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			}
 
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			logger.error("Main handler encountered an error.", e1);
+			Thread.currentThread().interrupt();
 		}
+	}
+
+	private boolean isTestServer(Message msg) {
+		if (msg.isServerMessage())
+			return msg.getServer().get().getIdAsString().equals(testServerID);
+		return false;
 	}
 
 	private void initialiseDataStorage() throws Exception {
@@ -238,7 +252,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 				if (legendsWebsite.isDataFetchSuccessfull()) {
 
-					if (backupWebsiteFlag.equals("true")) {
+					if (backupWebsiteFlag) {
 						System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
 
 						// Upload current website HTML as backup
@@ -259,19 +273,20 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 					}
 
 				} else {
-					System.err.println("Character database missing information. Trying Backup...");
+					logger.warn("Character database missing information. Trying Backup...");
 
 					OnlineDataManager backup = new OnlineDataManager(api, "Website_Backup_Msg_ID", "Website Backup",
 							LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), true);
 
 					legendsWebsite = new LegendsDatabase(backup.getData());
 					if (!legendsWebsite.isDataFetchSuccessfull()) {
-						System.err.println("Warning: Backup is also missing information.");
+						logger.warn("Warning: Backup is also missing information.");
 					}
 				}
 
 			} catch (Exception e) {
-				System.err.println("\nFailed to build character database. Relevant commands will be inactive.");
+				logger.warn("\nFailed to build character database. Relevant commands will be inactive.");
+				logger.error("\\nFailed to build character database.", e);
 				isRollCommandActive = false;
 			}
 
@@ -292,92 +307,104 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		 * Note, doesn't check for zones, will simply not work as expected
 		 * if discord goes out of sync with your timezone.
 		 * (only in the case of timers that depend on message creation timestamps)
-		 * 
 		 */
-		Thread t = new Thread(new Runnable() {
+		long testWebhookID;
+		long egubotWebhookID;
+		try {
+			egubotWebhookID = Long.parseLong(KeyManager.getID("Egubot_Webhook_ID"));
+			egubotWebhook = api.getWebhookById(egubotWebhookID).get().asIncomingWebhook().get();
+			egubotWebhook.updateAvatar(api.getUserById(userTargetID).get().getAvatar());
+			egubotWebhook.updateName(
+					api.getUserById(userTargetID).get().getDisplayName(api.getServerById(mainServerID).get()));
+		} catch (Exception e) {
+			egubotWebhook = null;
+		}
+		try {
+			testWebhookID = Long.parseLong(KeyManager.getID("Test_Webhook_ID"));
+			testWebhook = api.getWebhookById(testWebhookID).get().asIncomingWebhook().get();
+		} catch (Exception e) {
+			testWebhook = null;
+		}
 
-			@Override
-			public void run() {
-				long testWebhookID;
-				long egubotWebhookID;
-				try {
-					egubotWebhookID = Long.parseLong(KeyManager.getID("Egubot_Webhook_ID"));
-					egubotWebhook = api.getWebhookById(egubotWebhookID).get().asIncomingWebhook().get();
-					egubotWebhook.updateAvatar(api.getUserById(userTargetID).get().getAvatar());
-					egubotWebhook.updateName(
-							api.getUserById(userTargetID).get().getDisplayName(api.getServerById(mainServerID).get()));
-				} catch (Exception e) {
-					egubotWebhook = null;
-				}
-				try {
-					testWebhookID = Long.parseLong(KeyManager.getID("Test_Webhook_ID"));
-					testWebhook = api.getWebhookById(testWebhookID).get().asIncomingWebhook().get();
-				} catch (Exception e) {
-					testWebhook = null;
-				}
+		try {
+			testTimer = new MessageTimers(5000, null, null);
 
-				try {
-					testTimer = new MessageTimers(5000, null, null);
+		} catch (Exception e) {
+			testTimer = null;
+		}
 
-				} catch (Exception e) {
-					testTimer = null;
-				}
+		// Schedules the message based on the last message sent in
+		// the webhook's chat.
+		try {
+			double length;
+			try {
+				length = Double.parseDouble(
+						api.getMessageById(timerLengthMessage, api.getTextChannelById(userTargetChannelID).get()).join()
+								.getContent());
+			} catch (Exception e) {
+				length = 24;
+			}
 
-				// Schedules the message based on the last message sent in
-				// the webhook's chat.
-				try {
-					double length;
-					try {
-						length = Double.parseDouble(api
-								.getMessageById(timerLengthMessage, api.getTextChannelById(userTargetChannelID).get())
-								.join().getContent());
-					} catch (Exception e) {
-						length = 24;
-					}
+			deadChatTimer = new MessageTimers((long) (length * HOUR), null,
+					egubotWebhook.getChannel().get().getMessages(1).get().first().getCreationTimestamp());
+			deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
+		} catch (Exception e) {
+			deadChatTimer = null;
+		}
 
-					deadChatTimer = new MessageTimers((long) (length * HOUR), null,
-							egubotWebhook.getChannel().get().getMessages(1).get().first().getCreationTimestamp());
-					deadChatTimer.sendScheduledMessage(egubotWebhook, "Dead chat", true);
-				} catch (Exception e) {
-					deadChatTimer = null;
-				}
+		// Checks the first 50 messages in all channels in the server
+		// to see the last time it replied with a specific message
+		try {
+			sirioMsgContent = api.getMessageById(userTargetMsgID, api.getTextChannelById(userTargetChannelID).get())
+					.get().getContent();
 
-				// Checks the first 50 messages in all channels in the server
-				// to see the last time it replied with a specific message
-				try {
-					sirioMsgContent = api
-							.getMessageById(userTargetMsgID, api.getTextChannelById(userTargetChannelID).get()).get()
-							.getContent();
-
-					List<ServerChannel> channels = api.getServerById(mainServerID).get().getChannels();
-					Object[] messages;
-					Message temp;
-					Instant lastMessageDate = Instant.now().minusMillis(6 * HOUR);
-					for (int i = 0; i < channels.size(); i++) {
-						if (channels.get(i).asTextChannel().isPresent()) {
-							messages = channels.get(i).asTextChannel().get().getMessages(50).get().toArray();
-							for (int j = 0; j < messages.length; j++) {
-								temp = (Message) messages[j];
-								if (temp != null && temp.getAuthor().isYourself()
-										&& temp.getContent().equals(sirioMsgContent)) {
-									if (temp.getCreationTimestamp().isAfter(lastMessageDate)) {
-										lastMessageDate = temp.getCreationTimestamp();
-										// System.out.println(lastMessageDate);
-									}
-								}
+			List<ServerChannel> channels = api.getServerById(mainServerID).get().getChannels();
+			Object[] messages;
+			Message temp;
+			Instant lastMessageDate = Instant.now().minusMillis(6 * HOUR);
+			for (int i = 0; i < channels.size(); i++) {
+				if (channels.get(i).asTextChannel().isPresent()) {
+					messages = channels.get(i).asTextChannel().get().getMessages(50).get().toArray();
+					for (int j = 0; j < messages.length; j++) {
+						temp = (Message) messages[j];
+						if (temp != null && temp.getAuthor().isYourself()
+								&& temp.getContent().equals(sirioMsgContent)) {
+							if (temp.getCreationTimestamp().isAfter(lastMessageDate)) {
+								lastMessageDate = temp.getCreationTimestamp();
+								// System.out.println(lastMessageDate);
 							}
 						}
 					}
-
-					// Starts a delay timer based on the last time it replied with
-					// a specific message
-					userTargetTimer = new MessageTimers(6 * HOUR, null, lastMessageDate);
-				} catch (Exception e) {
-					userTargetTimer = null;
 				}
 			}
-		});
-		t.start();
+
+			// Starts a delay timer based on the last time it replied with
+			// a specific message
+			userTargetTimer = new MessageTimers(6 * HOUR, null, lastMessageDate);
+		} catch (Exception e) {
+			userTargetTimer = null;
+		}
+
+	}
+
+	private boolean checkWebDriverCommands(Message msg, String lowCaseText) throws ClassNotFoundException {
+		if (lowCaseText.matches("b-insult(?s).*")) {
+			String[] options = lowCaseText.replace("b-insult", "").split(">>");
+			if (options.length < 2) {
+				msg.getChannel().sendMessage("Hast thou no target, no foe, or no purpose in mind?");
+			} else {
+				try (AIResponseGenerator a = new AIResponseGenerator()) {
+					msg.getChannel().sendMessage("Will be whispered in time.");
+					String response = a.getResponse(options[0], options[1]);
+					msg.getAuthor().asUser().get().sendMessage(response);
+				} catch (Exception e) {
+					logger.error("Failed to get response from online AI.", e);
+					msg.getAuthor().asUser().get().sendMessage("Perhaps not.");
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private boolean checkWeatherCommands(Message msg, String lowCaseTxt) {
@@ -400,6 +427,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				}
 
 			} catch (IOException e1) {
+				logger.error("Failed to translate.", e1);
 			}
 
 		}
@@ -442,7 +470,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 					Message ref = msg.getMessageReference().get().getMessage().get();
 					String content = ref.getContent();
-					if (content.equals("")) {
+					if (content.isBlank()) {
 						msg.getChannel().sendMessage(MessageFormats.createTranslateEmbed(ref, translate));
 					} else {
 						msg.getChannel().sendMessage(translate.post(content, true),
@@ -451,7 +479,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				} else {
 					String content = lowCaseTxt.replace("b-translate", "").strip();
 
-					if (content.equals("")) {
+					if (content.isBlank()) {
 						msg.getChannel().sendMessage(MessageFormats.createTranslateEmbed(msg, translate));
 					} else {
 						msg.getChannel().sendMessage(translate.post(content, true),
@@ -461,6 +489,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 				}
 			} catch (IOException e1) {
+				logger.error("Failed to translate.", e1);
 				msg.getChannel().sendMessage("Failed to connect to endpoint :thumbs_down:");
 			}
 
@@ -477,6 +506,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				testTimer.setStartTime(null, msg.getCreationTimestamp());
 				testTimer.sendScheduledMessage(testWebhook, msgText, true);
 			} catch (Exception e1) {
+				logger.error("Failed to start timer task.", e1);
 			}
 			return true;
 		}
@@ -485,7 +515,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			try {
 				testTimer.cancelRecurringTimer();
 			} catch (Exception e1) {
-
+				logger.error("Failed to cancel timer task.", e1);
 			}
 			return true;
 		}
@@ -496,10 +526,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private void refresh(Message msg) throws Exception {
 		if (!msg.getAuthor().getIdAsString().equals(userTargetID)) {
 			msg.getChannel().sendMessage("Refreshing...").join();
-			System.out.println("\nRefreshing MessageCreateEventHandler.");
+			System.out.println("\nRefreshing " + MessageCreateEventHandler.class.getName() + ".");
 
 			initialiseDataStorage();
-			initialiseWebhooks();
+			executorService.submit(this::initialiseWebhooks);
 
 			msg.getChannel().sendMessage("Refreshed :ok_hand:");
 		} else {
@@ -510,10 +540,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private void terminate(Message msg) {
 		boolean isOwner = isOwner(msg);
 		String st = msg.getContent().toLowerCase().replace("terminate", "").strip();
-		if (st.equals("") || st.equals(api.getYourself().getMentionTag())) {
+		if (st.isBlank() || st.equals(api.getYourself().getMentionTag())) {
 			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
 				msg.getChannel().sendMessage("Terminating...").join();
-				System.out.println("\nTerminate message invoked.");
+				logger.warn("\nTerminate message invoked.");
 				shutdownManager.initiateShutdown(0);
 			} else {
 				msg.getChannel().sendMessage("<a:no:1195656310356717689>");
@@ -541,7 +571,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 						if (!generatedText.matches("Error:(?s).*")) {
 							msg.getChannel().sendMessage(generatedText);
 						} else if (!generatedText.contains("Connect to localhost:5000"))
-							System.err.println("AI Response: " + generatedText);
+							logger.warn("AI Response: {}", generatedText);
 					}
 				} catch (Exception e1) {
 					// not worth bothering with
@@ -613,8 +643,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	}
 
-	private boolean tryAutoRespondCommands(Message msg, String msgText, String lowCaseTxt) {
-
+	private boolean checkAutoRespondCommands(Message msg, String msgText) {
+		String lowCaseTxt = msgText.toLowerCase();
 		if (lowCaseTxt.matches("b-response(?s).*")) {
 			boolean isOwner = isOwner(msg);
 			if (lowCaseTxt.contains("b-response create")) {
@@ -766,7 +796,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private void checkChannelTimer(String channelID) {
 		try {
-			if (channelID.equals(egubotWebhook.getChannel().get().getIdAsString())) {
+			if (deadChatTimer != null && channelID.equals(egubotWebhook.getChannel().get().getIdAsString())) {
 
 				deadChatTimer.cancelRecurringTimer();
 				deadChatTimer.setStartTime(null, null);
@@ -774,7 +804,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			}
 		} catch (Exception e1) {
-
 		}
 	}
 
@@ -802,33 +831,27 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
 				// If tasks don't finish within time, forceful shutdown
 				executorService.shutdownNow();
+				logger.error("Executor Service shutdown was forced.");
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			e.printStackTrace();
+			logger.error("Shutdown failed.", e);
 		}
 	}
 
-	private String replaceAttachmentText(MessageCreateEvent e, String msgText) {
-		StringBuilder st2 = new StringBuilder();
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(
-				e.getMessage().getAttachments().get(0).asInputStream(), StandardCharsets.UTF_8))) {
-			String st;
+	private String replaceAttachmentText(Message msg, String msgText) {
+		String st = "";
 
-			while ((st = br.readLine()) != null) {
-				st2.append(st + "\n");
-			}
-
-		} catch (IOException e2) {
-
+		try {
+			st = FileUtilities.readInputStream(msg.getAttachments().get(0).asInputStream(), "\n");
+		} catch (IOException e) {
 		}
 
-		return msgText.replace("[attachment text replace]", st2);
+		return msgText.replace("[attachment text replace]", st);
 	}
 
 	@Override
 	public int getShutdownPriority() {
-		// TODO Auto-generated method stub
 		return 10;
 	}
 

@@ -1,6 +1,9 @@
 package com.github.egubot.main;
 
 import java.util.Scanner;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.message.Message;
@@ -8,7 +11,7 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.interfaces.Shutdownable;
 
 public class StatusManager implements Shutdownable {
-
+	private static final Logger logger = LogManager.getLogger(StatusManager.class.getName());
 	private String statusChannelID = KeyManager.getID("Status_Channel_ID");
 	private String statusMessageID = KeyManager.getID("Status_Message_ID");
 
@@ -55,7 +58,7 @@ public class StatusManager implements Shutdownable {
 						try {
 							statusMessageID = api.getTextChannelById(KeyManager.getID("Status_Channel_ID")).get()
 									.sendMessage("status").join().getIdAsString();
-							KeyManager.updateKeys("Status_Message_ID", statusMessageID, KeyManager.idsFileName);
+							KeyManager.updateKeys("Status_Message_ID", statusMessageID, KeyManager.IDS_FILE_NAME);
 
 							statusMessage = api
 									.getMessageById(statusMessageID, api.getTextChannelById(statusChannelID).get())
@@ -66,7 +69,7 @@ public class StatusManager implements Shutdownable {
 					} else {
 						System.out.println("\nAlways skip this? y/n");
 						if (in.nextLine().equalsIgnoreCase("y")) {
-							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.idsFileName);
+							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.IDS_FILE_NAME);
 						}
 					}
 				}
@@ -85,7 +88,7 @@ public class StatusManager implements Shutdownable {
 			String id;
 
 			id = in.nextLine();
-			KeyManager.updateKeys("Status_Channel_ID", id, KeyManager.idsFileName);
+			KeyManager.updateKeys("Status_Channel_ID", id, KeyManager.IDS_FILE_NAME);
 
 		}
 
@@ -103,7 +106,7 @@ public class StatusManager implements Shutdownable {
 			System.out.println("Disconnecting...");
 			api.disconnect();
 		} catch (Exception e) {
-
+			logger.error("Couldn't disconnect", e);
 		}
 	}
 
@@ -123,7 +126,8 @@ public class StatusManager implements Shutdownable {
 			} catch (NullPointerException e1) {
 
 			} catch (Exception e) {
-				System.err.println("Can't update status message");
+				logger.warn("Can't update status message");
+				logger.error("Couldn't update status message.",e);
 			}
 		}
 	}
@@ -136,7 +140,8 @@ public class StatusManager implements Shutdownable {
 			} catch (NullPointerException e1) {
 
 			} catch (Exception e) {
-				System.err.println("Can't update status message");
+				logger.warn("Can't update status message");
+				logger.error("Couldn't update status message.",e);
 			}
 		}
 	}
@@ -151,7 +156,8 @@ public class StatusManager implements Shutdownable {
 			else if (!isOnline())
 				api.updateActivity(ActivityType.PLAYING, "test mode");
 		} catch (Exception e) {
-			System.err.println("Can't change activity");
+			logger.warn("Can't change activity");
+			logger.error("Couldn't change activity.",e);
 		}
 	}
 
@@ -212,7 +218,7 @@ public class StatusManager implements Shutdownable {
 						+ "\nNote: Send a message in your status channel and copy its id.");
 
 				id = in.nextLine();
-				KeyManager.updateKeys("Activity_Msg_ID", id, KeyManager.idsFileName);
+				KeyManager.updateKeys("Activity_Msg_ID", id, KeyManager.IDS_FILE_NAME);
 
 				activityMsgID = KeyManager.getID("Activity_Msg_ID");
 

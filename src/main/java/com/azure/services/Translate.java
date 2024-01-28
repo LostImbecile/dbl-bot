@@ -7,13 +7,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 
 import com.github.egubot.main.KeyManager;
+import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -61,16 +60,8 @@ public class Translate {
 		// Process the response
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 200) {
-			StringBuilder result = new StringBuilder();
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
-
-				String line;
-				while ((line = reader.readLine()) != null) {
-					result.append(line);
-				}
-			}
-			return extractTranslationFromResponse(result.toString(), appendLanguage);
+			String result = FileUtilities.readInputStream(response.getEntity().getContent());
+			return extractTranslationFromResponse(result, appendLanguage);
 		} else {
 			return checkStatusCode(statusCode);
 		}
@@ -137,41 +128,16 @@ public class Translate {
 
 	public static String getTranslateLanguages() throws IOException {
 		String url = "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation";
-		StringBuilder result = new StringBuilder(500);
-		try (BufferedReader br = new BufferedReader(
-				new InputStreamReader(new URL(url).openStream(), StandardCharsets.UTF_8))) {
-			String line = null;
+		String result = FileUtilities.readInputStream(new URL(url).openStream());
 
-			// You can process the text as you read it instead of adding it first
-			// depending on what you want to do
-			while ((line = br.readLine()) != null) {
-				result.append(line);
-			}
-			// System.out.println("Lines read: " + lines.size());
-
-		}
-
-		return JSONUtilities.prettify(result.toString()).replace("\"", "").replace("dir: ltr\n ", "")
-				.replace("dir: rtl\n ", "");
+		return JSONUtilities.prettify(result).replace("\"", "").replace("dir: ltr\n ", "").replace("dir: rtl\n ", "");
 	}
 
 	public static String getTransliterateLanguages() throws IOException {
 		String url = "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=transliteration";
-		StringBuilder result = new StringBuilder(500);
-		try (BufferedReader br = new BufferedReader(
-				new InputStreamReader(new URL(url).openStream(), StandardCharsets.UTF_8))) {
-			String line = null;
+		String result = FileUtilities.readInputStream(new URL(url).openStream());
 
-			// You can process the text as you read it instead of adding it first
-			// depending on what you want to do
-			while ((line = br.readLine()) != null) {
-				result.append(line);
-			}
-			// System.out.println("Lines read: " + lines.size());
-
-		}
-
-		return JSONUtilities.prettify(result.toString()).replace("\"", "");
+		return JSONUtilities.prettify(result).replace("\"", "");
 	}
 
 	public String detectLanguage(String text, boolean getLanguageOnly) throws IOException {
@@ -193,15 +159,9 @@ public class Translate {
 		// Process the response
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 200) {
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
-			StringBuilder result = new StringBuilder();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				result.append(line);
-			}
+			String result = FileUtilities.readInputStream(response.getEntity().getContent());
 
-			return extractDetectedLanguageFromResponse(result.toString(), getLanguageOnly);
+			return extractDetectedLanguageFromResponse(result, getLanguageOnly);
 		} else {
 			return checkStatusCode(statusCode);
 		}
@@ -238,8 +198,8 @@ public class Translate {
 
 	public static void main(String[] args) {
 		try {
-			System.out.println(new Translate("","en")
-					.post("J’aimerais vraiment conduire votre voiture autour du pâté de maisons plusieurs fois!", true));
+			System.out.println(new Translate("", "en").post(
+					"J’aimerais vraiment conduire votre voiture autour du pâté de maisons plusieurs fois!", true));
 
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -8,8 +8,6 @@ import java.util.Random;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
-import org.javacord.api.event.message.MessageCreateEvent;
-
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.objects.Response;
 import com.github.egubot.objects.ResponseList;
@@ -34,7 +32,7 @@ public class AutoRespond extends DataManagerSwitcher {
 		super(api, idKey, resourcePath, "Autorespond", true);
 	}
 
-	public boolean respond(String msgText, MessageCreateEvent e) {
+	public boolean respond(String msgText, Message msg) {
 		/*
 		 * Content Example:
 		 * Equal Split Normal Split test Split ok Split emoji
@@ -68,15 +66,15 @@ public class AutoRespond extends DataManagerSwitcher {
 					if (msgText.matches("(?s).*?" + response.getInvocMsg() + "(?s).*+"))
 						deleteFlag = true;
 				} else if (response.getMatchType().equalsIgnoreCase("user delete")) {
-					if (e.getMessageAuthor().getIdAsString().equals(response.getInvocMsg().replaceAll("[<>@ ]", "")))
+					if (msg.getAuthor().getIdAsString().equals(response.getInvocMsg().replaceAll("[<>@ ]", "")))
 						deleteFlag = true;
 				}
 
 				if (replyFlag) {
 					response.incrementUsage();
 					replyMsg = parseResponseMsg(response.getResponseMessage());
-					if (e.getMessage().getMessageReference().isPresent()) {
-						reference = e.getMessage().getMessageReference().get().getMessage().get();
+					if (msg.getMessageReference().isPresent()) {
+						reference = msg.getMessageReference().get().getMessage().get();
 						reference.reply(replyMsg, false);
 
 						for (int j = 0; j < reactions.size(); j++) {
@@ -84,13 +82,13 @@ public class AutoRespond extends DataManagerSwitcher {
 						}
 
 					} else {
-						e.getChannel().sendMessage(replyMsg);
+						msg.getChannel().sendMessage(replyMsg);
 
 						for (int j = 0; j < reactions.size(); j++) {
-							e.getMessage().addReaction(Abbreviations.getReactionId(reactions.get(j)));
+							msg.addReaction(Abbreviations.getReactionId(reactions.get(j)));
 						}
 					}
-					
+
 					try {
 						// In order to update usage
 						// Updates in 10m for online storage
@@ -101,7 +99,7 @@ public class AutoRespond extends DataManagerSwitcher {
 				}
 
 				if (deleteFlag) {
-					e.getMessage().delete();
+					msg.delete();
 					return true;
 				}
 
@@ -149,12 +147,15 @@ public class AutoRespond extends DataManagerSwitcher {
 				responses.add(newResp);
 				writeData(e.getChannel(), false);
 			}
-		} catch (Exception e1) {
+		} catch (NullPointerException e1) {
 			e.getChannel()
 					.sendMessage("Correct format:"
 							+ "\nb-response create type >> message >> response (>> reaction1 >> reaction2 >>...)"
 							+ "\n\nAlternative:\nb-response create type >> message >> option1 ?? option2 ?? ... >> ..."
 							+ "\n\nTypes:" + "\nContain, equal and match");
+		} catch (Exception e1) {
+			String error = "Problematic Message: \"" + msgText + "\"";
+			logger.error(error, e1);
 		}
 
 	}
@@ -180,7 +181,7 @@ public class AutoRespond extends DataManagerSwitcher {
 
 			String st = msgText.substring("b-response remove".length()).strip();
 
-			if (st.equals(""))
+			if (st.isBlank())
 				throw new Exception();
 
 			boolean isNameExist = false;
@@ -213,6 +214,7 @@ public class AutoRespond extends DataManagerSwitcher {
 			autoRespondData.setCount(autoRespondData.getResponses().size());
 			setLockedDataEndIndex(autoRespondData.getLockedDataIndex());
 		} catch (JsonSyntaxException e) {
+			logger.error("Syntax Error updating objects", e);
 			autoRespondData = convertOldDataToResponses(getData(), parameterSplit);
 		}
 		responses = (ArrayList<Response>) autoRespondData.getResponses();

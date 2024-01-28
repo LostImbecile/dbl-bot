@@ -1,23 +1,22 @@
 package com.github.egubot.main;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.event.connection.ResumeEvent;
 import org.javacord.api.listener.connection.ResumeListener;
 
-public class ResumeEventHandler extends StatusManager implements ResumeListener {
-
+public class ResumeEventHandler implements ResumeListener {
+	private static final Logger logger = LogManager.getLogger(ResumeEventHandler.class.getName());
+	private StatusManager statusManager;
 	public ResumeEventHandler(boolean testMode, DiscordApi api) {
-		super(api, testMode);
+		statusManager = new StatusManager(api, testMode);
 	}
 
 	@Override
 	public void onResume(ResumeEvent event) {
-		changeActivity();
-		String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd-hh:mm:ss"));
-		System.out.println("\n" + date + ": Bot resumed successfully and is active.");
+		statusManager.changeActivity();
+		logger.warn("Bot resumed successfully and is active.");
 	}
 
 }
