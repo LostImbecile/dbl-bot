@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -105,6 +107,10 @@ public class FileUtilities {
 		}
 
 		return result.toString();
+	}
+	
+	public static InputStream toInputStream(String st) {
+		return IOUtils.toInputStream(st, StandardCharsets.UTF_8);
 	}
 
 	public static void main(String[] args) {

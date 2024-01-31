@@ -7,12 +7,15 @@ import java.util.Random;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.Messageable;
 import com.github.egubot.objects.Abbreviations;
+import com.github.egubot.objects.Attributes;
 import com.github.egubot.objects.Response;
 import com.github.egubot.objects.ResponseList;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.JSONUtilities;
+import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.DataManagerSwitcher;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -44,7 +47,7 @@ public class AutoRespond extends DataManagerSwitcher {
 		List<String> reactions;
 		boolean replyFlag = false;
 		boolean deleteFlag = false;
-		for (Response response: responses) {
+		for (Response response : responses) {
 			reactions = response.getReactions();
 
 			if (response.getResponseType().equalsIgnoreCase("normal")) {
@@ -69,17 +72,24 @@ public class AutoRespond extends DataManagerSwitcher {
 				}
 
 				if (replyFlag) {
+					if (!isRespondToUser(response, msg))
+						return true;
+
 					response.incrementUsage();
 					replyMsg = parseResponseMsg(response.getResponseMessage());
+
 					if (msg.getMessageReference().isPresent()) {
 						reference = msg.getMessageReference().get().getMessage().get();
-						reference.reply(replyMsg, false);
+						if (isReplyToReference(response, reference)) {
+							reference.reply(replyMsg, false);
 
-						for (String reaction : reactions) {
-							reference.addReaction(Abbreviations.getReactionId(reaction));
+							for (String reaction : reactions) {
+								reference.addReaction(Abbreviations.getReactionId(reaction));
+							}
+							replyFlag = false;
 						}
-
-					} else {
+					}
+					if (replyFlag) {
 						msg.getChannel().sendMessage(replyMsg);
 
 						for (String reaction : reactions) {
@@ -111,6 +121,42 @@ public class AutoRespond extends DataManagerSwitcher {
 		}
 
 		return false;
+	}
+
+	private boolean isReplyToReference(Response response, Message msg) {
+		Attributes attr = response.getAttr();
+		MessageAuthor author = msg.getAuthor();
+
+		// This is so the author of the message or the reference
+		// gets completely ignored if they are set to be ignored
+		if(!isRespondToUser(response, msg))
+			return false;
+		
+		if (attr.isReplyToAuthor() && UserInfoUtilities.isUserEqual(author, response.getAuthorID()))
+			return true;
+		if (attr.isReplyToOwner() && (UserInfoUtilities.isOwner(msg) || UserInfoUtilities.isServerOwner(msg)))
+			return true;
+		if (attr.isReplyToAdmin() && author.isServerAdmin())
+			return true;
+		if (attr.isReplyToReply())
+			return true;
+
+		return false;
+	}
+
+	private boolean isRespondToUser(Response response, Message msg) {
+		Attributes attr = response.getAttr();
+		MessageAuthor author = msg.getAuthor();
+		if (attr.isDisabled())
+			return false;
+		if (attr.isIgnoreAuthor() && UserInfoUtilities.isUserEqual(author, response.getAuthorID()))
+			return false;
+		if (attr.isIgnoreOwner() && (UserInfoUtilities.isOwner(msg) || UserInfoUtilities.isServerOwner(msg)))
+			return false;
+		if (attr.isIgnoreAdmin() && author.isServerAdmin())
+			return false;
+
+		return true;
 	}
 
 	private String parseResponseMsg(String response) {
@@ -188,8 +234,10 @@ public class AutoRespond extends DataManagerSwitcher {
 			for (int j = startIndex; j < responses.size(); j++) {
 				response = responses.get(j);
 				if (Response.isInvocEqual(response.getInvocMsg(), st)) {
-					isNameExist = true;
-					responses.remove(j);
+					if (response.getAttr().isDeletable() || isOwner) {
+						isNameExist = true;
+						responses.remove(j);
+					}
 					break;
 				}
 			}
@@ -198,6 +246,55 @@ public class AutoRespond extends DataManagerSwitcher {
 				writeData(e, false);
 			} else {
 				e.sendMessage("No such invocation message");
+			}
+		} catch (Exception e1) {
+			e.sendMessage("What?");
+		}
+	}
+
+	public void updateResponse(String msgText, Messageable e, boolean isOwner) {
+		try {
+			int startIndex = getLockedDataEndIndex();
+
+			if (isOwner)
+				startIndex = 0;
+
+			String st = msgText.substring("b-response edit".length()).strip();
+			if (st.isBlank())
+				throw new Exception();
+
+			String[] arguments = st.split(">>");
+			if (arguments.length < 2)
+				throw new Exception();
+
+			st = arguments[0].strip();
+			boolean isResponseExist = false;
+
+			Response response = null;
+			for (int j = startIndex; j < responses.size(); j++) {
+				response = responses.get(j);
+				if (Response.isInvocEqual(response.getInvocMsg(), st)) {
+					if (response.getAttr().isEditable() || isOwner)
+						isResponseExist = true;
+					break;
+				}
+			}
+
+			boolean isUpdated = false;
+			if (isResponseExist) {
+				for (int i = 1; i < arguments.length; i++) {
+					String argument = arguments[i];
+					if (response.updateResponse(argument))
+						isUpdated = true;
+				}
+			}
+
+			if (isResponseExist && isUpdated) {
+				writeData(e, false);
+			} else if (isResponseExist) {
+				e.sendMessage("Nothing was updated.");
+			} else {
+				e.sendMessage("No such invocation message.");
 			}
 		} catch (Exception e1) {
 			e.sendMessage("What?");

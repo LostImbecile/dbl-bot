@@ -9,7 +9,7 @@ import com.google.gson.JsonParser;
 
 public class JSONUtilities {
 	static Random rng = new Random();
-	static Gson gson = new Gson();
+	static final Gson gson = new Gson();
 
 	public static String prettify(String jsonText) {
 		JsonObject jsonObject = JsonParser.parseString(jsonText).getAsJsonObject();
@@ -35,12 +35,13 @@ public class JSONUtilities {
 		int random = rng.nextInt(1000); // Adjust the range as needed
 		return String.format("%d-%d", timestamp, random);
 	}
-    
-	public static void main(String[] args) {
-		String st = jsonify("wwewe\"\n\ts");
-		System.out.println(st);
-		st = dejsonify(st);
-		System.out.println(st);
-	}
+
+	public static <T> String toJsonPrettyPrint(T object, Class<T> clazz) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        String json = gson.toJson(object, clazz);
+
+        return json;
+    }
 
 }

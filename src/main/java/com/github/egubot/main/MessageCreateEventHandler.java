@@ -1,7 +1,6 @@
 package com.github.egubot.main;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -29,9 +27,12 @@ import com.github.egubot.features.MessageFormats;
 import com.github.egubot.features.MessageTimers;
 import com.github.egubot.gpt2.DiscordAI;
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.objects.Attributes;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.JSONUtilities;
 import com.github.egubot.shared.SendObjects;
+import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.OnlineDataManager;
 import com.github.egubot.webautomation.AIResponseGenerator;
@@ -64,11 +65,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private DiscordApi api;
 
-	private LegendsDatabase legendsWebsite;
-	private LegendsRoll legendsRoll;
-	private AutoRespond autoRespond;
-	private RollTemplates templates;
-	private LegendsSearch legendsSearch;
+	private LegendsDatabase legendsWebsite = null;
+	private LegendsRoll legendsRoll = null;
+	private AutoRespond autoRespond = null;
+	private RollTemplates templates = null;
+	private LegendsSearch legendsSearch = null;
 	private Translate translate = new Translate();
 
 	private boolean isRollCommandActive;
@@ -184,6 +185,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				return;
 			}
 
+			if (lowCaseTxt.equals("b-send attributes")) {
+				msg.getChannel().sendMessage(FileUtilities.toInputStream(
+						JSONUtilities.toJsonPrettyPrint(new Attributes(), Attributes.class)), "Attributes.txt");
+			}
+
 			if (lowCaseTxt.equals("spam mode off")) {
 				readBotMessages = false;
 				return;
@@ -225,7 +231,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) {
-		if (isOwner(msg) && lowCaseTxt.matches("b-message(?s).*")) {
+		if (UserInfoUtilities.isOwner(msg) && lowCaseTxt.matches("b-message(?s).*")) {
 			try {
 				if (lowCaseTxt.contains("b-message edit")) {
 					String st = lowCaseTxt.replace("b-message edit", "").strip();
@@ -262,7 +268,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		 */
 		autoRespond = new AutoRespond(api);
 		autoRespond.toggleManager(true);
-		shutdownManager.registerShutdownable(autoRespond);
 
 		if (dbLegendsMode) {
 			// Fetches data from the legends website and initialises
@@ -314,7 +319,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (isRollCommandActive) {
 				templates = new RollTemplates(api, legendsWebsite);
 				templates.toggleManager(true);
-				shutdownManager.registerShutdownable(templates);
 
 				legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
 
@@ -476,8 +480,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (lowCaseTxt.contains("b-translate languages")) {
 
 				try {
-					msg.getChannel().sendMessage(
-							IOUtils.toInputStream(Translate.getTranslateLanguages(), StandardCharsets.UTF_8),
+					msg.getChannel().sendMessage(FileUtilities.toInputStream(Translate.getTranslateLanguages()),
 							"languages.txt");
 				} catch (IOException e1) {
 					msg.getChannel().sendMessage("Failed to send :thumbs_down");
@@ -545,10 +548,13 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private void refresh(Message msg) throws Exception {
-		if (!msg.getAuthor().getIdAsString().equals(userTargetID)) {
+		if (!UserInfoUtilities.isUserEqual(msg.getAuthor(), userTargetID)) {
 			msg.getChannel().sendMessage("Refreshing...").join();
 			System.out.println("\nRefreshing " + MessageCreateEventHandler.class.getName() + ".");
 
+			// Important to make sure any remaining data is uploaded first
+			shutdownInternalClasses();
+			
 			initialiseDataStorage();
 			executorService.submit(this::initialiseWebhooks);
 
@@ -559,7 +565,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private void terminate(Message msg) {
-		boolean isOwner = isOwner(msg);
+		boolean isOwner = UserInfoUtilities.isOwner(msg);
+		;
 		String st = msg.getContent().toLowerCase().replace("terminate", "").strip();
 		if (st.isBlank() || st.equals(api.getYourself().getMentionTag())) {
 			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
@@ -667,7 +674,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private boolean checkAutoRespondCommands(Message msg, String msgText) {
 		String lowCaseTxt = msgText.toLowerCase();
 		if (lowCaseTxt.matches("b-response(?s).*")) {
-			boolean isOwner = isOwner(msg);
+			boolean isOwner = UserInfoUtilities.isOwner(msg);
+			;
 			if (lowCaseTxt.contains("b-response create")) {
 				if (!lowCaseTxt.contains("sleep"))
 					autoRespond.writeResponse(msgText, msg, isOwner);
@@ -678,6 +686,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			if (lowCaseTxt.contains("b-response remove")) {
 				autoRespond.removeResponse(msgText, msg.getChannel(), isOwner);
+				return true;
+			}
+
+			if (lowCaseTxt.contains("b-response edit")) {
+				autoRespond.updateResponse(msgText, msg.getChannel(), isOwner);
 				return true;
 			}
 
@@ -786,13 +799,14 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private boolean checkTemplateCommands(Message msg, String lowCaseTxt) {
+		boolean isOwner = UserInfoUtilities.isOwner(msg);
 		if (lowCaseTxt.contains("b-template create")) {
 			templates.writeTemplate(lowCaseTxt, msg.getChannel());
 			return true;
 		}
 
 		if (lowCaseTxt.contains("b-template remove")) {
-			templates.removeTemplate(lowCaseTxt, msg.getChannel(), isOwner(msg));
+			templates.removeTemplate(lowCaseTxt, msg.getChannel(), isOwner);
 			return true;
 		}
 
@@ -801,7 +815,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			return true;
 		}
 
-		if (lowCaseTxt.contains("b-template lock") && isOwner(msg)) {
+		if (lowCaseTxt.contains("b-template lock") && isOwner) {
 			try {
 				int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
 				templates.setLockedDataEndIndex(x);
@@ -828,16 +842,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		}
 	}
 
-	private boolean isOwner(Message msg) {
-		boolean isOwner = false;
-		if (msg.getAuthor().isBotOwner() || msg.getAuthor().isTeamMember()) {
-			isOwner = true;
-		}
-		return isOwner;
-	}
-
-	public void shutdown() {
-		executorService.shutdown();
+	public void shutdownInternalClasses() {
 		try {
 			if (deadChatTimer != null)
 				deadChatTimer.terminateTimer();
@@ -846,8 +851,20 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (userTargetTimer != null)
 				userTargetTimer.terminateTimer();
 		} catch (Exception e) {
-
+			logger.error("Failed to shut timers down.", e);
 		}
+		try {
+			if (autoRespond != null)
+				autoRespond.shutdown();
+			if (templates != null)
+				templates.shutdown();
+		} catch (Exception e) {
+			logger.error("Failed to shut storage classes down.", e);
+		}
+	}
+	public void shutdown() {
+		shutdownInternalClasses();
+		executorService.shutdown();
 		try {
 			if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
 				// If tasks don't finish within time, forceful shutdown
@@ -866,7 +883,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		try {
 			st = FileUtilities.readInputStream(msg.getAttachments().get(0).asInputStream(), "\n");
 		} catch (IOException e) {
-			
+
 		}
 
 		return msgText.replace("[attachment text replace]", st);

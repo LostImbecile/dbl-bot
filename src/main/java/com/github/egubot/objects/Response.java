@@ -1,6 +1,7 @@
 package com.github.egubot.objects;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class Response implements Comparable<Object> {
@@ -19,11 +20,13 @@ public class Response implements Comparable<Object> {
 	@SerializedName("author")
 	private String author = "-1";
 	@SerializedName("attr")
-	private List<Integer> attributeIds;
+	private Attributes attr = new Attributes();
 	@SerializedName("channel_blacklist")
 	private List<String> blacklistedChannelIds;
-	@SerializedName("name_blacklist")
-	private List<String> blacklistedNameIds;
+	@SerializedName("user_blacklist")
+	private List<String> blacklistedUserIds;
+	@SerializedName("user_whitelist")
+	private List<String> whitelist;
 	@SerializedName("usage")
 	private int usage = 0;
 
@@ -61,6 +64,68 @@ public class Response implements Comparable<Object> {
 
 			return isInvocEqual(st, st2);
 		}
+		return false;
+	}
+
+	public boolean updateResponse(String argument) {
+		String st;
+		if (argument.contains("response:")) {
+			st = argument.replace("response:", "");
+			if (!st.isBlank()) {
+				this.setResponseMessage(st);
+				return true;
+			}
+		}
+		if (argument.contains("attr:")) {
+			st = argument.replace("attr:", "");
+			String[] temp = st.split(",");
+			for (String attribute : temp) {
+				try {
+					String name = attribute.substring(0, attribute.indexOf("="));
+					boolean value = Boolean.parseBoolean(attribute.substring(attribute.indexOf("=") + 1).strip());
+					this.getAttr().updateAttribute(name, value);
+				} catch (Exception e1) {
+				}
+			}
+			return true;
+		}
+		if (argument.contains("reactions:")) {
+			st = argument.replace("reactions:", "");
+			String[] temp = st.split(",");
+			this.getReactions().clear();
+			for (String reaction : temp) {
+				this.getReactions().add(reaction);
+			}
+			return true;
+		}
+		if (argument.contains("blacklist:")) {
+			st = argument.replace("blacklist:", "");
+			if (st.contains("#"))
+				this.getBlacklistedChannelIds().clear();
+			if (st.contains("@"))
+				this.getBlacklistedUserIds();
+			String[] temp = st.split(",");
+			for (String id : temp) {
+				if (id.contains("#")) {
+					this.getBlacklistedChannelIds().add(id);
+				} else if (id.contains("@")) {
+					this.getBlacklistedUserIds().add(id);
+				}
+			}
+			return true;
+		}
+		if (argument.contains("whitelist:")) {
+			st = argument.replace("whitelist:", "");
+
+			this.getWhitelist().clear();
+
+			String[] temp = st.split(",");
+			for (String id : temp) {
+				this.getWhitelist().add(id);
+			}
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -111,17 +176,13 @@ public class Response implements Comparable<Object> {
 	public String getAuthor() {
 		return author;
 	}
+	
+	public String getAuthorID() {
+		return author.split("-")[0];
+	}
 
 	public void setAuthor(String author) {
 		this.author = author;
-	}
-
-	public List<Integer> getAttributeIds() {
-		return attributeIds;
-	}
-
-	public void setAttributeIds(List<Integer> attributeIds) {
-		this.attributeIds = attributeIds;
 	}
 
 	public List<String> getBlacklistedChannelIds() {
@@ -130,14 +191,6 @@ public class Response implements Comparable<Object> {
 
 	public void setBlacklistedChannelIds(List<String> blacklistedChannelIds) {
 		this.blacklistedChannelIds = blacklistedChannelIds;
-	}
-
-	public List<String> getBlacklistedNameIds() {
-		return blacklistedNameIds;
-	}
-
-	public void setBlacklistedNameIds(List<String> blacklistedNameIds) {
-		this.blacklistedNameIds = blacklistedNameIds;
 	}
 
 	public int getUsage() {
@@ -162,5 +215,33 @@ public class Response implements Comparable<Object> {
 
 	public String toString() {
 		return getMatchType() + " >> " + getResponseType() + " >> " + getInvocMsg() + " >> " + getResponseMessage();
+	}
+
+	public Attributes getAttr() {
+		return attr;
+	}
+
+	public void setAttr(Attributes attr) {
+		this.attr = attr;
+	}
+
+	public List<String> getBlacklistedUserIds() {
+		return blacklistedUserIds;
+	}
+
+	public void setBlacklistedUserIds(List<String> blacklistedUserIds) {
+		this.blacklistedUserIds = blacklistedUserIds;
+	}
+
+	public List<String> getWhitelist() {
+		return whitelist;
+	}
+
+	public void setWhitelist(List<String> whitelist) {
+		this.whitelist = whitelist;
+	}
+
+	public String getInvocationMessage() {
+		return invocationMessage;
 	}
 }
