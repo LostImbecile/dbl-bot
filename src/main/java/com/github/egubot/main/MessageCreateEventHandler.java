@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,7 +60,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private String chatGPTActiveChannelID = "";
 
-	private static ArrayList<String> chatgptConversation = new ArrayList<>(0);
+	private static List<String> chatgptConversation = Collections.synchronizedList(new ArrayList<String>(20));
 
 	private DiscordApi api;
 
@@ -382,11 +383,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			Object[] messages;
 			Message temp;
 			Instant lastMessageDate = Instant.now().minusMillis(6 * HOUR);
-			for (int i = 0; i < channels.size(); i++) {
-				if (channels.get(i).asTextChannel().isPresent()) {
-					messages = channels.get(i).asTextChannel().get().getMessages(50).get().toArray();
-					for (int j = 0; j < messages.length; j++) {
-						temp = (Message) messages[j];
+			for (ServerChannel channel : channels) {
+				if (channel.asTextChannel().isPresent()) {
+					messages = channel.asTextChannel().get().getMessages(50).get().toArray();
+					for (Object message : messages) {
+						temp = (Message) message;
 						if (temp != null && temp.getAuthor().isYourself()
 								&& temp.getContent().equals(sirioMsgContent)) {
 							if (temp.getCreationTimestamp().isAfter(lastMessageDate)) {

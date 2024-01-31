@@ -5,6 +5,7 @@ import java.util.List;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Messageable;
 
+import com.github.egubot.objects.Tags;
 import com.github.egubot.storage.DataManagerSwitcher;
 
 public class RollTemplates extends DataManagerSwitcher {
@@ -66,9 +67,9 @@ public class RollTemplates extends DataManagerSwitcher {
 			String temp;
 			do {
 				temp = tokens[1];
-				for (int j = 0; j < getData().size(); j++) {
-					tokens[1] = tokens[1].replace(getTemplateName(getData().get(j)).toLowerCase(),
-							(getTemplateBody(getData().get(j)).toLowerCase()));
+				for (String element : getData()) {
+					tokens[1] = tokens[1].replace(getTemplateName(element).toLowerCase(),
+							(getTemplateBody(element).toLowerCase()));
 				}
 			} while (!temp.equals(tokens[1]));
 
@@ -78,8 +79,8 @@ public class RollTemplates extends DataManagerSwitcher {
 			boolean isTag = false;
 			boolean isNameExist = false;
 
-			for (int j = 0; j < getData().size(); j++) {
-				if (isTemplateEqual(getData().get(j), newTemplate)) {
+			for (String element : getData()) {
+				if (isTemplateEqual(element, newTemplate)) {
 					isNameExist = true;
 					break;
 				}
@@ -92,8 +93,8 @@ public class RollTemplates extends DataManagerSwitcher {
 
 			for (int i = 1; i < tokens.length; i++) {
 
-				for (int j = 0; j < legendsWebsite.getTags().size(); j++) {
-					if (tokens[i].equalsIgnoreCase(legendsWebsite.getTags().get(j).getName())) {
+				for (Tags element : legendsWebsite.getTags()) {
+					if (tokens[i].equalsIgnoreCase(element.getName())) {
 						isTag = true;
 					}
 				}

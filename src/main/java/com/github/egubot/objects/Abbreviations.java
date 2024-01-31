@@ -34,8 +34,8 @@ public class Abbreviations {
 	}
 
 	public static String replaceAbbreviations(String input, List<Abbreviations> abbreviations) {
-		for (int i = 0; i < abbreviations.size(); i++) {
-			input = input.replace(abbreviations.get(i).getName(), abbreviations.get(i).getId());
+		for (Abbreviations abbreviation : abbreviations) {
+			input = input.replace(abbreviation.getName(), abbreviation.getId());
 		}
 		return input;
 

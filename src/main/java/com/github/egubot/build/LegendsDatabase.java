@@ -130,10 +130,9 @@ public class LegendsDatabase {
 		String endWrite = "<br/><br/>";
 
 		String[] token;
-		String st = "", line;
+		String st = "";
 		boolean writeFlag = false;
-		for (int i = 0; i < lines.size(); i++) {
-			line = lines.get(i);
+		for (String line : lines) {
 			if (line.contains(beginWrite)) {
 				writeFlag = true;
 				continue;
@@ -285,8 +284,8 @@ public class LegendsDatabase {
 		token = st.split(" ");
 
 		int tagNum = 0;
-		for (int j = 0; j < token.length; j++) {
-			tagNum += getTag(token[j], charactersList.get(characterIndex - 1));
+		for (String element : token) {
+			tagNum += getTag(element, charactersList.get(characterIndex - 1));
 		}
 
 		return tagNum;
@@ -482,9 +481,9 @@ public class LegendsDatabase {
 	private int getTag(String st, Characters characters) {
 		int id;
 		id = Integer.parseInt(st);
-		for (int k = 0; k < tags.size(); k++) {
-			if (tags.get(k).getId() == id) {
-				tags.get(k).getCharacters().put(characters);
+		for (Tags tag : tags) {
+			if (tag.getId() == id) {
+				tag.getCharacters().put(characters);
 				return 1;
 			}
 		}

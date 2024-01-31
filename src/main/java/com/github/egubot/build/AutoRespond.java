@@ -24,7 +24,7 @@ public class AutoRespond extends DataManagerSwitcher {
 	private static String parameterSplit = ">>>>>>>>>>";
 	private static String idKey = "Responses_Message_ID";
 	private ResponseList autoRespondData;
-	private ArrayList<Response> responses;
+	private List<Response> responses;
 
 	private Random rng = new Random();
 
@@ -39,14 +39,12 @@ public class AutoRespond extends DataManagerSwitcher {
 		 * Split emoji Split etc....
 		 */
 		Message reference;
-		Response response;
 
 		String replyMsg;
 		List<String> reactions;
 		boolean replyFlag = false;
 		boolean deleteFlag = false;
-		for (int i = 0; i < responses.size(); i++) {
-			response = responses.get(i);
+		for (Response response: responses) {
 			reactions = response.getReactions();
 
 			if (response.getResponseType().equalsIgnoreCase("normal")) {
@@ -77,15 +75,15 @@ public class AutoRespond extends DataManagerSwitcher {
 						reference = msg.getMessageReference().get().getMessage().get();
 						reference.reply(replyMsg, false);
 
-						for (int j = 0; j < reactions.size(); j++) {
-							reference.addReaction(Abbreviations.getReactionId(reactions.get(j)));
+						for (String reaction : reactions) {
+							reference.addReaction(Abbreviations.getReactionId(reaction));
 						}
 
 					} else {
 						msg.getChannel().sendMessage(replyMsg);
 
-						for (int j = 0; j < reactions.size(); j++) {
-							msg.addReaction(Abbreviations.getReactionId(reactions.get(j)));
+						for (String reaction : reactions) {
+							msg.addReaction(Abbreviations.getReactionId(reaction));
 						}
 					}
 
@@ -108,7 +106,7 @@ public class AutoRespond extends DataManagerSwitcher {
 			} else if (response.getResponseType().equalsIgnoreCase("Special")) {
 
 			} else {
-				System.err.println("\nThe following line is invalid and cannot be invoked:\n" + getData().get(i));
+				System.err.println("\nThe following line is invalid and cannot be invoked:\n" + response.toString());
 			}
 		}
 
@@ -217,7 +215,7 @@ public class AutoRespond extends DataManagerSwitcher {
 			logger.error("Syntax Error updating objects", e);
 			autoRespondData = convertOldDataToResponses(getData(), parameterSplit);
 		}
-		responses = (ArrayList<Response>) autoRespondData.getResponses();
+		responses = Collections.synchronizedList((ArrayList<Response>) autoRespondData.getResponses());
 		Collections.sort(responses);
 	}
 

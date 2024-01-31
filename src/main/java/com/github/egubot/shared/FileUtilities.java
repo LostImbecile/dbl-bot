@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -61,7 +60,7 @@ public class FileUtilities {
 			Gson gson = new Gson();
 			T[] array = gson.fromJson(new InputStreamReader(input), type);
 			if (array != null) {
-				return new ArrayList<>(Arrays.asList(array));
+				return new ArrayList<>(List.of(array));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -38,7 +39,7 @@ public class OnlineDataManager implements DataManager {
 	// This file is created to send the data to discord
 	private File tempDataFile = new File("TempData.txt");
 
-	private List<String> data = new ArrayList<>(100);
+	private List<String> data = Collections.synchronizedList(new ArrayList<>(100));
 	private int lockedDataEndIndex = 0;
 	private String lastUpdateDate = null;
 	private String dataName;
@@ -238,8 +239,8 @@ public class OnlineDataManager implements DataManager {
 	public void writeData(Messageable e) {
 		try {
 			try (FileWriter file = new FileWriter(tempDataFile)) {
-				for (int i = 0; i < data.size(); i++) {
-					file.write(data.get(i) + "\n");
+				for (String st : data) {
+					file.write(st + "\n");
 				}
 			}
 

@@ -159,4 +159,8 @@ public class Response implements Comparable<Object> {
 	public void incrementUsage() {
 		this.usage++;
 	}
+
+	public String toString() {
+		return getMatchType() + " >> " + getResponseType() + " >> " + getInvocMsg() + " >> " + getResponseMessage();
+	}
 }

@@ -16,7 +16,7 @@ public class CharacterHash extends HashSet<Characters> {
 	private int occupiedSize;
 
 	public CharacterHash() {
-		table = new ArrayList<>(0);
+		table = new ArrayList<>(DEFAULT_CAPACITY);
 		occupiedSize = 0;
 		for (int i = 0; i < DEFAULT_CAPACITY; i++) {
 			table.add(null);
@@ -137,7 +137,7 @@ public class CharacterHash extends HashSet<Characters> {
 		return -1;
 	}
 
-	private static class Entry implements Serializable{
+	private static class Entry implements Serializable {
 		private static final long serialVersionUID = -2084321373016689242L;
 		int key;
 		Characters value;
@@ -147,12 +147,12 @@ public class CharacterHash extends HashSet<Characters> {
 			this.value = value;
 		}
 	}
-	
+
 	public ArrayList<Characters> toArrayList() {
-		ArrayList<Characters> list = new ArrayList<>(0);
+		ArrayList<Characters> list = new ArrayList<>(getOccupiedSize());
 
 		// Descending as I prefer that in this case
-		for (int i = table.size() -1 ; i >= 0; i--) {
+		for (int i = table.size() - 1; i >= 0; i--) {
 			if (get(i) != null) {
 				list.add(get(i));
 			}
@@ -164,21 +164,22 @@ public class CharacterHash extends HashSet<Characters> {
 	public boolean isEmpty() {
 		return getOccupiedSize() == 0;
 	}
-	
+
 	@Override
-	public Set<Characters> clone(){
+	public Set<Characters> clone() {
 		CharacterHash hashClone = new CharacterHash();
-		for(int i=0;i<this.size();i++) {
+		for (int i = 0; i < this.size(); i++) {
 			hashClone.put(this.get(i));
 		}
 		return hashClone;
-		
+
 	}
+
 	public static void printEmptyIDs(List<Characters> list) {
 		CharacterHash characters = ConvertObjects.arraytoCharacterHash(list);
-		
-		for(int i=0;i<characters.size();i++) {
-			if(characters.get(i) == null) {
+
+		for (int i = 0; i < characters.size(); i++) {
+			if (characters.get(i) == null) {
 				System.out.println(i);
 			}
 		}

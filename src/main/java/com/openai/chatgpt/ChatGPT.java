@@ -42,22 +42,23 @@ public class ChatGPT {
 			 * Write your own system message here to guide the AI's interactions
 			 * Likely for the bot to not adhere to it
 			 */
-			String body = "{\"model\": \"" + model + "\"" + ", \"messages\": " + "[{\"role\": \"system\""
+			StringBuilder body = new StringBuilder();
+			body.append("{\"model\": \"" + model + "\"" + ", \"messages\": " + "[{\"role\": \"system\""
 					+ ", \"content\": \"You are a discord bot called bamox in a discord server, you are not to assist, "
 					+ "but have casual conversations, pretend that you are not an AI but a human. "
 					+ "You will not speak like an AI, and prefer to send short responses. "
-					+ "Since the server has many people, the prompt will start with the message author's name\"}";
+					+ "Since the server has many people, the prompt will start with the message author's name\"}");
 
 			// Convo history
-			for (int i = 0; i < conversation.size(); i++) {
-				body += "," + conversation.get(i);
+			for (String element : conversation) {
+				body.append("," + element);
 			}
 
-			body += "," + reformatInput(prompt, author) + "]}";
+			body.append("," + reformatInput(prompt, author) + "]}");
 
 			// This is what sends the message
 			OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-			writer.write(body);
+			writer.write(body.toString());
 			writer.flush();
 			writer.close();
 
@@ -66,7 +67,7 @@ public class ChatGPT {
 					new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
 			String line;
 
-			StringBuffer response = new StringBuffer();
+			StringBuilder response = new StringBuilder();
 
 			while ((line = br.readLine()) != null) {
 				response.append(line);

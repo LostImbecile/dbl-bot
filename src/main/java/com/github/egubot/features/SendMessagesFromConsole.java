@@ -75,8 +75,8 @@ public class SendMessagesFromConsole {
 	private static String addNewlines(String message) {
 		String[] messageArray = message.split("%n");
 		message = "";
-		for (int i = 0; i < messageArray.length; i++) {
-			message += "\n" + messageArray[i];
+		for (String element : messageArray) {
+			message += "\n" + element;
 		}
 		return message;
 	}
@@ -94,9 +94,9 @@ public class SendMessagesFromConsole {
 
 			try {
 				messageArray = messageArray[3].split(" "); // Note: Separate emojis by spaces
-				for (int j = 0; j < messageArray.length; j++)
+				for (String element : messageArray)
 					api.getMessageById(messageID, api.getTextChannelById(channelID).get()).get()
-							.addReaction(Abbreviations.getReactionId(messageArray[j]));
+							.addReaction(Abbreviations.getReactionId(element));
 
 			} catch (Exception e) {
 				System.out.println("Failed to send");

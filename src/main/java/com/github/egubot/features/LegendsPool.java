@@ -1,6 +1,5 @@
 package com.github.egubot.features;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -13,11 +12,11 @@ import com.github.egubot.objects.Tags;
 
 public abstract class LegendsPool {
 	private LegendsDatabase legendsWebsite;
-	private ArrayList<String> rollTemplates;
+	private List<String> rollTemplates;
 
 	protected LegendsPool(LegendsDatabase legendsWebsite, List<String> rollTemplates) {
 		this.legendsWebsite = legendsWebsite;
-		this.rollTemplates =  (ArrayList<String>) rollTemplates;
+		this.rollTemplates =  rollTemplates;
 	}
 
 	protected abstract List<Characters> getPool(String msgText);
@@ -54,7 +53,6 @@ public abstract class LegendsPool {
 		LinkedList<String> operandStack = (LinkedList<String>) operands;
 		LinkedList<Set<Characters>> pools = (LinkedList<Set<Characters>>) pool;
 		String[] subPoolFilter;
-		String st;
 		boolean popTwo = true;
 
 		/*
@@ -82,16 +80,15 @@ public abstract class LegendsPool {
 		 * of the first -1 in the operand stack or so.
 		 */
 
-		for (int i = 0; i < filters.length; i++) {
-			st = filters[i];
+		for (String filter : filters) {
 			// System.out.println(st);
-			if (isOperator(st)) {
+			if (isOperator(filter)) {
 				if (popTwo) {
 					// System.out.println("pop 2");
 					subPoolFilter = new String[2];
 					subPoolFilter[0] = pop(operandStack);
 					subPoolFilter[1] = pop(operandStack);
-					pools.push(getSubPool(subPoolFilter, new CharacterHash(), null, st));
+					pools.push(getSubPool(subPoolFilter, new CharacterHash(), null, filter));
 					operandStack.push("-1");
 				} else {
 					// System.out.println("pop 1");
@@ -104,17 +101,17 @@ public abstract class LegendsPool {
 							pop(operandStack);
 							subPoolFilter[0] = pop(operandStack);
 							operandStack.push("-1");
-							pools.push(getSubPool(subPoolFilter, pools.get(0), null, st));
+							pools.push(getSubPool(subPoolFilter, pools.get(0), null, filter));
 						} else {
 							subPoolFilter[0] = pop(operandStack);
-							pools.push(getSubPool(subPoolFilter, null, pools.get(0), st));
+							pools.push(getSubPool(subPoolFilter, null, pools.get(0), filter));
 						}
 
 						pools.remove(1);
 
 					} else if (pools.size() >= 2) {
 
-						pools.push(getSubPool(null, pools.get(0), pools.get(1), st));
+						pools.push(getSubPool(null, pools.get(0), pools.get(1), filter));
 						pools.remove(1);
 						pools.remove(1);
 
@@ -126,7 +123,7 @@ public abstract class LegendsPool {
 				popTwo = false;
 
 			} else {
-				operandStack.push(st);
+				operandStack.push(filter);
 				if (operandStack.size() >= 2 && !operandStack.get(0).equals("-1") && !operandStack.get(1).equals("-1"))
 					popTwo = true;
 				else
@@ -146,33 +143,33 @@ public abstract class LegendsPool {
 	private void turnToPostfix(String[] filters, List<String> operators, List<String> operands) {
 		LinkedList<String> opStack = (LinkedList<String>) operators;
 		LinkedList<String> conStack = (LinkedList<String>) operands;
-		String st;
+		
 		String temp;
 		// This is done the exact same way it is for any infix
 		// to postfix conversion, so read the details online.
-		for (int i = 0; i < filters.length; i++) {
-			st = filters[i];
-			if (isOperator(st)) {
+		for (String filter : filters) {
+			
+			if (isOperator(filter)) {
 
-				if (isHigherPriority(opStack, st)) {
-					opStack.push(st);
+				if (isHigherPriority(opStack, filter)) {
+					opStack.push(filter);
 				} else {
-					while (!isHigherPriority(opStack, st)) {
+					while (!isHigherPriority(opStack, filter)) {
 						temp = pop(conStack) + " " + pop(conStack) + " " + pop(opStack);
 						conStack.push(temp);
 					}
-					opStack.push(st);
+					opStack.push(filter);
 				}
-			} else if (isOpenBracket(st)) {
-				opStack.push(st);
-			} else if (isClosedBracket(st)) {
+			} else if (isOpenBracket(filter)) {
+				opStack.push(filter);
+			} else if (isClosedBracket(filter)) {
 				while (!isOpenBracket(opStack.get(0))) {
 					temp = pop(conStack) + " " + pop(conStack) + " " + pop(opStack);
 					conStack.push(temp);
 				}
 				pop(opStack);
 			} else {
-				conStack.push(st);
+				conStack.push(filter);
 			}
 
 		}
@@ -275,15 +272,13 @@ public abstract class LegendsPool {
 		// Either combines the pools if two are sent, or
 		// creates a new one from the filters
 		Tags tag;
-		String tagCondition;
 
 		if (subPool1 != null && subPool2 != null) {
 			// System.out.println("Pool1 " + operation + " Pool2");
 			combineSubPools(subPool1, subPool2, operation);
 
 		} else if (subPoolFilter != null) {
-			for (int j = 0; j < subPoolFilter.length; j++) {
-				tagCondition = subPoolFilter[j];
+			for (String tagCondition : subPoolFilter) {
 
 				for (int i = 0; i < getLegendsWebsite().getTags().size(); i++) {
 					tag = getLegendsWebsite().getTags().get(i);

@@ -58,9 +58,9 @@ public class SendObjects {
 			try (FileWriter file = new FileWriter(tempFile)) {
 				String gameID;
 				String name;
-				for (int i = 0; i < characters.size(); i++) {
-					gameID = "[" + characters.get(i).getGameID();
-					name = characters.get(i).getCharacterName();
+				for (Characters character : characters) {
+					gameID = "[" + character.getGameID();
+					name = character.getCharacterName();
 					file.write(String.format("%-12s] - %s%n", gameID, name));
 				}
 			}

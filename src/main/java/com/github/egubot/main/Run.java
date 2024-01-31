@@ -15,9 +15,9 @@ public class Run {
 			 */ Console console = System.console();
 
 			String title = "Discord Bot";
-			for (int i = 0; i < args.length; i++) {
-				if (args[i].toLowerCase().contains("title:")) {
-					title = args[i].replaceAll("[-\"]", "").replaceAll("(?i)title:", "");
+			for (String arg : args) {
+				if (arg.toLowerCase().contains("title:")) {
+					title = arg.replaceAll("[-\"]", "").replaceAll("(?i)title:", "");
 					break;
 				}
 			}
