@@ -2,20 +2,25 @@
 
 Discord bot I've made for a specific server. Its features mostly have to do with a mobile game called "Dragon Ball Legends".
 
-Not quite meant to be used or be useful, only up so server members can look at it or add to it.
+Not meant to be used or be useful, only public so server members can look at it or add to it.
 
 Notes:
 ---------------------------------
 The classes in main are implementation specific, you'll want to change some of them as needed (the MessageCreateEventHandler in particular), the rest should work as is, but you should modify their messages or add more to them.
 
-You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created for certain things, but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
+You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created for certain things, 
+but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
-This bot was made for a single server and stores its data on discord, I didn't consider it getting used for multiple servers or the case where you want the storage to be local only.
+Selenium was added to interact with some websites, remove it from pom.xml if you don't need its features as it greatly increases
+the size, it will not interfere with the running of the app if you catch the relevant exceptions.
+
+This bot was made for use on single servers and stores its data on discord (online/local toggle is in the process of being finished), and
+isn't made to handle cases where you're running it with multiple servers (storage is completely shared), to keep things simple.
  
-Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the framework is switching 
+Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the API is switching 
 to java 11 soon.
 
-Also works on Linux (tested), but resources have to be next to the bot when exported as a jar, or reconfigured in the Classpath.
+Also works on Linux (tested), but resource locations behave differently, isn't a problem however.
 
 Bot commands:
 ---------------------------------
@@ -47,24 +52,29 @@ Translate:
 - b-translate set (on)/(off)
 - b-translate set (to)/(from-to)
 - b-translate languages
-- b-translate (text)/(reply to message)/(embed)
+- b-translate (text)/(reply to the message)/(embed)
 
 Weather:
 - b-weather (city) *detailed
 
+WebDriver:
+- b-insult (person name) >> (reason)
+
 ChatGPT 3.5:
-- chatgpt activate
+- chatgpt activate (it's off by default)
 - chatgpt deactivate
 - gpt (message)
 - gpt channel on/off
 
 Custom AI:
-- ai
+- ai (message)
 - ai terminate/activate
 
 Bot Control:
 - terminate
 - refresh
+- b-message edit (messageId) (message)
+- b-message delete (messageId)
 
 ### Active
 **1) b-roll(n) (filters)** 

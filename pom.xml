@@ -53,6 +53,8 @@
 			<version>2.15.1</version>
 		</dependency>
 
+		<!--Comment this out if you don't need it as it
+			greatly increases size, won't affect runtime-->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>

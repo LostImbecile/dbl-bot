@@ -137,11 +137,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				return;
 			}
 
-			if (isOwner(msg) && lowCaseTxt.matches("b-message edit(?s).*")) {
-				String st = lowCaseTxt.replace("b-message edit", "").strip();
-				String id = st.substring(0, st.indexOf(" "));
-				String edit = st.substring(st.indexOf(" "));
-				api.getMessageById(id, e.getChannel()).get().edit(edit);
+			if (checkBotMessageControlCommands(msg, lowCaseTxt)) {
+				return;
 			}
 
 			// This is so I can run a test version and a non-test version at the same time
@@ -224,6 +221,29 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			logger.error("Main handler encountered an error.", e1);
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) {
+		if (isOwner(msg) && lowCaseTxt.matches("b-message(?s).*")) {
+			try {
+				if (lowCaseTxt.contains("b-message edit")) {
+					String st = lowCaseTxt.replace("b-message edit", "").strip();
+					String id = st.substring(0, st.indexOf(" "));
+					String edit = st.substring(st.indexOf(" "));
+					api.getMessageById(id, msg.getChannel()).get().edit(edit);
+					return true;
+				}
+				if (lowCaseTxt.contains("b-message delete")) {
+					String st = lowCaseTxt.replace("b-message delete", "").strip();
+					api.getMessageById(st, msg.getChannel()).get().delete();
+					return true;
+				}
+			} catch (Exception e) {
+				Thread.currentThread().interrupt();
+				logger.error("Failed to change or delete a message.", e);
+			}
+		}
+		return false;
 	}
 
 	private boolean isTestServer(Message msg) {
@@ -845,6 +865,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		try {
 			st = FileUtilities.readInputStream(msg.getAttachments().get(0).asInputStream(), "\n");
 		} catch (IOException e) {
+			
 		}
 
 		return msgText.replace("[attachment text replace]", st);
