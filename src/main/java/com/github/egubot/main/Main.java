@@ -33,16 +33,11 @@ public class Main {
 	 * Javacord documentation:
 	 * https://javadoc.io/doc/org.javacord/javacord-api
 	 */
-	@SuppressWarnings("resource")
 	public static void main(String[] args) throws IOException {
 		FallbackLoggerConfiguration.setDebug(false);
 		int exitCode = 0;
 
-		// Current arguments:
-		// dbl_off , test , sendmessages
-		String arguments = String.join(" ", args).toLowerCase();
-		Shared.setTestMode(checkTestmode(arguments));
-		
+		String arguments = checkArguments(args);
 
 		// Important to have all keys, some will be created for
 		// you, and the rest could be ignored.
@@ -55,7 +50,7 @@ public class Main {
 				BotApi.initialise(new DiscordApiBuilder().setToken(token)
 						.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login()
 						.join());
-				
+
 				if (BotApi.getApi().getServers().isEmpty()) {
 					System.out.println(
 							"You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
@@ -88,15 +83,15 @@ public class Main {
 				}
 			} else {
 
-				System.out.println("You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
+				System.out.println(
+						"You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
 
-				addListeners(arguments);
+				addListeners();
 
 				setBotOnline(BotApi.getApi());
 
 				checkSendMessagesFromConsoleArg(arguments);
 			}
-
 		} catch (MissingIntentException e) {
 			logger.fatal("Missing intent. Program will exit.", e);
 			exitCode = 1;
@@ -109,6 +104,15 @@ public class Main {
 		} finally {
 			Shared.getShutdown().initiateShutdown(exitCode);
 		}
+	}
+
+	private static String checkArguments(String[] args) {
+		// Current arguments:
+		// dbl_off , test , sendmessages
+		String arguments = String.join(" ", args).toLowerCase();
+		Shared.setTestMode(checkTestmode(arguments));
+		Shared.setDbLegendsMode(checkDBLegendsMode(arguments));
+		return arguments;
 	}
 
 	private static void initialiseStatus() {
@@ -158,15 +162,14 @@ public class Main {
 		}
 	}
 
-	private static void addListeners(String arguments) throws Exception {
-		boolean dbLegendsMode = checkDBLegendsMode(arguments);
+	private static void addListeners() throws Exception {
 		/*
 		 * Listeners, heart of the bot.
 		 * Customise these yourself, the classes I made are for
 		 * my personal use, best to write your own, but you can
 		 * use these as an example.
 		 */
-		MessageCreateEventHandler messageHandler = new MessageCreateEventHandler(dbLegendsMode);
+		MessageCreateEventHandler messageHandler = new MessageCreateEventHandler();
 		Shared.getShutdown().registerShutdownable(messageHandler);
 		BotApi.getApi().addMessageCreateListener(messageHandler);
 		BotApi.getApi().addReconnectListener(new ReconnectEventHandler());

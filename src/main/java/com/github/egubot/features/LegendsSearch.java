@@ -149,7 +149,7 @@ public class LegendsSearch extends LegendsPool {
 
 	@Override
 	protected List<Characters> getPool(String msgText) {
-		String st = msgText.replace("b-search", "").trim();
+		String st = msgText.replaceFirst("b-search", "").trim();
 		CharacterHash filterPool;
 		CharacterHash namePool;
 

@@ -25,11 +25,12 @@ public class StatusManager implements Shutdownable {
 	protected boolean testMode;
 	protected DiscordApi api;
 
-	private boolean isStatusMsgSet = false;
+	private boolean isStatusMsgSet;
 
 	public StatusManager() {
 		this.api = BotApi.getApi();
 		this.testMode = Shared.isTestMode();
+		this.isStatusMsgSet = Shared.isTestMode();
 		try {
 			statusMessage = api.getMessageById(statusMessageID, api.getTextChannelById(statusChannelID).get()).get();
 		} catch (Exception e) {
@@ -144,7 +145,7 @@ public class StatusManager implements Shutdownable {
 
 	public void changeActivity() {
 		try {
-			if (!isStatusMsgSet && !testMode)
+			if (!isStatusMsgSet)
 				updateStatusMessage();
 
 			if (!testMode)
@@ -190,6 +191,8 @@ public class StatusManager implements Shutdownable {
 	private void updateStatusMessage() {
 		// Have your message be written as: Type>>>Message
 		// You don't need to provide a type
+		if(testMode)
+			return;
 		String separator = ">>>";
 		try {
 			activityMsgContent = api.getMessageById(activityMsgID, api.getTextChannelById(statusChannelID).get()).get()

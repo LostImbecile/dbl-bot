@@ -12,7 +12,7 @@ public class ReconnectEventHandler implements ReconnectListener{
 	
 	@Override
 	public void onReconnect(ReconnectEvent event) {
-		Shared.getStatus().changeActivity();;
+		Shared.getStatus().changeActivity();
 		logger.warn("Bot reconnected successfully and is active.");
 	}
 

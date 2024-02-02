@@ -86,7 +86,7 @@ public class LegendsRoll extends LegendsPool {
 	}
 
 	protected List<Characters> getPool(String msgText) {
-		String st = msgText.replace("b-roll", "");
+		String st = msgText.replaceFirst("b-roll", "");
 		ArrayList<Characters> pool;
 
 		// Remove number in b-rolln if present

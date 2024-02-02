@@ -10,6 +10,10 @@ public class Shared {
 	private static StatusManager status;
 	private static Scanner input = new Scanner(System.in);
 	private static boolean testMode = false;
+	private static boolean dbLegendsMode = true;
+	
+	private Shared() {
+	}
 
 	public static ShutdownManager getShutdown() {
 		return shutdown;
@@ -41,6 +45,14 @@ public class Shared {
 
 	public static void setTestMode(boolean testMode) {
 		Shared.testMode = testMode;
+	}
+
+	public static boolean isDbLegendsMode() {
+		return dbLegendsMode;
+	}
+
+	public static void setDbLegendsMode(boolean dbLegendsMode) {
+		Shared.dbLegendsMode = dbLegendsMode;
 	}
 
 }
