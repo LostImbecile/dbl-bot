@@ -24,12 +24,7 @@ public class SendMessagesFromConsole {
 		Scanner in = Shared.getSystemInput();
 		ArrayList<Abbreviations> emojis = (ArrayList<Abbreviations>) getEmojis();
 
-		String testChannelID = KeyManager.getID("Test_Channel_ID");
-		if (!api.getTextChannelById(testChannelID).isPresent()) {
-			System.out.println("No default starting channel was set, enter a channel ID below:");
-			KeyManager.updateKeys("Test_Channel_ID", in.nextLine(), KeyManager.IDS_FILE_NAME);
-			testChannelID = KeyManager.getID("Test_Channel_ID");
-		}
+		String testChannelID = getTestChannelID(api, in);
 
 		try {
 			String channelID = testChannelID, message = "";
@@ -74,6 +69,16 @@ public class SendMessagesFromConsole {
 		} catch (NoSuchElementException e) {
 			System.err.println("\nSomething invalid was entered. Program will need to exit.");
 		}
+	}
+
+	private static String getTestChannelID(DiscordApi api, Scanner in) {
+		String testChannelID = KeyManager.getID("Test_Channel_ID");
+		if (!api.getTextChannelById(testChannelID).isPresent()) {
+			System.out.println("No default starting channel was set, enter a channel ID below:");
+			KeyManager.updateKeys("Test_Channel_ID", in.nextLine(), KeyManager.idsFileName);
+			testChannelID = KeyManager.getID("Test_Channel_ID");
+		}
+		return testChannelID;
 	}
 
 	private static String addNewlines(String message) {

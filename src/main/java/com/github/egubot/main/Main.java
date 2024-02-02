@@ -63,7 +63,7 @@ public class Main {
 				}
 			} catch (Exception e1) {
 				logger.error("Invalid token. Exiting.");
-				KeyManager.updateKeys("Discord_API_Key", "-1", KeyManager.TOKENS_FILE_NAME);
+				KeyManager.updateKeys("Discord_API_Key", "-1", KeyManager.tokensFileName);
 				Shared.getShutdown().initiateShutdown(1);
 			}
 

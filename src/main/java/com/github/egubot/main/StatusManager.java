@@ -54,7 +54,7 @@ public class StatusManager implements Shutdownable {
 						try {
 							statusMessageID = api.getTextChannelById(KeyManager.getID("Status_Channel_ID")).get()
 									.sendMessage("status").join().getIdAsString();
-							KeyManager.updateKeys("Status_Message_ID", statusMessageID, KeyManager.IDS_FILE_NAME);
+							KeyManager.updateKeys("Status_Message_ID", statusMessageID, KeyManager.idsFileName);
 
 							statusMessage = api
 									.getMessageById(statusMessageID, api.getTextChannelById(statusChannelID).get())
@@ -65,7 +65,7 @@ public class StatusManager implements Shutdownable {
 					} else {
 						System.out.println("\nAlways skip this? y/n");
 						if (in.nextLine().equalsIgnoreCase("y")) {
-							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.IDS_FILE_NAME);
+							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.idsFileName);
 						}
 					}
 				}
@@ -84,7 +84,7 @@ public class StatusManager implements Shutdownable {
 			String id;
 
 			id = in.nextLine();
-			KeyManager.updateKeys("Status_Channel_ID", id, KeyManager.IDS_FILE_NAME);
+			KeyManager.updateKeys("Status_Channel_ID", id, KeyManager.idsFileName);
 
 		}
 
@@ -214,7 +214,7 @@ public class StatusManager implements Shutdownable {
 						+ "\nNote: Send a message in your status channel and copy its id.");
 
 				id = in.nextLine();
-				KeyManager.updateKeys("Activity_Msg_ID", id, KeyManager.IDS_FILE_NAME);
+				KeyManager.updateKeys("Activity_Msg_ID", id, KeyManager.idsFileName);
 
 				activityMsgID = KeyManager.getID("Activity_Msg_ID");
 

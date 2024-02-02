@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -24,9 +25,10 @@ import org.javacord.api.entity.message.Messageable;
 import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.main.BotApi;
 import com.github.egubot.main.KeyManager;
+import com.github.egubot.shared.FileUtilities;
 
 public class OnlineDataManager implements DataManager {
-	private static final Logger logger = LogManager.getLogger(DataManager.class.getName());
+	private static final Logger logger = LogManager.getLogger(OnlineDataManager.class.getName());
 	private DiscordApi api;
 
 	private String storageChannelID = KeyManager.getID("Storage_Channel_ID");
@@ -40,13 +42,13 @@ public class OnlineDataManager implements DataManager {
 	// This file is created to send the data to discord
 	private File tempDataFile = new File("TempData.txt");
 
-	private List<String> data = Collections.synchronizedList(new ArrayList<>(100));
+	private List<String> data = Collections.synchronizedList(new ArrayList<String>(100));
 	private int lockedDataEndIndex = 0;
 	private String lastUpdateDate = null;
 	private String dataName;
 
-	public OnlineDataManager(String storageKey, String dataName, InputStream localInput,
-			boolean verbose) throws Exception {
+	public OnlineDataManager(String storageKey, InputStream localInput, String dataName, boolean verbose)
+			throws Exception {
 		this.api = BotApi.getApi();
 		this.storageKey = storageKey;
 		this.storageMsgID = KeyManager.getID(storageKey);
@@ -66,16 +68,13 @@ public class OnlineDataManager implements DataManager {
 	}
 
 	private void findLocalInput(String resourcePath) {
-		try {
-			localInputStream = new BufferedInputStream(getClass().getResourceAsStream(resourcePath));
-			if (localInputStream == null) {
-				localInputStream = new BufferedInputStream(new FileInputStream(new File(resourcePath)));
-			}
-		} catch (Exception e) {
+		InputStream fileInputStream = FileUtilities.getFileInputStream(resourcePath, false);
+		if (fileInputStream == null) {
 			System.err
 					.println("\nWarning: no local " + dataName + " data. Expected " + resourcePath + " to be present.");
-			logger.warn("No local data.", e);
-			localInputStream = null;
+			logger.warn("No local data.");
+		} else {
+			localInputStream = new BufferedInputStream(fileInputStream);
 		}
 	}
 
@@ -94,7 +93,7 @@ public class OnlineDataManager implements DataManager {
 	private void checkStorageMessage(boolean verbose) throws Exception {
 		if (!storageChannelID.equals("-1")) {
 			uploadLocalData(true);
-			KeyManager.updateKeys(storageKey, storageMsgID, KeyManager.IDS_FILE_NAME);
+			KeyManager.updateKeys(storageKey, storageMsgID, KeyManager.idsFileName);
 			storageMsgID = KeyManager.getID(storageKey);
 			try {
 				storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
@@ -108,7 +107,7 @@ public class OnlineDataManager implements DataManager {
 		}
 	}
 
-	private void uploadLocalData(boolean fromFile) throws Exception {
+	private synchronized void uploadLocalData(boolean fromFile) throws Exception {
 		String newID = "";
 		String oldID = "";
 		try {
@@ -121,19 +120,11 @@ public class OnlineDataManager implements DataManager {
 				oldID = "-1";
 			}
 
-			// System.out.println(getInputStream().available()/1024 + "KB");
-
 			newID = api.getTextChannelById(storageChannelID).get()
 					.sendMessage(getInputStream(), dataName.replace(" ", "_") + ".txt").join().getIdAsString();
 
 			try {
-				if (storageMessage != null) {
-					storageMessage.edit(newID).join();
-				} else {
-					storageMsgID = newID;
-					storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get())
-							.get();
-				}
+				updateStorageMessageContent(newID);
 			} catch (Exception e) {
 				newID = oldID;
 			}
@@ -155,6 +146,15 @@ public class OnlineDataManager implements DataManager {
 		}
 	}
 
+	private void updateStorageMessageContent(String newID) throws InterruptedException, ExecutionException {
+		if (storageMessage != null) {
+			storageMessage.edit(newID).join();
+		} else {
+			storageMsgID = newID;
+			storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).get();
+		}
+	}
+
 	private void checkStorageChannel() throws Exception {
 		if (!storageChannelID.equals("-1")) {
 			if (api.getTextChannelById(storageChannelID).isPresent()) {
@@ -165,7 +165,7 @@ public class OnlineDataManager implements DataManager {
 				Scanner in = new Scanner(System.in);
 
 				storageChannelID = in.nextLine();
-				KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.IDS_FILE_NAME);
+				KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);
 				storageChannelID = KeyManager.getID("Storage_Channel_ID");
 			}
 		}
@@ -181,16 +181,12 @@ public class OnlineDataManager implements DataManager {
 				newID = storageMsgID;
 			}
 
-			String[] date;
-
 			Message newMessage = api.getMessageById(newID, api.getTextChannelById(storageChannelID).get()).join();
 			InputStream attachment = newMessage.getAttachments().get(0).asInputStream();
 
 			setInputStream(new BufferedInputStream(attachment));
 
-			// Date
-			date = newMessage.getCreationTimestamp().toString().split("[Tz.]");
-			lastUpdateDate = date[0] + ", " + date[1].substring(0, date[1].length() - 3);
+			getLastUpdateDate(newMessage);
 
 			if (verbose) {
 				System.out.println(
@@ -200,7 +196,7 @@ public class OnlineDataManager implements DataManager {
 			readInput();
 
 			// Avoid some cases where it's empty
-			setInputStream(new BufferedInputStream(attachment));
+			setInputStream(new BufferedInputStream(FileUtilities.toInputStream(data)));
 
 		} catch (IOException | NullPointerException e) {
 			if (verbose) {
@@ -211,6 +207,13 @@ public class OnlineDataManager implements DataManager {
 
 			readInput();
 		}
+	}
+
+	private void getLastUpdateDate(Message newMessage) {
+		// Date
+		String[] date;
+		date = newMessage.getCreationTimestamp().toString().split("[Tz.]");
+		lastUpdateDate = date[0] + ", " + date[1].substring(0, date[1].length() - 3);
 	}
 
 	private void readInput() throws IOException {

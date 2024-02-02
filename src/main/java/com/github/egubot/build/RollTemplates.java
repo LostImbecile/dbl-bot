@@ -9,11 +9,11 @@ import com.github.egubot.storage.DataManagerSwitcher;
 
 public class RollTemplates extends DataManagerSwitcher {
 	private static String idKey = "Templates_Message_ID";
-	private static String resourcePath = "/RollTemplates.txt";
+	private static String resourcePath = "RollTemplates.txt";
 
 	private LegendsDatabase legendsWebsite;
 
-	public RollTemplates(LegendsDatabase legendsWebsite) throws Exception {
+	public RollTemplates(LegendsDatabase legendsWebsite) {
 		super(idKey, resourcePath, "Filter Templates", true);
 
 		this.legendsWebsite = legendsWebsite;

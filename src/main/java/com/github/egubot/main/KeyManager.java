@@ -17,8 +17,8 @@ import com.github.egubot.shared.FileUtilities;
 
 public class KeyManager {
 	private static final Logger logger = LogManager.getLogger(KeyManager.class.getName());
-	public static final String TOKENS_FILE_NAME = "Tokens.txt";
-	public static final String IDS_FILE_NAME = "IDs.txt";
+	public static String tokensFileName = "Tokens.txt";
+	public static String idsFileName = "IDs.txt";
 
 	private KeyManager() {
 	}
@@ -33,7 +33,7 @@ public class KeyManager {
 		 * Discord_API_Key=wefwefweffw
 		 * ChatGPT_API_Key=ewefewfewfw
 		 */
-		InputStream input = FileUtilities.getFileInputStream(TOKENS_FILE_NAME);
+		InputStream input = FileUtilities.getFileInputStream(tokensFileName, true);
 
 		if (input == null) {
 			System.err.println("Couldn't find or create tokens file");
@@ -45,7 +45,7 @@ public class KeyManager {
 
 	public static String getID(String idKey) {
 		// Add an IDs.txt file in your resources or next to the bot
-		InputStream input = FileUtilities.getFileInputStream(IDS_FILE_NAME);
+		InputStream input = FileUtilities.getFileInputStream(idsFileName, true);
 
 		if (input == null) {
 			System.err.println("Couldn't find or create IDs file");
@@ -97,7 +97,7 @@ public class KeyManager {
 	}
 
 	public static void updateKeys(String key, String id, String fileName) {
-		InputStream input = FileUtilities.getFileInputStream(fileName);
+		InputStream input = FileUtilities.getFileInputStream(fileName, true);
 		ArrayList<KeyValue> keyValues = (ArrayList<KeyValue>) readKeys(input);
 
 		// Update or add the new key-value pair
@@ -137,35 +137,35 @@ public class KeyManager {
 		if (token.isBlank()) {
 			System.out.println("No token, please enter one below:");
 			id = in.nextLine();
-			updateKeys("Discord_API_Key", id, TOKENS_FILE_NAME);
+			updateKeys("Discord_API_Key", id, tokensFileName);
 		} else if (token.equals("-1")) {
 			System.out.println("Invalid token, please enter one below:");
 			id = in.nextLine();
-			updateKeys("Discord_API_Key", id, TOKENS_FILE_NAME);
+			updateKeys("Discord_API_Key", id, tokensFileName);
 		}
 		if (!(testServerID.length() >= 17 && testServerID.matches("[\\d+]+")) && !testServerID.equals("-1")) {
 			System.out.println("No valid storage server ID, please enter one below, or -1 to always skip.");
 			id = in.nextLine();
-			updateKeys("Test_Server_ID", id, IDS_FILE_NAME);
+			updateKeys("Test_Server_ID", id, idsFileName);
 		}
 
 		if (!(storageChannelID.length() >= 17 && storageChannelID.matches("[\\d+]+"))
 				&& !storageChannelID.equals("-1")) {
 			System.out.println("No valid storage channel ID, please enter one below, or -1 to always skip.");
 			id = in.nextLine();
-			updateKeys("Storage_Channel_ID", id, IDS_FILE_NAME);
+			updateKeys("Storage_Channel_ID", id, idsFileName);
 		}
 
 		if (!(statusChannelID.length() >= 17 && statusChannelID.matches("[\\d+]+")) && !statusChannelID.equals("-1")) {
 			System.out.println("No valid status channel ID, please enter one below, or -1 to always skip.");
 			id = in.nextLine();
-			updateKeys("Status_Channel_ID", id, IDS_FILE_NAME);
+			updateKeys("Status_Channel_ID", id, idsFileName);
 		}
 
 	}
 	
 	public static void main(String[] args) {
-		readKeys(FileUtilities.getFileInputStream(IDS_FILE_NAME));
+		readKeys(FileUtilities.getFileInputStream(idsFileName, true));
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.github.egubot.storage;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -24,6 +25,7 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 	private String resourcePath;
 	private String dataName;
 	private boolean verbose;
+	private InputStream localInput = null;
 
 	public DataManagerSwitcher(String dataName) {
 		this.dataName = dataName;
@@ -41,13 +43,26 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 		toggleManager();
 	}
 
+	public DataManagerSwitcher(String storageKey, String resourcePath, InputStream localInput, boolean verbose) {
+		this.storageKey = storageKey;
+		this.resourcePath = resourcePath;
+		this.localInput = localInput;
+		this.verbose = verbose;
+		this.isOnlineCapable = true;
+		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
+		toggleManager();
+	}
+
 	public synchronized void toggleManager() {
 		if (isOnline() && !isOnlineCapable)
 			logger.warn("Not enough info to use online storage.");
 
 		if (isOnline() && isOnlineCapable) {
 			try {
-				manager = new OnlineDataManager(storageKey, resourcePath, dataName, verbose);
+				if (localInput == null)
+					manager = new OnlineDataManager(storageKey, resourcePath, dataName, verbose);
+				else
+					manager = new OnlineDataManager(storageKey, localInput, dataName, verbose);
 			} catch (Exception e) {
 				isOnlineCapable = false;
 				logger.error(e);

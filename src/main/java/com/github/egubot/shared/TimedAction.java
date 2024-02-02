@@ -5,15 +5,11 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/*
- * This class has bot specific implementations, while
- * it could be used for other things (basic timers mainly)
- * you'll likely need to change it to suit your needs first.
- * 
- * Important methods are documented, the rest are either
- * straightforward or implementation specific.
- */
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class TimedAction {
+	public static final Logger logger = LogManager.getLogger(TimedAction.class.getName());
 	private volatile boolean isTimerOn;
 	private volatile boolean isRecurringTimerOn;
 	private Timer timer = new Timer(true);
@@ -81,11 +77,7 @@ public class TimedAction {
 		setSingeTimerTask(task);
 		isTimerOn = true;
 
-		try {
-			timer.schedule(task, length);
-		} catch (Exception e) {
-
-		}
+		timer.schedule(task, length);
 	}
 
 	/**
@@ -103,21 +95,15 @@ public class TimedAction {
 		if (adjustDate)
 			adjustDate(tillNow);
 
-		// System.out.println("Recurring timer started");
 		setRecurringTimerTask(task);
 		isRecurringTimerOn = true;
 
-		try {
-			if (startTime != null) {
-				// System.out.println("Scheduled for: " + startTime);
-				timer.scheduleAtFixedRate(task, startTime, length);
-			} else {
-				// System.out.println("Active in " + length + " hours");
-				timer.scheduleAtFixedRate(task, length, length);
-			}
-		} catch (Exception e) {
-
+		if (startTime != null) {
+			timer.scheduleAtFixedRate(task, startTime, length);
+		} else {
+			timer.scheduleAtFixedRate(task, length, length);
 		}
+
 	}
 
 	/**
@@ -145,12 +131,12 @@ public class TimedAction {
 		TimerTask timertask = new TimerTask() {
 			@Override
 			public void run() {
+				isTimerOn = false;
 				try {
 					task.run();
-					isTimerOn = false;
 				} catch (Exception e) {
-					// Set to false so the task can run again
-					isTimerOn = false;
+					logger.error("Timer task failed to run.", e);
+
 					if (maxRetries > 0) {
 						System.out.println("Retrying failed task...");
 						startOneInstanceSingleTimer(task, maxRetries);
@@ -171,12 +157,12 @@ public class TimedAction {
 		TimerTask timertask = new TimerTask() {
 			@Override
 			public void run() {
+				isRecurringTimerOn = false;
 				try {
 					task.run();
 				} catch (Exception e) {
+					logger.error("Timer task failed to run.", e);
 				}
-				isRecurringTimerOn = false;
-
 			}
 		};
 		startRecurringTimer(timertask, adjustDate, tillNow);
@@ -199,14 +185,9 @@ public class TimedAction {
 	public void setStartTime(Date startTime, Instant otherTimeFormat) {
 		if (startTime == null && otherTimeFormat != null) {
 			this.startTime = Date.from(otherTimeFormat);
-			// System.out.println("Date adjusted to: " + this.startTime.toString());
 		} else {
-			// Whether null or not
+			// Can be null here, intended
 			this.startTime = startTime;
-			// if (startTime != null)
-			// System.out.println("Date adjusted to: " + this.startTime.toString());
-			// else
-			// System.out.println("Date is null");
 		}
 	}
 

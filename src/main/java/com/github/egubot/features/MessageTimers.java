@@ -8,7 +8,7 @@ import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.shared.TimedAction;
 
-public class MessageTimers extends TimedAction{
+public class MessageTimers extends TimedAction {
 
 	public MessageTimers(long length, Date startTime, Instant otherTimeFormat) {
 		super(length, startTime, otherTimeFormat);
@@ -24,8 +24,12 @@ public class MessageTimers extends TimedAction{
 
 			@Override
 			public void run() {
-				e.sendMessage(text);
-				setTimerOn(false);
+				try {
+					setTimerOn(false);
+					e.sendMessage(text);
+				} catch (Exception e) {
+					logger.error("Failed to send message", e);
+				}
 			}
 		};
 
@@ -44,7 +48,11 @@ public class MessageTimers extends TimedAction{
 
 			@Override
 			public void run() {
-				e.sendMessage(text);
+				try {
+					e.sendMessage(text);
+				} catch (Exception e) {
+					logger.error("Failed to send message", e);
+				}
 			}
 		};
 
@@ -63,8 +71,12 @@ public class MessageTimers extends TimedAction{
 
 			@Override
 			public void run() {
-				e.sendMessage(text).join();
-				cancelRecurringTimer();
+				try {
+					cancelRecurringTimer();
+					e.sendMessage(text).join();
+				} catch (Exception e) {
+					logger.error("Failed to send message", e);
+				}
 			}
 		};
 
@@ -82,7 +94,11 @@ public class MessageTimers extends TimedAction{
 
 			@Override
 			public void run() {
-				e.sendMessage(text);
+				try {
+					e.sendMessage(text);
+				} catch (Exception e) {
+					logger.error("Failed to send message", e);
+				}
 			}
 		};
 

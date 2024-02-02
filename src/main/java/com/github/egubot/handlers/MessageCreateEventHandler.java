@@ -273,7 +273,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		 * 
 		 */
 		autoRespond = new AutoRespond();
-		
+
 		if (dbLegendsMode) {
 			// Fetches data from the legends website and initialises
 			// classes that are based on it, or doesn't if that fails
@@ -290,12 +290,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 						new Thread(() -> {
 							try {
 
-								new OnlineDataManager("Website_Backup_Msg_ID", "website_backup",
+								new OnlineDataManager("Website_Backup_Msg_ID",
 										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/characters"),
-										false).writeData(null);
+										"website_backup", false).writeData(null);
 
 							} catch (Exception e) {
-								
+								logger.error("Failed to upload website backup", e);
 							}
 
 						}).start();
@@ -306,8 +306,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				} else {
 					logger.warn("Character database missing information. Trying Backup...");
 
-					OnlineDataManager backup = new OnlineDataManager("Website_Backup_Msg_ID", "Website Backup",
-							LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), true);
+					OnlineDataManager backup = new OnlineDataManager("Website_Backup_Msg_ID",
+							LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), "Website Backup", true);
 
 					legendsWebsite = new LegendsDatabase(backup.getData());
 					if (!legendsWebsite.isDataFetchSuccessfull()) {
@@ -450,8 +450,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		if (isTranslateOn) {
 
 			try {
-				if (lowCaseTxt.length() < 140
-						&& !translate.detectLanguage(lowCaseTxt, true).matches("en|Error.*")) {
+				if (lowCaseTxt.length() < 140 && !translate.detectLanguage(lowCaseTxt, true).matches("en|Error.*")) {
 					msg.getChannel().sendMessage(translate.post(lowCaseTxt, true));
 				}
 
@@ -570,7 +569,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private void terminate(Message msg) {
 		boolean isOwner = UserInfoUtilities.isOwner(msg);
-		
+
 		String st = msg.getContent().toLowerCase().replace("terminate", "").strip();
 		if (st.isBlank() || st.equals(api.getYourself().getMentionTag())) {
 			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
@@ -679,7 +678,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		String lowCaseTxt = msgText.toLowerCase();
 		if (lowCaseTxt.matches("b-response(?s).*")) {
 			boolean isOwner = UserInfoUtilities.isOwner(msg);
-			
+
 			if (lowCaseTxt.contains("b-response create")) {
 				if (!lowCaseTxt.contains("sleep"))
 					autoRespond.writeResponse(msgText, msg, isOwner);

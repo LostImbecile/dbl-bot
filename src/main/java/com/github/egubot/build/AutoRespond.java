@@ -22,7 +22,7 @@ import com.google.gson.JsonSyntaxException;
 public class AutoRespond extends DataManagerSwitcher {
 
 	private static final Gson gson = new Gson();
-	private static String resourcePath = "/MessageResponses.txt";
+	private static String resourcePath = "MessageResponses.txt";
 	private static String parameterSplit = ">>>>>>>>>>";
 	private static String idKey = "Responses_Message_ID";
 	private ResponseList autoRespondData;
