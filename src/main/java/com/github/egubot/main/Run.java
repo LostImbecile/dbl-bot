@@ -28,7 +28,7 @@ public class Run {
 			if (console == null && !GraphicsEnvironment.isHeadless()) {
 				try {
 					Runtime.getRuntime().exec(
-							new String[] { "cmd", "/K", "Start \"" + title + "\" java -Xms40m -Xmx200m -jar bot.jar "
+							new String[] { "cmd", "/K", "Start \"" + title + "\" java -Xms50m -Xmx300m -jar bot.jar "
 									+ String.join(" ", args) + "&& exit", });
 				} catch (Exception e) {
 					// If you're not on windows just run the bot through the

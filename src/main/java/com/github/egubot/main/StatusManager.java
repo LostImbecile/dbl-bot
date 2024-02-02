@@ -26,6 +26,8 @@ public class StatusManager implements Shutdownable {
 	protected DiscordApi api;
 
 	private boolean isStatusMsgSet;
+	// In case of exit when a different instance is online
+	private boolean isStatusChangedToOnline = false;
 
 	public StatusManager() {
 		this.api = BotApi.getApi();
@@ -119,6 +121,7 @@ public class StatusManager implements Shutdownable {
 	public void setStatusOnline() {
 		if (!testMode) {
 			try {
+				isStatusChangedToOnline = true;
 				statusMessage.edit("online").join();
 			} catch (NullPointerException e1) {
 
@@ -130,7 +133,7 @@ public class StatusManager implements Shutdownable {
 	}
 
 	public void setStatusOffline() {
-		if (!testMode) {
+		if (!testMode && isStatusChangedToOnline) {
 			System.out.println("Updating status....");
 			try {
 				statusMessage.edit("offline").join();

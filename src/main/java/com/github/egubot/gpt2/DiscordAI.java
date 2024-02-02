@@ -55,7 +55,7 @@ public class DiscordAI implements AutoCloseable {
 				st = st.substring(0, st.length() - 2);
 			return st;
 		} catch (Exception e) {
-			// e.printStackTrace();
+			// logger.error(e);
 			return "Error: " + e.getMessage();
 		}
 	}
@@ -64,7 +64,6 @@ public class DiscordAI implements AutoCloseable {
 		try {
 			httpClient.close();
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 

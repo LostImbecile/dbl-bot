@@ -32,6 +32,7 @@ import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;
 import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.UserInfoUtilities;
+import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.DataManagerSwitcher;
 
 public class MessageCreateEventHandler implements MessageCreateListener, Shutdownable {
@@ -58,6 +59,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private boolean testMode;
 
+	private boolean isUserTimerOn = ConfigManager.getBooleanProperty("User_Target_Enable");
 	private MessageTimers testTimer = null;
 	private MessageTimers userTargetTimer = null;
 	private MessageTimers deadChatTimer = null;
@@ -298,6 +300,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 		// Checks the first 50 messages in all channels in the server
 		// to see the last time it replied with a specific message
+		if (!isUserTimerOn)
+			return;
 		try {
 			sirioMsgContent = api.getMessageById(userTargetMsgID, api.getTextChannelById(userTargetChannelID).get())
 					.get().getContent();

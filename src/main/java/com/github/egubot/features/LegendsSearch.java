@@ -140,7 +140,7 @@ public class LegendsSearch extends LegendsPool {
 				msg.edit(embeds).join();
 				messageComponentInteraction.acknowledge();
 			} catch (Exception e) {
-				// e.printStackTrace();
+				// logger.error(e);
 			}
 
 		}

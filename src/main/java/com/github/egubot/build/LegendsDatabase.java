@@ -9,6 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.Tags;
 
@@ -18,6 +21,7 @@ import com.github.egubot.objects.Tags;
  * this specific one.
  */
 public class LegendsDatabase {
+	private static final Logger logger = LogManager.getLogger(LegendsDatabase.class.getName());
 	private ArrayList<Characters> charactersList = new ArrayList<>(500);
 	private ArrayList<Tags> tags = new ArrayList<>(100);
 	private ArrayList<String> lines = new ArrayList<>(1000);
@@ -63,17 +67,13 @@ public class LegendsDatabase {
 		return lines;
 	}
 
-	public void getData() throws IOException {
+	public void getData() {
 		getSpecialTags();
 		getAllTags(lines);
 
 		// If 0 then data for all units was fetched, o.w, there's a problem
 		// 546 is the current unit count as an additional measure
-		if (getCharacters(lines) == 0 && charactersList.size() > 545) {
-			setDataFetchSuccessfull(true);
-		} else {
-			setDataFetchSuccessfull(false);
-		}
+		setDataFetchSuccessfull(getCharacters(lines) == 0 && charactersList.size() > 545);
 
 	}
 
@@ -86,8 +86,6 @@ public class LegendsDatabase {
 			while ((line = br.readLine()) != null) {
 				lines.add(line.replace("é", "e"));
 			}
-			// System.out.println("Lines read: " + lines.size());
-
 		}
 	}
 
@@ -302,7 +300,7 @@ public class LegendsDatabase {
 				charactersList.get(characterIndex - 1).setCharacterName(st);
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -313,7 +311,7 @@ public class LegendsDatabase {
 			st = st.substring(st.indexOf("=") + 1).replace("\"", "").strip();
 			charactersList.get(characterIndex - 1).setImageLink(st);
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -324,7 +322,7 @@ public class LegendsDatabase {
 			charactersList.get(characterIndex - 1).setGameID(st);
 			evaluateReleaseDate(st, characterIndex);
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -334,7 +332,7 @@ public class LegendsDatabase {
 			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 			evaluateLFStatus(st, characterIndex);
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -344,7 +342,7 @@ public class LegendsDatabase {
 			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 			evaluateZenkaiStatus(st, characterIndex);
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -354,7 +352,7 @@ public class LegendsDatabase {
 			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 			charactersList.get(characterIndex - 1).setRarity(st);
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -364,7 +362,7 @@ public class LegendsDatabase {
 			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
 			charactersList.get(characterIndex - 1).setColour(st);
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -380,7 +378,7 @@ public class LegendsDatabase {
 				return 1;
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 		return 0;
 	}
@@ -394,7 +392,7 @@ public class LegendsDatabase {
 				tags.get(12).getCharacters().put(charactersList.get(characterIndex - 1));
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -407,7 +405,7 @@ public class LegendsDatabase {
 				tags.get(13).getCharacters().put(charactersList.get(characterIndex - 1));
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 
@@ -418,7 +416,7 @@ public class LegendsDatabase {
 					.replace("Super Saiyan ", "SSJ").replace("SSJGod", "SSG").replace("SSG SS", "SSGSS").strip();
 			return st;
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 			return "Error";
 		}
 	}
@@ -474,7 +472,7 @@ public class LegendsDatabase {
 				tags.get(24).getCharacters().put(charactersList.get(characterIndex - 1));
 			}
 		} catch (StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
+			logger.error(e);
 		}
 	}
 

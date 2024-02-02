@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.openai.chatgpt.ChatGPT;
 
 public class ChatGPTFacade {
+	private static final Logger logger = LogManager.getLogger(ChatGPTFacade.class.getName());
 	private List<String> chatgptConversation = Collections.synchronizedList(new ArrayList<String>(20));
 	private boolean isChatGPTOn = false;
 	private String chatGPTActiveChannelID = "";
@@ -55,10 +58,10 @@ public class ChatGPTFacade {
 							}
 						}
 					} catch (Exception e1) {
-						//
+						logger.error(e1);
 					}
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					logger.error(e1);
 				}
 
 				return true;

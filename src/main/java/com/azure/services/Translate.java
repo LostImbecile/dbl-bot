@@ -202,7 +202,7 @@ public class Translate {
 					"J’aimerais vraiment conduire votre voiture autour du pâté de maisons plusieurs fois!", true));
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			
 		}
 	}
 }

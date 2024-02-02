@@ -45,9 +45,9 @@ public class LegendsCommandsFacade implements Shutdownable {
 			if (isLegendsMode) {
 				templates = new LegendsTemplatesFacade(legendsWebsite);
 
-				legendsRoll = new LegendsRoll(legendsWebsite, templates.getTemplates().getRollTemplates());
+				legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
 
-				legendsSearch = new LegendsSearch(legendsWebsite, templates.getTemplates().getRollTemplates());
+				legendsSearch = new LegendsSearch(legendsWebsite, templates.getRollTemplates());
 			}
 		}
 	}
@@ -56,12 +56,6 @@ public class LegendsCommandsFacade implements Shutdownable {
 		String channelID = msg.getChannel().getIdAsString();
 		if (isLegendsMode) {
 			if (lowCaseTxt.matches("b-(?s).*")) {
-
-				if (lowCaseTxt.equals("b-website upload")) {
-					uploadLegendsWebsiteBackup();
-					msg.getChannel().sendMessage("Done");
-					return true;
-				}
 
 				if (templates.checkTemplateCommands(msg, lowCaseTxt)) {
 					return true;
@@ -81,58 +75,84 @@ public class LegendsCommandsFacade implements Shutdownable {
 
 				} catch (Exception e1) {
 					msg.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
+					logger.error("Legends commands error", e1);
 					return true;
 				}
 
-				if (lowCaseTxt.equals("b-character send")) {
-					SendObjects.sendCharacters(msg.getChannel(), legendsWebsite.getCharactersList());
+				if(checkObjectCommands(msg, lowCaseTxt))
 					return true;
-				}
-
-				if (lowCaseTxt.equals("b-character printemptyids")) {
-					CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
-					return true;
-				}
-
-				if (lowCaseTxt.equals("b-tag send")) {
-					SendObjects.sendTags(msg.getChannel(), legendsWebsite.getTags());
-					return true;
-				}
 
 			}
 
-			if (channelID.equals(wheelChannelID)) {
-				if (lowCaseTxt.equals("skip")) {
-					msg.getChannel().sendMessage("Disabled roll animation :ok_hand:");
-					isAnimated = false;
-					return true;
-				}
+			if(checkWheelChannel(msg, lowCaseTxt, channelID))
+				return true;
 
-				if (lowCaseTxt.equals("unskip")) {
-					msg.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
-					isAnimated = true;
-					return true;
-				}
+			if(checkAnimationCommands(msg, lowCaseTxt))
+				return true;
+		}
 
-				if (lowCaseTxt.equals("roll")) {
-					legendsRoll.rollCharacters("b-roll6 t1", msg.getChannel(), isAnimated);
-					return true;
-				}
-			}
+		return false;
+	}
 
-			if (lowCaseTxt.equals("disable roll animation")) {
-				msg.getChannel().sendMessage("Disabled");
+	private boolean checkObjectCommands(Message msg, String lowCaseTxt) {
+		if (lowCaseTxt.equals("b-character send")) {
+			SendObjects.sendCharacters(msg.getChannel(), legendsWebsite.getCharactersList());
+			return true;
+		}
+
+		if (lowCaseTxt.equals("b-character printemptyids")) {
+			CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
+			return true;
+		}
+
+		if (lowCaseTxt.equals("b-tag send")) {
+			SendObjects.sendTags(msg.getChannel(), legendsWebsite.getTags());
+			return true;
+		}
+		
+		if (lowCaseTxt.equals("b-website upload")) {
+			uploadLegendsWebsiteBackup();
+			msg.getChannel().sendMessage("Done");
+			return true;
+		}
+		
+		return false;
+	}
+
+	private boolean checkAnimationCommands(Message msg, String lowCaseTxt) {
+		if (lowCaseTxt.equals("disable roll animation")) {
+			msg.getChannel().sendMessage("Disabled");
+			isAnimated = false;
+			return true;
+		}
+
+		if (lowCaseTxt.equals("enable roll animation")) {
+			msg.getChannel().sendMessage("Enabled");
+			isAnimated = true;
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkWheelChannel(Message msg, String lowCaseTxt, String channelID) {
+		if (channelID.equals(wheelChannelID)) {
+			if (lowCaseTxt.equals("skip")) {
+				msg.getChannel().sendMessage("Disabled roll animation :ok_hand:");
 				isAnimated = false;
 				return true;
 			}
 
-			if (lowCaseTxt.equals("enable roll animation")) {
-				msg.getChannel().sendMessage("Enabled");
+			if (lowCaseTxt.equals("unskip")) {
+				msg.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
 				isAnimated = true;
 				return true;
 			}
-		}
 
+			if (lowCaseTxt.equals("roll")) {
+				legendsRoll.rollCharacters("b-roll6 t1", msg.getChannel(), isAnimated);
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -176,7 +196,8 @@ public class LegendsCommandsFacade implements Shutdownable {
 
 	@Override
 	public void shutdown() {
-		templates.shutdown();
+		if (templates != null)
+			templates.shutdown();
 	}
 
 	@Override

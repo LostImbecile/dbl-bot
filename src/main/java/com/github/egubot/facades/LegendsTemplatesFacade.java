@@ -1,5 +1,7 @@
 package com.github.egubot.facades;
 
+import java.util.List;
+
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.LegendsDatabase;
@@ -7,9 +9,9 @@ import com.github.egubot.build.RollTemplates;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.shared.UserInfoUtilities;
 
-public class LegendsTemplatesFacade implements Shutdownable{
+public class LegendsTemplatesFacade implements Shutdownable {
 	private RollTemplates templates = null;
-	
+
 	public LegendsTemplatesFacade(LegendsDatabase legendsWebsite) {
 		templates = new RollTemplates(legendsWebsite);
 	}
@@ -46,17 +48,14 @@ public class LegendsTemplatesFacade implements Shutdownable{
 		return false;
 	}
 
-	public RollTemplates getTemplates() {
-		return templates;
-	}
-
-	public void setTemplates(RollTemplates templates) {
-		this.templates = templates;
+	public List<String> getRollTemplates() {
+		return templates.getRollTemplates();
 	}
 
 	@Override
 	public void shutdown() {
-		templates.shutdown();
+		if (templates != null)
+			templates.shutdown();
 	}
 
 	@Override
