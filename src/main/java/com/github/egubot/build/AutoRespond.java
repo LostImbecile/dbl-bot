@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.Messageable;
@@ -31,8 +30,8 @@ public class AutoRespond extends DataManagerSwitcher {
 
 	private Random rng = new Random();
 
-	public AutoRespond(DiscordApi api) {
-		super(api, idKey, resourcePath, "Autorespond", true);
+	public AutoRespond() {
+		super(idKey, resourcePath, "Autorespond", true);
 	}
 
 	public boolean respond(String msgText, Message msg) {
@@ -151,7 +150,7 @@ public class AutoRespond extends DataManagerSwitcher {
 			return false;
 		if (attr.isIgnoreAuthor() && UserInfoUtilities.isUserEqual(author, response.getAuthorID()))
 			return false;
-		if (attr.isIgnoreOwner() && (UserInfoUtilities.isOwner(msg) || UserInfoUtilities.isServerOwner(msg)))
+		if (attr.isIgnoreOwner() && UserInfoUtilities.isOwner(msg))
 			return false;
 		if (attr.isIgnoreAdmin() && author.isServerAdmin())
 			return false;

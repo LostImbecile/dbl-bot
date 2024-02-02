@@ -9,16 +9,17 @@ import com.google.gson.JsonParser;
 
 public class JSONUtilities {
 	static Random rng = new Random();
-	static final Gson gson = new Gson();
 
 	public static String prettify(String jsonText) {
-		JsonObject jsonObject = JsonParser.parseString(jsonText).getAsJsonObject();
-
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		
+		JsonObject jsonObject = JsonParser.parseString(jsonText).getAsJsonObject();
+		
 		return gson.toJson(jsonObject);
 	}
 
 	public static String jsonify(String input) {
+		Gson gson = new Gson();
 		String st = gson.toJson(input);
 		return st.substring(1, st.length() - 1);
 		// input = input.replace("\\", "\\\\");
@@ -27,6 +28,7 @@ public class JSONUtilities {
 	}
 
 	public static String dejsonify(String input) {
+		Gson gson = new Gson();
 		return gson.fromJson("\"" + input + "\"", String.class);
 	}
 
@@ -39,9 +41,7 @@ public class JSONUtilities {
 	public static <T> String toJsonPrettyPrint(T object, Class<T> clazz) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        String json = gson.toJson(object, clazz);
-
-        return json;
+        return gson.toJson(object, clazz);
     }
 
 }

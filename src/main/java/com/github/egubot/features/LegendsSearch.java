@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.Messageable;
@@ -18,6 +17,7 @@ import org.javacord.api.interaction.MessageComponentInteraction;
 import org.javacord.api.listener.interaction.MessageComponentCreateListener;
 
 import com.github.egubot.build.LegendsDatabase;
+import com.github.egubot.main.BotApi;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
 
@@ -27,7 +27,7 @@ public class LegendsSearch extends LegendsPool {
 		super(legendsWebsite, rollTemplates);
 	}
 
-	public void search(String msgText, DiscordApi api, Messageable e) {
+	public void search(String msgText, Messageable e) {
 		EmbedBuilder[] embeds = new EmbedBuilder[10];
 		ArrayList<Characters> pool = (ArrayList<Characters>) getPool(msgText);
 		if (pool == null || pool.isEmpty()) {
@@ -72,7 +72,7 @@ public class LegendsSearch extends LegendsPool {
 			MessageComponentCreateListener navigatePageHandler = new NavigatePageHandler(pool, msg.send(e).join(), prev,
 					next);
 
-			api.addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES)
+			BotApi.getApi().addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES)
 					.addRemoveHandler(() -> msg.removeAllComponents()
 							.setContent("Found " + pool.size() + " characters. Page navigation timed out."));
 

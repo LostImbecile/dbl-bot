@@ -9,6 +9,7 @@ import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.shared.Shared;
 
 public class StatusManager implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(StatusManager.class.getName());
@@ -24,19 +25,14 @@ public class StatusManager implements Shutdownable {
 	protected boolean testMode;
 	protected DiscordApi api;
 
-	private boolean isStatusMsgSet;
+	private boolean isStatusMsgSet = false;
 
 	public StatusManager() {
-		isStatusMsgSet = false;
-	}
-
-	public StatusManager(DiscordApi api, boolean testMode) {
-		this.api = api;
-		this.testMode = testMode;
+		this.api = BotApi.getApi();
+		this.testMode = Shared.isTestMode();
 		try {
 			statusMessage = api.getMessageById(statusMessageID, api.getTextChannelById(statusChannelID).get()).get();
 		} catch (Exception e) {
-
 		}
 
 		updateStatusMessage();

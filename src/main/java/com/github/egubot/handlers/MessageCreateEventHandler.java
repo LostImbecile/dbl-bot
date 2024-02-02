@@ -1,4 +1,4 @@
-package com.github.egubot.main;
+package com.github.egubot.handlers;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -27,13 +27,18 @@ import com.github.egubot.features.MessageFormats;
 import com.github.egubot.features.MessageTimers;
 import com.github.egubot.gpt2.DiscordAI;
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.main.BotApi;
+import com.github.egubot.main.KeyManager;
+import com.github.egubot.main.ShutdownManager;
 import com.github.egubot.objects.Attributes;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;
 import com.github.egubot.shared.SendObjects;
+import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.ConfigManager;
+import com.github.egubot.storage.DataManagerSwitcher;
 import com.github.egubot.storage.OnlineDataManager;
 import com.github.egubot.webautomation.AIResponseGenerator;
 import com.openai.chatgpt.ChatGPT;
@@ -61,7 +66,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private String chatGPTActiveChannelID = "";
 
-	private static List<String> chatgptConversation = Collections.synchronizedList(new ArrayList<String>(20));
+	private List<String> chatgptConversation = Collections.synchronizedList(new ArrayList<String>(20));
 
 	private DiscordApi api;
 
@@ -87,22 +92,22 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private final ExecutorService executorService;
 	private ShutdownManager shutdownManager;
 
-	public MessageCreateEventHandler(DiscordApi api, ShutdownManager shutdownManager, boolean testMode,
-			boolean dbLegendsMode) throws Exception {
+	public MessageCreateEventHandler(boolean dbLegendsMode) throws Exception {
 		/*
 		 * I store templates, responses and all that stuff online in case someone
 		 * else uses the bot on their end, so the data needs to be initialised
 		 * from an online storage each time. I used discord for this, a cloud
 		 * services could do better.
 		 */
-		this.api = api;
-		this.testMode = testMode;
-		this.isAnimated = !testMode;
+		this.api = BotApi.getApi();
+		this.testMode = Shared.isTestMode();
+		this.isAnimated = !Shared.isTestMode();
 		this.dbLegendsMode = dbLegendsMode;
 		this.isRollCommandActive = dbLegendsMode;
 		this.executorService = Executors.newFixedThreadPool(10);
-		this.shutdownManager = shutdownManager;
+		this.shutdownManager = Shared.getShutdown();
 
+		DataManagerSwitcher.setOnline(true);
 		initialiseDataStorage();
 		executorService.submit(this::initialiseWebhooks);
 	}
@@ -127,15 +132,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			// Ignore bots unless changed
 			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
-				return;
-			}
-
-			if (lowCaseTxt.contains("terminate")) {
-				terminate(msg);
-			}
-
-			if (lowCaseTxt.equals("refresh")) {
-				refresh(msg);
 				return;
 			}
 
@@ -230,7 +226,17 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		}
 	}
 
-	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) {
+	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) throws Exception {
+		if (lowCaseTxt.contains("terminate")) {
+			terminate(msg);
+			return true;
+		}
+
+		if (lowCaseTxt.equals("refresh")) {
+			refresh(msg);
+			return true;
+		}
+
 		if (UserInfoUtilities.isOwner(msg) && lowCaseTxt.matches("b-message(?s).*")) {
 			try {
 				if (lowCaseTxt.contains("b-message edit")) {
@@ -266,9 +272,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		 * can be used for all bots.
 		 * 
 		 */
-		autoRespond = new AutoRespond(api);
-		autoRespond.toggleManager(true);
-
+		autoRespond = new AutoRespond();
+		
 		if (dbLegendsMode) {
 			// Fetches data from the legends website and initialises
 			// classes that are based on it, or doesn't if that fails
@@ -285,12 +290,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 						new Thread(() -> {
 							try {
 
-								new OnlineDataManager(api, "Website_Backup_Msg_ID", "website_backup",
+								new OnlineDataManager("Website_Backup_Msg_ID", "website_backup",
 										LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/characters"),
 										false).writeData(null);
 
 							} catch (Exception e) {
-
+								
 							}
 
 						}).start();
@@ -301,7 +306,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				} else {
 					logger.warn("Character database missing information. Trying Backup...");
 
-					OnlineDataManager backup = new OnlineDataManager(api, "Website_Backup_Msg_ID", "Website Backup",
+					OnlineDataManager backup = new OnlineDataManager("Website_Backup_Msg_ID", "Website Backup",
 							LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), true);
 
 					legendsWebsite = new LegendsDatabase(backup.getData());
@@ -317,8 +322,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			}
 
 			if (isRollCommandActive) {
-				templates = new RollTemplates(api, legendsWebsite);
-				templates.toggleManager(true);
+				templates = new RollTemplates(legendsWebsite);
 
 				legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
 
@@ -412,7 +416,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	}
 
-	private boolean checkWebDriverCommands(Message msg, String lowCaseText) throws ClassNotFoundException {
+	private boolean checkWebDriverCommands(Message msg, String lowCaseText) {
 		if (lowCaseText.matches("b-insult(?s).*")) {
 			String[] options = lowCaseText.replace("b-insult", "").split(">>");
 			if (options.length < 2) {
@@ -447,7 +451,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			try {
 				if (lowCaseTxt.length() < 140
-						&& !translate.detectLanguage(lowCaseTxt, true).matches("(?:en)|(?:Error.*)")) {
+						&& !translate.detectLanguage(lowCaseTxt, true).matches("en|Error.*")) {
 					msg.getChannel().sendMessage(translate.post(lowCaseTxt, true));
 				}
 
@@ -554,7 +558,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			// Important to make sure any remaining data is uploaded first
 			shutdownInternalClasses();
-			
+
 			initialiseDataStorage();
 			executorService.submit(this::initialiseWebhooks);
 
@@ -566,7 +570,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private void terminate(Message msg) {
 		boolean isOwner = UserInfoUtilities.isOwner(msg);
-		;
+		
 		String st = msg.getContent().toLowerCase().replace("terminate", "").strip();
 		if (st.isBlank() || st.equals(api.getYourself().getMentionTag())) {
 			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
@@ -651,7 +655,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 							}
 						}
 					} catch (Exception e1) {
-
+						//
 					}
 				} catch (Exception e1) {
 					e1.printStackTrace();
@@ -675,7 +679,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		String lowCaseTxt = msgText.toLowerCase();
 		if (lowCaseTxt.matches("b-response(?s).*")) {
 			boolean isOwner = UserInfoUtilities.isOwner(msg);
-			;
+			
 			if (lowCaseTxt.contains("b-response create")) {
 				if (!lowCaseTxt.contains("sleep"))
 					autoRespond.writeResponse(msgText, msg, isOwner);
@@ -705,7 +709,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 					autoRespond.setLockedDataEndIndex(x);
 					autoRespond.writeData(msg.getChannel(), false);
 				} catch (Exception e1) {
-
+					//
 				}
 				return true;
 			}
@@ -713,6 +717,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				try {
 					autoRespond.writeData(msg.getChannel());
 				} catch (Exception e1) {
+					//
 				}
 			}
 
@@ -731,7 +736,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 				try {
 					if (lowCaseTxt.contains("b-search")) {
-						legendsSearch.search(lowCaseTxt, api, msg.getChannel());
+						legendsSearch.search(lowCaseTxt, msg.getChannel());
 						return true;
 					}
 
@@ -821,6 +826,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				templates.setLockedDataEndIndex(x);
 				templates.writeData(msg.getChannel(), false);
 			} catch (Exception e1) {
+				//
 			}
 
 			return true;
@@ -839,6 +845,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			}
 		} catch (Exception e1) {
+			//
 		}
 	}
 
@@ -862,6 +869,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			logger.error("Failed to shut storage classes down.", e);
 		}
 	}
+
 	public void shutdown() {
 		shutdownInternalClasses();
 		executorService.shutdown();
@@ -883,7 +891,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		try {
 			st = FileUtilities.readInputStream(msg.getAttachments().get(0).asInputStream(), "\n");
 		} catch (IOException e) {
-
+			//
 		}
 
 		return msgText.replace("[attachment text replace]", st);

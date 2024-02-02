@@ -5,7 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class ConfigManager {
+	private static final Logger logger = LogManager.getLogger(ConfigManager.class.getName());
 	private static final String CONFIG_FILE_PATH = "config.properties";
 	private static final Properties properties = new Properties();
 
@@ -38,7 +42,7 @@ public class ConfigManager {
 
 	public static boolean getBooleanProperty(String key) {
 		String value = properties.getProperty(key);
-			return Boolean.parseBoolean(value);
+		return Boolean.parseBoolean(value);
 	}
 
 	public static double getDoubleProperty(String key) {
@@ -77,7 +81,7 @@ public class ConfigManager {
 		try (FileOutputStream fileOutputStream = new FileOutputStream(CONFIG_FILE_PATH)) {
 			properties.store(fileOutputStream, null);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Couldn't write to config file.", e);
 		}
 	}
 

@@ -14,12 +14,12 @@ import java.util.TimerTask;
  * straightforward or implementation specific.
  */
 public class TimedAction {
+	private volatile boolean isTimerOn;
+	private volatile boolean isRecurringTimerOn;
 	private Timer timer = new Timer(true);
 	private long length;
 	private Date startTime;
 	private Instant otherTimeFormat;
-	private boolean isTimerOn;
-	private boolean isRecurringTimerOn;
 	private TimerTask singeTimerTask;
 	private TimerTask recurringTimerTask;
 
@@ -31,7 +31,7 @@ public class TimedAction {
 		this.startTime = startTime;
 	}
 
-	private void adjustDate(boolean adjustTillNow) {
+	private synchronized void adjustDate(boolean adjustTillNow) {
 		/*
 		 * If the time has already passed, it adds the given
 		 * delay to it, either once or till it's in the future
@@ -77,7 +77,7 @@ public class TimedAction {
 	 * 
 	 * @param task TimerTask
 	 */
-	public void startSingleTimer(TimerTask task) {
+	public synchronized void startSingleTimer(TimerTask task) {
 		setSingeTimerTask(task);
 		isTimerOn = true;
 
@@ -99,7 +99,7 @@ public class TimedAction {
 	 * @param adjustDate boolean: If date should be adjusted
 	 * @param tillNow    boolean: If adjustment is once or till the future
 	 */
-	public void startRecurringTimer(TimerTask task, boolean adjustDate, boolean tillNow) {
+	public synchronized void startRecurringTimer(TimerTask task, boolean adjustDate, boolean tillNow) {
 		if (adjustDate)
 			adjustDate(tillNow);
 
@@ -126,7 +126,7 @@ public class TimedAction {
 	 * This doesn't let another timer that's one instance
 	 * only run in the meantime; unless it's recurring.
 	 */
-	public void startDelayTimer() {
+	public synchronized void startDelayTimer() {
 		TimerTask updateStatusTask = new TimerTask() {
 
 			@Override
@@ -138,12 +138,11 @@ public class TimedAction {
 		startSingleTimer(updateStatusTask);
 	}
 
-	public void startOneInstanceSingleTimer(TimerTask task, int maxRetries) {
+	public synchronized void startOneInstanceSingleTimer(TimerTask task, int maxRetries) {
 		if (isTimerOn)
 			return;
 
 		TimerTask timertask = new TimerTask() {
-			int retryCount = 0;
 			@Override
 			public void run() {
 				try {
@@ -152,25 +151,22 @@ public class TimedAction {
 				} catch (Exception e) {
 					// Set to false so the task can run again
 					isTimerOn = false;
-					if (retryCount < maxRetries) {
-                        retryCount++;
-                        System.out.println("Retrying... (Attempt " + retryCount + ")");
-                        startOneInstanceSingleTimer(task, maxRetries);
-                    } else {
-                        System.out.println("Max retries reached. Task failed.");
-                    }
+					if (maxRetries > 0) {
+						System.out.println("Retrying failed task...");
+						startOneInstanceSingleTimer(task, maxRetries);
+					} else {
+						System.out.println("Max retries reached. Task failed.");
+					}
 				}
-				
 
 			}
 		};
 		startSingleTimer(timertask);
 	}
 
-	public void startOneInstanceRecurringimer(TimerTask task, boolean adjustDate, boolean tillNow) {
+	public synchronized void startOneInstanceRecurringimer(TimerTask task, boolean adjustDate, boolean tillNow) {
 		if (isRecurringTimerOn)
 			return;
-		
 
 		TimerTask timertask = new TimerTask() {
 			@Override

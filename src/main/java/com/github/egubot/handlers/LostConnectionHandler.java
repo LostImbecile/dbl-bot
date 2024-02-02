@@ -1,4 +1,4 @@
-package com.github.egubot.main;
+package com.github.egubot.handlers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

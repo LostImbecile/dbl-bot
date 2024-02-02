@@ -2,7 +2,6 @@ package com.github.egubot.build;
 
 import java.util.List;
 
-import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.objects.Tags;
@@ -14,8 +13,8 @@ public class RollTemplates extends DataManagerSwitcher {
 
 	private LegendsDatabase legendsWebsite;
 
-	public RollTemplates(DiscordApi api, LegendsDatabase legendsWebsite) throws Exception {
-		super(api, idKey, resourcePath, "Filter Templates", true);
+	public RollTemplates(LegendsDatabase legendsWebsite) throws Exception {
+		super(idKey, resourcePath, "Filter Templates", true);
 
 		this.legendsWebsite = legendsWebsite;
 	}

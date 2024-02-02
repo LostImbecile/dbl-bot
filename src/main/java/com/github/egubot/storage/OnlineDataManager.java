@@ -22,6 +22,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
+import com.github.egubot.main.BotApi;
 import com.github.egubot.main.KeyManager;
 
 public class OnlineDataManager implements DataManager {
@@ -44,9 +45,9 @@ public class OnlineDataManager implements DataManager {
 	private String lastUpdateDate = null;
 	private String dataName;
 
-	public OnlineDataManager(DiscordApi api, String storageKey, String dataName, InputStream localInput,
+	public OnlineDataManager(String storageKey, String dataName, InputStream localInput,
 			boolean verbose) throws Exception {
-		this.api = api;
+		this.api = BotApi.getApi();
 		this.storageKey = storageKey;
 		this.storageMsgID = KeyManager.getID(storageKey);
 		this.dataName = dataName;
@@ -54,9 +55,9 @@ public class OnlineDataManager implements DataManager {
 		initialise(verbose);
 	}
 
-	public OnlineDataManager(DiscordApi api, String storageKey, String resourcePath, String dataName, boolean verbose)
+	public OnlineDataManager(String storageKey, String resourcePath, String dataName, boolean verbose)
 			throws Exception {
-		this.api = api;
+		this.api = BotApi.getApi();
 		this.storageKey = storageKey;
 		this.storageMsgID = KeyManager.getID(storageKey);
 		this.dataName = dataName;

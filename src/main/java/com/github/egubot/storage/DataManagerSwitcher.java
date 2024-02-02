@@ -5,7 +5,6 @@ import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
@@ -15,12 +14,12 @@ import com.github.egubot.shared.TimedAction;
 public class DataManagerSwitcher implements DataManager, Shutdownable {
 	protected static final Logger logger = LogManager.getLogger(DataManagerSwitcher.class.getName());
 	private static final int MINUTE = 60 * 1000;
+
+	private static volatile boolean isOnline = false;
 	private boolean isOnlineCapable = false;
-	private boolean isOnline = false;
 	private DataManager manager;
 
 	private TimedAction uploadTimer = null;
-	private DiscordApi api;
 	private String storageKey;
 	private String resourcePath;
 	private String dataName;
@@ -28,42 +27,41 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 
 	public DataManagerSwitcher(String dataName) {
 		this.dataName = dataName;
+		this.isOnlineCapable = false;
+		toggleManager();
 	}
 
-	public DataManagerSwitcher(DiscordApi api, String storageKey, String resourcePath, String dataName,
-			boolean verbose) {
-		this.api = api;
+	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, boolean verbose) {
 		this.storageKey = storageKey;
 		this.resourcePath = resourcePath;
 		this.dataName = dataName;
 		this.verbose = verbose;
 		this.isOnlineCapable = true;
 		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
+		toggleManager();
 	}
 
-	public void toggleManager(boolean isOnline) {
-		if (isOnline && !isOnlineCapable)
+	public synchronized void toggleManager() {
+		if (isOnline() && !isOnlineCapable)
 			logger.warn("Not enough info to use online storage.");
 
-		if (isOnline && isOnlineCapable) {
+		if (isOnline() && isOnlineCapable) {
 			try {
-				manager = new OnlineDataManager(api, storageKey, resourcePath, dataName, verbose);
-				this.isOnline = true;
+				manager = new OnlineDataManager(storageKey, resourcePath, dataName, verbose);
 			} catch (Exception e) {
-				this.isOnline = false;
+				isOnlineCapable = false;
 				logger.error(e);
-				logger.warn("Error occurred; switching to local storage...");
+				logger.warn("Error occurred\nSwitching to local storage...");
 				manager = new LocalDataManager();
 			}
 		} else {
-			this.isOnline = false;
 			manager = new LocalDataManager();
 		}
 		updateObjects();
 	}
 
 	public void writeData(Messageable e, boolean isImmediate) {
-		if (isImmediate || !isOnline || uploadTimer == null) {
+		if (isImmediate || !isOnline() || uploadTimer == null) {
 			writeData(e);
 		} else {
 			TimerTask task = new TimerTask() {
@@ -82,7 +80,7 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 		// Make sure any running timer stops
 		if (uploadTimer != null && uploadTimer.isTimerOn())
 			uploadTimer.cancelSingleTimer();
-		
+
 		updateDataFromObjects();
 		manager.writeData(e);
 		updateObjects();
@@ -130,6 +128,14 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 	@Override
 	public int getShutdownPriority() {
 		return 0;
+	}
+
+	public static boolean isOnline() {
+		return isOnline;
+	}
+
+	public static synchronized void setOnline(boolean isOnline) {
+		DataManagerSwitcher.isOnline = isOnline;
 	}
 
 }
