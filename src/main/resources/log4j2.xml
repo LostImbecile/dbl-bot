@@ -11,7 +11,7 @@
 
 		<Console name="ConsoleWithInfo" target="SYSTEM_OUT">
 			<PatternLayout
-				pattern="%d{HH:mm:ss} [%t] %-5level %logger{3} - %msg%n" />
+				pattern="%d{HH:mm:ss} %-5level %logger{0} - %msg%n" />
 		</Console>
 
 		<RollingFile name="LogFile"
@@ -24,6 +24,7 @@
 				<OnStartupTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="50 KB" />
 			</Policies>
+			<DefaultRolloverStrategy max="10" />
 		</RollingFile>
 
 		<RollingFile name="JavacordLogFile"
@@ -36,25 +37,22 @@
 				<OnStartupTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="1 MB" />
 			</Policies>
+			<DefaultRolloverStrategy max="10" />
 		</RollingFile>
 
 	</Appenders>
 	<Loggers>
-		<Root level="info">
+		<Root level="off">
 		</Root>
-		<Logger name="com.github" level="fatal" additivity="false">
-			<AppenderRef ref="LogFile" />
-			<AppenderRef ref="ConsoleWithInfo" />
-		</Logger>
-		<Logger name="com.github" level="error" additivity="false">
-			<AppenderRef ref="LogFile" level="error"/>
-		</Logger>
 		<Logger name="com" level="warn" additivity="false">
-			<AppenderRef ref="ConsoleWithInfo" level="warn"/>
+			<AppenderRef ref="ConsoleWithInfo" level="warn" />
+			<AppenderRef ref="ConsoleWithInfo" level="fatal" />
+			<AppenderRef ref="LogFile" level="error" />
+			<AppenderRef ref="LogFile" level="fatal" />
 		</Logger>
 		<Logger name="com.github.egubot.main.ShutdownManager"
 			level="info" additivity="false">
-			<AppenderRef ref="ConsoleWithInfo"/>
+			<AppenderRef ref="ConsoleWithInfo" />
 		</Logger>
 		<Logger name="org.javacord" level="info" additivity="false">
 			<AppenderRef ref="JavacordLogFile" />
