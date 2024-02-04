@@ -1,12 +1,9 @@
 package com.weatherapi.forecast;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-
 import com.github.egubot.main.KeyManager;
+import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -28,20 +25,10 @@ public class WeatherForecast {
 		String forecastURL = url + "&q=" + city + "&days=" + days;
 
 		try {
-			StringBuilder result = new StringBuilder();
 			URL url = new URL(forecastURL);
+			String result = FileUtilities.readInputStream(url.openStream());
 
-			try (BufferedReader br = new BufferedReader(
-					new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
-
-				String line;
-				while ((line = br.readLine()) != null) {
-					result.append(line);
-				}
-
-			}
-
-			return JSONUtilities.prettify(result.toString());
+			return JSONUtilities.prettify(result);
 		} catch (IOException e) {
 			return checkErrorCode(e.getMessage());
 		}

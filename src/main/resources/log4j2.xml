@@ -10,6 +10,7 @@
 		</Console>
 
 		<Console name="ConsoleWithInfo" target="SYSTEM_OUT">
+		<ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
 			<PatternLayout
 				pattern="%d{HH:mm:ss} %-5level %logger{0} - %msg%n" />
 		</Console>
@@ -44,11 +45,15 @@
 	<Loggers>
 		<Root level="off">
 		</Root>
+		<Logger name="com" level="fatal" additivity="false">
+			<AppenderRef ref="ConsoleWithInfo" />
+			<AppenderRef ref="LogFile" />
+		</Logger>
+		<Logger name="com" level="error" additivity="false">
+			<AppenderRef ref="LogFile" />
+		</Logger>
 		<Logger name="com" level="warn" additivity="false">
-			<AppenderRef ref="ConsoleWithInfo" level="warn" />
-			<AppenderRef ref="ConsoleWithInfo" level="fatal" />
-			<AppenderRef ref="LogFile" level="error" />
-			<AppenderRef ref="LogFile" level="fatal" />
+			<AppenderRef ref="ConsoleWithInfo" />
 		</Logger>
 		<Logger name="com.github.egubot.main.ShutdownManager"
 			level="info" additivity="false">

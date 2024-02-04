@@ -23,7 +23,7 @@ public class ShutdownManager {
 		shutdownables.add(shutdownable);
 	}
 
-	public void initiateShutdown(int exitCode) {
+	public synchronized void initiateShutdown(int exitCode) {
 		logger.info("Shutdown Sequence Initiated");
 		// Some classes need to shutdown last to avoid trouble
 		Collections.sort(shutdownables, Comparator.comparingInt(Shutdownable::getShutdownPriority));

@@ -1,6 +1,8 @@
 package com.github.egubot.storage;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -10,15 +12,18 @@ import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.interfaces.Toggleable;
 import com.github.egubot.shared.TimedAction;
 
-public class DataManagerSwitcher implements DataManager, Shutdownable {
+public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleable {
 	protected static final Logger logger = LogManager.getLogger(DataManagerSwitcher.class.getName());
 	private static final int MINUTE = 60 * 1000;
 
+	private static List<Toggleable> toggleables = new ArrayList<>();
+
 	private static volatile boolean isOnline = false;
 	private boolean isOnlineCapable = false;
-	private DataManager manager;
+	private DataManager manager = null;
 
 	private TimedAction uploadTimer = null;
 	private String storageKey;
@@ -27,55 +32,82 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 	private boolean verbose;
 	private InputStream localInput = null;
 
-	public DataManagerSwitcher(String dataName) {
+	public DataManagerSwitcher() {
+		registerToggleable(this);
+	}
+
+	public DataManagerSwitcher(String dataName) throws IOException {
+		this();
 		this.dataName = dataName;
 		this.isOnlineCapable = false;
-		toggleManager();
+		toggle();
 	}
 
-	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, boolean verbose) {
+	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, boolean verbose) throws IOException {
+		this();
 		this.storageKey = storageKey;
 		this.resourcePath = resourcePath;
 		this.dataName = dataName;
 		this.verbose = verbose;
 		this.isOnlineCapable = true;
 		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
-		toggleManager();
+		toggle();
 	}
 
-	public DataManagerSwitcher(String storageKey, String resourcePath, InputStream localInput, boolean verbose) {
+	public DataManagerSwitcher(String storageKey, InputStream localInput, String dataName, boolean verbose) throws IOException {
+		this();
 		this.storageKey = storageKey;
-		this.resourcePath = resourcePath;
 		this.localInput = localInput;
+		this.dataName = dataName;
 		this.verbose = verbose;
 		this.isOnlineCapable = true;
 		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
-		toggleManager();
+		toggle();
 	}
 
-	public synchronized void toggleManager() {
+	@Override
+	public synchronized void toggle() throws IOException {
+		if (manager == null)
+			switchManager(true);
+		else {
+			// Avoid loss of data
+			writeData(null);
+			List<String> data = getData();
+			int lockedData = getLockedDataEndIndex();
+
+			switchManager(false);
+
+			setData(data);
+			setLockedDataEndIndex(lockedData);
+			writeData(null);
+		}
+	}
+
+	private void switchManager(boolean initialise) throws IOException {
 		if (isOnline() && !isOnlineCapable)
 			logger.warn("Not enough info to use online storage.");
 
 		if (isOnline() && isOnlineCapable) {
 			try {
 				if (localInput == null)
-					manager = new OnlineDataManager(storageKey, resourcePath, dataName, verbose);
+					manager = new OnlineDataManager(storageKey, resourcePath, dataName);
 				else
-					manager = new OnlineDataManager(storageKey, localInput, dataName, verbose);
+					manager = new OnlineDataManager(storageKey, localInput, dataName);
 			} catch (Exception e) {
 				isOnlineCapable = false;
 				logger.error(e);
 				logger.warn("Error occurred\nSwitching to local storage...");
-				manager = new LocalDataManager();
+				manager = new LocalDataManager(dataName);
 			}
 		} else {
-			manager = new LocalDataManager();
+			manager = new LocalDataManager(dataName);
 		}
-		updateObjects();
+
+		if (initialise)
+			initialise(verbose);
 	}
 
-	public void writeData(Messageable e, boolean isImmediate) {
+	public synchronized void writeData(Messageable e, boolean isImmediate) {
 		if (isImmediate || !isOnline() || uploadTimer == null) {
 			writeData(e);
 		} else {
@@ -96,13 +128,20 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 		if (uploadTimer != null && uploadTimer.isTimerOn())
 			uploadTimer.cancelSingleTimer();
 
-		updateDataFromObjects();
 		manager.writeData(e);
-		updateObjects();
+	}
+
+	@Override
+	public void initialise(boolean verbose) throws IOException {
+		manager.initialise(verbose);
+	}
+	
+	@Override
+	public void readData(Messageable e) {
+		manager.readData(e);
 	}
 
 	public void sendData(Messageable e) {
-		updateDataFromObjects();
 		manager.sendData(e);
 	}
 
@@ -122,14 +161,6 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 		manager.setData(data);
 	}
 
-	public void updateObjects() {
-		// For classes that convert data to objects
-	}
-
-	public void updateDataFromObjects() {
-		// For classes that convert data to objects
-	}
-
 	@Override
 	public void shutdown() {
 		if (uploadTimer != null) {
@@ -145,12 +176,27 @@ public class DataManagerSwitcher implements DataManager, Shutdownable {
 		return 0;
 	}
 
-	public static boolean isOnline() {
+	public static synchronized boolean isOnline() {
 		return isOnline;
 	}
 
 	public static synchronized void setOnline(boolean isOnline) {
 		DataManagerSwitcher.isOnline = isOnline;
+		notifyToggleables();
+	}
+
+	private static synchronized void registerToggleable(Toggleable toggleable) {
+		toggleables.add(toggleable);
+	}
+
+	private static synchronized void notifyToggleables() {
+		for (Toggleable toggleable : toggleables) {
+			try {
+				toggleable.toggle();
+			} catch (Exception e) {
+				logger.error("Failed to toggle storage for class", e);
+			}
+		}
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.github.egubot.facades;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.javacord.api.entity.message.Message;
@@ -12,7 +13,7 @@ import com.github.egubot.shared.UserInfoUtilities;
 public class LegendsTemplatesFacade implements Shutdownable {
 	private RollTemplates templates = null;
 
-	public LegendsTemplatesFacade(LegendsDatabase legendsWebsite) {
+	public LegendsTemplatesFacade(LegendsDatabase legendsWebsite) throws IOException {
 		templates = new RollTemplates(legendsWebsite);
 	}
 
@@ -37,7 +38,7 @@ public class LegendsTemplatesFacade implements Shutdownable {
 			try {
 				int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
 				templates.setLockedDataEndIndex(x);
-				templates.writeData(msg.getChannel(), false);
+				templates.writeData(msg.getChannel());
 			} catch (Exception e1) {
 				//
 			}

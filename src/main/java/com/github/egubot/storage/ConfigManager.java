@@ -86,6 +86,6 @@ public class ConfigManager {
 	}
 
 	public static void main(String[] args) {
-		setProperty("", "");
+		System.out.println(getBooleanProperty("Is_Storage_Online"));
 	}
 }

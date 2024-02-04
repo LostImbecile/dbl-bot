@@ -1,19 +1,20 @@
 package com.github.egubot.build;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.objects.Tags;
-import com.github.egubot.storage.DataManagerSwitcher;
+import com.github.egubot.storage.DataManagerHandler;
 
-public class RollTemplates extends DataManagerSwitcher {
+public class RollTemplates extends DataManagerHandler {
 	private static String idKey = "Templates_Message_ID";
 	private static String resourcePath = "RollTemplates.txt";
 
 	private LegendsDatabase legendsWebsite;
 
-	public RollTemplates(LegendsDatabase legendsWebsite) {
+	public RollTemplates(LegendsDatabase legendsWebsite) throws IOException {
 		super(idKey, resourcePath, "Filter Templates", true);
 
 		this.legendsWebsite = legendsWebsite;
@@ -49,7 +50,7 @@ public class RollTemplates extends DataManagerSwitcher {
 			}
 
 			if (isNameExist) {
-				writeData(e, false);
+				writeData(e);
 			} else {
 				e.sendMessage("\"" + st + "\" is not a template <a:L:1155894861644435516>");
 			}
@@ -105,7 +106,7 @@ public class RollTemplates extends DataManagerSwitcher {
 
 			if (isTag) {
 				getData().add(newTemplate);
-				writeData(e, false);
+				writeData(e);
 			}
 		} catch (Exception e1) {
 			e.sendMessage("Correct format:" + "\nb-template create name filters");

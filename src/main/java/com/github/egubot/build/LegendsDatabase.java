@@ -125,7 +125,6 @@ public class LegendsDatabase {
 
 	private void getAllTags(List<String> lines) {
 		String beginWrite = "- All Tags -";
-		String endWrite = "<br/><br/>";
 
 		String[] token;
 		String st = "";
@@ -135,8 +134,6 @@ public class LegendsDatabase {
 				writeFlag = true;
 				continue;
 			}
-			if (line.contains(endWrite))
-				break;
 
 			if (writeFlag) {
 				token = line.split("option value=");
@@ -151,7 +148,9 @@ public class LegendsDatabase {
 						System.err.println("Tag ID failed to fetch from line:\n" + token[j]);
 					}
 				}
+				return;
 			}
+			
 
 		}
 	}

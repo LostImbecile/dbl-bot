@@ -1,15 +1,20 @@
 package com.github.egubot.facades;
 
+import java.io.IOException;
+
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.AutoRespond;
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.objects.Attributes;
+import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.JSONUtilities;
 import com.github.egubot.shared.UserInfoUtilities;
 
-public class AutoRespondFacade implements Shutdownable{
+public class AutoRespondFacade implements Shutdownable {
 	private AutoRespond autoRespond = null;
-	
-	public AutoRespondFacade() {
+
+	public AutoRespondFacade() throws IOException {
 		autoRespond = new AutoRespond();
 	}
 
@@ -45,7 +50,7 @@ public class AutoRespondFacade implements Shutdownable{
 				try {
 					int x = Integer.parseInt(lowCaseTxt.replaceAll("\\D", ""));
 					autoRespond.setLockedDataEndIndex(x);
-					autoRespond.writeData(msg.getChannel(), false);
+					autoRespond.writeData(msg.getChannel());
 				} catch (Exception e1) {
 					//
 				}
@@ -53,12 +58,19 @@ public class AutoRespondFacade implements Shutdownable{
 			}
 			if (lowCaseTxt.equals("b-response update")) {
 				try {
-					autoRespond.writeData(msg.getChannel());
+					autoRespond.writeDataNow(msg.getChannel());
 				} catch (Exception e1) {
 					//
 				}
 			}
 
+		}
+
+		if (lowCaseTxt.equals("b-send attributes")) {
+			msg.getChannel().sendMessage(
+					FileUtilities.toInputStream(JSONUtilities.toJsonPrettyPrint(new Attributes(), Attributes.class)),
+					"Attributes.txt");
+			return true;
 		}
 
 		return false;
@@ -67,7 +79,7 @@ public class AutoRespondFacade implements Shutdownable{
 	@Override
 	public void shutdown() {
 		if (autoRespond != null)
-			autoRespond.shutdown();		
+			autoRespond.shutdown();
 	}
 
 	@Override

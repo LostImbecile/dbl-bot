@@ -1,7 +1,6 @@
 package com.github.egubot.objects;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
@@ -15,7 +14,7 @@ public class ResponseList {
 	private List<Response> responses;
 
 	public ResponseList() {
-		this.responses = Collections.synchronizedList(new ArrayList<>(100));
+		this.responses = new ArrayList<>(100);
 	}
 
 	public List<Response> getResponses() {

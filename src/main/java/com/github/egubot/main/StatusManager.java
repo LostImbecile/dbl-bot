@@ -43,8 +43,7 @@ public class StatusManager implements Shutdownable {
 
 	public void checkMessageID() {
 		if (!statusChannelID.equals("-1")) {
-			@SuppressWarnings("resource")
-			Scanner in = new Scanner(System.in);
+			Scanner in = Shared.getSystemInput();
 
 			try {
 				statusMessage = api.getMessageById(statusMessageID, api.getTextChannelById(statusChannelID).get())
@@ -82,11 +81,8 @@ public class StatusManager implements Shutdownable {
 		if (!statusChannelID.equals("-1") && (!api.getTextChannelById(statusChannelID).isPresent())) {
 
 			System.err.println("Status channel ID is invalid, please enter a new one, or -1 to always skip");
-			@SuppressWarnings("resource")
-			Scanner in = new Scanner(System.in);
-			String id;
 
-			id = in.nextLine();
+			String id = Shared.getSystemInput().nextLine();
 			KeyManager.updateKeys("Status_Channel_ID", id, KeyManager.idsFileName);
 
 		}
@@ -212,14 +208,10 @@ public class StatusManager implements Shutdownable {
 			activityMsgType = activityMsgType.toLowerCase().strip();
 		} catch (Exception e) {
 			if (!activityMsgID.equals("-1")){
-				@SuppressWarnings("resource")
-				Scanner in = new Scanner(System.in);
-				String id;
-
 				System.err.println("Status Message ID is invalid, please enter a new one, or -1 to always skip"
 						+ "\nNote: Send a message in your status channel and copy its id.");
 
-				id = in.nextLine();
+				String id = Shared.getSystemInput().nextLine();
 				KeyManager.updateKeys("Activity_Msg_ID", id, KeyManager.idsFileName);
 
 				activityMsgID = KeyManager.getID("Activity_Msg_ID");

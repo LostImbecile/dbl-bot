@@ -15,21 +15,16 @@ import org.javacord.api.entity.webhook.IncomingWebhook;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import com.github.egubot.facades.AutoRespondFacade;
 import com.github.egubot.facades.ChatGPTFacade;
 import com.github.egubot.facades.CustomAIFacade;
-import com.github.egubot.facades.LegendsCommandsFacade;
-import com.github.egubot.facades.TranslateFacade;
-import com.github.egubot.facades.WeatherFacade;
-import com.github.egubot.facades.WebDriverFacade;
+import com.github.egubot.facades.StorageFacadesHandler;
+import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.BotApi;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.main.ShutdownManager;
-import com.github.egubot.objects.Attributes;
 import com.github.egubot.shared.FileUtilities;
-import com.github.egubot.shared.JSONUtilities;
 import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.ConfigManager;
@@ -45,17 +40,15 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private String userTargetMsgID = KeyManager.getID("User_Target_Msg_ID");
 	private String userTargetChannelID = KeyManager.getID("User_Target_Msg_Channel_ID");
 	private String timerLengthMessage = KeyManager.getID("Dead_Chat_Timer_Msg");
-	private String sirioMsgContent;
+	private String userTargetMsgContent;
 
 	private boolean readBotMessages = false;
 	private DiscordApi api;
 
-	private AutoRespondFacade autoRespond = null;
-	private LegendsCommandsFacade legends = null;
+	private StorageFacadesHandler storageFacades;
+	private WebFacadesHandler webFacades = new WebFacadesHandler();
 	private ChatGPTFacade gpt = new ChatGPTFacade();
 	private CustomAIFacade customAi = new CustomAIFacade();
-	private TranslateFacade translate = new TranslateFacade();
-	private WeatherFacade weather = new WeatherFacade();
 
 	private boolean testMode;
 
@@ -70,7 +63,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private final ExecutorService executorService;
 	private ShutdownManager shutdownManager;
 
-	public MessageCreateEventHandler() throws Exception {
+	public MessageCreateEventHandler() {
 		/*
 		 * I store templates, responses and all that stuff online in case someone
 		 * else uses the bot on their end, so the data needs to be initialised
@@ -82,8 +75,9 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		this.executorService = Executors.newFixedThreadPool(10);
 		this.shutdownManager = Shared.getShutdown();
 
-		DataManagerSwitcher.setOnline(true);
-		initialiseDataStorage();
+		DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
+
+		storageFacades = new StorageFacadesHandler();
 		executorService.submit(this::initialiseWebhooks);
 	}
 
@@ -131,43 +125,19 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				lowCaseTxt = msgText.toLowerCase();
 			}
 
-			if (legends.checkCommands(msg, lowCaseTxt)) {
+			if (storageFacades.checkCommands(msg, msgText, lowCaseTxt))
 				return;
-			}
 
-			if (translate.checkCommands(msg, lowCaseTxt)) {
+			if (webFacades.checkCommands(msg, lowCaseTxt))
 				return;
-			}
-
-			if (weather.checkCommands(msg, lowCaseTxt)) {
-				return;
-			}
-
-			if (autoRespond.checkCommands(msg, msgText)) {
-				return;
-			}
-
-			if (WebDriverFacade.checkCommands(msg, lowCaseTxt)) {
-				return;
-			}
 
 			if (testMode && (checkTimerTasks(msg, msgText, lowCaseTxt))) {
 				return;
 			}
 
-			if (lowCaseTxt.equals("b-send attributes")) {
-				msg.getChannel().sendMessage(FileUtilities.toInputStream(
-						JSONUtilities.toJsonPrettyPrint(new Attributes(), Attributes.class)), "Attributes.txt");
-			}
-
-			if (lowCaseTxt.equals("spam mode off")) {
-				readBotMessages = false;
-				return;
-			}
-
-			if (lowCaseTxt.equals("spam mode on")) {
-				readBotMessages = true;
-				return;
+			if (lowCaseTxt.equals("b-verse")) {
+				msg.getChannel().sendMessage(
+						FileUtilities.readURL("https://labs.bible.org/api/?passage=random&type=text&formatting=plain"));
 			}
 
 			if (lowCaseTxt.matches("parrot(?s).*")) {
@@ -178,13 +148,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (customAi.checkCommands(msg, lowCaseTxt))
 				return;
 
-			if (autoRespond.respond(msgText, msg)) {
+			if (storageFacades.respond(msg, msgText))
 				return;
-			}
 
 			if (userTargetTimer != null && authorID.equals(userTargetID)) {
 				try {
-					userTargetTimer.sendDelayedRateLimitedMessage(e.getChannel(), sirioMsgContent, true);
+					userTargetTimer.sendDelayedRateLimitedMessage(e.getChannel(), userTargetMsgContent, true);
 				} catch (Exception e1) {
 
 				}
@@ -204,6 +173,21 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 		if (lowCaseTxt.equals("refresh")) {
 			refresh(msg);
+			return true;
+		}
+
+		if (lowCaseTxt.equals("spam mode off")) {
+			readBotMessages = false;
+			return true;
+		}
+
+		if (lowCaseTxt.equals("spam mode on")) {
+			readBotMessages = true;
+			return true;
+		}
+
+		if (lowCaseTxt.equals("b-toggle manager") && UserInfoUtilities.isOwner(msg)) {
+			DataManagerSwitcher.setOnline(!DataManagerSwitcher.isOnline());
 			return true;
 		}
 
@@ -233,17 +217,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		if (msg.isServerMessage())
 			return msg.getServer().get().getIdAsString().equals(testServerID);
 		return false;
-	}
-
-	private void initialiseDataStorage() throws Exception {
-		/*
-		 * You'll want to make your own classes for this stuff usually,
-		 * as these are bot/feature specific, autorespond however
-		 * can be used for all bots.
-		 * 
-		 */
-		autoRespond = new AutoRespondFacade();
-		legends = new LegendsCommandsFacade();
 	}
 
 	private void initialiseWebhooks() {
@@ -303,8 +276,9 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		if (!isUserTimerOn)
 			return;
 		try {
-			sirioMsgContent = api.getMessageById(userTargetMsgID, api.getTextChannelById(userTargetChannelID).get())
-					.get().getContent();
+			userTargetMsgContent = api
+					.getMessageById(userTargetMsgID, api.getTextChannelById(userTargetChannelID).get()).get()
+					.getContent();
 
 			List<ServerChannel> channels = api.getServerById(mainServerID).get().getChannels();
 			Message[] messages;
@@ -315,7 +289,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 					messages = channel.asTextChannel().get().getMessages(50).get().toArray(new Message[0]);
 					for (Message message : messages) {
 						temp = message;
-						if (temp != null && temp.getAuthor().isYourself() && temp.getContent().equals(sirioMsgContent)
+						if (temp != null && temp.getAuthor().isYourself()
+								&& temp.getContent().equals(userTargetMsgContent)
 								&& (temp.getCreationTimestamp().isAfter(lastMessageDate))) {
 							lastMessageDate = temp.getCreationTimestamp();
 						}
@@ -357,7 +332,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		return false;
 	}
 
-	private void refresh(Message msg) throws Exception {
+	private void refresh(Message msg) {
 		if (!UserInfoUtilities.isUserEqual(msg.getAuthor(), userTargetID)) {
 			msg.getChannel().sendMessage("Refreshing...").join();
 			System.out.println("\nRefreshing " + MessageCreateEventHandler.class.getName() + ".");
@@ -365,7 +340,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			// Important to make sure any remaining data is uploaded first
 			shutdownInternalClasses();
 
-			initialiseDataStorage();
+			storageFacades = new StorageFacadesHandler();
 			executorService.submit(this::initialiseWebhooks);
 
 			msg.getChannel().sendMessage("Refreshed :ok_hand:");
@@ -412,17 +387,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				testTimer.terminateTimer();
 			if (userTargetTimer != null)
 				userTargetTimer.terminateTimer();
+			if (storageFacades != null)
+				storageFacades.shutdown();
 		} catch (Exception e) {
 			logger.error("Failed to shut timers down.", e);
 		}
-		try {
-			if (autoRespond != null)
-				autoRespond.shutdown();
-			if (legends != null)
-				legends.shutdown();
-		} catch (Exception e) {
-			logger.error("Failed to shut storage classes down.", e);
-		}
+
 	}
 
 	public void shutdown() {

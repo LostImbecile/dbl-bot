@@ -1,7 +1,11 @@
 /target/
 /src/main/resources/IDs.txt
 /src/main/resources/Tokens.txt
-/src/main/resources/MessageResponses.txt
-/src/main/resources/RollTemplates.txt
+/src/main/resources/Autorespond.txt
+/src/main/resources/Filter_Templates.txt
 /logs
 config.properties
+.pydevproject
+/Autorespond.txt
+/Filter_Templates.txt
+
