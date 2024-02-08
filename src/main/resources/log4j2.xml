@@ -45,15 +45,9 @@
 	<Loggers>
 		<Root level="off">
 		</Root>
-		<Logger name="com" level="fatal" additivity="false">
-			<AppenderRef ref="ConsoleWithInfo" />
-			<AppenderRef ref="LogFile" />
-		</Logger>
-		<Logger name="com" level="error" additivity="false">
-			<AppenderRef ref="LogFile" />
-		</Logger>
 		<Logger name="com" level="warn" additivity="false">
 			<AppenderRef ref="ConsoleWithInfo" />
+			<AppenderRef ref="LogFile" level="error" />
 		</Logger>
 		<Logger name="com.github.egubot.main.ShutdownManager"
 			level="info" additivity="false">

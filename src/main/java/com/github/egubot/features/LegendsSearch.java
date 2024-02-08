@@ -197,7 +197,7 @@ public class LegendsSearch extends LegendsPool {
 		}
 
 		name = name.toLowerCase().replace("ssb", "ssgss").replace("dbl", "").replace("-", "")
-				.replace("frieza_no_brother", "cooler").strip();
+				.replace("frieza_no_brother", "cooler").replace("best_unit_in_the_game","5101s").strip();
 
 		ArrayList<Characters> charactersList = (ArrayList<Characters>) getLegendsWebsite().getCharactersList();
 

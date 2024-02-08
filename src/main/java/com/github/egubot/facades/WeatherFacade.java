@@ -1,6 +1,7 @@
 package com.github.egubot.facades;
 
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.features.MessageFormats;
@@ -11,15 +12,13 @@ public class WeatherFacade {
 
 	public boolean checkCommands(Message msg, String lowCaseTxt) {
 		if (lowCaseTxt.matches("b-weather(?s).*")) {
-
-			sendWeather(msg, lowCaseTxt);
-
+			sendWeather(msg.getChannel(), lowCaseTxt);
 			return true;
 		}
 		return false;
 	}
 
-	public static void sendWeather(Message msg, String lowCaseTxt) {
+	public static void sendWeather(Messageable e, String lowCaseTxt) {
 		String[] args = lowCaseTxt.replaceFirst("b-weather", "").strip().split(" ");
 		String city = args[0];
 		String minimal = "";
@@ -28,11 +27,11 @@ public class WeatherFacade {
 		}
 		Weather response = WeatherForecast.getForecastData("3", city);
 		if (response.isError()) {
-			msg.getChannel().sendMessage(response.getErrorMessage());
+			e.sendMessage(response.getErrorMessage());
 		} else {
 			boolean isMinimal = !minimal.equals("detailed");
 			EmbedBuilder[] embeds = createWeatherEmbed(response, isMinimal);
-			msg.getChannel().sendMessage(embeds);
+			e.sendMessage(embeds);
 		}
 	}
 

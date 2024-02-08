@@ -43,7 +43,7 @@ public class Main {
 		// you, and the rest could be ignored.
 		KeyManager.checkKeys();
 		String token = KeyManager.getToken("Discord_API_Key");
-
+		
 		try {
 			try {
 				// For info about intents check the links at the start of the class

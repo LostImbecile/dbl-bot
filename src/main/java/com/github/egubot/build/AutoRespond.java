@@ -38,7 +38,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 	public boolean respond(String msgText, Message msg) {
 		if (responses == null)
 			return false;
-		
+
 		List<String> reactions;
 		boolean replyFlag = false;
 		boolean deleteFlag = false;
@@ -46,24 +46,27 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			reactions = response.getReactions();
 
 			if (response.getResponseType().equalsIgnoreCase("normal")) {
-				if (response.getMatchType().equalsIgnoreCase("equal")) {
+				switch (response.getMatchType().toLowerCase()) {
+				case "equal":
 					if (msgText.equalsIgnoreCase(response.getInvocMsg()))
 						replyFlag = true;
-
-				} else if (response.getMatchType().equalsIgnoreCase("contain")) {
+					break;
+				case "contain":
 					if (msgText.matches("(?s).*?(?i)(?<![\\w-.])(?:" + response.getInvocMsg() + ")(?![\\w-.])(?s).*+"))
 						replyFlag = true;
-
-				} else if (response.getMatchType().equalsIgnoreCase("match")) {
+					break;
+				case "match":
 					if (msgText.matches("(?i)" + response.getInvocMsg()))
 						replyFlag = true;
-
-				} else if (response.getMatchType().equalsIgnoreCase("msg delete")) {
+					break;
+				case "msg delete":
 					if (msgText.matches("(?s).*?" + response.getInvocMsg() + "(?s).*+"))
 						deleteFlag = true;
-				} else if (response.getMatchType().equalsIgnoreCase("user delete")) {
+					break;
+				case "user delete":
 					if (msg.getAuthor().getIdAsString().equals(response.getInvocMsg().replaceAll("[<>@ ]", "")))
 						deleteFlag = true;
+					break;
 				}
 				if (replyFlag) {
 					respond(msg, reactions, replyFlag, response);
