@@ -24,7 +24,7 @@ import com.google.gson.JsonSyntaxException;
 
 public class AutoRespond extends DataManagerHandler implements UpdatableObjects {
 
-	private static String resourcePath = "MessageResponses.txt";
+	private static String resourcePath = "Autorespond.txt";
 	private static String idKey = "Responses_Message_ID";
 	private ResponseList autoRespondData;
 	private List<Response> responses;

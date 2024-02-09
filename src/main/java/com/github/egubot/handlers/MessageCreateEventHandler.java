@@ -140,7 +140,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 						FileUtilities.readURL("https://labs.bible.org/api/?passage=random&type=text&formatting=plain"));
 			}
 
-			if (lowCaseTxt.matches("parrot(?s).*")) {
+			if (lowCaseTxt.matches("parrot(?s).*") && UserInfoUtilities.isOwner(msg)) {
 				e.getChannel().sendMessage(msgText.replaceFirst("parrot", ""));
 				return;
 			}
@@ -176,13 +176,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			return true;
 		}
 
-		if (lowCaseTxt.equals("spam mode off")) {
-			readBotMessages = false;
-			return true;
-		}
-
-		if (lowCaseTxt.equals("spam mode on")) {
-			readBotMessages = true;
+		if (lowCaseTxt.equals("toggle bot read mode") && UserInfoUtilities.isOwner(msg)) {
+			readBotMessages = !readBotMessages;
 			return true;
 		}
 
@@ -333,7 +328,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private void refresh(Message msg) {
-		if (!UserInfoUtilities.isUserEqual(msg.getAuthor(), userTargetID)) {
+		if (UserInfoUtilities.isOwner(msg)) {
 			msg.getChannel().sendMessage("Refreshing...").join();
 			System.out.println("\nRefreshing " + MessageCreateEventHandler.class.getName() + ".");
 

@@ -13,18 +13,40 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	public String getVideo(String link) {
 		driver.get("https://www.y2mate.com/");
-		
-		if(!link.contains("youtu"))
+
+		if (!link.contains("youtu"))
 			return null;
 
 		sendURL(link);
-		
+
 		waitForPageChange();
 
-		clickOnConvert();
+		clickOnVideoDownload();
 
-		return getDownloadLink();
+		return getVideoDownloadLink();
 
+	}
+
+	public String getAudio(String link) {
+		driver.get("https://www.y2mate.com/");
+
+		if (!link.contains("youtu"))
+			return null;
+
+		sendURL(link);
+
+		waitForPageChange();
+
+		driver.findElement(By.linkText("Audio")).click();
+
+		clickOnAudioDownload();
+
+		return getAudioDownloadLink();
+	}
+
+	private void clickOnAudioDownload() {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#audio .btn"))).click();
 	}
 
 	private void sendURL(String link) {
@@ -33,28 +55,32 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 		a.sendKeys(link);
 		driver.findElement(By.id("btn-submit")).click();
 	}
+	
+	private String getAudioDownloadLink() {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		WebElement downloadLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Download .mp3")));
+		return downloadLink.getAttribute("href");
+	}
 
-	private String getDownloadLink() {
+	private String getVideoDownloadLink() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		WebElement downloadLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Download .mp4")));
 		return downloadLink.getAttribute("href");
 	}
 
-	private void clickOnConvert() {
+	private void clickOnVideoDownload() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-		WebElement element = wait
-				.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#mp4 tr:nth-child(1) .btn")));
-		element.click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#mp4 tr:nth-child(1) .btn"))).click();
 	}
 
 	private void waitForPageChange() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("nav-link")));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Video")));
 	}
 
 	public static void main(String[] args) {
 		try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
-			System.out.println(a.getVideo(""));
+			System.out.println(a.getAudio("https://youtu.be/JUl2fg7AOVQ?feature=shared"));
 
 		}
 

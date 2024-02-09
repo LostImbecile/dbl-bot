@@ -1,21 +1,20 @@
-# egubot (DBLegends)
+# Egubot (DBLegends - Discord Bot)
 
-Discord bot I've made for a specific server. Its features mostly have to do with a mobile game called "Dragon Ball Legends".
+Discord bot I've made for a specific server. Its features mostly have to do with a mobile game called "Dragon Ball Legends", but there are some other useful things.
 
-Not meant to be used or be useful, only public so server members can look at it or add to it.
+Public so server members can look at it or add to it.
 
 Notes:
 ---------------------------------
-The classes in main are implementation specific, you'll want to change some of them as needed (the MessageCreateEventHandler in particular), the rest should work as is, but you should modify their messages or add more to them.
+Some of the classes are implementation specific, you'll want to change some of them as needed, the rest should work as is, but you should modify their messages, clear them up, or add more to them.
 
 You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created for certain things, 
 but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
 Selenium was added to interact with some websites, remove it from pom.xml if you don't need its features as it greatly increases
-the size, it will not interfere with the running of the app if you catch the relevant exceptions.
+the size, it will not interfere with the running of the app if you do, but it's otherwise useful.
 
-This bot was made for use on single servers and stores its data on discord (online/local toggle is in the process of being finished), and
-isn't made to handle cases where you're running it with multiple servers (storage is completely shared), to keep things simple.
+This bot was made for use on single servers and stores its data on discord or locally. It isn't yet made to handle cases where you're running it with multiple servers (storage is completely shared), to keep things simple.
  
 Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the API is switching 
 to java 11 soon.
@@ -27,7 +26,7 @@ Bot commands:
 
 *Everything is case insensitive. Invocation has to be at the beginning of your message, not read otherwise.*
 
-*Brackets indicate operand, stars mean optional, everything else needs to be there.*
+*Round Brackets indicate operand, stars mean optional, square brackets for comments, everything else needs to be there.*
 
 DBLegends Random Roll:
 - b-roll(n) *(filters)
@@ -45,6 +44,8 @@ DBLegends Character Search:
 - b-tag update (name) (characters)
 
 Automatic Responses:
+
+ `[Types: contain, equal, match]`
 - b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> *(reaction)...
 - b-response remove (message)
 
@@ -59,9 +60,12 @@ Weather:
 
 WebDriver:
 - b-insult (person name) >> (reason)
+- b-grab (youtube link)
+- b-grab mp3 (youtube link)
+- b-convert *(gif/vid) 
 
 ChatGPT 3.5:
-- chatgpt activate (it's off by default)
+- chatgpt activate `[it's off by default]`
 - chatgpt deactivate
 - gpt (message)
 - gpt channel on/off
@@ -70,11 +74,14 @@ Custom AI:
 - ai (message)
 - ai terminate/activate
 
-Bot Control:
+Bot Control (Owner):
 - terminate
 - refresh
 - b-message edit (messageId) (message)
 - b-message delete (messageId)
+- parrot (msg)
+- b-toggle manager `[Toggles storage]`
+- toggle bot read mode `[Toggles reading bot message]`
 
 ### Active
 **1) b-roll(n) (filters)** 
@@ -114,16 +121,12 @@ b-template create t2 LoE + ginyu_force
 where LoE is a template, ginyu force is a tag
 
 
-
 **3) b-template remove (name)**
 - Removes an existing template if there is one with the same name (case insensitive).
 - Default templates can't be removed. You'll be told they don't exist if you try to.
 
-
-
 **4) b-template send**
 - Sends a file with all templates.
-
 
 **5) gpt (message)**
 - Gets response from chatgpt.
@@ -200,10 +203,37 @@ b-search 21
 - Like #4 but a file with all tags instead.
 - Prints the number of units with the tag.
 
+**11) b-grab (link)**
+- Sends a link of the video file to download it locally.
+- Accepts youtube links.
+- Instagram, tiktok, and twitter may be added.
+
+**12) b-grab mp3 (link)**
+- Sends a link of the audio to download it locally.
+- Accepts youtube links.
+
+**13) b-convert \*(gif/video)**
+- Converts gifs to videos and back.
+- Tries to automatically detect which is which, but appending the type is recommended.
+- Checks embeds and attachments, if the video/gif doesn't embed, or takes long to, it's ignored.
+- You can reply to the message that contains the file, or it can check yours.
+
+**14) b-weather (city) \*detailed**
+- Sends an embed with info on the city's weather for today and tomorrow.
+- If "detailed" is added, it includes more info and after tomorrow.
+
+**15) b-translate (text)/(reply to the message)/(embed)**
+- Translates the text in your message, the reply, or the embed in your message or the reply
+- Automatically detects language and translates to English unless set.
+- b-translate set (to/from-to) to manually set the language.
+- Uses an AI no better than google translate, with the same weaknesses.
+- Language is in its shortened form (i.e, en for English, fr for French).
+- Do b-translate languages to get all languages and their shortened forms
+
 ---------------------------------
 ### TBA 2029:
 
-**11) b-tag create (name) (characters)**
+**16) b-tag create (name) (characters)**
 - Creates a new tag that has the characters specified.
 - You don't need to specify characters on creation.
 - Tag name must be unique and devoid of spaces.
@@ -217,17 +247,17 @@ b-tag create cancer_units <https://dblegends.net/character.php?id=238> 191 491
 
 Creates a tag called cancer_units that contains characters with the above site IDs.
 
-**12) b-tag remove (name)**
+**17) b-tag remove (name)**
 - Removes custom tags, default ones can't be removed.
 
-**13) b-tag update (name) (characters)**
+**18) b-tag update (name) (characters)**
 - Adds or removes characters from a custom tag.
 - Default tags can't be modified.
 - Prefix the name with + or -.
 
 ---------------------------------
 ### Inactive:
-**14) ai**
+**19) ai**
 - Personal GPT2 AI, generates text randomly when called.
 - Has to be running on my end, which is almost never.
 - Pretty shit, can be racist and an arsehole as well.

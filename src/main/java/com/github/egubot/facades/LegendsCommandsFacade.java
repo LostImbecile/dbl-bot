@@ -12,10 +12,11 @@ import com.github.egubot.features.LegendsSearch;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.objects.CharacterHash;
+import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.SendObjects;
 import com.github.egubot.shared.Shared;
 import com.github.egubot.storage.ConfigManager;
-import com.github.egubot.storage.OnlineDataManager;
+import com.github.egubot.storage.LocalDataManager;
 
 public class LegendsCommandsFacade implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(LegendsCommandsFacade.class.getName());
@@ -119,7 +120,7 @@ public class LegendsCommandsFacade implements Shutdownable {
 		}
 
 		if (lowCaseTxt.equals("b-website upload")) {
-			uploadLegendsWebsiteBackup();
+			saveLegendsWebsiteBackup();
 			msg.getChannel().sendMessage("Done");
 			return true;
 		}
@@ -164,13 +165,13 @@ public class LegendsCommandsFacade implements Shutdownable {
 		return false;
 	}
 
-	private void backupLegendsWebsite() throws Exception {
+	private void backupLegendsWebsite() throws IOException {
 		if (legendsWebsite.isDataFetchSuccessfull()) {
 
 			if (backupWebsiteFlag) {
 				System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
 				// Upload current website HTML as backup
-				uploadLegendsWebsiteBackup();
+				saveLegendsWebsiteBackup();
 			} else {
 				System.out.println("Character database was successfully built!");
 			}
@@ -182,8 +183,7 @@ public class LegendsCommandsFacade implements Shutdownable {
 	}
 
 	private void getLegendsWebsiteBackup() throws IOException {
-		OnlineDataManager backup = new OnlineDataManager("Website_Backup_Msg_ID",
-				LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/"), "Website Backup");
+		LocalDataManager backup = new LocalDataManager("Website Backup");
 		backup.initialise(false);
 
 		legendsWebsite = new LegendsDatabase(backup.getData());
@@ -192,15 +192,13 @@ public class LegendsCommandsFacade implements Shutdownable {
 		}
 	}
 
-	private void uploadLegendsWebsiteBackup() {
+	private void saveLegendsWebsiteBackup() {
 		try {
-			OnlineDataManager backup = new OnlineDataManager("Website_Backup_Msg_ID",
-					LegendsDatabase.getWebsiteAsInputStream("https://dblegends.net/characters"), "website_backup");
-			backup.initialise(false);
-			backup.writeData(null);
+			LocalDataManager backup = new LocalDataManager("Website Backup");
+			backup.writeData(FileUtilities.readURL(LegendsDatabase.WEBSITE_URL));
 
 		} catch (Exception e) {
-			logger.error("Failed to upload website backup", e);
+			logger.error("Failed to save website backup", e);
 		}
 	}
 

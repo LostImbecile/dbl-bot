@@ -82,7 +82,10 @@ public class OnlineDataManager implements DataManager {
 	}
 
 	private void checkStorageMessage(boolean verbose) throws IOException {
-		if (!storageChannelID.equals("-1")) {
+		if (storageChannelID.equals("-1"))
+			return;
+		
+		if (api.getTextChannelById(storageChannelID).isPresent()) {
 			uploadLocalData(true);
 			KeyManager.updateKeys(storageKey, storageMsgID, KeyManager.idsFileName);
 			storageMsgID = KeyManager.getID(storageKey);
@@ -93,10 +96,19 @@ public class OnlineDataManager implements DataManager {
 					System.out.println("\nNew " + dataName + " message was created.");
 			} catch (Exception e) {
 				if (verbose)
-					logger.warn("\nFailed to create new {} message.", dataName);
-				logger.error("\nFailed to create new {} message.", dataName, e);
+					logger.warn("Failed to create new {} message.", dataName);
+				logger.error("Failed to create new {} message.", dataName, e);
 			}
+		} else {
+			System.out.println("\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
+
+			storageChannelID = Shared.getSystemInput().nextLine();
+			KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);
+			storageChannelID = KeyManager.getID("Storage_Channel_ID");
+
+			checkStorageMessage(verbose);
 		}
+
 	}
 
 	private synchronized void uploadLocalData(boolean fromFile) throws IOException {
@@ -134,7 +146,7 @@ public class OnlineDataManager implements DataManager {
 		} catch (Exception e) {
 			logger.error("Uploading data failed.", e);
 			Thread.currentThread().interrupt();
-			checkStorageChannel();
+			checkStorageMessage(true);
 		}
 	}
 
@@ -144,20 +156,6 @@ public class OnlineDataManager implements DataManager {
 		} else {
 			storageMsgID = newID;
 			storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get()).join();
-		}
-	}
-
-	private void checkStorageChannel() throws IOException {
-		if (!storageChannelID.equals("-1")) {
-			if (api.getTextChannelById(storageChannelID).isPresent()) {
-				throw new IOException();
-			} else {
-				System.out.println("\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
-
-				storageChannelID = Shared.getSystemInput().nextLine();
-				KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);
-				storageChannelID = KeyManager.getID("Storage_Channel_ID");
-			}
 		}
 	}
 

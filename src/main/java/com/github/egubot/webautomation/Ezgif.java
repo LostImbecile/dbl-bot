@@ -19,7 +19,8 @@ public class Ezgif extends LocalWebDriver {
 		super(true, true, true);
 	}
 
-	public String videoToGIF(String url) {
+	public String videoToGif(String url) {
+		// With a "j"
 		driver.get("https://ezgif.com/video-to-gif");
 
 		uploadAndWait(url);

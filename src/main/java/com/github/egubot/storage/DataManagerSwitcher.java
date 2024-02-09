@@ -43,7 +43,8 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		toggle();
 	}
 
-	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, boolean verbose) throws IOException {
+	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, boolean verbose)
+			throws IOException {
 		this();
 		this.storageKey = storageKey;
 		this.resourcePath = resourcePath;
@@ -54,7 +55,8 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		toggle();
 	}
 
-	public DataManagerSwitcher(String storageKey, InputStream localInput, String dataName, boolean verbose) throws IOException {
+	public DataManagerSwitcher(String storageKey, InputStream localInput, String dataName, boolean verbose)
+			throws IOException {
 		this();
 		this.storageKey = storageKey;
 		this.localInput = localInput;
@@ -89,19 +91,30 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 
 		if (isOnline() && isOnlineCapable) {
 			try {
-				if (localInput == null)
-					manager = new OnlineDataManager(storageKey, resourcePath, dataName);
-				else
-					manager = new OnlineDataManager(storageKey, localInput, dataName);
+				getOnlineManager(initialise);
+				return;
 			} catch (Exception e) {
 				isOnlineCapable = false;
 				logger.error(e);
-				logger.warn("Error occurred\nSwitching to local storage...");
-				manager = new LocalDataManager(dataName);
+				logger.warn("Online manager failed. Switching to local storage...");
 			}
-		} else {
-			manager = new LocalDataManager(dataName);
 		}
+
+		getLocalManager(initialise);
+
+	}
+
+	private void getLocalManager(boolean initialise) throws IOException {
+		manager = new LocalDataManager(dataName);
+		if (initialise)
+			initialise(verbose);
+	}
+
+	private void getOnlineManager(boolean initialise) throws IOException {
+		if (localInput == null)
+			manager = new OnlineDataManager(storageKey, resourcePath, dataName);
+		else
+			manager = new OnlineDataManager(storageKey, localInput, dataName);
 
 		if (initialise)
 			initialise(verbose);
@@ -135,7 +148,7 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 	public void initialise(boolean verbose) throws IOException {
 		manager.initialise(verbose);
 	}
-	
+
 	@Override
 	public void readData(Messageable e) {
 		manager.readData(e);

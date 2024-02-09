@@ -121,11 +121,14 @@ public class FileUtilities {
 
 	public static String readURL(String link) {
 		try {
-			URL url = new URL(link);
-			return FileUtilities.readInputStream(url.openStream(), "\n");
+			return FileUtilities.readInputStream(urlAsInputStream(link), "\n");
 		} catch (IOException e) {
 			return "failed";
 		}
+	}
+
+	public static InputStream urlAsInputStream(String address) throws IOException {
+		return new URL(address).openStream();
 	}
 
 	public static void writeToFile(String txt, String fileName) {
@@ -146,9 +149,9 @@ public class FileUtilities {
 
 	public static String getFileLastModified(String fileName) {
 		File file = new File(fileName);
-		if(!file.exists())
+		if (!file.exists())
 			return "null";
-		
+
 		long lastModifiedTime = file.lastModified();
 
 		Instant instant = Instant.ofEpochMilli(lastModifiedTime);
@@ -181,7 +184,8 @@ public class FileUtilities {
 	}
 
 	public static void main(String[] args) {
-		//FileUtilities.writeToFile(FileUtilities.readURL("https://dblegends.net/characters"), "legends.txt");
+		// FileUtilities.writeToFile(FileUtilities.readURL("https://dblegends.net/characters"),
+		// "legends.txt");
 		System.out.println(FileUtilities.getFileLastModified("Autorespond.txt"));
 	}
 }

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.Tags;
+import com.github.egubot.shared.FileUtilities;
 
 /*
  * Implementation specific, the start() method works
@@ -26,6 +26,7 @@ public class LegendsDatabase {
 	private ArrayList<Tags> tags = new ArrayList<>(100);
 	private ArrayList<String> lines = new ArrayList<>(1000);
 
+	public static final String WEBSITE_URL = "https://dblegends.net/characters";
 	private boolean isDataFetchSuccessfull;
 
 	public LegendsDatabase(List<String> lines) throws IOException {
@@ -41,18 +42,9 @@ public class LegendsDatabase {
 
 	public LegendsDatabase() throws IOException {
 		// Read from website
-		InputStream is = getWebsiteAsInputStream("https://dblegends.net/characters");
+		InputStream is = FileUtilities.urlAsInputStream(WEBSITE_URL);
 		readData(is);
 		getData();
-	}
-
-	public static InputStream getWebsiteAsInputStream(String address) throws IOException {
-		// Default constructor reads from the website
-		// Make a URL to the web page
-		URL url = new URL(address);
-
-		// Get the input stream through URL Connection
-		return url.openStream();
 	}
 
 	public List<Characters> getCharactersList() {

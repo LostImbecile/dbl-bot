@@ -35,6 +35,14 @@ public class LocalDataManager implements DataManager {
 					+ FileUtilities.getFileLastModified(fileName));
 	}
 
+	public void writeData(String data) {
+		try {
+			FileUtilities.writeToFile(data, fileName);
+		} catch (Exception e1) {
+			logger.error("Failed to write and upload data.", e1);
+		}
+	}
+
 	@Override
 	public void writeData(Messageable e) {
 		try {

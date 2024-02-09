@@ -10,7 +10,7 @@ import com.github.egubot.storage.DataManagerHandler;
 
 public class RollTemplates extends DataManagerHandler {
 	private static String idKey = "Templates_Message_ID";
-	private static String resourcePath = "RollTemplates.txt";
+	private static String resourcePath = "Filter_Templates.txt";
 
 	private LegendsDatabase legendsWebsite;
 

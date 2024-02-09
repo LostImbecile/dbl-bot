@@ -19,33 +19,16 @@ public class WebDriverFacade {
 	private static final Logger logger = LogManager.getLogger(WebDriverFacade.class.getName());
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("\\.(?:jpg|jpeg|png|mp3|ogg|wav)+",
 			Pattern.CASE_INSENSITIVE);
+	private static final Pattern YOUTUBE_COMMAND_PATTERN = Pattern.compile("(?i)b-grab(?:\\s?mp3)?\\s*<?([^>]+)>?");
 
 	public static boolean checkCommands(Message msg, String msgText, String lowCaseText) {
 		if (lowCaseText.matches("b-insult(?s).*")) {
-			String[] options = lowCaseText.replaceFirst("b-insult", "").split(">>");
-			if (options.length < 2) {
-				msg.getChannel().sendMessage("Hast thou no target, no foe, or no purpose in mind?");
-			} else {
-				try (AIResponseGenerator a = new AIResponseGenerator()) {
-					msg.getChannel().sendMessage("Will be whispered in time.");
-					String response = a.getResponse(options[0], options[1]);
-					msg.getAuthor().asUser().get().sendMessage(response);
-				} catch (Exception e) {
-					logger.error("Failed to get response from online AI.", e);
-					msg.getAuthor().asUser().get().sendMessage("Perhaps not.");
-				}
-			}
+			checkInsultCommands(msg, lowCaseText);
 			return true;
 		}
 
 		if (lowCaseText.matches("b-convert(?s).*")) {
-			if (lowCaseText.contains("b-convert gif")) {
-				checkEzgifCommands(msg, true, false);
-			} else if (lowCaseText.contains("b-convert vid")) {
-				checkEzgifCommands(msg, false, true);
-			} else {
-				checkEzgifCommands(msg, false, false);
-			}
+			checkEzgifCommands(msg, lowCaseText.contains("b-convert gif"), lowCaseText.contains("b-convert vid"));
 			return true;
 		}
 
@@ -57,35 +40,63 @@ public class WebDriverFacade {
 		return false;
 	}
 
+	private static void checkInsultCommands(Message msg, String lowCaseText) {
+		String[] options = lowCaseText.replaceFirst("b-insult", "").split(">>");
+		if (options.length < 2) {
+			msg.getChannel().sendMessage("Hast thou no target, no foe, or no purpose in mind?");
+		} else {
+			try (AIResponseGenerator a = new AIResponseGenerator()) {
+				msg.getChannel().sendMessage("Will be whispered in time.");
+				String response = a.getResponse(options[0], options[1]);
+				msg.getAuthor().asUser().get().sendMessage(response);
+			} catch (Exception e) {
+				logger.error("Failed to get response from online AI.", e);
+				msg.getAuthor().asUser().get().sendMessage("Perhaps not.");
+			}
+		}
+	}
+
 	private static void checkGrabCommands(Message msg, String msgText) {
 		try {
 			EmbedBuilder embed = null;
 			if (msgText.contains("youtu")) {
 				embed = getYoutubeLinkEmbed(msgText);
 			}
+
 			if (embed != null)
 				msg.reply(embed);
 			else
 				msg.reply(":thumbs_down:");
+
 		} catch (Exception e) {
+			logger.error("Couldn't get video link", e);
 			msg.reply("Failed :thumbs_down:");
 		}
 	}
 
 	private static EmbedBuilder getYoutubeLinkEmbed(String text) {
-		String link = text.substring(text.indexOf(" ") + 1);
+		Matcher matcher = YOUTUBE_COMMAND_PATTERN.matcher(text);
+		String link = matcher.replaceAll("$1").strip();
 		String newLink = null;
+		String extension = "";
 		if (!link.isBlank() && link.contains("https")) {
 			try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
-				newLink = a.getVideo(link);
+				if (text.contains("mp3")) {
+					extension = ".mp3";
+					newLink = a.getAudio(link);
+
+				} else {
+					extension = ".mp4";
+					newLink = a.getVideo(link);
+
+				}
 			}
 		}
 		if (newLink == null)
 			return null;
 
-		return new EmbedBuilder()
-				.setAuthor("Click to download", newLink, "https://cdn-icons-png.flaticon.com/256/1384/1384060.png")
-				.setDescription("not sus trust me");
+		return new EmbedBuilder().setAuthor("Click to download " + extension, newLink,
+				"https://cdn-icons-png.flaticon.com/256/1384/1384060.png").setDescription("not sus trust me");
 	}
 
 	private static void checkEzgifCommands(Message msg, boolean isKnownGif, boolean isKnownVid) {
@@ -128,7 +139,7 @@ public class WebDriverFacade {
 		msg.getChannel().sendMessage("Processing. Will take up to 2 minutes.");
 		try (Ezgif a = new Ezgif()) {
 			if (!isKnownVid && (isKnownGif || !link.contains(".gif")) && !link.contains("tenor")) {
-				msg.reply("Be sure to download it before expiry.\n" + a.videoToGIF(link));
+				msg.reply("Be sure to download it locally before expiry.\n" + a.videoToGif(link));
 			} else {
 				if (link.contains("tenor") && link.contains(".mp4"))
 					msg.reply(link);
