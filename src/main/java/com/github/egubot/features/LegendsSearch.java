@@ -23,8 +23,8 @@ import com.github.egubot.objects.Characters;
 
 public class LegendsSearch extends LegendsPool {
 
-	public LegendsSearch(LegendsDatabase legendsWebsite, List<String> rollTemplates) {
-		super(legendsWebsite, rollTemplates);
+	public LegendsSearch(List<String> rollTemplates) {
+		super(rollTemplates);
 	}
 
 	public void search(String msgText, Messageable e) {
@@ -199,7 +199,8 @@ public class LegendsSearch extends LegendsPool {
 		name = name.toLowerCase().replace("ssb", "ssgss").replace("dbl", "").replace("-", "")
 				.replace("frieza_no_brother", "cooler").replace("best_unit_in_the_game","5101s").strip();
 
-		ArrayList<Characters> charactersList = (ArrayList<Characters>) getLegendsWebsite().getCharactersList();
+		getLegendsWebsite();
+		ArrayList<Characters> charactersList = (ArrayList<Characters>) LegendsDatabase.getCharactersList();
 
 		// Split the input name into individual tokens (words)
 		String[] nameTokens = name.split("_");

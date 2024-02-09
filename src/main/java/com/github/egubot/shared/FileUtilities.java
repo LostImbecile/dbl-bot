@@ -62,6 +62,10 @@ public class FileUtilities {
 
 		return input;
 	}
+	
+	public static boolean isFileExist(String fileName) {
+		return new File(fileName).exists();
+	}
 
 	public static <T> List<T> readListFromJson(String fileName, Class<T[]> type) {
 		try (InputStream input = getFileInputStream(fileName, true)) {

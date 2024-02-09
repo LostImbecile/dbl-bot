@@ -12,6 +12,7 @@ import com.github.egubot.features.LegendsSearch;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.objects.CharacterHash;
+import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.SendObjects;
 import com.github.egubot.shared.Shared;
@@ -40,8 +41,8 @@ public class LegendsCommandsFacade implements Shutdownable {
 
 				backupLegendsWebsite();
 			} catch (Exception e) {
-				logger.warn("\nFailed to build character database. Relevant commands will be inactive.");
-				logger.error("\\nFailed to build character database.", e);
+				logger.warn("Failed to build character database. Relevant commands will be inactive.");
+				logger.error("Failed to build character database.", e);
 				isLegendsMode = false;
 			}
 
@@ -54,9 +55,9 @@ public class LegendsCommandsFacade implements Shutdownable {
 					return;
 				}
 
-				legendsRoll = new LegendsRoll(legendsWebsite, templates.getRollTemplates());
+				legendsRoll = new LegendsRoll(templates.getRollTemplates());
 
-				legendsSearch = new LegendsSearch(legendsWebsite, templates.getRollTemplates());
+				legendsSearch = new LegendsSearch(templates.getRollTemplates());
 			}
 		}
 	}
@@ -105,17 +106,17 @@ public class LegendsCommandsFacade implements Shutdownable {
 
 	private boolean checkObjectCommands(Message msg, String lowCaseTxt) {
 		if (lowCaseTxt.equals("b-character send")) {
-			SendObjects.sendCharacters(msg.getChannel(), legendsWebsite.getCharactersList());
+			SendObjects.sendCharacters(msg.getChannel(), LegendsDatabase.getCharactersList());
 			return true;
 		}
 
 		if (lowCaseTxt.equals("b-character printemptyids")) {
-			CharacterHash.printEmptyIDs(legendsWebsite.getCharactersList());
+			CharacterHash.printEmptyIDs(LegendsDatabase.getCharactersList());
 			return true;
 		}
 
 		if (lowCaseTxt.equals("b-tag send")) {
-			SendObjects.sendTags(msg.getChannel(), legendsWebsite.getTags());
+			SendObjects.sendTags(msg.getChannel(), LegendsDatabase.getTags());
 			return true;
 		}
 
@@ -169,7 +170,7 @@ public class LegendsCommandsFacade implements Shutdownable {
 		if (legendsWebsite.isDataFetchSuccessfull()) {
 
 			if (backupWebsiteFlag) {
-				System.out.println("Character database was successfully built!\nWebsite Backup uploading...");
+				System.out.println("Character database was successfully built!");
 				// Upload current website HTML as backup
 				saveLegendsWebsiteBackup();
 			} else {
@@ -183,12 +184,16 @@ public class LegendsCommandsFacade implements Shutdownable {
 	}
 
 	private void getLegendsWebsiteBackup() throws IOException {
-		LocalDataManager backup = new LocalDataManager("Website Backup");
-		backup.initialise(false);
-
-		legendsWebsite = new LegendsDatabase(backup.getData());
-		if (!legendsWebsite.isDataFetchSuccessfull()) {
-			logger.warn("Warning: Backup is also missing information.");
+		if (FileUtilities.isFileExist("Website_Backup.txt")) {
+			LocalDataManager backup = new LocalDataManager("Website Backup");
+			backup.initialise(false);
+			legendsWebsite = new LegendsDatabase(ConvertObjects.listToText(backup.getData()));
+			if (!legendsWebsite.isDataFetchSuccessfull()) {
+				logger.warn("Backup is also missing information.");
+			}
+		} else {
+			logger.warn("There is no backup.");
+			throw new IOException();
 		}
 	}
 

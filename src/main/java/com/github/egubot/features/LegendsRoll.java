@@ -9,6 +9,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
@@ -17,8 +18,8 @@ public class LegendsRoll extends LegendsPool {
 	
 	private Random rng = new Random();
 
-	public LegendsRoll(LegendsDatabase legendsWebsite, List<String> arrayList) {
-		super(legendsWebsite, arrayList);
+	public LegendsRoll(List<String> rollTemplates) {
+		super(rollTemplates);
 	}
 
 	public void rollCharacters(String msgText, Messageable e, boolean isAnimated) {
@@ -98,7 +99,8 @@ public class LegendsRoll extends LegendsPool {
 		st = st.strip();
 		// System.out.println(st);
 		if (st.isBlank()) {
-			pool = (ArrayList<Characters>) getLegendsWebsite().getCharactersList();
+			getLegendsWebsite();
+			pool = (ArrayList<Characters>) LegendsDatabase.getCharactersList();
 		} else {
 			pool = ((CharacterHash) analyseAndCreatePool(st)).toArrayList();
 		}

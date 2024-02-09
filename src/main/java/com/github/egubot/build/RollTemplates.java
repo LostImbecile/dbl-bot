@@ -12,12 +12,9 @@ public class RollTemplates extends DataManagerHandler {
 	private static String idKey = "Templates_Message_ID";
 	private static String resourcePath = "Filter_Templates.txt";
 
-	private LegendsDatabase legendsWebsite;
 
-	public RollTemplates(LegendsDatabase legendsWebsite) throws IOException {
+	public RollTemplates() throws IOException {
 		super(idKey, resourcePath, "Filter Templates", true);
-
-		this.legendsWebsite = legendsWebsite;
 	}
 
 	public void removeTemplate(String msgText, Messageable e, boolean isOwner) {
@@ -93,7 +90,7 @@ public class RollTemplates extends DataManagerHandler {
 
 			for (int i = 1; i < tokens.length; i++) {
 
-				for (Tags element : legendsWebsite.getTags()) {
+				for (Tags element : LegendsDatabase.getTags()) {
 					if (tokens[i].equalsIgnoreCase(element.getName())) {
 						isTag = true;
 					}

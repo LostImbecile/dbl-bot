@@ -14,8 +14,7 @@ public abstract class LegendsPool {
 	private LegendsDatabase legendsWebsite;
 	private List<String> rollTemplates;
 
-	protected LegendsPool(LegendsDatabase legendsWebsite, List<String> rollTemplates) {
-		this.legendsWebsite = legendsWebsite;
+	protected LegendsPool(List<String> rollTemplates) {
 		this.rollTemplates =  rollTemplates;
 	}
 
@@ -280,8 +279,10 @@ public abstract class LegendsPool {
 		} else if (subPoolFilter != null) {
 			for (String tagCondition : subPoolFilter) {
 
-				for (int i = 0; i < getLegendsWebsite().getTags().size(); i++) {
-					tag = getLegendsWebsite().getTags().get(i);
+				getLegendsWebsite();
+				for (int i = 0; i < LegendsDatabase.getTags().size(); i++) {
+					getLegendsWebsite();
+					tag = LegendsDatabase.getTags().get(i);
 
 					if (tag.getName().equalsIgnoreCase(tagCondition)) {
 						// System.out.print(tagCondition + " ");

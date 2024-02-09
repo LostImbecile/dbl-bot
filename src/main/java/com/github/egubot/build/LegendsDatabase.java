@@ -1,19 +1,18 @@
 package com.github.egubot.build;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.Tags;
-import com.github.egubot.shared.FileUtilities;
 
 /*
  * Implementation specific, the start() method works
@@ -22,67 +21,42 @@ import com.github.egubot.shared.FileUtilities;
  */
 public class LegendsDatabase {
 	private static final Logger logger = LogManager.getLogger(LegendsDatabase.class.getName());
-	private ArrayList<Characters> charactersList = new ArrayList<>(500);
-	private ArrayList<Tags> tags = new ArrayList<>(100);
-	private ArrayList<String> lines = new ArrayList<>(1000);
+	private static ArrayList<Characters> charactersList = new ArrayList<>(500);
+	private static ArrayList<Tags> tags = new ArrayList<>(100);
 
 	public static final String WEBSITE_URL = "https://dblegends.net/characters";
 	private boolean isDataFetchSuccessfull;
 
-	public LegendsDatabase(List<String> lines) throws IOException {
-		setLines(lines);
-		getData();
-	}
-
-	public LegendsDatabase(InputStream is) throws IOException {
-		// To read from a different input
-		readData(is);
-		getData();
+	public LegendsDatabase(String st) {
+		Document document = Jsoup.parse(st);
+		getData(document);
 	}
 
 	public LegendsDatabase() throws IOException {
-		// Read from website
-		InputStream is = FileUtilities.urlAsInputStream(WEBSITE_URL);
-		readData(is);
-		getData();
+		Document document = Jsoup.connect(WEBSITE_URL).get();
+		getData(document);
 	}
 
-	public List<Characters> getCharactersList() {
+	public static List<Characters> getCharactersList() {
 		return charactersList;
 	}
 
-	public List<Tags> getTags() {
+	public static List<Tags> getTags() {
 		return tags;
 	}
 
-	public List<String> getLines() {
-		return lines;
-	}
+	public void getData(Document document) {
+		addSpecialTags();
+		getAllTags(document);
 
-	public void getData() {
-		getSpecialTags();
-		getAllTags(lines);
+		getCharacters(document);
 
-		// If 0 then data for all units was fetched, o.w, there's a problem
 		// 546 is the current unit count as an additional measure
-		setDataFetchSuccessfull(getCharacters(lines) == 0 && charactersList.size() > 545);
-
-	}
-
-	private void readData(InputStream is) throws IOException {
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-			String line = null;
-
-			// You can process the text as you read it instead of adding it first
-			// depending on what you want to do
-			while ((line = br.readLine()) != null) {
-				lines.add(line.replace("é", "e"));
-			}
-		}
+		setDataFetchSuccessfull(charactersList.size() > 545);
 	}
 
 	//
-	private void getSpecialTags() {
+	private void addSpecialTags() {
 		/*
 		 * Index matters for some of the tags here so don't reorder
 		 * the lines, I can use the IDs to add them, but I want to
@@ -115,304 +89,104 @@ public class LegendsDatabase {
 		tags.add(new Tags(-1, "event"));// 24
 	}
 
-	private void getAllTags(List<String> lines) {
-		String beginWrite = "- All Tags -";
+	private static void getAllTags(Document document) {
+		Elements optionElements = document.select("option");
 
-		String[] token;
-		String st = "";
-		boolean writeFlag = false;
-		for (String line : lines) {
-			if (line.contains(beginWrite)) {
-				writeFlag = true;
+		for (Element option : optionElements) {
+			try {
+				int value = Integer.parseInt(option.attr("value"));
+				String label = option.text().toLowerCase().replace("é", "e");
+				tags.add(new Tags(value, label));
+			} catch (NumberFormatException e) {
+				// Not an issue here
+			}
+		}
+	}
+
+	private static void getCharacters(Document document) {
+		Elements characters = document.select("a.chara-list");
+		for (Element character : characters) {
+			String charaUrl = character.attr("href");
+			String name = character.attr("data-charaname");
+			String colour = character.attr("data-element");
+			String rarity = character.attr("data-rarity");
+			String zenkai = character.attr("data-zenkai");
+			String lf = character.attr("data-lf");
+			String tags = character.attr("data-tags");
+			String imgUrl = character.select(".character-thumb img").attr("src");
+			String gameID = character.select("div[title]").attr("title");
+
+			// Alternate names and image
+			// String charaFormName = character.attr("data-charaformname");
+			// String img2Url = character.select(".character2").attr("src");
+
+			if (gameID.isBlank())
 				continue;
-			}
 
-			if (writeFlag) {
-				token = line.split("option value=");
-
-				for (int j = 0; j < token.length; j++) {
-					try {
-						st = token[j];
-						if (token[j].contains("\"") && token[j].contains(">") && token[j].contains("<")) {
-							processTag(st);
-						}
-					} catch (Exception e) {
-						System.err.println("Tag ID failed to fetch from line:\n" + token[j]);
-					}
-				}
-				return;
-			}
-			
-
+			Characters newCharacter = new Characters();
+			newCharacter.setImageLink(imgUrl);
+			newCharacter.setColour(colour);
+			newCharacter.setGameID(gameID);
+			newCharacter.setRarity(rarity);
+			newCharacter.setCharacterName(processName(name));
+			setSiteID(charaUrl, newCharacter);
+			setZenkaiStatus(zenkai, newCharacter);
+			setLFStatus(lf, newCharacter);
+			setTags(tags, newCharacter);
+			evaluateReleaseDate(gameID, newCharacter);
+			charactersList.add(newCharacter);
 		}
 	}
 
-	private void processTag(String st) {
-		String name;
-		String value;
-		value = st.substring(st.indexOf("\"") + 1, st.indexOf("\"", st.indexOf("\"") + 1));
-		name = st.substring(st.indexOf(">") + 1, st.indexOf("<")).replaceAll("[\"()#]", "").replaceAll("[ /]", "_");
-		tags.add(new Tags(Integer.parseInt(value), name.toLowerCase()));
-	}
-
-	private int getCharacters(List<String> lines) {
-		/*
-		 * To get data from a website you just read its HTML content (with say, f12),
-		 * and then identify any patterns you find.
-		 * 
-		 * There are different ways to do it depending on the website, and you
-		 * can get containers directly as well to avoid having to look for certain
-		 * keywords and the sort. Java does have support for that stuff so you
-		 * can look for some online, this was easier for me so I went for it.
-		 * 
-		 * This class is fixed, changing a number or a line might break it, so
-		 * it's preferred that you do not touch it.
-		 */
-		String beginWrite = "\"character-container text-center justify-content-around justify-content-center d-flex flex-wrap\"";
-		String endWrite = "</main>";
-		String newCharacter = "chara-list chara-listing zoom";
-		String lineWithID = "/character/";
-		String colour = "data-element";
-		String rarity = "data-rarity";
-		String zenkaiStatus = "data-zenkai";
-		String lfStatus = "data-lf";
-		String ignID = "title=";
-		String image = "src=";
-		String name = "\"card-header name";
-		String tags = "data-tags=";
-		String line;
-
-		int dataCounter = 0;
-		int characterIndex = 0;
-		boolean writeFlag = false;
-
-		for (int i = 160; i < lines.size(); i++) {
-			line = lines.get(i);
-
-			if (line.contains(beginWrite)) {
-				writeFlag = true;
-			}
-
-			if (line.contains(endWrite))
-				break;
-
-			if (writeFlag) {
-
-				if (line.contains(newCharacter)) {
-
-					charactersList.add(new Characters());
-					characterIndex++;
-				}
-
-				if (line.contains(lineWithID) && line.contains("\"")) {
-					if (setSiteID(line, characterIndex) != 0) {
-						dataCounter++;
-					}
-
-				} else if (line.contains(colour) && line.contains("=")) {
-
-					setColour(line, characterIndex);
-					dataCounter++;
-
-				} else if (line.contains(rarity) && line.contains("=")) {
-
-					setRarity(line, characterIndex);
-					dataCounter++;
-
-				} else if (line.contains(zenkaiStatus) && line.contains("=")) {
-
-					setZenkaiStatus(line, characterIndex);
-					dataCounter++;
-
-				} else if (line.contains(lfStatus) && line.contains("=")) {
-
-					setLFStatus(line, characterIndex);
-					dataCounter++;
-
-				} else if (line.contains(ignID) && line.contains("=")) {
-
-					setGameID(line, characterIndex);
-					dataCounter++;
-
-				} else if (line.contains(image) && line.contains("=")) {
-
-					setImageLink(line, characterIndex);
-
-					if (!line.contains("alt="))
-						dataCounter++;
-
-				} else if (line.contains(name)) {
-
-					setName(lines, characterIndex, i);
-
-					if (!line.contains("Form"))
-						dataCounter++;
-
-				} else if (line.contains(tags) && line.contains("=") && line.contains(">")) {
-
-					if (setTags(line, characterIndex) > 5) {
-						dataCounter++;
-					}
-
-				}
-			}
-
+	private static void setLFStatus(String st, Characters character) {
+		if (st.equals("0"))
+			character.setLF(false);
+		else {
+			character.setLF(true);
+			tags.get(13).getCharacters().put(character);
 		}
-
-		// Each unit should have 9 pieces of data related to it
-		// if any is missing there's a problem
-
-		return characterIndex * 9 - dataCounter;
-
 	}
 
-	private int setTags(String line, int characterIndex) {
-		String[] token;
-		String st;
-		st = line.substring(line.indexOf("=") + 1, line.indexOf(">")).replace("\"", "").strip();
-		token = st.split(" ");
-
-		int tagNum = 0;
-		for (String element : token) {
-			tagNum += getTag(element, charactersList.get(characterIndex - 1));
-		}
-
-		return tagNum;
-		// charactersList.get(characterIndex - 1).setImageLink(st);
-	}
-
-	private void setName(List<String> lines, int characterIndex, int i) {
+	private static void setSiteID(String line, Characters character) {
 		try {
-			String st;
-			String line;
-			line = lines.get(i + 1);
-			if (line.contains(">") && line.contains("<")) {
-				st = processName(line);
-				charactersList.get(characterIndex - 1).setCharacterName(st);
-			}
-		} catch (StringIndexOutOfBoundsException e) {
+			String st = line.replace("/character/", "");
+			character.setSiteID(Integer.parseInt(st));
+		} catch (NumberFormatException e) {
 			logger.error(e);
 		}
 	}
 
-	private void setImageLink(String line, int characterIndex) {
-		try {
-			String st;
-			st = line.substring(line.indexOf("src"));
-			st = st.substring(st.indexOf("=") + 1).replace("\"", "").strip();
-			charactersList.get(characterIndex - 1).setImageLink(st);
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-	}
-
-	private void setGameID(String line, int characterIndex) {
-		try {
-			String st;
-			st = line.substring(line.indexOf("=") + 1, line.length() - 2).replace("\"", "").strip();
-			charactersList.get(characterIndex - 1).setGameID(st);
-			evaluateReleaseDate(st, characterIndex);
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-	}
-
-	private void setLFStatus(String line, int characterIndex) {
-		try {
-			String st;
-			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-			evaluateLFStatus(st, characterIndex);
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-	}
-
-	private void setZenkaiStatus(String line, int characterIndex) {
-		try {
-			String st;
-			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-			evaluateZenkaiStatus(st, characterIndex);
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-	}
-
-	private void setRarity(String line, int characterIndex) {
-		try {
-			String st;
-			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-			charactersList.get(characterIndex - 1).setRarity(st);
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-	}
-
-	private void setColour(String line, int characterIndex) {
-		try {
-			String st;
-			st = line.substring(line.indexOf("=") + 1).replace("\"", "").strip();
-			charactersList.get(characterIndex - 1).setColour(st);
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-	}
-
-	private int setSiteID(String line, int characterIndex) {
-		try {
-			String[] token;
-			String st;
-			token = line.split("/character/");
-			if (token.length > 1) {
-
-				st = token[1].substring(0, token[1].indexOf("\"") + 1).replace("\"", "").strip();
-				charactersList.get(characterIndex - 1).setSiteID(Integer.parseInt(st));
-				return 1;
-			}
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
-		return 0;
-	}
-
-	private void evaluateZenkaiStatus(String st, int characterIndex) {
+	private static void setZenkaiStatus(String st, Characters character) {
 		try {
 			if (st.equals("-1"))
-				charactersList.get(characterIndex - 1).setZenkai(false);
+				character.setZenkai(false);
 			else {
-				charactersList.get(characterIndex - 1).setZenkai(true);
-				tags.get(12).getCharacters().put(charactersList.get(characterIndex - 1));
+				character.setZenkai(true);
+				tags.get(12).getCharacters().put(character);
 			}
 		} catch (StringIndexOutOfBoundsException e) {
 			logger.error(e);
 		}
 	}
 
-	private void evaluateLFStatus(String st, int characterIndex) {
-		try {
-			if (st.equals("0"))
-				charactersList.get(characterIndex - 1).setLF(false);
-			else {
-				charactersList.get(characterIndex - 1).setLF(true);
-				tags.get(13).getCharacters().put(charactersList.get(characterIndex - 1));
-			}
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
+	private static void setTags(String line, Characters character) {
+		String[] token = line.split(" ");
+
+		for (String id : token) {
+			getTag(id, character);
 		}
 	}
 
 	private static String processName(String line) {
 		try {
-			String st;
-			st = line.substring(line.indexOf(">") + 1, line.indexOf("<")).replace("\"", "")
-					.replace("Super Saiyan ", "SSJ").replace("SSJGod", "SSG").replace("SSG SS", "SSGSS").strip();
-			return st;
+			return line.replace("Super Saiyan ", "SSJ").replace("SSJGod", "SSG").replace("SSG SS", "SSGSS").strip();
 		} catch (StringIndexOutOfBoundsException e) {
 			logger.error(e);
 			return "Error";
 		}
 	}
 
-	private void evaluateReleaseDate(String st, int characterIndex) {
+	private static void evaluateReleaseDate(String st, Characters character) {
 		try {
 			int releaseDate;
 			int yearIndex;
@@ -433,50 +207,48 @@ public class LegendsDatabase {
 					if (yearIndex > 13 && yearIndex < 22) {
 						// Adds units on the edge of the year to both years
 						if (releaseDate == 1 && yearIndex > 14)
-							tags.get(yearIndex - 1).getCharacters().put(charactersList.get(characterIndex - 1));
+							tags.get(yearIndex - 1).getCharacters().put(character);
 
 						if (releaseDate == -1 && yearIndex < 21)
-							tags.get(yearIndex + 1).getCharacters().put(charactersList.get(characterIndex - 1));
+							tags.get(yearIndex + 1).getCharacters().put(character);
 
-						tags.get(yearIndex).getCharacters().put(charactersList.get(characterIndex - 1));
+						tags.get(yearIndex).getCharacters().put(character);
 					}
 
 					// Add old or new tag
 					if (yearIndex < 16)
-						tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
+						tags.get(22).getCharacters().put(character);
 					else
-						tags.get(23).getCharacters().put(charactersList.get(characterIndex - 1));
+						tags.get(23).getCharacters().put(character);
 
 				} catch (NumberFormatException e) {
 					System.out.println("Failed to parse: " + st);
 				}
 			} else {
 				// Specific units someone wanted added
-				releaseDate = charactersList.get(characterIndex - 1).getSiteID();
+				releaseDate = character.getSiteID();
 				if (releaseDate == 45 || releaseDate == 162 || releaseDate == 157 || releaseDate == 183
 						|| releaseDate == 201 || releaseDate == 246) {
-					tags.get(14).getCharacters().put(charactersList.get(characterIndex - 1));
-					tags.get(22).getCharacters().put(charactersList.get(characterIndex - 1));
+					tags.get(14).getCharacters().put(character);
+					tags.get(22).getCharacters().put(character);
 				}
 
 				// Add to event tag
-				tags.get(24).getCharacters().put(charactersList.get(characterIndex - 1));
+				tags.get(24).getCharacters().put(character);
 			}
 		} catch (StringIndexOutOfBoundsException e) {
 			logger.error(e);
 		}
 	}
 
-	private int getTag(String st, Characters characters) {
-		int id;
-		id = Integer.parseInt(st);
+	private static void getTag(String st, Characters character) {
+		int id = Integer.parseInt(st);
 		for (Tags tag : tags) {
 			if (tag.getId() == id) {
-				tag.getCharacters().put(characters);
-				return 1;
+				tag.getCharacters().put(character);
+				return;
 			}
 		}
-		return 0;
 	}
 
 	public boolean isDataFetchSuccessfull() {
@@ -487,7 +259,4 @@ public class LegendsDatabase {
 		this.isDataFetchSuccessfull = isDataFetchSuccessfull;
 	}
 
-	public void setLines(List<String> lines) {
-		this.lines = new ArrayList<>(lines);
-	}
 }

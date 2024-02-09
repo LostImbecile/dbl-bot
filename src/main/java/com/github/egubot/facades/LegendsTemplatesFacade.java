@@ -14,7 +14,7 @@ public class LegendsTemplatesFacade implements Shutdownable {
 	private RollTemplates templates = null;
 
 	public LegendsTemplatesFacade(LegendsDatabase legendsWebsite) throws IOException {
-		templates = new RollTemplates(legendsWebsite);
+		templates = new RollTemplates();
 	}
 
 	public boolean checkTemplateCommands(Message msg, String lowCaseTxt) {
