@@ -9,16 +9,18 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.embed.Embed;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.webautomation.AIResponseGenerator;
 import com.github.egubot.webautomation.Ezgif;
+import com.github.egubot.webautomation.GrabYoutubeVideo;
 
 public class WebDriverFacade {
 	private static final Logger logger = LogManager.getLogger(WebDriverFacade.class.getName());
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("\\.(?:jpg|jpeg|png|mp3|ogg|wav)+",
 			Pattern.CASE_INSENSITIVE);
 
-	public static boolean checkCommands(Message msg, String lowCaseText) {
+	public static boolean checkCommands(Message msg, String msgText, String lowCaseText) {
 		if (lowCaseText.matches("b-insult(?s).*")) {
 			String[] options = lowCaseText.replaceFirst("b-insult", "").split(">>");
 			if (options.length < 2) {
@@ -46,7 +48,44 @@ public class WebDriverFacade {
 			}
 			return true;
 		}
+
+		if (lowCaseText.matches("b-grab(?s).*")) {
+			msg.getChannel().sendMessage("one moment");
+			checkGrabCommands(msg, msgText);
+			return true;
+		}
 		return false;
+	}
+
+	private static void checkGrabCommands(Message msg, String msgText) {
+		try {
+			EmbedBuilder embed = null;
+			if (msgText.contains("youtu")) {
+				embed = getYoutubeLinkEmbed(msgText);
+			}
+			if (embed != null)
+				msg.reply(embed);
+			else
+				msg.reply(":thumbs_down:");
+		} catch (Exception e) {
+			msg.reply("Failed :thumbs_down:");
+		}
+	}
+
+	private static EmbedBuilder getYoutubeLinkEmbed(String text) {
+		String link = text.substring(text.indexOf(" ") + 1);
+		String newLink = null;
+		if (!link.isBlank() && link.contains("https")) {
+			try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
+				newLink = a.getVideo(link);
+			}
+		}
+		if (newLink == null)
+			return null;
+
+		return new EmbedBuilder()
+				.setAuthor("Click to download", newLink, "https://cdn-icons-png.flaticon.com/256/1384/1384060.png")
+				.setDescription("not sus trust me");
 	}
 
 	private static void checkEzgifCommands(Message msg, boolean isKnownGif, boolean isKnownVid) {

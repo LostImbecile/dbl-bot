@@ -4,6 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import com.github.egubot.main.KeyManager;
@@ -42,29 +43,30 @@ public class Translate {
 	}
 
 	public String post(String text, boolean appendLanguage) throws IOException {
-		HttpClient client = HttpClients.createDefault();
-		String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
-		HttpPost httpPost = new HttpPost(url);
+		try (CloseableHttpClient client = HttpClients.createDefault()) {
+			String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
+			HttpPost httpPost = new HttpPost(url);
 
-		// Set headers
-		httpPost.setHeader("Ocp-Apim-Subscription-Key", key);
-		httpPost.setHeader("Ocp-Apim-Subscription-Region", location);
-		httpPost.setHeader("Content-type", "application/json");
+			// Set headers
+			httpPost.setHeader("Ocp-Apim-Subscription-Key", key);
+			httpPost.setHeader("Ocp-Apim-Subscription-Region", location);
+			httpPost.setHeader("Content-type", "application/json");
 
-		// Set request body
-		httpPost.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
+			// Set request body
+			httpPost.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
 
-		// Execute the request
-		HttpResponse response = client.execute(httpPost);
+			// Execute the request
+			HttpResponse response = client.execute(httpPost);
 
-		// Process the response
-		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == 200) {
-			String result = FileUtilities.readInputStream(response.getEntity().getContent());
-			return extractTranslationFromResponse(result, appendLanguage);
-		} else {
-			return checkStatusCode(statusCode);
-		}
+			// Process the response
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == 200) {
+				String result = FileUtilities.readInputStream(response.getEntity().getContent());
+				return extractTranslationFromResponse(result, appendLanguage);
+			} else {
+				return checkStatusCode(statusCode);
+			}
+		} 
 	}
 
 	public String extractTranslationFromResponse(String response, boolean appendLanguage) {

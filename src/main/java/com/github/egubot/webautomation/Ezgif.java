@@ -171,7 +171,7 @@ public class Ezgif extends LocalWebDriver {
 
 	public static void main(String[] args) {
 		try (Ezgif a = new Ezgif()) {
-			System.out.println(a.gifToVideo("https://media1.tenor.com/m/UtnWU1BwsZcAAAAd/bald-vince-mcmahon.gif"));
+			System.out.println(a.gifToVideo(""));
 		}
 	}
 }

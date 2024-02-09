@@ -128,7 +128,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (storageFacades.checkCommands(msg, msgText, lowCaseTxt))
 				return;
 
-			if (webFacades.checkCommands(msg, lowCaseTxt))
+			if (webFacades.checkCommands(msg, msgText, lowCaseTxt))
 				return;
 
 			if (testMode && (checkTimerTasks(msg, msgText, lowCaseTxt))) {
