@@ -7,10 +7,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class GrabYoutubeVideo extends LocalWebDriver {
+	
+	// Grabs the video or audio file of a youtube video 
 	public GrabYoutubeVideo() {
 		super(false, true, true);
 	}
 
+	// Doesn't check for the link being valid thoroughly.
+	// Link expires after some time passes.
 	public String getVideo(String link) {
 		driver.get("https://www.y2mate.com/");
 
@@ -80,8 +84,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	public static void main(String[] args) {
 		try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
-			System.out.println(a.getAudio("https://youtu.be/JUl2fg7AOVQ?feature=shared"));
-
+			System.out.println(a.getAudio(""));
 		}
 
 	}

@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.objects.KeyValue;
 import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.Shared;
 
 public class KeyManager {
 	private static final Logger logger = LogManager.getLogger(KeyManager.class.getName());
@@ -126,12 +127,10 @@ public class KeyManager {
 
 	public static void checkKeys() {
 		String token = KeyManager.getToken("Discord_API_Key");
-		String storageChannelID = KeyManager.getID("Storage_Channel_ID");
 		String testServerID = KeyManager.getID("Test_Server_ID");
 		String statusChannelID = KeyManager.getID("Status_Channel_ID");
 
-		@SuppressWarnings("resource")
-		Scanner in = new Scanner(System.in);
+		Scanner in = Shared.getSystemInput();
 		String id;
 
 		if (token.isBlank()) {
@@ -144,16 +143,9 @@ public class KeyManager {
 			updateKeys("Discord_API_Key", id, tokensFileName);
 		}
 		if (!(testServerID.length() >= 17 && testServerID.matches("[\\d+]+")) && !testServerID.equals("-1")) {
-			System.out.println("No valid storage server ID, please enter one below, or -1 to always skip.");
+			System.out.println("No valid Test server ID, please enter one below, or -1 to always skip.");
 			id = in.nextLine();
 			updateKeys("Test_Server_ID", id, idsFileName);
-		}
-
-		if (!(storageChannelID.length() >= 17 && storageChannelID.matches("[\\d+]+"))
-				&& !storageChannelID.equals("-1")) {
-			System.out.println("No valid storage channel ID, please enter one below, or -1 to always skip.");
-			id = in.nextLine();
-			updateKeys("Storage_Channel_ID", id, idsFileName);
 		}
 
 		if (!(statusChannelID.length() >= 17 && statusChannelID.matches("[\\d+]+")) && !statusChannelID.equals("-1")) {

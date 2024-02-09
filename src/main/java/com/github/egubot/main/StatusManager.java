@@ -65,7 +65,7 @@ public class StatusManager implements Shutdownable {
 							checkChannelID();
 						}
 					} else {
-						System.out.println("\nAlways skip this? y/n");
+						System.out.println("Always skip this? y/n");
 						if (in.nextLine().equalsIgnoreCase("y")) {
 							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.idsFileName);
 						}
@@ -143,6 +143,7 @@ public class StatusManager implements Shutdownable {
 	}
 
 	public void changeActivity() {
+		// Check updateStatusMessage() for the form
 		try {
 			if (!isStatusMsgSet)
 				updateStatusMessage();
@@ -158,19 +159,19 @@ public class StatusManager implements Shutdownable {
 	}
 
 	private ActivityType getActivityType() {
-		if (activityMsgType.matches("watch(?s).*")) {
+		if (activityMsgType.matches("(?i)watch(?s).*")) {
 
 			return ActivityType.WATCHING;
 
-		} else if (activityMsgType.matches("listen(?s).*")) {
+		} else if (activityMsgType.matches("(?i)listen(?s).*")) {
 
 			return ActivityType.LISTENING;
 
-		} else if (activityMsgType.matches("stream(?s).*")) {
+		} else if (activityMsgType.matches("(?i)stream(?s).*")) {
 
 			return ActivityType.STREAMING;
 
-		} else if (activityMsgType.matches("compet(?s).*")) {
+		} else if (activityMsgType.matches("(?i)compet(?s).*")) {
 
 			return ActivityType.COMPETING;
 
@@ -188,9 +189,8 @@ public class StatusManager implements Shutdownable {
 	}
 
 	private void updateStatusMessage() {
-		// Have your message be written as: Type>>>Message
-		// You don't need to provide a type
-		if(testMode)
+		// Have your message be written as: Type >>> Message OR just message
+		if(testMode || activityMsgID.equals("-1"))
 			return;
 		String separator = ">>>";
 		try {
@@ -203,7 +203,7 @@ public class StatusManager implements Shutdownable {
 				activityMsgType = "";
 			}
 
-			activityMsgContent = activityMsgContent.replaceFirst(activityMsgType + separator, "");
+			activityMsgContent = activityMsgContent.replaceFirst(activityMsgType + separator, "").strip();
 
 			activityMsgType = activityMsgType.toLowerCase().strip();
 		} catch (Exception e) {

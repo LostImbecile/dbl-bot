@@ -11,7 +11,7 @@ import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
-import com.github.egubot.webautomation.AIResponseGenerator;
+import com.github.egubot.webautomation.InsultGenerator;
 import com.github.egubot.webautomation.Ezgif;
 import com.github.egubot.webautomation.GrabYoutubeVideo;
 
@@ -45,7 +45,7 @@ public class WebDriverFacade {
 		if (options.length < 2) {
 			msg.getChannel().sendMessage("Hast thou no target, no foe, or no purpose in mind?");
 		} else {
-			try (AIResponseGenerator a = new AIResponseGenerator()) {
+			try (InsultGenerator a = new InsultGenerator()) {
 				msg.getChannel().sendMessage("Will be whispered in time.");
 				String response = a.getResponse(options[0], options[1]);
 				msg.getAuthor().asUser().get().sendMessage(response);

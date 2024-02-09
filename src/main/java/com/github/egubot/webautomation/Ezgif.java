@@ -19,26 +19,37 @@ public class Ezgif extends LocalWebDriver {
 		super(true, true, true);
 	}
 
+	// Expect a result in 10-20 seconds, or over a minute for big files.
+	// Keep in mind the resulting link expires within 24hours.
 	public String videoToGif(String url) {
 		// With a "j"
 		driver.get("https://ezgif.com/video-to-gif");
 
 		uploadAndWait(url);
 
-		WebElement end = driver.findElement(By.id("end"));
-		end.clear();
-		end.sendKeys("30");
+		setGIFLengthToMax();
 
 		driver.findElement(By.name("video-to-gif")).click();
 
 		String output = getImage();
-		String size = getNewStats().getText();
+		String size = getNewFileSize().getText();
 
+		// Auto compresses GIF and resizes it if needed.
+		// Takes way longer depending on the size.
 		if (shouldCompress(size, "10MB")) {
-			output = optimise(2, false);
+			output = optimiseSecondary(2, false);
 		}
 
 		return output;
+	}
+
+	private void setGIFLengthToMax() {
+		WebElement end = driver.findElement(By.id("end"));
+		end.clear();
+		
+		// 30s is the maximum video length at 10fps, everything 
+		// past that is ignored.
+		end.sendKeys("30");
 	}
 
 	public String gifToVideo(String url) {
@@ -71,7 +82,7 @@ public class Ezgif extends LocalWebDriver {
 		return sourceElement.getAttribute("src");	
 	}
 
-	private WebElement getNewStats() {
+	private WebElement getNewFileSize() {
 		return driver.findElement(By.cssSelector(".filestats:nth-child(2) > strong"));
 	}
 
@@ -80,7 +91,7 @@ public class Ezgif extends LocalWebDriver {
 		return wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".filestats")));
 	}
 
-	public String optimise(int attempts, boolean fromResize) {
+	public String optimiseSecondary(int attempts, boolean fromResize) {
 		if (!fromResize)
 			driver.findElement(By.cssSelector(".file-menu:nth-child(4) td:nth-child(4) img")).click();
 		else
@@ -95,16 +106,16 @@ public class Ezgif extends LocalWebDriver {
 		driver.findElement(By.name("optimize")).click();
 
 		String output = getImage();
-		String size = getNewStats().getText();
+		String size = getNewFileSize().getText();
 
 		if (shouldCompress(size, "10MB") && attempts > 1) {
-			output = resize(--attempts);
+			output = resizeSecondary(--attempts);
 		}
 
 		return output;
 	}
 
-	public String resize(int attempts) {
+	public String resizeSecondary(int attempts) {
 		driver.findElement(By.cssSelector(".file-menu:nth-child(3) td:nth-child(2) > a")).click();
 
 		waitForPageChange();
@@ -116,16 +127,16 @@ public class Ezgif extends LocalWebDriver {
 
 		getImage();
 
-		return optimise(attempts, true);
+		return optimiseSecondary(attempts, true);
 	}
 
-	public static int getLength(String input) {
+	public static long getLength(String input) {
 		Matcher matcher = LENGTH_PATTERN.matcher(input);
 		if (matcher.find()) {
 			int hours = Integer.parseInt(matcher.group(1));
 			int minutes = Integer.parseInt(matcher.group(2));
 			int seconds = Integer.parseInt(matcher.group(3));
-			int totalSeconds = hours * 3600 + minutes * 60 + seconds;
+			long totalSeconds = hours * 3600 + minutes * 60 + seconds;
 			return totalSeconds > 30 ? 30 : totalSeconds;
 		}
 		return -1;

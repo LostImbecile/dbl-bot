@@ -2,7 +2,7 @@ package com.github.egubot.webautomation;
 
 import org.openqa.selenium.By;
 
-public class AIResponseGenerator extends LocalWebDriver {
+public class InsultGenerator extends LocalWebDriver {
 	// Include selenium in dependencies
 
 	public String getResponse(String targetPerson, String reason) {
@@ -24,7 +24,7 @@ public class AIResponseGenerator extends LocalWebDriver {
 	}
 
 	public static void main(String[] args) {
-		try (AIResponseGenerator a = new AIResponseGenerator()) {
+		try (InsultGenerator a = new InsultGenerator()) {
 			System.out.println(a.getResponse("person", "test"));
 		}
 	}

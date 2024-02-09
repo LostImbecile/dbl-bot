@@ -3,7 +3,6 @@ package com.github.egubot.main;
 import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.exception.MissingIntentException;
@@ -15,6 +14,7 @@ import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.handlers.ReconnectEventHandler;
 import com.github.egubot.handlers.ResumeEventHandler;
 import com.github.egubot.shared.Shared;
+import com.github.egubot.storage.ConfigManager;
 
 public class Main {
 	private static final Logger logger = LogManager.getLogger(Main.class.getName());
@@ -39,15 +39,15 @@ public class Main {
 
 		String arguments = checkArguments(args);
 
-		// Important to have all keys, some will be created for
+		// Important to have all keys. Some will be created for
 		// you, and the rest could be ignored.
 		KeyManager.checkKeys();
 		String token = KeyManager.getToken("Discord_API_Key");
-		
+
 		try {
 			try {
 				// For info about intents check the links at the start of the class
-				BotApi.initialise(new DiscordApiBuilder().setToken(token)
+				BotApi.setApi(new DiscordApiBuilder().setToken(token)
 						.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login()
 						.join());
 
@@ -66,11 +66,7 @@ public class Main {
 			 * Status message to prevent multiple instances being up at once, bot needs to
 			 * send and edit it.
 			 * 
-			 * I'm using discord to log it, but you should use a cloud service normally.
 			 * If you won't give the bot to someone else this isn't needed.
-			 * 
-			 * Just checking online status doesn't work unless you use a second
-			 * bot for it, as the moment you connect status will be online regardless.
 			 */
 			initialiseStatus();
 
@@ -82,13 +78,12 @@ public class Main {
 					restartMain(args);
 				}
 			} else {
-
 				System.out.println(
 						"You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
 
 				addListeners();
 
-				setBotOnline(BotApi.getApi());
+				setBotOnline();
 
 				checkSendMessagesFromConsoleArg(arguments);
 			}
@@ -134,13 +129,13 @@ public class Main {
 		Main.main(args);
 	}
 
-	private static void setBotOnline(DiscordApi api) {
+	private static void setBotOnline() {
 		// Refer to the class to change activity or learn how to
 		// control it
 		Shared.getStatus().changeActivity();
 		Shared.getStatus().setStatusOnline();
 
-		String botName = api.getYourself().getName();
+		String botName = BotApi.getApi().getYourself().getName();
 		botName = botName.replaceFirst("^\\p{L}", Character.toUpperCase(botName.charAt(0)) + "");
 
 		System.out.println(
@@ -154,7 +149,7 @@ public class Main {
 		 * directly from the console. Type "password"
 		 * if argument wasn't sent.
 		 */
-		if (!arguments.contains("sendmessages")) {
+		if (!(arguments.contains("sendmessages") || ConfigManager.getBooleanProperty("Send_Messages_From_Console"))) {
 			if (Shared.getSystemInput().nextLine().equals("password"))
 				SendMessagesFromConsole.start();
 		} else {
@@ -178,11 +173,11 @@ public class Main {
 	}
 
 	private static boolean checkDBLegendsMode(String arguments) {
-		return !arguments.contains("dbl_off");
+		return !(arguments.contains("dbl_off") || ConfigManager.getBooleanProperty("DBL_Off"));
 	}
 
 	private static boolean checkTestmode(String arguments) {
-		return arguments.contains("test");
+		return arguments.contains("test") || ConfigManager.getBooleanProperty("Test_Mode");
 	}
 
 }
