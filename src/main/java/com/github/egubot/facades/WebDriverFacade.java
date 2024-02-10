@@ -20,6 +20,7 @@ public class WebDriverFacade {
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("\\.(?:jpg|jpeg|png|mp3|ogg|wav)+",
 			Pattern.CASE_INSENSITIVE);
 	private static final Pattern YOUTUBE_COMMAND_PATTERN = Pattern.compile("(?i)b-grab(?:\\s?mp3)?\\s*<?([^>]+)>?");
+	private static final String YOUTUBE_ICON = "https://cdn-icons-png.flaticon.com/256/1384/1384060.png";
 
 	public static boolean checkCommands(Message msg, String msgText, String lowCaseText) {
 		if (lowCaseText.matches("b-insult(?s).*")) {
@@ -77,26 +78,35 @@ public class WebDriverFacade {
 	private static EmbedBuilder getYoutubeLinkEmbed(String text) {
 		Matcher matcher = YOUTUBE_COMMAND_PATTERN.matcher(text);
 		String link = matcher.replaceAll("$1").strip();
+		String[] result = null;
 		String newLink = null;
-		String extension = "";
+		String title = "Click To Download ";
+
 		if (!link.isBlank() && link.contains("https")) {
 			try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
 				if (text.contains("mp3")) {
-					extension = ".mp3";
-					newLink = a.getAudio(link);
+					title += "Audio";
+					result = a.getAudio(link);
 
 				} else {
-					extension = ".mp4";
-					newLink = a.getVideo(link);
+					title += "Video";
+					result = a.getVideo(link);
 
 				}
 			}
 		}
-		if (newLink == null)
+
+		if (result == null)
 			return null;
 
-		return new EmbedBuilder().setAuthor("Click to download " + extension, newLink,
-				"https://cdn-icons-png.flaticon.com/256/1384/1384060.png").setDescription("not sus trust me");
+		newLink = result[0];
+
+		if (result[1] == null || result[2] == null) {
+			return new EmbedBuilder().setAuthor(title, newLink, YOUTUBE_ICON);
+		} else {
+			return new EmbedBuilder().setAuthor(title, newLink, YOUTUBE_ICON).setThumbnail(result[1])
+					.setDescription(result[2]);
+		}
 	}
 
 	private static void checkEzgifCommands(Message msg, boolean isKnownGif, boolean isKnownVid) {

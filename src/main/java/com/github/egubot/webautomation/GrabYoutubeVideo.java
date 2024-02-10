@@ -7,15 +7,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class GrabYoutubeVideo extends LocalWebDriver {
-	
-	// Grabs the video or audio file of a youtube video 
+
+	// Grabs the video or audio file of a youtube video
 	public GrabYoutubeVideo() {
 		super(false, true, true);
 	}
 
 	// Doesn't check for the link being valid thoroughly.
 	// Link expires after some time passes.
-	public String getVideo(String link) {
+	public String[] getVideo(String link) {
 		driver.get("https://www.y2mate.com/");
 
 		if (!link.contains("youtu"))
@@ -24,14 +24,17 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 		sendURL(link);
 
 		waitForPageChange();
+
+		String thumbnail = getThumbnail();
+		String name = getName();
 
 		clickOnVideoDownload();
 
-		return getVideoDownloadLink();
+		return new String[] { getVideoDownloadLink(), thumbnail, name };
 
 	}
 
-	public String getAudio(String link) {
+	public String[] getAudio(String link) {
 		driver.get("https://www.y2mate.com/");
 
 		if (!link.contains("youtu"))
@@ -40,12 +43,31 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 		sendURL(link);
 
 		waitForPageChange();
+
+		String image = getThumbnail();
+		String name = getName();
 
 		driver.findElement(By.linkText("Audio")).click();
 
 		clickOnAudioDownload();
 
-		return getAudioDownloadLink();
+		return new String[] { getAudioDownloadLink(), image, name };
+	}
+
+	private String getThumbnail() {
+		try {
+			return driver.findElement(By.cssSelector(".thumbnail > img")).getAttribute("src");
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private String getName() {
+		try {
+			return driver.findElement(By.cssSelector(".caption > b")).getText();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	private void clickOnAudioDownload() {
@@ -59,7 +81,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 		a.sendKeys(link);
 		driver.findElement(By.id("btn-submit")).click();
 	}
-	
+
 	private String getAudioDownloadLink() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		WebElement downloadLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Download .mp3")));
@@ -84,7 +106,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	public static void main(String[] args) {
 		try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
-			System.out.println(a.getAudio(""));
+			System.out.println(a.getAudio("https://www.youtube.com/watch?v=3tE3UzwloJU"));
 		}
 
 	}
