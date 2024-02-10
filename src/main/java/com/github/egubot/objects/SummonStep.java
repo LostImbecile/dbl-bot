@@ -5,7 +5,7 @@ public class SummonStep {
 	private String currencyType;
 	private String rewardTitle;
 	private String rewardURL;
-	private String specialAttribute;
+	private String specialAttributeString;
 	private int rewardNum;
 	private int numberOfPulls;
 
@@ -36,6 +36,38 @@ public class SummonStep {
 
 	public int getNumberOfPulls() {
 		return numberOfPulls;
+	}
+
+	public boolean isExOrHigher() {
+		return this.specialAttributeString.contains("EX100");
+	}
+
+	public boolean isSparkingOrHigher() {
+		return this.specialAttributeString.contains("SP100");
+	}
+
+	public boolean isOneSparkingGuaranteed() {
+		return this.specialAttributeString.contains("OverSP_1");
+	}
+
+	public boolean isThreeSparkingGuaranteed() {
+		return this.specialAttributeString.contains("OverSP_3");
+	}
+
+	public boolean isOneLFGuaranteed() {
+		return this.specialAttributeString.contains("LL100_1");
+	}
+
+	public boolean isThreeLFGuaranteed() {
+		return this.specialAttributeString.contains("LL100_3");
+	}
+
+	public boolean isLFDouble() {
+		return this.specialAttributeString.contains("LL_Double");
+	}
+
+	public boolean isUltraDouble() {
+		return this.specialAttributeString.contains("UL_Double");
 	}
 
 	public void setNumberOfPulls(int numberOfPulls) {
@@ -69,8 +101,8 @@ public class SummonStep {
 	@Override
 	public String toString() {
 		return "SummonStep [\ncurrencyNeeded=" + currencyNeeded + "\ncurrencyType=" + currencyType + "\nrewardTitle="
-				+ rewardTitle + "\nrewardURL=" + rewardURL + "\nspecialAttribute=" + specialAttribute + "\nrewardNum="
-				+ rewardNum + "\nnumberOfPulls=" + numberOfPulls + "\n]";
+				+ rewardTitle + "\nrewardURL=" + rewardURL + "\nspecialAttribute=" + specialAttributeString
+				+ "\nrewardNum=" + rewardNum + "\nnumberOfPulls=" + numberOfPulls + "\n]";
 	}
 
 	public String getCurrencyType() {
@@ -99,11 +131,11 @@ public class SummonStep {
 	}
 
 	public String getSpecialAttribute() {
-		return specialAttribute;
+		return specialAttributeString;
 	}
 
 	public void setSpecialAttribute(String specialAttribute) {
-		this.specialAttribute = specialAttribute;
+		this.specialAttributeString = specialAttribute;
 	}
 
 	public void setCurrencyNeeded(int currencyNeeded) {

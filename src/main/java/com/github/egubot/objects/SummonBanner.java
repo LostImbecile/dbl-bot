@@ -8,7 +8,11 @@ public class SummonBanner {
 	private List<SummonStep> onceOnlySteps = new ArrayList<>(2);
 	private List<SummonStep> normalSteps = new ArrayList<>(3);
 	private List<SummonCharacter> featuredUnits = new ArrayList<>(10);
+	private int lFCount = 0;
 
+	public void incrementLFCount() {
+		this.lFCount++;
+	}
 	public List<SummonStep> getOnceOnlySteps() {
 		return onceOnlySteps;
 	}
@@ -45,5 +49,13 @@ public class SummonBanner {
 	public String toString() {
 		return "SummonBanner [\ntitle=" + title + "\nonceOnlySteps=" + onceOnlySteps + "\nnormalSteps=" + normalSteps
 				+ "\nfeaturedUnits=" + featuredUnits + "\n]";
+	}
+
+	public int getlFCount() {
+		return lFCount;
+	}
+
+	public void setlFCount(int lFCount) {
+		this.lFCount = lFCount;
 	}
 }

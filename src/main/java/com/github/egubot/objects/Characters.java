@@ -31,6 +31,23 @@ public class Characters {
 	public void setRarity(String rarity) {
 		this.rarity = rarity;
 	}
+	
+	public boolean isUltra() {
+		return this.rarity.equalsIgnoreCase("ULTRA");
+	}
+	
+	public boolean isSparking() {
+		return this.rarity.equalsIgnoreCase("SPARKING");
+	}
+	
+	public boolean isExtreme() {
+		return this.rarity.equalsIgnoreCase("EXTREME");
+	}
+	
+	public boolean isHero() {
+		return this.rarity.equalsIgnoreCase("HERO");
+	}
+	
 
 	public void setColour(String colour) {
 		this.colour = colour;
