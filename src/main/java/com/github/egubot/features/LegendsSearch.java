@@ -199,7 +199,6 @@ public class LegendsSearch extends LegendsPool {
 		name = name.toLowerCase().replace("ssb", "ssgss").replace("dbl", "").replace("-", "")
 				.replace("frieza_no_brother", "cooler").replace("best_unit_in_the_game","5101s").strip();
 
-		getLegendsWebsite();
 		ArrayList<Characters> charactersList = (ArrayList<Characters>) LegendsDatabase.getCharactersList();
 
 		// Split the input name into individual tokens (words)

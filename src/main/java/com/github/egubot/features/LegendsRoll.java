@@ -99,7 +99,6 @@ public class LegendsRoll extends LegendsPool {
 		st = st.strip();
 		// System.out.println(st);
 		if (st.isBlank()) {
-			getLegendsWebsite();
 			pool = (ArrayList<Characters>) LegendsDatabase.getCharactersList();
 		} else {
 			pool = ((CharacterHash) analyseAndCreatePool(st)).toArrayList();

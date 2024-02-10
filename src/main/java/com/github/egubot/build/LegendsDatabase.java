@@ -11,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.Tags;
 
@@ -23,6 +24,7 @@ public class LegendsDatabase {
 	private static final Logger logger = LogManager.getLogger(LegendsDatabase.class.getName());
 	private static ArrayList<Characters> charactersList = new ArrayList<>(500);
 	private static ArrayList<Tags> tags = new ArrayList<>(100);
+	private static CharacterHash characterHash = new CharacterHash();
 
 	public static final String WEBSITE_URL = "https://dblegends.net/characters";
 	private boolean isDataFetchSuccessfull;
@@ -120,53 +122,52 @@ public class LegendsDatabase {
 			// String charaFormName = character.attr("data-charaformname");
 			// String img2Url = character.select(".character2").attr("src");
 
-			if (gameID.isBlank())
+			int siteID = getSiteID(charaUrl);
+			if (gameID.isBlank() || siteID == -1)
 				continue;
-
+						
 			Characters newCharacter = new Characters();
+			newCharacter.setSiteID(siteID);
 			newCharacter.setImageLink(imgUrl);
 			newCharacter.setColour(colour);
 			newCharacter.setGameID(gameID);
 			newCharacter.setRarity(rarity);
 			newCharacter.setCharacterName(processName(name));
-			setSiteID(charaUrl, newCharacter);
-			setZenkaiStatus(zenkai, newCharacter);
-			setLFStatus(lf, newCharacter);
+			
+			boolean zenkaiStatus = getZenkaiStatus(zenkai);
+			boolean lfStatus = getLFStatus(lf);
+			
+			if(zenkaiStatus)
+				getTags().get(12).getCharacters().put(newCharacter);
+			if(lfStatus)
+				getTags().get(13).getCharacters().put(newCharacter);
+			
+			newCharacter.setZenkai(zenkaiStatus);
+			newCharacter.setLF(lfStatus);
+			
 			setTags(tags, newCharacter);
 			evaluateReleaseDate(gameID, newCharacter);
 			charactersList.add(newCharacter);
+			characterHash.put(newCharacter);
 		}
 	}
 
-	private static void setLFStatus(String st, Characters character) {
-		if (st.equals("0"))
-			character.setLF(false);
-		else {
-			character.setLF(true);
-			tags.get(13).getCharacters().put(character);
-		}
+	private static boolean getLFStatus(String st) {
+		return !st.equals("0");
 	}
 
-	private static void setSiteID(String line, Characters character) {
+	public static int getSiteID(String line) {
 		try {
 			String st = line.replace("/character/", "");
-			character.setSiteID(Integer.parseInt(st));
+			return Integer.parseInt(st);
 		} catch (NumberFormatException e) {
 			logger.error(e);
+			return -1;
 		}
 	}
 
-	private static void setZenkaiStatus(String st, Characters character) {
-		try {
-			if (st.equals("-1"))
-				character.setZenkai(false);
-			else {
-				character.setZenkai(true);
-				tags.get(12).getCharacters().put(character);
-			}
-		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
-		}
+	private static boolean getZenkaiStatus(String st) {
+		return !st.equals("-1");
 	}
 
 	private static void setTags(String line, Characters character) {
@@ -257,6 +258,18 @@ public class LegendsDatabase {
 
 	public void setDataFetchSuccessfull(boolean isDataFetchSuccessfull) {
 		this.isDataFetchSuccessfull = isDataFetchSuccessfull;
+	}
+
+	public static CharacterHash getCharacterHash() {
+		return characterHash;
+	}
+
+	public static void setCharacterHash(CharacterHash characterHash) {
+		LegendsDatabase.characterHash = characterHash;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		new LegendsDatabase();
 	}
 
 }

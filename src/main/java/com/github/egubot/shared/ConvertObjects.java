@@ -3,8 +3,6 @@ package com.github.egubot.shared;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.egubot.objects.CharacterHash;
-import com.github.egubot.objects.Characters;
 
 public class ConvertObjects {
 	private ConvertObjects() {
@@ -20,16 +18,6 @@ public class ConvertObjects {
 
 	public static List<String> textToList(String jsonData) {
 		return new ArrayList<>(List.of(jsonData.split("\n")));
-	}
-
-	public static CharacterHash arraytoCharacterHash(List<Characters> arr) {
-		CharacterHash hash = new CharacterHash();
-
-		for (Characters element : arr) {
-			if (hash.put(element))
-				System.err.println("\nSite ID clash for: " + element.getSiteID());
-		}
-		return hash;
 	}
 
 	public static String instantToString(Instant instant) {

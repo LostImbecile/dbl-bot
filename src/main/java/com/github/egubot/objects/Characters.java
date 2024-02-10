@@ -12,21 +12,8 @@ public class Characters {
 	private boolean isZenkai;
 	private boolean isLF;
 
-	public Characters(String characterName, String rarity, String colour, String gameID, String imageLink, int siteID,
-			boolean isZenkai, boolean isLF) {
-		super();
-		this.characterName = characterName;
-		this.rarity = rarity;
-		this.colour = colour;
-		this.gameID = gameID;
-		this.imageLink = imageLink;
-		this.siteID = siteID;
-		this.isZenkai = isZenkai;
-		this.isLF = isLF;
-	}
-
 	public Characters() {
-
+		// Rarely needed
 	}
 
 	public boolean isLF() {
@@ -115,5 +102,11 @@ public class Characters {
 
 	public boolean isZenkai() {
 		return isZenkai;
+	}
+
+	@Override
+	public String toString() {
+		return "Characters [\ncharacterName=" + characterName + "\nrarity=" + rarity + "\ngameID=" + gameID + "\nsiteID="
+				+ siteID + "\n]";
 	}
 }

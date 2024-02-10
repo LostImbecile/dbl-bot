@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.github.egubot.shared.ConvertObjects;
-
 public class CharacterHash extends HashSet<Characters> {
 
 	private static final long serialVersionUID = 1659741544544868218L;
@@ -175,11 +173,9 @@ public class CharacterHash extends HashSet<Characters> {
 
 	}
 
-	public static void printEmptyIDs(List<Characters> list) {
-		CharacterHash characters = ConvertObjects.arraytoCharacterHash(list);
-
+	public static void printEmptyIDs(Set<Characters> characters) {
 		for (int i = 0; i < characters.size(); i++) {
-			if (characters.get(i) == null) {
+			if (((CharacterHash) characters).get(i) == null) {
 				System.out.println(i);
 			}
 		}

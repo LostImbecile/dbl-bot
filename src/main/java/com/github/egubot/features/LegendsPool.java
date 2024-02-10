@@ -11,7 +11,6 @@ import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.Tags;
 
 public abstract class LegendsPool {
-	private LegendsDatabase legendsWebsite;
 	private List<String> rollTemplates;
 
 	protected LegendsPool(List<String> rollTemplates) {
@@ -278,10 +277,7 @@ public abstract class LegendsPool {
 
 		} else if (subPoolFilter != null) {
 			for (String tagCondition : subPoolFilter) {
-
-				getLegendsWebsite();
 				for (int i = 0; i < LegendsDatabase.getTags().size(); i++) {
-					getLegendsWebsite();
 					tag = LegendsDatabase.getTags().get(i);
 
 					if (tag.getName().equalsIgnoreCase(tagCondition)) {
@@ -359,9 +355,5 @@ public abstract class LegendsPool {
 			System.err.println("undefined operation at legends reroll: " + operation);
 		}
 
-	}
-
-	public LegendsDatabase getLegendsWebsite() {
-		return legendsWebsite;
 	}
 }

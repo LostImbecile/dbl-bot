@@ -111,7 +111,7 @@ public class LegendsCommandsFacade implements Shutdownable {
 		}
 
 		if (lowCaseTxt.equals("b-character printemptyids")) {
-			CharacterHash.printEmptyIDs(LegendsDatabase.getCharactersList());
+			CharacterHash.printEmptyIDs(LegendsDatabase.getCharacterHash());
 			return true;
 		}
 

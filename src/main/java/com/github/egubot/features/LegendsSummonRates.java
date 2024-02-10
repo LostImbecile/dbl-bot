@@ -7,82 +7,114 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.github.egubot.build.LegendsDatabase;
+import com.github.egubot.objects.Characters;
+import com.github.egubot.objects.SummonBanner;
+import com.github.egubot.objects.SummonCharacter;
+import com.github.egubot.objects.SummonStep;
+
 public class LegendsSummonRates {
 
 	public static String getRates(String summonURL) throws IOException {
-		// Connect to the website and get the HTML document
 		Document document = Jsoup.connect(summonURL).get();
-		
-		// Select the element with class "text-center"
-        Element titleElement = document.selectFirst("h2.text-center");
-        
-        // Get the text of the element
-        String title = titleElement.text();
-        
-        // Print the title
-        System.out.println("Banner: " + title);
-        System.out.println("------------------------------");
-        Elements gashaDetails = document.select(".gasha-details");
-        int rewardCounter = 0;
-        for (Element gashaDetail : gashaDetails) {
-            Elements imageElements = gashaDetail.select("img");
 
-            for (Element imageElement : imageElements) {
-                String imgTitle = imageElement.attr("title");
-                String imageUrl = imageElement.absUrl("src");
+		Element titleElement = document.selectFirst("h2.text-center");
 
-                System.out.println("Title: " + imgTitle);
-                System.out.println("Image URL: " + imageUrl);
-            }
+		String title = titleElement.text();
+		SummonBanner banner = new SummonBanner();
 
-            Element crystalNumElement = gashaDetail.selectFirst(".crystal-num");
-            String crystalNum = crystalNumElement.text();
-            System.out.println("Crystal Number: " + crystalNum);
+		banner.setTitle(title);
 
-            try {
+		Elements gashaDetails = document.select(".gasha-details");
+		for (Element gashaDetail : gashaDetails) {
+			SummonStep step = new SummonStep();
+
+			Elements imageElements = gashaDetail.select("img");
+
+			for (int i = 0; i < imageElements.size(); i++) {
+				Element imageElement = imageElements.get(i);
+				String imgTitle = imageElement.attr("title");
+				String imageUrl = imageElement.absUrl("src");
+
+				if (i == 0) {
+					step.setCurrencyType(imgTitle);
+				} else if (imgTitle.isBlank()) {
+					step.setSpecialAttribute(imageUrl);
+				} else {
+					step.setRewardTitle(imgTitle);
+					step.setRewardURL(imageUrl);
+				}
+			}
+
+			Element crystalNumElement = gashaDetail.selectFirst(".crystal-num");
+			String currencyNum;
+			if (crystalNumElement != null)
+				currencyNum = crystalNumElement.text();
+			else {
+				currencyNum = gashaDetail.selectFirst(".tix-num").text();
+			}
+
+			step.setCurrencyNeeded(currencyNum);
+
+			try {
 				Element rewardNumElement = gashaDetail.selectFirst(".reward-num");
 				String rewardNum = rewardNumElement.text();
-				System.out.println("Reward Number: " + rewardNum);
-				rewardCounter++;
+				step.setRewardNum(rewardNum);
 			} catch (Exception e) {
+				step.setRewardNum(0);
 			}
-            
-            String text = gashaDetail.selectFirst("div[style]").text();
-            System.out.println("Text: " + text);
 
+			String text = gashaDetail.selectFirst("div[style]").text();
+			step.setNumberOfPulls(text);
 
-            System.out.println("------------------------------");
-        }
-        System.out.println("Number of rewards: " +  rewardCounter);
-        System.out.println("Featured:");
-        
-        Element characterContainer = document.selectFirst(".character-container");
+			if (step.getCurrencyNeeded() == 300) {
+				banner.getOnceOnlySteps().add(step);
+			} else {
+				banner.getNormalSteps().add(step);
+			}
+		}
 
-        Elements elements = characterContainer.select("a.chara-list");
+		Element characterContainer = document.selectFirst(".character-container");
 
-        for (Element element : elements) {
-            String href = element.attr("href");
+		Elements elements = characterContainer.select("a.chara-list");
 
-            Element leftElement = element.selectFirst("div.mx-2 > div:first-child");
-            String leftValue = leftElement.text();
+		for (Element element : elements) {
+			SummonCharacter character = new SummonCharacter();
+			String href = element.attr("href");
 
-            Element rightElement = element.selectFirst("div.mx-2 > div:last-child");
-            String rightValue = rightElement.text();
+			character.setCharacter(getCharacer(href));
 
-            Element isNewElement = element.selectFirst("div.isNew");
-            boolean isNew = isNewElement != null;
+			Element leftElement = element.selectFirst("div.mx-2 > div:first-child");
+			String leftValue = leftElement.text();
+			character.setzPowerAmount(leftValue);
 
-            System.out.println("Href: " + href);
-            System.out.println("Left value: " + leftValue);
-            System.out.println("Right value: " + rightValue);
-            System.out.println("Is new: " + isNew);
-        }
+			Element rightElement = element.selectFirst("div.mx-2 > div:last-child");
+			String rightValue = rightElement.text();
+			character.setSummonRate(rightValue);
+
+			Element isNewElement = element.selectFirst("div.isNew");
+			character.setNew(isNewElement != null);
+			banner.getFeaturedUnits().add(character);
+		}
+
+		System.out.println(banner);
+
 		return null;
+	}
+
+	private static Characters getCharacer(String href) {
+		int id = LegendsDatabase.getSiteID(href);
+		if (id == -1)
+			return null;
+
+		return LegendsDatabase.getCharacterHash().get(id);
+
 	}
 
 	public static void main(String[] args) {
 		try {
-			getRates("https://dblegends.net/banner/2025900");
+			new LegendsDatabase();
+			getRates("https://dblegends.net/banner/2026300");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
