@@ -20,6 +20,7 @@ import com.github.egubot.facades.CustomAIFacade;
 import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
+import com.github.egubot.features.Test;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.BotApi;
 import com.github.egubot.main.KeyManager;
@@ -107,6 +108,13 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (checkBotMessageControlCommands(msg, lowCaseTxt)) {
 				return;
 			}
+			
+			try {
+				// Ignore or remove
+				Test.check(e, msg, msgText);
+			} catch (Exception e1) {
+				
+			}
 
 			// This is so I can run a test version and a non-test version at the same time
 			if (testMode && !isTestServer(msg))
@@ -114,6 +122,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (!testMode && isTestServer(msg))
 				return;
 
+			
 			String authorID = msg.getAuthor().getIdAsString();
 
 			checkChannelTimer(msg);

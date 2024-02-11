@@ -9,6 +9,7 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.features.LegendsRoll;
 import com.github.egubot.features.LegendsSearch;
+import com.github.egubot.features.LegendsSummonRates;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.objects.CharacterHash;
@@ -99,8 +100,26 @@ public class LegendsCommandsFacade implements Shutdownable {
 
 			if (checkAnimationCommands(msg, lowCaseTxt))
 				return true;
+
+			if (checkSummonCommands(msg, lowCaseTxt)) {
+				return true;
+			}
 		}
 
+		return false;
+	}
+
+	private boolean checkSummonCommands(Message msg, String lowCaseTxt) {
+		if (lowCaseTxt.contains("b-summon")) {
+			String st = lowCaseTxt.replace("b-summon", "").replace("<", "").replace(">", "").strip();
+			try {
+				msg.getChannel().sendMessage(LegendsSummonRates.getBannerRates(st));
+			} catch (Exception e) {
+				logger.error("Summon rate error.", e);
+				msg.getChannel().sendMessage("Failed :thumbs_down:");
+			}
+			return true;
+		}
 		return false;
 	}
 

@@ -3,12 +3,12 @@
 /src/main/resources/Tokens.txt
 /src/main/resources/Autorespond.txt
 /src/main/resources/Filter_Templates.txt
+src/main/java/com/github/egubot/features/Test.java
 /logs
 config.properties
 .pydevproject
 /Autorespond.txt
 /Filter_Templates.txt
-
 /Timers.txt
 /IDs.txt
 /Tokens.txt

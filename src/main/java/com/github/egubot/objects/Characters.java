@@ -58,7 +58,7 @@ public class Characters {
 	}
 
 	public void setImageLink(String imageLink) {
-		this.imageLink = imageLink;
+		this.imageLink = "https://dblegends.net/" + imageLink;
 	}
 
 	public void setSiteID(int siteID) {
@@ -100,7 +100,7 @@ public class Characters {
 	}
 
 	public String getImageLink() {
-		return "https://dblegends.net/" + imageLink.strip();
+		return imageLink.strip();
 	}
 
 	public String getPageLink() {

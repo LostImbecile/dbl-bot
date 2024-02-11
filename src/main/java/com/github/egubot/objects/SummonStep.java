@@ -1,13 +1,13 @@
 package com.github.egubot.objects;
 
 public class SummonStep {
-	private int currencyNeeded;
-	private String currencyType;
-	private String rewardTitle;
-	private String rewardURL;
-	private String specialAttributeString;
-	private int rewardNum;
-	private int numberOfPulls;
+	private int currencyNeeded = 0;
+	private String currencyType = "";
+	private String rewardTitle = "";
+	private String rewardURL = "";
+	private String specialAttributeString = "";
+	private int rewardNum = 0;
+	private int numberOfPulls = 0;
 
 	public void setRewardTitle(String rewardTitle) {
 		this.rewardTitle = rewardTitle;
@@ -131,6 +131,8 @@ public class SummonStep {
 	}
 
 	public String getSpecialAttribute() {
+		if (specialAttributeString == null)
+			return "";
 		return specialAttributeString;
 	}
 

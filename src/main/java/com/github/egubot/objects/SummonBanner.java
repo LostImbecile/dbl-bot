@@ -5,6 +5,7 @@ import java.util.List;
 
 public class SummonBanner {
 	private String title;
+	private String imageURL;
 	private List<SummonStep> onceOnlySteps = new ArrayList<>(2);
 	private List<SummonStep> normalSteps = new ArrayList<>(3);
 	private List<SummonCharacter> featuredUnits = new ArrayList<>(10);
@@ -57,5 +58,11 @@ public class SummonBanner {
 
 	public void setlFCount(int lFCount) {
 		this.lFCount = lFCount;
+	}
+	public String getImageURL() {
+		return  imageURL;
+	}
+	public void setImageURL(String imageURL) {
+		this.imageURL = "https://dblegends.net/" + imageURL;
 	}
 }

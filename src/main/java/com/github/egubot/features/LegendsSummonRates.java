@@ -3,9 +3,12 @@ package com.github.egubot.features;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -24,15 +27,145 @@ public class LegendsSummonRates {
 	private static final String NEW = "New";
 	private static final String LF = "LF";
 
-	public static SummonBanner getBanner(String summonURL) throws IOException {
+	public static List<EmbedBuilder> getBannerRates(String summonURL) throws IOException {
+		List<EmbedBuilder> embeds = new ArrayList<>(5);
+
+		SummonBanner banner = getBanner(summonURL);
+
+		List<Map<Integer, Double>> rotation = calculateRotationChance(banner);
+		int[] rotationCosts = calculateRotationCosts(banner);
+
+		Map<Integer, Integer> focusCharacters = chooseCharacters(banner.getFeaturedUnits());
+
+		Map<Integer, Double> oneRotation = combineSteps(rotation.get(0), rotation.get(1), banner.getFeaturedUnits());
+		Map<String, Double> oneRotationTotal = getTotalSummonsRates(banner, oneRotation);
+
+		Map<Integer, Double> threeRotation = combineSteps(rotation.get(0),
+				multiplyRotations(rotation.get(1), 3, banner.getFeaturedUnits()), banner.getFeaturedUnits());
+		Map<String, Double> threeRotationTotal = getTotalSummonsRates(banner, threeRotation);
+
+		int numOfRotationsToGetFocusCharacter = getRotationNumForGuaranteedFocus(focusCharacters, rotation);
+
+		if (numOfRotationsToGetFocusCharacter > 3) {
+			Map<Integer, Double> customRotation = combineSteps(rotation.get(0),
+					multiplyRotations(rotation.get(1), numOfRotationsToGetFocusCharacter, banner.getFeaturedUnits()),
+					banner.getFeaturedUnits());
+			Map<String, Double> customRotationTotal = getTotalSummonsRates(banner, customRotation);
+
+			// To avoid passing the number separately cuz the name is very long
+			// Needed for cc cost
+			customRotation.put(-1, (double) numOfRotationsToGetFocusCharacter);
+			customRotationTotal.put("-1", (double) numOfRotationsToGetFocusCharacter);
+
+			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(oneRotation, threeRotation, customRotation,
+					focusCharacters));
+			embeds.add(MessageFormats.buildSummonTotalEmbed(oneRotationTotal, threeRotationTotal, customRotationTotal,
+					rotationCosts, banner));
+		} else {
+			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(oneRotation, threeRotation, null, focusCharacters));
+			embeds.add(MessageFormats.buildSummonTotalEmbed(oneRotationTotal, threeRotationTotal, null, rotationCosts,
+					banner));
+		}
+		return embeds;
+	}
+
+	private static int[] calculateRotationCosts(SummonBanner banner) {
+		int onceOnlySteps = 0;
+		int normalSteps = 0;
+
+		for (SummonStep step : banner.getOnceOnlySteps()) {
+			onceOnlySteps += step.getCurrencyNeeded();
+		}
+
+		for (SummonStep step : banner.getNormalSteps()) {
+			normalSteps += step.getCurrencyNeeded();
+		}
+		return new int[] { onceOnlySteps, normalSteps };
+	}
+
+	public static int getPullsNeeded(int zPower) {
+		if (zPower > 0)
+			return (int) Math.ceil(5000.0 / zPower);
+		return 0;
+	}
+
+	public static double getRedTwoChance(int pullsNeeded, Double chance) {
+		return Math.pow(chance, pullsNeeded);
+	}
+
+	private static int getRotationNumForGuaranteedFocus(Map<Integer, Integer> focusCharacters,
+			List<Map<Integer, Double>> rotation) {
+		int numOfRotations = 1;
+		double targetChance = 0.8;
+		for (Entry<Integer, Integer> entry : focusCharacters.entrySet()) {
+			Characters character = LegendsDatabase.getCharacterHash().get(entry.getKey());
+			double rate = rotation.get(1).get(entry.getKey());
+			double newRate = rate;
+			for (int i = 2; newRate < targetChance; i++) {
+				newRate = 1 - Math.pow((1 - rate), i);
+				if (newRate >= targetChance && i > numOfRotations && !character.isExtreme())
+					numOfRotations = i;
+			}
+		}
+		return numOfRotations;
+	}
+
+	private static Map<Integer, Integer> chooseCharacters(List<SummonCharacter> featuredUnits) {
+		// ID and the amount of z power you get
+		Map<Integer, Integer> focusCharacters = new HashMap<Integer, Integer>();
+		List<SummonCharacter> potentialCharacters = new ArrayList<>();
+		boolean foundFocus = false;
+		for (SummonCharacter summonCharacter : featuredUnits) {
+			Characters character = summonCharacter.getCharacter();
+			if (summonCharacter.isNew() || character.isUltra()) {
+				focusCharacters.put(character.getSiteID(), summonCharacter.getzPowerAmount());
+				foundFocus = true;
+			} else if (character.isLF()) {
+				potentialCharacters.add(summonCharacter);
+			}
+		}
+		if (focusCharacters.isEmpty() && !potentialCharacters.isEmpty()) {
+			int maxIndex = 0;
+			int minIndex = 0;
+			for (int i = 1; i < potentialCharacters.size(); i++) {
+				SummonCharacter character = potentialCharacters.get(i);
+				SummonCharacter maxCharacter = potentialCharacters.get(maxIndex);
+				if (character.getSummonRate() > maxCharacter.getSummonRate())
+					maxIndex = i;
+				SummonCharacter minCharacter = potentialCharacters.get(minIndex);
+				if (character.getSummonRate() < minCharacter.getSummonRate())
+					minIndex = i;
+			}
+
+			SummonCharacter maxCharacter = potentialCharacters.get(maxIndex);
+			if (maxIndex == minIndex) {
+				focusCharacters.put(maxCharacter.getCharacter().getSiteID(), maxCharacter.getzPowerAmount());
+				foundFocus = true;
+			} else {
+				focusCharacters.put(maxCharacter.getCharacter().getSiteID(), maxCharacter.getzPowerAmount());
+				SummonCharacter minCharacter = potentialCharacters.get(minIndex);
+				focusCharacters.put(minCharacter.getCharacter().getSiteID(), minCharacter.getzPowerAmount());
+				foundFocus = true;
+			}
+		}
+
+		if (!foundFocus)
+			focusCharacters.put(featuredUnits.get(0).getCharacter().getSiteID(),
+					featuredUnits.get(0).getzPowerAmount());
+
+		return focusCharacters;
+	}
+
+	private static SummonBanner getBanner(String summonURL) throws IOException {
 		Document document = Jsoup.connect(summonURL).get();
 		SummonBanner banner = new SummonBanner();
 
 		Element titleElement = document.selectFirst("h2.text-center");
 
-		String title = titleElement.text();
+		Element imageElement = document.selectFirst("img.bannerimage");
 
-		banner.setTitle(title);
+		banner.setImageURL(imageElement.attr("src"));
+		banner.setTitle(titleElement.text());
 
 		addSummonSteps(document, banner);
 
@@ -101,36 +234,38 @@ public class LegendsSummonRates {
 			SummonCharacter character = new SummonCharacter();
 			String href = element.attr("href");
 
-			Characters temp = getCharacter(href);
-			if (temp == null)
+			Characters databaseSavedCharacter = getCharacter(href);
+			if (databaseSavedCharacter == null)
 				continue;
-			character.setCharacter(temp);
+			character.setCharacter(databaseSavedCharacter);
 
-			Element leftElement = element.selectFirst("div.mx-2 > div:first-child");
-			String leftValue = leftElement.text();
-			character.setzPowerAmount(leftValue);
+			Element summonRateElement = element.selectFirst("div.mx-2 > div:first-child");
+			String summonRate = summonRateElement.text();
+			character.setzPowerAmount(summonRate);
 
-			Element rightElement = element.selectFirst("div.mx-2 > div:last-child");
-			String rightValue = rightElement.text();
-			character.setSummonRate(rightValue);
+			Element zPowerElement = element.selectFirst("div.mx-2 > div:last-child");
+			String zPower = zPowerElement.text();
+			character.setSummonRate(zPower);
 
 			Element isNewElement = element.selectFirst("div.isNew");
 			character.setNew(isNewElement != null);
 			banner.getFeaturedUnits().add(character);
 
-			if (temp.isLF())
+			if (databaseSavedCharacter.isLF())
 				banner.incrementLFCount();
 		}
 	}
 
 	private static Map<String, Double> getTotalSummonsRates(SummonBanner banner, Map<Integer, Double> ratesMap) {
-		Map<String, Double> result = new HashMap<>();
+		// Order stays the same in this map
+		Map<String, Double> result = new LinkedHashMap<>();
 
-		result.put(LF, 0.0);
+		result.put(FEATURED, 0.0);
 		result.put(NEW, 0.0);
 		result.put(ULTRA, 0.0);
+		result.put(LF, 0.0);
 		result.put(SPARKING, 0.0);
-		result.put(FEATURED, 0.0);
+		
 
 		double typeRate;
 		double finalRate;
@@ -182,16 +317,12 @@ public class LegendsSummonRates {
 		return result;
 	}
 
-	public static Map<String, Double> calculateChance(SummonBanner banner) {
+	private static List<Map<Integer, Double>> calculateRotationChance(SummonBanner banner) {
 		Map<Integer, Double> onceOnly = calculateChanceForOnceOnlySteps(banner);
 		Map<Integer, Double> normal = calculateChanceForNormalSteps(banner);
-		Map<Integer, Double> threeRotations = combineSteps(onceOnly,
-				multiplyRotations(normal, 3, banner.getFeaturedUnits()), banner.getFeaturedUnits());
-		System.out.println("3 rotations worth: " + threeRotations);
-		Map<String, Double> result = null;
-
-		System.out.println(getTotalSummonsRates(banner, threeRotations));
-
+		ArrayList<Map<Integer, Double>> result = new ArrayList<>();
+		result.add(onceOnly);
+		result.add(normal);
 		return result;
 	}
 
@@ -207,7 +338,7 @@ public class LegendsSummonRates {
 		return result;
 	}
 
-	public static Map<Integer, Double> calculateChanceForOnceOnlySteps(SummonBanner banner) {
+	private static Map<Integer, Double> calculateChanceForOnceOnlySteps(SummonBanner banner) {
 		List<Map<Integer, Double>> onceOnly = new ArrayList<>();
 
 		for (SummonStep step : banner.getOnceOnlySteps()) {
@@ -216,7 +347,7 @@ public class LegendsSummonRates {
 		return combineSteps(onceOnly, banner.getFeaturedUnits());
 	}
 
-	public static Map<Integer, Double> calculateChanceForNormalSteps(SummonBanner banner) {
+	private static Map<Integer, Double> calculateChanceForNormalSteps(SummonBanner banner) {
 		List<Map<Integer, Double>> normal = new ArrayList<>();
 
 		for (SummonStep step : banner.getNormalSteps()) {
@@ -298,14 +429,5 @@ public class LegendsSummonRates {
 	}
 
 	public static void main(String[] args) {
-		try {
-			new LegendsDatabase();
-			SummonBanner banner = getBanner("https://dblegends.net/banner/21400");
-			System.out.println(banner.getTitle());
-			calculateChance(banner);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }

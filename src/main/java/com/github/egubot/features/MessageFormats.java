@@ -1,22 +1,29 @@
 package com.github.egubot.features;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
+import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.objects.Characters;
+import com.github.egubot.objects.SummonBanner;
 
 public class MessageFormats {
 	// This replaces spaces with an invisible character
 	public static final String EQUALISE = String.format("%n%80s", "‏‏‎ ").replace(" ", "\u2005");
+	public static final String INLINE_EQUALISE = String.format("%n%35s", "‏‏‎ ").replace(" ", "\u2005");
 	private static Random rng = new Random();
-	
+
 	private MessageFormats() {
 	}
-	
+
 	public static void animateRolledCharacters(List<Characters> pool, Message msg, EmbedBuilder[] embeds,
 			int rollAmount) {
 		EmbedBuilder[] rollEmbeds;
@@ -91,5 +98,103 @@ public class MessageFormats {
 				.setAuthor(unit.getCharacterName(), unit.getPageLink(), unit.getImageLink())
 				.setFooter(unit.getGameID());
 
+	}
+
+	public static List<EmbedBuilder> buildSummonCharacterEmbeds(Map<Integer, Double> oneRotation,
+			Map<Integer, Double> threeRotation, Map<Integer, Double> customRotation,
+			Map<Integer, Integer> focusCharacters) {
+		List<EmbedBuilder> embeds = new ArrayList<>(focusCharacters.size());
+		EmbedBuilder temp;
+		int numberOfRotations = 0;
+		if (customRotation != null)
+			numberOfRotations = (int) Math.ceil(customRotation.get(-1));
+
+		String rateFormat = "%.1f%%";
+
+		for (Entry<Integer, Integer> entry : focusCharacters.entrySet()) {
+			int id = entry.getKey();
+			Characters character = LegendsDatabase.getCharacterHash().get(id);
+			temp = createCharacterEmbed(character);
+
+			int pulls = LegendsSummonRates.getPullsNeeded(entry.getValue());
+			double rate = oneRotation.get(id);
+			double getRedTwoChance = LegendsSummonRates.getRedTwoChance(pulls, rate);
+
+			temp.addInlineField("One Rotation", "Once: " + String.format(rateFormat, rate * 100) + "\nRed2: "
+					+ String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE);
+
+			rate = threeRotation.get(id);
+			getRedTwoChance = LegendsSummonRates.getRedTwoChance(pulls, rate);
+
+			temp.addInlineField("Three Rotations", "Once: " + String.format(rateFormat, rate * 100) + "\nRed2: "
+					+ String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE);
+
+			if (customRotation != null) {
+				rate = customRotation.get(id);
+				getRedTwoChance = LegendsSummonRates.getRedTwoChance(pulls, rate);
+
+				temp.addInlineField(numberOfRotations + " Rotations", "Once: " + String.format(rateFormat, rate * 100)
+						+ "\nRed2: " + String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE);
+
+			}
+			embeds.add(temp);
+		}
+		return embeds;
+	}
+
+	public static EmbedBuilder buildSummonTotalEmbed(Map<String, Double> oneRotationTotal,
+			Map<String, Double> threeRotationTotal, Map<String, Double> customRotationTotal, int[] rotationCosts,
+			SummonBanner banner) {
+
+		EmbedBuilder embed = new EmbedBuilder();
+		embed.setAuthor("Total Chance");
+		embed.setColor(Color.CYAN);
+		embed.setFooter("Fields exclude each other.");
+		embed.setDescription(banner.getTitle() + EQUALISE);
+		embed.setThumbnail(banner.getImageURL());
+		String rateFormat = "%.1f%%";
+
+		StringBuilder description = new StringBuilder();
+		for (Entry<String, Double> entry : oneRotationTotal.entrySet()) {
+			double rate = entry.getValue() * 100;
+			if (rate < 0.5)
+				continue;
+
+			description.append(entry.getKey() + ": " + String.format(rateFormat, rate) + "\n");
+		}
+		description.append("\nCost: " + String.format("%,d", (rotationCosts[0] + rotationCosts[1])));
+		embed.addInlineField("One Rotation", description.toString() + INLINE_EQUALISE);
+
+		// reset
+		description.setLength(0);
+
+		for (Entry<String, Double> entry : threeRotationTotal.entrySet()) {
+			double rate = entry.getValue() * 100;
+			if (rate < 0.5)
+				continue;
+
+			description.append(entry.getKey() + ": " + String.format(rateFormat, rate) + "\n");
+		}
+		description.append("\nCost: " + String.format("%,d", (rotationCosts[0] + 3 * rotationCosts[1])));
+		embed.addInlineField("Three Rotations", description.toString() + INLINE_EQUALISE);
+
+		description.setLength(0);
+
+		if (customRotationTotal != null) {
+			// Entry -1 has number of rotations
+			int numberOfRotations = (int) Math.ceil(customRotationTotal.get("-1"));
+			for (Entry<String, Double> entry : customRotationTotal.entrySet()) {
+				double rate = entry.getValue() * 100;
+				if (rate < 0.5 || entry.getKey().equals("-1"))
+					continue;
+
+				description.append(entry.getKey() + ": " + String.format(rateFormat, rate) + "\n");
+			}
+			description.append(
+					"\nCost: " + String.format("%,d", (rotationCosts[0] + numberOfRotations * rotationCosts[1])));
+			embed.addInlineField(numberOfRotations + " Rotations", description.toString() + INLINE_EQUALISE);
+		}
+
+		return embed;
 	}
 }

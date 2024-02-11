@@ -43,6 +43,9 @@ DBLegends Character Search:
 - b-tag create (name) *(characters)
 - b-tag update (name) (characters)
 
+DBLegends Summon Rate:
+- b-summon (banner_url)
+
 Automatic Responses:
 
  `[Types: contain, equal, match]`
@@ -230,10 +233,18 @@ b-search 21
 - Language is in its shortened form (i.e, en for English, fr for French).
 - Do b-translate languages to get all languages and their shortened forms
 
+**16) b-summon (banner_url)**
+- Calculates the rates to get the important characters of the banner.
+- Also calculates total rates and the cost.
+- Calculates amount of rotations needed to have an 80% to get the character.
+- Includes chance to get the character to red 2.
+- Includes one rotation, three rotations, and 80% chance worth of rotations.
+- Get the banner url from <https://dblegends.net/>.
+
 ---------------------------------
 ### TBA 2029:
 
-**16) b-tag create (name) (characters)**
+**17) b-tag create (name) (characters)**
 - Creates a new tag that has the characters specified.
 - You don't need to specify characters on creation.
 - Tag name must be unique and devoid of spaces.
@@ -247,17 +258,17 @@ b-tag create cancer_units <https://dblegends.net/character.php?id=238> 191 491
 
 Creates a tag called cancer_units that contains characters with the above site IDs.
 
-**17) b-tag remove (name)**
+**18) b-tag remove (name)**
 - Removes custom tags, default ones can't be removed.
 
-**18) b-tag update (name) (characters)**
+**19) b-tag update (name) (characters)**
 - Adds or removes characters from a custom tag.
 - Default tags can't be modified.
 - Prefix the name with + or -.
 
 ---------------------------------
 ### Inactive:
-**19) ai**
+**20) ai**
 - Personal GPT2 AI, generates text randomly when called.
 - Has to be running on my end, which is almost never.
 - Pretty shit, can be racist and an arsehole as well.
