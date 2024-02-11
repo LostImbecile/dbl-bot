@@ -61,6 +61,9 @@ Translate:
 Weather:
 - b-weather (city) *detailed
 
+Music Player:
+- b-play (link)
+
 WebDriver:
 - b-insult (person name) >> (reason)
 - b-grab (youtube link)

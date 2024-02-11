@@ -21,6 +21,7 @@ import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
 import com.github.egubot.features.Test;
+import com.github.egubot.features.VoiceChannelPlayback;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.BotApi;
 import com.github.egubot.main.KeyManager;
@@ -30,6 +31,7 @@ import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.DataManagerSwitcher;
+import com.github.lavaplayer.TrackScheduler;
 
 public class MessageCreateEventHandler implements MessageCreateListener, Shutdownable {
 	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
@@ -108,12 +110,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (checkBotMessageControlCommands(msg, lowCaseTxt)) {
 				return;
 			}
-			
+
 			try {
 				// Ignore or remove
 				Test.check(e, msg, msgText);
 			} catch (Exception e1) {
-				
+
 			}
 
 			// This is so I can run a test version and a non-test version at the same time
@@ -122,7 +124,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (!testMode && isTestServer(msg))
 				return;
 
-			
 			String authorID = msg.getAuthor().getIdAsString();
 
 			checkChannelTimer(msg);
@@ -132,6 +133,20 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (lowCaseTxt.contains("[attachment text replace]") && !msg.getAttachments().isEmpty()) {
 				msgText = replaceAttachmentText(msg, msgText);
 				lowCaseTxt = msgText.toLowerCase();
+			}
+
+			if (lowCaseTxt.startsWith("b-play")) {
+				try {
+					VoiceChannelPlayback.play(msg);
+				} catch (Exception e1) {
+					logger.error("Play error", e1);
+				}
+				return;
+			}
+			if (lowCaseTxt.startsWith("b-cancel")) {
+				TrackScheduler.destroy(e.getServer().get().getIdAsString());
+				e.getServer().get().getConnectedVoiceChannel(api.getYourself()).get().disconnect();
+				return;
 			}
 
 			if (storageFacades.checkCommands(msg, msgText, lowCaseTxt))

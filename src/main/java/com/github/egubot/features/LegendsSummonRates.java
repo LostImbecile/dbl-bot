@@ -127,13 +127,16 @@ public class LegendsSummonRates {
 		if (focusCharacters.isEmpty() && !potentialCharacters.isEmpty()) {
 			int maxIndex = 0;
 			int minIndex = 0;
+			double tolerance = 0.5;
 			for (int i = 1; i < potentialCharacters.size(); i++) {
-				SummonCharacter character = potentialCharacters.get(i);
-				SummonCharacter maxCharacter = potentialCharacters.get(maxIndex);
-				if (character.getSummonRate() > maxCharacter.getSummonRate())
+				double character = potentialCharacters.get(i).getSummonRate() * 100;
+
+				double maxRate = potentialCharacters.get(maxIndex).getSummonRate() * 100;
+				if (character > (maxRate + tolerance))
 					maxIndex = i;
-				SummonCharacter minCharacter = potentialCharacters.get(minIndex);
-				if (character.getSummonRate() < minCharacter.getSummonRate())
+
+				double minRate = potentialCharacters.get(minIndex).getSummonRate() * 100;
+				if (character < (minRate - tolerance))
 					minIndex = i;
 			}
 
@@ -265,7 +268,6 @@ public class LegendsSummonRates {
 		result.put(ULTRA, 0.0);
 		result.put(LF, 0.0);
 		result.put(SPARKING, 0.0);
-		
 
 		double typeRate;
 		double finalRate;
