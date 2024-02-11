@@ -24,7 +24,7 @@ import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.yamusic.YandexMusicAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 
-public class VoiceChannelPlayback {
+public class SoundPlayback {
 	private static final AudioPlayerManager remotePlayerManager = new DefaultAudioPlayerManager();
 	private static final AudioPlayerManager localPlayerManager = new DefaultAudioPlayerManager();
 
@@ -48,6 +48,14 @@ public class VoiceChannelPlayback {
 	}
 
 	public static void play(Message msg) {
+		ServerVoiceChannel channel;
+		try {
+			channel = msg.getAuthor().getConnectedVoiceChannel().get();
+		} catch (NoSuchElementException e) {
+			msg.getChannel().sendMessage("Connect to a voice channel first.");
+			return;
+		}
+
 		String name = msg.getContent().replace("b-play", "").replace("<", "").replace(">", "").strip();
 		String serverID = msg.getServer().get().getIdAsString();
 		AudioPlayerManager manager;
@@ -56,37 +64,38 @@ public class VoiceChannelPlayback {
 			manager = remotePlayerManager;
 		else
 			manager = localPlayerManager;
-		AudioPlayer player = manager.createPlayer();
 
-		TrackScheduler trackScheduler = new TrackScheduler(player, serverID);
-		player.addListener(trackScheduler);
-
-		manager.loadItem(name, new AudioLoadHandler(trackScheduler, msg));
+		boolean isNewPlayer = false;
+		AudioPlayer player;
+		if (TrackScheduler.getServerAudioPlayer(serverID) == null) {
+			player = manager.createPlayer();
+			TrackScheduler trackScheduler = new TrackScheduler(player, serverID);
+			player.addListener(trackScheduler);
+			isNewPlayer = true;
+		} else {
+			player = TrackScheduler.getServerAudioPlayer(serverID);
+		}
 
 		try {
-			ServerVoiceChannel channel = msg.getAuthor().getConnectedVoiceChannel().get();
-			if (!channel.isConnected(BotApi.getApi().getYourself()) || TrackScheduler.isServerPlayListEmpty(serverID)) {
+			if (isNewPlayer || !channel.isConnected(BotApi.getApi().getYourself())) {
 				channel.connect().thenAccept(audioConnection -> {
+
+					channel.addServerVoiceChannelMemberLeaveListener(event -> {
+						if (channel.getConnectedUserIds().size() < 2
+								|| !channel.isConnected(BotApi.getApi().getYourself())) {
+							TrackScheduler.destroy(serverID);
+						}
+					});
+
 					AudioSource source = new LavaplayerAudioSource(player);
 					audioConnection.setAudioSource(source);
-					trackScheduler.setChannel(channel);
+					manager.loadItem(name, new AudioLoadHandler(msg, serverID));
 				});
+			} else {
+				manager.loadItem(name, new AudioLoadHandler(msg, serverID));
 			}
-
-			channel.addServerVoiceChannelMemberLeaveListener(event -> {
-				if (channel.getConnectedUserIds().size() < 2 || !channel.isConnected(BotApi.getApi().getYourself())) {
-					channel.disconnect();
-					player.destroy();
-					TrackScheduler.destroy(serverID);
-					trackScheduler.disconnect();
-				}
-			});
-		} catch (NoSuchElementException e) {
-			msg.getChannel().sendMessage("Connect to a voice channel first.");
 		} catch (Exception e) {
-			player.destroy();
 			TrackScheduler.destroy(serverID);
-			trackScheduler.disconnect();
 		}
 
 	}

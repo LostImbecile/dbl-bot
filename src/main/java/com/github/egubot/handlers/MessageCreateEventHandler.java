@@ -21,7 +21,7 @@ import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
 import com.github.egubot.features.Test;
-import com.github.egubot.features.VoiceChannelPlayback;
+import com.github.egubot.features.SoundPlayback;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.BotApi;
 import com.github.egubot.main.KeyManager;
@@ -135,17 +135,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				lowCaseTxt = msgText.toLowerCase();
 			}
 
-			if (lowCaseTxt.startsWith("b-play")) {
-				try {
-					VoiceChannelPlayback.play(msg);
-				} catch (Exception e1) {
-					logger.error("Play error", e1);
-				}
-				return;
-			}
-			if (lowCaseTxt.startsWith("b-cancel")) {
-				TrackScheduler.destroy(e.getServer().get().getIdAsString());
-				e.getServer().get().getConnectedVoiceChannel(api.getYourself()).get().disconnect();
+			if (checkMusicCommands(e, msg, lowCaseTxt)) {
 				return;
 			}
 
@@ -187,6 +177,28 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			logger.error("Main handler encountered an error.", e1);
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	private boolean checkMusicCommands(MessageCreateEvent e, Message msg, String lowCaseTxt) {
+		if (lowCaseTxt.startsWith("b-play")) {
+			try {
+				SoundPlayback.play(msg);
+			} catch (Exception e1) {
+				logger.error("Play error", e1);
+			}
+			return true;
+		}
+		
+		if (lowCaseTxt.startsWith("b-cancel")) {
+			TrackScheduler.destroy(e.getServer().get().getIdAsString());
+			return true;
+		}
+		
+		if (lowCaseTxt.startsWith("b-skip")) {
+			TrackScheduler.skip(e.getServer().get().getIdAsString());
+		}
+
+		return false;
 	}
 
 	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) throws Exception {

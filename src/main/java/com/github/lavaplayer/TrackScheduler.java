@@ -7,8 +7,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javacord.api.entity.channel.ServerVoiceChannel;
-
+import com.github.egubot.main.BotApi;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -19,22 +18,31 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 
 public class TrackScheduler extends AudioEventAdapter {
 	private static final Logger logger = LogManager.getLogger(TrackScheduler.class.getName());
-	static final Map<String, AudioPlaylist> playlists = new HashMap<>();
+	private static final Map<String, AudioPlaylist> playlists = new HashMap<>();
+	private static final Map<String, AudioPlayer> players = new HashMap<>();
 
 	private AudioPlayer player;
 	private String serverID;
-	private ServerVoiceChannel channel = null;
 
 	public TrackScheduler(AudioPlayer player, String serverID) {
 		this.player = player;
 		this.serverID = serverID;
+		players.put(serverID, player);
 	}
 
 	public static boolean isServerPlayListEmpty(String serverID) {
 		return playlists.get(serverID) == null || playlists.get(serverID).getTracks().isEmpty();
 	}
 
-	public void queue(AudioTrack track, String serverID) {
+	public static boolean isServerPlaying(String serverID) {
+		return players.get(serverID) != null && players.get(serverID).getPlayingTrack() != null;
+	}
+
+	public static AudioPlayer getServerAudioPlayer(String serverID) {
+		return players.get(serverID);
+	}
+
+	public static void queue(AudioTrack track, String serverID) {
 		try {
 			AudioPlaylist playlist = playlists.get(serverID);
 			if (playlist == null) {
@@ -45,15 +53,16 @@ public class TrackScheduler extends AudioEventAdapter {
 				playlist.getTracks().add(track);
 			}
 
-			if (player.getPlayingTrack() == null)
-				player.playTrack(track);
+			if (!isServerPlaying(serverID)) {
+				getServerAudioPlayer(serverID).playTrack(track);
+			}
 		} catch (Exception e) {
 			logger.error(e);
 			throw e;
 		}
 	}
 
-	public void queue(AudioPlaylist incomingPlayList, String serverID) {
+	public static void queue(AudioPlaylist incomingPlayList, String serverID) {
 		try {
 			AudioPlaylist playlist = playlists.get(serverID);
 			int maxVideos = Math.min(20, incomingPlayList.getTracks().size() - 1);
@@ -66,8 +75,8 @@ public class TrackScheduler extends AudioEventAdapter {
 				playlists.put(serverID, playlist);
 			}
 
-			if (player.getPlayingTrack() == null)
-				player.playTrack(incomingPlayList.getTracks().get(0));
+			if (!isServerPlaying(serverID))
+				getServerAudioPlayer(serverID).playTrack(incomingPlayList.getTracks().get(0));
 		} catch (Exception e) {
 			logger.error(e);
 			throw e;
@@ -76,6 +85,10 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	public static void destroy(String serverID) {
 		playlists.remove(serverID);
+		if (players.get(serverID) != null)
+			players.get(serverID).destroy();
+		players.remove(serverID);
+		disconnect(serverID);
 	}
 
 	@Override
@@ -93,10 +106,24 @@ public class TrackScheduler extends AudioEventAdapter {
 		// A track started playing
 	}
 
+	public static void skip(String serverID) {
+		goToNextTrack(serverID, 0);
+	}
+
+	private static void goToNextTrack(String serverID, int i) {
+		AudioPlayer serverPlayer = players.get(serverID);
+		List<AudioTrack> list = playlists.get(serverID).getTracks();
+		list.remove(i);
+		if (!list.isEmpty() && serverPlayer != null)
+			serverPlayer.playTrack(list.get(0));
+		else
+			destroy(serverID);
+	}
+
 	@Override
 	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
 		if (endReason.mayStartNext) {
-			goToNextTrack(player, track);
+			goToNextTrack(track);
 		}
 
 		// endReason == FINISHED: A track finished or died by an exception (mayStartNext
@@ -110,23 +137,23 @@ public class TrackScheduler extends AudioEventAdapter {
 		// clone of this back to your queue
 	}
 
-	private void goToNextTrack(AudioPlayer player, AudioTrack track) {
+	private void goToNextTrack(AudioTrack track) {
 		List<AudioTrack> list = playlists.get(serverID).getTracks();
 		list.remove(track);
-		if (!list.isEmpty())
+		if (!list.isEmpty() || player != null)
 			player.playTrack(list.get(0));
 		else
-			channel.disconnect();
+			destroy(serverID);
 	}
 
 	@Override
 	public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
-		goToNextTrack(player, track);
+		goToNextTrack(track);
 	}
 
 	@Override
 	public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
-		goToNextTrack(player, track);
+		goToNextTrack(track);
 	}
 
 	public AudioPlayer getPlayer() {
@@ -149,16 +176,12 @@ public class TrackScheduler extends AudioEventAdapter {
 		return playlists;
 	}
 
-	public ServerVoiceChannel getChannel() {
-		return channel;
-	}
+	public static void disconnect(String serverID) {
+		try {
+			BotApi.getApi().getServerById(serverID).get().getConnectedVoiceChannel(BotApi.getApi().getYourself()).get()
+					.disconnect();
+		} catch (Exception e) {
 
-	public void setChannel(ServerVoiceChannel channel) {
-		this.channel = channel;
-	}
-
-	public void disconnect() {
-		if (channel != null)
-			channel.disconnect();
+		}
 	}
 }
