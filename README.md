@@ -62,7 +62,12 @@ Weather:
 - b-weather (city) *detailed
 
 Music Player:
-- b-play (link)
+- b-play (link)/(ytsearch: keyword)
+- b-cancel
+- b-pause
+- b-resume
+- b-skip
+- b-info `[The playlist's]`
 
 WebDriver:
 - b-insult (person name) >> (reason)

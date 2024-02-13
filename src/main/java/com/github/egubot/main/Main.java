@@ -50,17 +50,13 @@ public class Main {
 				BotApi.setApi(new DiscordApiBuilder().setToken(token)
 						.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login()
 						.join());
-
-				if (BotApi.getApi().getServers().isEmpty()) {
-					System.out.println(
-							"You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
-					System.out.println("\nPlease invite it before continuing.");
-				}
 			} catch (Exception e1) {
 				logger.error("Invalid token. Exiting.");
 				KeyManager.updateKeys("Discord_API_Key", "-1", KeyManager.tokensFileName);
 				Shared.getShutdown().initiateShutdown(1);
 			}
+
+			checkServerList();
 
 			/*
 			 * Status message to prevent multiple instances being up at once, bot needs to
@@ -78,8 +74,7 @@ public class Main {
 					restartMain(args);
 				}
 			} else {
-				System.out.println(
-						"You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
+				printBotInviteLink();
 
 				addListeners();
 
@@ -99,6 +94,17 @@ public class Main {
 		} finally {
 			Shared.getShutdown().initiateShutdown(exitCode);
 		}
+	}
+
+	private static void checkServerList() {
+		if (BotApi.getApi().getServers().isEmpty()) {
+			printBotInviteLink();
+			System.out.println("\nPlease invite it before continuing.");
+		}
+	}
+
+	private static void printBotInviteLink() {
+		System.out.println("You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
 	}
 
 	private static String checkArguments(String[] args) {
@@ -157,16 +163,14 @@ public class Main {
 		}
 	}
 
-	private static void addListeners() throws Exception {
+	private static void addListeners() {
 		/*
 		 * Listeners, heart of the bot.
 		 * Customise these yourself, the classes I made are for
 		 * my personal use, best to write your own, but you can
 		 * use these as an example.
 		 */
-		MessageCreateEventHandler messageHandler = new MessageCreateEventHandler();
-		Shared.getShutdown().registerShutdownable(messageHandler);
-		BotApi.getApi().addMessageCreateListener(messageHandler);
+		BotApi.getApi().addMessageCreateListener(new MessageCreateEventHandler());
 		BotApi.getApi().addReconnectListener(new ReconnectEventHandler());
 		BotApi.getApi().addResumeListener(new ResumeEventHandler());
 		BotApi.getApi().addLostConnectionListener(new LostConnectionHandler());

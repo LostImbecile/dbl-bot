@@ -31,7 +31,6 @@ import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.DataManagerSwitcher;
-import com.github.lavaplayer.TrackScheduler;
 
 public class MessageCreateEventHandler implements MessageCreateListener, Shutdownable {
 	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
@@ -78,6 +77,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		this.testMode = Shared.isTestMode();
 		this.executorService = Executors.newFixedThreadPool(10);
 		this.shutdownManager = Shared.getShutdown();
+		shutdownManager.registerShutdownable(this);
 
 		DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
 
@@ -141,7 +141,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				lowCaseTxt = msgText.toLowerCase();
 			}
 
-			if (checkMusicCommands(e, msg, lowCaseTxt)) {
+			if (SoundPlayback.checkMusicCommands(msg, lowCaseTxt)) {
 				return;
 			}
 
@@ -183,28 +183,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			logger.error("Main handler encountered an error.", e1);
 			Thread.currentThread().interrupt();
 		}
-	}
-
-	private boolean checkMusicCommands(MessageCreateEvent e, Message msg, String lowCaseTxt) {
-		if (lowCaseTxt.startsWith("b-play")) {
-			try {
-				SoundPlayback.play(msg);
-			} catch (Exception e1) {
-				logger.error("Play error", e1);
-			}
-			return true;
-		}
-
-		if (lowCaseTxt.startsWith("b-cancel")) {
-			TrackScheduler.destroy(e.getServer().get().getIdAsString());
-			return true;
-		}
-
-		if (lowCaseTxt.startsWith("b-skip")) {
-			TrackScheduler.skip(e.getServer().get().getIdAsString());
-		}
-
-		return false;
 	}
 
 	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) throws Exception {

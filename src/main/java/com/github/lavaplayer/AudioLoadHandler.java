@@ -11,13 +11,20 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 public class AudioLoadHandler implements AudioLoadResultHandler {
 	private static final Logger logger = LogManager.getLogger(AudioLoadHandler.class.getName());
-	
+
 	Message msg;
 	String serverID;
+	boolean fromSearch = false;
 
 	public AudioLoadHandler(Message msg, String serverID) {
 		this.msg = msg;
 		this.serverID = serverID;
+	}
+
+	public AudioLoadHandler(Message msg, String serverID, boolean fromSearch) {
+		this.msg = msg;
+		this.serverID = serverID;
+		this.fromSearch = fromSearch;
 	}
 
 	@Override
@@ -27,7 +34,10 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 
 	@Override
 	public void playlistLoaded(AudioPlaylist playlist) {
-		TrackScheduler.queue(playlist, serverID);
+		if (!fromSearch)
+			TrackScheduler.queue(playlist, serverID);
+		else
+			TrackScheduler.queue(playlist.getTracks().get(0), serverID);
 	}
 
 	@Override
@@ -40,7 +50,7 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 
 	@Override
 	public void loadFailed(FriendlyException exception) {
-		msg.reply(exception.getMessage());
+		msg.reply("Loading of a video failed");
 		if (!TrackScheduler.isServerPlaying(serverID)) {
 			TrackScheduler.destroy(serverID);
 		}

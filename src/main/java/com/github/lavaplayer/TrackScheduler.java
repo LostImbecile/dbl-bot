@@ -1,10 +1,10 @@
 package com.github.lavaplayer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.github.egubot.main.BotApi;
@@ -83,6 +83,22 @@ public class TrackScheduler extends AudioEventAdapter {
 		}
 	}
 
+	public static Map<String, Long> getPlayListInfo(String serverID) {
+		AudioPlaylist list = playlists.get(serverID);
+		if (list == null) {
+			return Collections.emptyMap();
+		} else {
+			List<AudioTrack> tracks = list.getTracks();
+			Map<String, Long> trackInfo = new HashMap<>();
+			for (int i = 0; i < tracks.size() && i < 10; i++) {
+				AudioTrack audioTrack = tracks.get(i);
+				trackInfo.put(audioTrack.getIdentifier(), audioTrack.getDuration());
+			}
+
+			return trackInfo;
+		}
+	}
+
 	public static void destroy(String serverID) {
 		playlists.remove(serverID);
 		if (players.get(serverID) != null)
@@ -108,6 +124,18 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	public static void skip(String serverID) {
 		goToNextTrack(serverID, 0);
+	}
+
+	public static void pause(String serverID) {
+		if (players.get(serverID) != null) {
+			players.get(serverID).setPaused(true);
+		}
+	}
+
+	public static void resume(String serverID) {
+		if (players.get(serverID) != null) {
+			players.get(serverID).setPaused(false);
+		}
 	}
 
 	private static void goToNextTrack(String serverID, int i) {
