@@ -1,6 +1,7 @@
 package com.github.egubot.handlers;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,7 +21,6 @@ import com.github.egubot.facades.CustomAIFacade;
 import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
-import com.github.egubot.features.Test;
 import com.github.egubot.features.SoundPlayback;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.BotApi;
@@ -65,6 +65,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	private final ExecutorService executorService;
 	private ShutdownManager shutdownManager;
+	private boolean isTestActive = false;
 
 	public MessageCreateEventHandler() {
 		/*
@@ -112,10 +113,15 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			}
 
 			try {
-				// Ignore or remove
-				Test.check(e, msg, msgText);
+				if (isTestActive) {
+					Class<?> testClass = Class.forName("com.github.egubot.features.Test");
+					Method checkMethod = testClass.getMethod("check", MessageCreateEvent.class, Message.class,
+							String.class);
+					checkMethod.invoke(null, e, msg, msgText);
+				} else if (lowCaseTxt.equals("b-test toggle")) {
+					isTestActive = true;
+				}
 			} catch (Exception e1) {
-
 			}
 
 			// This is so I can run a test version and a non-test version at the same time
@@ -188,12 +194,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			}
 			return true;
 		}
-		
+
 		if (lowCaseTxt.startsWith("b-cancel")) {
 			TrackScheduler.destroy(e.getServer().get().getIdAsString());
 			return true;
 		}
-		
+
 		if (lowCaseTxt.startsWith("b-skip")) {
 			TrackScheduler.skip(e.getServer().get().getIdAsString());
 		}
