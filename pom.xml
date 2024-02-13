@@ -5,7 +5,7 @@
 
 	<groupId>com.github.discord</groupId>
 	<artifactId>egubot</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<repositories>
 		<repository>
@@ -90,7 +90,56 @@
 	</properties>
 
 	<build>
+		<!-- Change this as you like -->
+		<finalName>bot</finalName>
 		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.finalName}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>com.github.egubot.main.Run</mainClass>
+						</manifest>
+					</archive>
+					<!-- Change this as you like -->
+					<outputDirectory>${project.build.finalName}</outputDirectory>
+					<excludes>
+						<exclude>**/*.txt</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<!-- Set failOnError to false to ignore compilation errors -->
+					<failOnError>false</failOnError>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -99,20 +148,21 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>org.javacord.examplebot.Main</mainClass>
-							<id>examplebot</id>
+							<mainClass>com.github.egubot.main.Run</mainClass>
+							<id>discordbot</id>
 						</program>
 					</programs>
 				</configuration>
-				<executions>
-					<execution>
-						<id>create-distribution</id>
-						<phase>package</phase>
-						<goals>
-							<goal>assemble</goal>
-						</goals>
-					</execution>
-				</executions>
+				<!-- Keep this if you want a distribution created -->
+				<!--				<executions>-->
+				<!--					<execution>-->
+				<!--						<id>create-distribution</id>-->
+				<!--						<phase>package</phase>-->
+				<!--						<goals>-->
+				<!--							<goal>assemble</goal>-->
+				<!--						</goals>-->
+				<!--					</execution>-->
+				<!--				</executions>-->
 			</plugin>
 
 			<plugin>
@@ -124,18 +174,83 @@
 						<descriptor>src/assembly/distribution.xml</descriptor>
 					</descriptors>
 				</configuration>
-				<executions>
-					<execution>
-						<id>create-archive</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
+				<!-- Keep this if you want a distribution created -->
+				<!--				<executions>-->
+				<!--					<execution>-->
+				<!--						<id>create-archive</id>-->
+				<!--						<phase>package</phase>-->
+				<!--						<goals>-->
+				<!--							<goal>single</goal>-->
+				<!--						</goals>-->
+				<!--					</execution>-->
+				<!--				</executions>-->
 			</plugin>
 
+			<!--In case you want to obfuscate your jar-->
+			<!--			<plugin>-->
+			<!--				<groupId>com.github.wvengen</groupId>-->
+			<!--				<artifactId>proguard-maven-plugin</artifactId>-->
+			<!--				<version>2.5.1</version>-->
+			<!--				<executions>-->
+			<!--					<execution>-->
+			<!--						<phase>package</phase>-->
+			<!--						<goals>-->
+			<!--							<goal>proguard</goal>-->
+			<!--						</goals>-->
+			<!--					</execution>-->
+			<!--				</executions>-->
+			<!--				<configuration>-->
+			<!--					<injarNotExistsSkip>true</injarNotExistsSkip>-->
+			<!--					<includeDependency>false</includeDependency>-->
+			<!--
+			<outputDirectory>${project.build.finalName}</outputDirectory>-->
+			<!--					<injar>${project.build.finalName}.jar</injar>-->
+			<!--					<outjar>${project.build.finalName}-obfuscated.jar</outjar>-->
+			<!--					<attach>false</attach>-->
+			<!--					<options>-->
+			<!--						<option>-keep class com.github.egubot.main.Run { *;
+			}</option>-->
+			<!--						<option>-keepnames class * { *; }</option>-->
+			<!--						<option>-dontwarn</option>-->
+			<!--						<option>-printseeds-->
+			<!--							${project.build.directory}/proguard-seeds.txt</option>-->
+			<!--						<option>-printusage-->
+			<!--							${project.build.directory}/proguard-shrinkusage.txt</option>-->
+			<!--						<option>-printmapping-->
+			<!--							${project.build.directory}/proguard-mapping.txt</option>-->
+			<!--					</options>-->
+			<!--				</configuration>-->
+			<!--			</plugin>-->
+
+			<!--			<plugin>-->
+			<!--				<artifactId>maven-resources-plugin</artifactId>-->
+			<!--				<version>3.3.1</version>-->
+			<!--				<executions>-->
+			<!--					<execution>-->
+			<!--						<id>copy-resources</id>-->
+			<!--						<phase>package</phase>-->
+			<!--						<goals>-->
+			<!--							<goal>copy-resources</goal>-->
+			<!--						</goals>-->
+			<!--						<configuration>-->
+			<!--
+			<outputDirectory>${project.build.finalName}</outputDirectory>-->
+			<!--							<resources>-->
+			<!--								<resource>-->
+			<!--									<directory>src/main/resources</directory>-->
+			<!--									<filtering>true</filtering>-->
+			<!--								</resource>-->
+			<!--							</resources>-->
+			<!--						</configuration>-->
+			<!--					</execution>-->
+			<!--				</executions>-->
+			<!--			</plugin>-->
+
 		</plugins>
+
 	</build>
 
+	<name>Egubot</name>
+	<url>https://github.com/LostImbecile/DBL-Egubot</url>
+	<description>Discord Bot</description>
 </project>
