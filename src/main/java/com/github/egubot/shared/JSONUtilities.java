@@ -43,5 +43,10 @@ public class JSONUtilities {
 
         return gson.toJson(object, clazz);
     }
+	
+	public static <T> T jsonToClass(String jsonTxt, Class<T> clazz){
+		Gson gson = new Gson();
+		return gson.fromJson(jsonTxt, clazz);
+	}
 
 }

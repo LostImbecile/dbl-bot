@@ -68,6 +68,7 @@ Music Player:
 - b-resume
 - b-skip
 - b-info `[The playlist's]`
+- b-now `[Playing now]`
 
 WebDriver:
 - b-insult (person name) >> (reason)

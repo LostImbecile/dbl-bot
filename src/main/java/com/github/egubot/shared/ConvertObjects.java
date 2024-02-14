@@ -31,11 +31,11 @@ public class ConvertObjects {
 		long minutes = (ms % 3600) / 60;
 		long remainingSeconds = ms % 60;
 		if (hours > 0) {
-			return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds);
+			return String.format("%2d:%02d:%02d", hours, minutes, remainingSeconds);
 		} else if (minutes > 0) {
-			return String.format("%02d:%02d", minutes, remainingSeconds);
+			return String.format("%2d:%02d", minutes, remainingSeconds);
 		} else {
-			return String.format("%02ds", remainingSeconds);
+			return String.format("%ds", remainingSeconds);
 		}
 	}
 }

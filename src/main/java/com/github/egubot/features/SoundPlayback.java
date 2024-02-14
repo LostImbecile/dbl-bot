@@ -36,6 +36,7 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.yamusic.YandexMusicAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 public class SoundPlayback {
 	private static final Logger logger = LogManager.getLogger(SoundPlayback.class.getName());
@@ -62,7 +63,7 @@ public class SoundPlayback {
 
 			remotePlayerManager = new DefaultAudioPlayerManager();
 			localPlayerManager = new DefaultAudioPlayerManager();
-			
+
 			initialisePlayerManagers();
 
 			bot = Bot.getApi().getYourself();
@@ -145,12 +146,45 @@ public class SoundPlayback {
 					return true;
 				}
 
+				if (lowCaseTxt.contains(prefix + "now")) {
+					getCurrentTrackInfo(msg);
+					return true;
+				}
+
 			}
 		} catch (Exception e) {
 			logger.error(e);
 		}
 
 		return false;
+	}
+
+	private static void getCurrentTrackInfo(Message msg) {
+		Server server = getServer(msg);
+		AudioTrack track = TrackScheduler.getCurrentTrack(server.getIdAsString());
+		String videoID = track.getIdentifier();
+		EmbedBuilder embed = new EmbedBuilder();
+		embed.setAuthor(GetYoutubeVideoInfo.getName(videoID), GetYoutubeVideoInfo.getURL(videoID),
+				server.getIcon().get());
+		embed.setColor(Color.RED);
+		embed.setImage(GetYoutubeVideoInfo.getThumb(videoID));
+
+		addProgressBar(track, embed);
+		msg.getChannel().sendMessage(embed);
+	}
+
+	private static void addProgressBar(AudioTrack track, EmbedBuilder embed) {
+		String positionString = ConvertObjects.convertMilliSecondsToTime(track.getPosition());
+		String durationString = ConvertObjects.convertMilliSecondsToTime(track.getDuration());
+
+		int maxWidth = 90;
+		double progress = (double) track.getPosition() / track.getDuration();
+		int finishedWidth = (int) Math.ceil(maxWidth * progress);
+		String finishedString = String.format("%" + finishedWidth / 2 + "s", " ").replace(" ", "-");
+		String progressBar = String.format("[%s%" + (maxWidth - finishedWidth) + "s]", finishedString, " ").replace(" ",
+				"\u2005");
+
+		embed.setDescription("**" + positionString + " " + progressBar + " " + durationString + "**");
 	}
 
 	private static void getPlaylistInfo(Message msg) {
@@ -161,16 +195,19 @@ public class SoundPlayback {
 		embed.setColor(Color.RED);
 		StringBuilder description = new StringBuilder(50);
 		for (Entry<String, Long> entry : map.entrySet()) {
-			description.append(convertTrackInfo(entry));
+			description.append(convertTrackInfoToText(entry));
 			description.append("\n");
 		}
 		embed.setDescription(description.toString());
 		msg.getChannel().sendMessage(embed);
 	}
 
-	private static String convertTrackInfo(Entry<String, Long> entry) {
-		return GetYoutubeVideoInfo.getName(entry.getKey()) + " - "
-				+ ConvertObjects.convertMilliSecondsToTime(entry.getValue());
+	private static String convertTrackInfoToText(Entry<String, Long> entry) {
+		String name = GetYoutubeVideoInfo.getName(entry.getKey());
+		String url = GetYoutubeVideoInfo.getURL(entry.getKey());
+		String hyperLink = "[" + name + "](" + url + ")";
+		String duration = ConvertObjects.convertMilliSecondsToTime(entry.getValue());
+		return hyperLink + " - " + duration;
 	}
 
 	private static Server getServer(Message msg) {

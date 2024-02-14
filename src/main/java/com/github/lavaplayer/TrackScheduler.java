@@ -85,7 +85,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	public static Map<String, Long> getPlayListInfo(String serverID) {
 		AudioPlaylist list = playlists.get(serverID);
-		if (list == null) {
+		if (list == null || list.getTracks().isEmpty()) {
 			return Collections.emptyMap();
 		} else {
 			List<AudioTrack> tracks = list.getTracks();
@@ -96,6 +96,15 @@ public class TrackScheduler extends AudioEventAdapter {
 			}
 
 			return trackInfo;
+		}
+	}
+
+	public static AudioTrack getCurrentTrack(String serverID) {
+		AudioPlaylist list = playlists.get(serverID);
+		if (list == null || list.getTracks().isEmpty())
+			return null;
+		else {
+			return list.getTracks().get(0);
 		}
 	}
 
