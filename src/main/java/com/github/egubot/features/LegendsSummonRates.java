@@ -83,13 +83,19 @@ public class LegendsSummonRates {
 		return new int[] { onceOnlySteps, normalSteps };
 	}
 
-	public static int getPullsNeeded(int zPower) {
+	public static int getRed2PullsNeeded(int zPower) {
 		if (zPower > 0)
 			return (int) Math.ceil(5000.0 / zPower);
 		return 0;
 	}
+	
+	public static int getSevenStarsPullsNeeded(int zPower) {
+		if (zPower > 0)
+			return (int) Math.ceil(3000.0 / zPower);
+		return 0;
+	}
 
-	public static double getRedTwoChance(int pullsNeeded, Double chance) {
+	public static double getConsecutiveChance(int pullsNeeded, Double chance) {
 		return Math.pow(chance, pullsNeeded);
 	}
 

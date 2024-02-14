@@ -116,30 +116,34 @@ public class MessageFormats {
 			Characters character = LegendsDatabase.getCharacterHash().get(id);
 			temp = createCharacterEmbed(character);
 
-			int pulls = LegendsSummonRates.getPullsNeeded(entry.getValue());
 			double rate = oneRotation.get(id);
-			double getRedTwoChance = LegendsSummonRates.getRedTwoChance(pulls, rate);
 
-			temp.addInlineField("One Rotation", "Once: " + String.format(rateFormat, rate * 100) + "\nRed2: "
-					+ String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE);
+			temp.addInlineField("One Rotation", getCharacterRatesField(rateFormat, rate, entry.getValue()));
 
 			rate = threeRotation.get(id);
-			getRedTwoChance = LegendsSummonRates.getRedTwoChance(pulls, rate);
 
-			temp.addInlineField("Three Rotations", "Once: " + String.format(rateFormat, rate * 100) + "\nRed2: "
-					+ String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE);
+			temp.addInlineField("Three Rotations", getCharacterRatesField(rateFormat, rate, entry.getValue()));
 
 			if (customRotation != null) {
 				rate = customRotation.get(id);
-				getRedTwoChance = LegendsSummonRates.getRedTwoChance(pulls, rate);
 
-				temp.addInlineField(numberOfRotations + " Rotations", "Once: " + String.format(rateFormat, rate * 100)
-						+ "\nRed2: " + String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE);
+				temp.addInlineField(numberOfRotations + " Rotations",
+						getCharacterRatesField(rateFormat, rate, entry.getValue()));
 
 			}
 			embeds.add(temp);
 		}
 		return embeds;
+	}
+
+	private static String getCharacterRatesField(String rateFormat, double rate, int zPower) {
+		int red2Pulls = LegendsSummonRates.getRed2PullsNeeded(zPower);
+		int sevenStarPulls = LegendsSummonRates.getSevenStarsPullsNeeded(zPower);
+		double getRedTwoChance = LegendsSummonRates.getConsecutiveChance(red2Pulls, rate);
+		double getSevenStarChance = LegendsSummonRates.getConsecutiveChance(sevenStarPulls, rate);
+		return "Once: " + String.format(rateFormat, rate * 100) + "\n7 Star: "
+				+ String.format(rateFormat, getSevenStarChance * 100) + "\nRed 2: "
+				+ String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE;
 	}
 
 	public static EmbedBuilder buildSummonTotalEmbed(Map<String, Double> oneRotationTotal,
