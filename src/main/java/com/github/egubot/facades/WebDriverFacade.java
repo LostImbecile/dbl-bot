@@ -12,6 +12,7 @@ import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.webautomation.InsultGenerator;
+import com.github.egubot.main.Bot;
 import com.github.egubot.webautomation.Ezgif;
 import com.github.egubot.webautomation.GrabYoutubeVideo;
 
@@ -23,17 +24,17 @@ public class WebDriverFacade {
 	private static final String YOUTUBE_ICON = "https://cdn-icons-png.flaticon.com/256/1384/1384060.png";
 
 	public static boolean checkCommands(Message msg, String msgText, String lowCaseText) {
-		if (lowCaseText.matches("b-insult(?s).*")) {
+		if (lowCaseText.matches(Bot.getPrefix() + "insult(?s).*")) {
 			checkInsultCommands(msg, lowCaseText);
 			return true;
 		}
 
-		if (lowCaseText.matches("b-convert(?s).*")) {
-			checkEzgifCommands(msg, lowCaseText.contains("b-convert gif"), lowCaseText.contains("b-convert vid"));
+		if (lowCaseText.matches(Bot.getPrefix() + "convert(?s).*")) {
+			checkEzgifCommands(msg, lowCaseText.contains(Bot.getPrefix() + "convert gif"), lowCaseText.contains(Bot.getPrefix() + "convert vid"));
 			return true;
 		}
 
-		if (lowCaseText.matches("b-grab(?s).*")) {
+		if (lowCaseText.matches(Bot.getPrefix() + "grab(?s).*")) {
 			msg.getChannel().sendMessage("one moment");
 			checkGrabCommands(msg, msgText);
 			return true;
@@ -42,7 +43,7 @@ public class WebDriverFacade {
 	}
 
 	private static void checkInsultCommands(Message msg, String lowCaseText) {
-		String[] options = lowCaseText.replaceFirst("b-insult", "").split(">>");
+		String[] options = lowCaseText.replaceFirst(Bot.getPrefix() + "insult", "").split(">>");
 		if (options.length < 2) {
 			msg.getChannel().sendMessage("Hast thou no target, no foe, or no purpose in mind?");
 		} else {

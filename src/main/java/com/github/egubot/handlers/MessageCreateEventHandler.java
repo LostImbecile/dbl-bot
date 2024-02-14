@@ -23,7 +23,7 @@ import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
 import com.github.egubot.features.SoundPlayback;
 import com.github.egubot.interfaces.Shutdownable;
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.main.ShutdownManager;
 import com.github.egubot.shared.FileUtilities;
@@ -65,6 +65,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private final ExecutorService executorService;
 	private ShutdownManager shutdownManager;
 	private boolean isTestActive = false;
+	private static String prefix = Bot.getPrefix();
 
 	public MessageCreateEventHandler() {
 		/*
@@ -73,7 +74,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		 * from an online storage each time. I used discord for this, a cloud
 		 * services could do better.
 		 */
-		this.api = BotApi.getApi();
+		this.api = Bot.getApi();
 		this.testMode = Shared.isTestMode();
 		this.executorService = Executors.newFixedThreadPool(10);
 		this.shutdownManager = Shared.getShutdown();
@@ -118,12 +119,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 					Method checkMethod = testClass.getMethod("check", MessageCreateEvent.class, Message.class,
 							String.class);
 					checkMethod.invoke(null, e, msg, msgText);
-				} else if (lowCaseTxt.equals("b-test toggle")) {
-					isTestActive = true;
+				} else if (lowCaseTxt.equals(prefix + "test toggle")) {
+					isTestActive = !isTestActive;
 				}
 			} catch (Exception e1) {
 			}
-
 			// This is so I can run a test version and a non-test version at the same time
 			if (testMode && !isTestServer(msg))
 				return;
@@ -141,21 +141,26 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				lowCaseTxt = msgText.toLowerCase();
 			}
 
-			if (SoundPlayback.checkMusicCommands(msg, lowCaseTxt)) {
+			if (storageFacades.checkCommands(msg, msgText, lowCaseTxt)) {
 				return;
 			}
 
-			if (storageFacades.checkCommands(msg, msgText, lowCaseTxt))
-				return;
-
 			if (webFacades.checkCommands(msg, msgText, lowCaseTxt))
 				return;
+
+			try {
+				if (SoundPlayback.checkMusicCommands(msg, lowCaseTxt)) {
+					return;
+				}
+			} catch (Exception e1) {
+				logger.error(e1);
+			}
 
 			if (testMode && (checkTimerTasks(msg, msgText, lowCaseTxt))) {
 				return;
 			}
 
-			if (lowCaseTxt.equals("b-verse")) {
+			if (lowCaseTxt.equals(prefix + "verse")) {
 				msg.getChannel().sendMessage(
 						FileUtilities.readURL("https://labs.bible.org/api/?passage=random&type=text&formatting=plain"));
 			}
@@ -186,7 +191,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) throws Exception {
-		if (lowCaseTxt.contains("terminate")) {
+		if (lowCaseTxt.startsWith("terminate")) {
 			terminate(msg);
 			return true;
 		}
@@ -201,22 +206,22 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			return true;
 		}
 
-		if (lowCaseTxt.equals("b-toggle manager") && UserInfoUtilities.isOwner(msg)) {
+		if (lowCaseTxt.equals(prefix + "toggle manager") && UserInfoUtilities.isOwner(msg)) {
 			DataManagerSwitcher.setOnline(!DataManagerSwitcher.isOnline());
 			return true;
 		}
 
-		if (UserInfoUtilities.isOwner(msg) && lowCaseTxt.matches("b-message(?s).*")) {
+		if (UserInfoUtilities.isOwner(msg) && lowCaseTxt.matches(prefix + "message(?s).*")) {
 			try {
-				if (lowCaseTxt.contains("b-message edit")) {
-					String st = lowCaseTxt.replaceFirst("b-message edit", "").strip();
+				if (lowCaseTxt.contains(prefix + "message edit")) {
+					String st = lowCaseTxt.replaceFirst(prefix + "message edit", "").strip();
 					String id = st.substring(0, st.indexOf(" "));
 					String edit = st.substring(st.indexOf(" "));
 					api.getMessageById(id, msg.getChannel()).get().edit(edit);
 					return true;
 				}
-				if (lowCaseTxt.contains("b-message delete")) {
-					String st = lowCaseTxt.replaceFirst("b-message delete", "").strip();
+				if (lowCaseTxt.contains(prefix + "message delete")) {
+					String st = lowCaseTxt.replaceFirst(prefix + "message delete", "").strip();
 					api.getMessageById(st, msg.getChannel()).get().delete();
 					return true;
 				}

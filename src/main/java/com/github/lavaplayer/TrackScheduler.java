@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -206,7 +206,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	public static void disconnect(String serverID) {
 		try {
-			BotApi.getApi().getServerById(serverID).get().getConnectedVoiceChannel(BotApi.getApi().getYourself()).get()
+			Bot.getApi().getServerById(serverID).get().getConnectedVoiceChannel(Bot.getApi().getYourself()).get()
 					.disconnect();
 		} catch (Exception e) {
 

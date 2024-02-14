@@ -13,18 +13,19 @@ public class StorageFacadesHandler implements Shutdownable {
 	private AutoRespondFacade autoRespond = null;
 	private LegendsCommandsFacade legends = null;
 
-	public StorageFacadesHandler(){
+	public StorageFacadesHandler() {
 		try {
 			autoRespond = new AutoRespondFacade();
 		} catch (IOException e) {
+			logger.error("Autorespond broke", e);
 			autoRespond = null;
 		}
 		legends = new LegendsCommandsFacade();
 	}
 
 	public boolean checkCommands(Message msg, String msgText, String lowCaseTxt) {
-		return legends.checkCommands(msg, lowCaseTxt)
-				|| (autoRespond != null && autoRespond.checkCommands(msg, msgText));
+		return (autoRespond != null && autoRespond.checkCommands(msg, msgText))
+				|| legends.checkCommands(msg, lowCaseTxt);
 	}
 
 	public boolean respond(Message msg, String msgText) {

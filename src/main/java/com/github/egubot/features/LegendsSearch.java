@@ -17,7 +17,7 @@ import org.javacord.api.interaction.MessageComponentInteraction;
 import org.javacord.api.listener.interaction.MessageComponentCreateListener;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
 
@@ -72,7 +72,7 @@ public class LegendsSearch extends LegendsPool {
 			MessageComponentCreateListener navigatePageHandler = new NavigatePageHandler(pool, msg.send(e).join(), prev,
 					next);
 
-			BotApi.getApi().addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES)
+			Bot.getApi().addMessageComponentCreateListener(navigatePageHandler).removeAfter(timeLimit, TimeUnit.MINUTES)
 					.addRemoveHandler(() -> msg.removeAllComponents()
 							.setContent("Found " + pool.size() + " characters. Page navigation timed out."));
 
@@ -149,7 +149,7 @@ public class LegendsSearch extends LegendsPool {
 
 	@Override
 	protected List<Characters> getPool(String msgText) {
-		String st = msgText.replaceFirst("b-search", "").trim();
+		String st = msgText.replaceFirst(Bot.getPrefix() + "search", "").trim();
 		CharacterHash filterPool;
 		CharacterHash namePool;
 

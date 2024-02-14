@@ -10,6 +10,7 @@ import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.azure.services.Translate;
+import com.github.egubot.main.Bot;
 import com.github.egubot.shared.FileUtilities;
 
 public class TranslateFacade {
@@ -30,17 +31,17 @@ public class TranslateFacade {
 			}
 
 		}
-		if (lowCaseTxt.matches("b-translate(?s).*")) {
-			if (lowCaseTxt.equals("b-translate set on")) {
+		if (lowCaseTxt.matches(Bot.getPrefix() + "translate(?s).*")) {
+			if (lowCaseTxt.equals(Bot.getPrefix() + "translate set on")) {
 				isTranslateOn = true;
 				return true;
 			}
-			if (lowCaseTxt.equals("b-translate set off")) {
+			if (lowCaseTxt.equals(Bot.getPrefix() + "translate set off")) {
 				isTranslateOn = false;
 				return true;
 			}
-			if (lowCaseTxt.contains("b-translate set")) {
-				String st = lowCaseTxt.replaceFirst("b-translate set", "").strip();
+			if (lowCaseTxt.contains(Bot.getPrefix() + "translate set")) {
+				String st = lowCaseTxt.replaceFirst(Bot.getPrefix() + "translate set", "").strip();
 				if (st.contains("-")) {
 					String[] toFrom = st.split("-");
 					translate.setFrom(toFrom[0]);
@@ -51,7 +52,7 @@ public class TranslateFacade {
 				}
 				return true;
 			}
-			if (lowCaseTxt.contains("b-translate languages")) {
+			if (lowCaseTxt.contains(Bot.getPrefix() + "translate languages")) {
 
 				try {
 					msg.getChannel().sendMessage(FileUtilities.toInputStream(Translate.getTranslateLanguages()),
@@ -75,7 +76,7 @@ public class TranslateFacade {
 								createTranslateEmbed(ref, translate));
 					}
 				} else {
-					String content = lowCaseTxt.replaceFirst("b-translate", "").strip();
+					String content = lowCaseTxt.replaceFirst(Bot.getPrefix() + "translate", "").strip();
 
 					if (content.isBlank()) {
 						msg.getChannel().sendMessage(createTranslateEmbed(msg, translate));

@@ -16,7 +16,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.FileUtilities;
@@ -40,7 +40,7 @@ public class OnlineDataManager implements DataManager {
 	private String dataName;
 
 	public OnlineDataManager(String storageKey, InputStream localInput, String dataName) throws IOException {
-		this.api = BotApi.getApi();
+		this.api = Bot.getApi();
 		this.storageKey = storageKey;
 		this.storageMsgID = KeyManager.getID(storageKey);
 		this.dataName = dataName;
@@ -49,7 +49,7 @@ public class OnlineDataManager implements DataManager {
 	}
 
 	public OnlineDataManager(String storageKey, String resourcePath, String dataName) throws IOException {
-		this.api = BotApi.getApi();
+		this.api = Bot.getApi();
 		this.storageKey = storageKey;
 		this.storageMsgID = KeyManager.getID(storageKey);
 		this.dataName = dataName;

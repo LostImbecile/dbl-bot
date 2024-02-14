@@ -8,7 +8,7 @@ import java.util.Scanner;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.github.egubot.main.KeyManager;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.shared.Shared;
@@ -20,7 +20,7 @@ public class SendMessagesFromConsole {
 	}
 
 	public static void start() {
-		DiscordApi api = BotApi.getApi();
+		DiscordApi api = Bot.getApi();
 		Scanner in = Shared.getSystemInput();
 		ArrayList<Abbreviations> emojis = (ArrayList<Abbreviations>) getEmojis();
 

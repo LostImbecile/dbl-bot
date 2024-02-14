@@ -5,13 +5,14 @@ import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.features.MessageFormats;
+import com.github.egubot.main.Bot;
 import com.weatherapi.forecast.Weather;
 import com.weatherapi.forecast.WeatherForecast;
 
 public class WeatherFacade {
 
 	public boolean checkCommands(Message msg, String lowCaseTxt) {
-		if (lowCaseTxt.matches("b-weather(?s).*")) {
+		if (lowCaseTxt.matches(Bot.getPrefix() + "weather(?s).*")) {
 			sendWeather(msg.getChannel(), lowCaseTxt);
 			return true;
 		}
@@ -19,7 +20,7 @@ public class WeatherFacade {
 	}
 
 	public static void sendWeather(Messageable e, String lowCaseTxt) {
-		String[] args = lowCaseTxt.replaceFirst("b-weather", "").strip().split(" ");
+		String[] args = lowCaseTxt.replaceFirst(Bot.getPrefix() + "weather", "").strip().split(" ");
 		String city = args[0];
 		String minimal = "";
 		if (args.length == 2) {

@@ -3,7 +3,7 @@ package com.github.lavaplayer;
 import org.javacord.api.audio.AudioSource;
 import org.javacord.api.audio.AudioSourceBase;
 
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 
@@ -18,7 +18,7 @@ public class LavaplayerAudioSource extends AudioSourceBase {
      * @param audioPlayer An audio player from Lavaplayer.
      */
     public LavaplayerAudioSource(AudioPlayer audioPlayer) {
-        super(BotApi.getApi());
+        super(Bot.getApi());
         this.audioPlayer = audioPlayer;
     }
 

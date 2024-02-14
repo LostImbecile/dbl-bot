@@ -11,6 +11,7 @@ import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
+import com.github.egubot.main.Bot;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.objects.Characters;
 
@@ -87,7 +88,7 @@ public class LegendsRoll extends LegendsPool {
 	}
 
 	protected List<Characters> getPool(String msgText) {
-		String st = msgText.replaceFirst("b-roll", "");
+		String st = msgText.replaceFirst(Bot.getPrefix() + "roll", "");
 		ArrayList<Characters> pool;
 
 		// Remove number in b-rolln if present

@@ -47,7 +47,7 @@ public class Main {
 		try {
 			try {
 				// For info about intents check the links at the start of the class
-				BotApi.setApi(new DiscordApiBuilder().setToken(token)
+				Bot.setApi(new DiscordApiBuilder().setToken(token)
 						.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login()
 						.join());
 			} catch (Exception e1) {
@@ -76,6 +76,8 @@ public class Main {
 			} else {
 				printBotInviteLink();
 
+				getPrefix();
+				
 				addListeners();
 
 				setBotOnline();
@@ -96,15 +98,25 @@ public class Main {
 		}
 	}
 
+	private static void getPrefix() {
+		String prefix = ConfigManager.getProperty("prefix");
+		if (prefix == null || prefix.isBlank()) {
+			prefix = "b-";
+			ConfigManager.setProperty("prefix", prefix);
+		}
+		prefix = prefix.toLowerCase();
+		Bot.setPrefix(prefix);
+	}
+
 	private static void checkServerList() {
-		if (BotApi.getApi().getServers().isEmpty()) {
+		if (Bot.getApi().getServers().isEmpty()) {
 			printBotInviteLink();
 			System.out.println("\nPlease invite it before continuing.");
 		}
 	}
 
 	private static void printBotInviteLink() {
-		System.out.println("You can invite the bot by using the following url:\n" + BotApi.getApi().createBotInvite());
+		System.out.println("You can invite the bot by using the following url:\n" + Bot.getApi().createBotInvite());
 	}
 
 	private static String checkArguments(String[] args) {
@@ -141,7 +153,7 @@ public class Main {
 		Shared.getStatus().changeActivity();
 		Shared.getStatus().setStatusOnline();
 
-		String botName = BotApi.getApi().getYourself().getName();
+		String botName = Bot.getApi().getYourself().getName();
 		botName = botName.replaceFirst("^\\p{L}", Character.toUpperCase(botName.charAt(0)) + "");
 
 		System.out.println(
@@ -170,10 +182,10 @@ public class Main {
 		 * my personal use, best to write your own, but you can
 		 * use these as an example.
 		 */
-		BotApi.getApi().addMessageCreateListener(new MessageCreateEventHandler());
-		BotApi.getApi().addReconnectListener(new ReconnectEventHandler());
-		BotApi.getApi().addResumeListener(new ResumeEventHandler());
-		BotApi.getApi().addLostConnectionListener(new LostConnectionHandler());
+		Bot.getApi().addMessageCreateListener(new MessageCreateEventHandler());
+		Bot.getApi().addReconnectListener(new ReconnectEventHandler());
+		Bot.getApi().addResumeListener(new ResumeEventHandler());
+		Bot.getApi().addLostConnectionListener(new LostConnectionHandler());
 	}
 
 	private static boolean checkDBLegendsMode(String arguments) {

@@ -11,6 +11,7 @@ import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.UpdatableObjects;
+import com.github.egubot.main.Bot;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.objects.Attributes;
 import com.github.egubot.objects.Response;
@@ -173,7 +174,8 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 
 	public void writeResponse(String msgText, Message e, boolean isOwner) {
 		try {
-			String newResponse = msgText.substring("b-response create".length()).strip();
+			String newResponse = msgText.substring((Bot.getPrefix() + "response create").length()).replace("\n", "%n")
+					.strip();
 
 			newResponse = reformatResponse(newResponse, isOwner);
 			boolean isNameExist = false;
@@ -195,7 +197,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 				responses.add(newResp);
 				writeData(e.getChannel());
 			}
-		} catch (NullPointerException e1) {
+		} catch (NullPointerException | StringIndexOutOfBoundsException e1) {
 			e.getChannel()
 					.sendMessage("Correct format:"
 							+ "\nb-response create type >> message >> response (>> reaction1 >> reaction2 >>...)"
@@ -210,7 +212,6 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 
 	private String reformatResponse(String st, boolean isOwner) {
 		st = st.replaceFirst(">>", ">> Normal >>");
-		st = st.replace("\n", "%n");
 		String responseType = st.substring(0, st.indexOf(">>")).strip();
 		if (responseType.equals("equal") || responseType.equals("contain") || responseType.equals("match"))
 			return st;
@@ -227,7 +228,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			if (isOwner)
 				startIndex = 0;
 
-			String st = msgText.substring("b-response remove".length()).strip();
+			String st = msgText.substring((Bot.getPrefix() + "response remove").length()).strip();
 
 			if (st.isBlank())
 				throw new Exception();
@@ -263,7 +264,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			if (isOwner)
 				startIndex = 0;
 
-			String st = msgText.substring("b-response edit".length()).strip();
+			String st = msgText.substring((Bot.getPrefix() + "response edit").length()).strip();
 			if (st.isBlank())
 				throw new Exception();
 

@@ -16,7 +16,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 
-import com.github.egubot.main.BotApi;
+import com.github.egubot.main.Bot;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.webautomation.GetYoutubeVideoInfo;
@@ -39,27 +39,40 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 
 public class SoundPlayback {
 	private static final Logger logger = LogManager.getLogger(SoundPlayback.class.getName());
-	private static final AudioPlayerManager remotePlayerManager = new DefaultAudioPlayerManager();
-	private static final AudioPlayerManager localPlayerManager = new DefaultAudioPlayerManager();
 	private static final int MINUTE = 60 * 60 * 1000;
-	private static String prefix = ConfigManager.getProperty("prefix").toLowerCase();
+
+	private static final AudioPlayerManager remotePlayerManager;
+	private static final AudioPlayerManager localPlayerManager;
+
+	private static String prefix;
 
 	private static final Pattern prefixPattern;
 	private static final Pattern angleBracketPattern;
-	private static final User bot = BotApi.getApi().getYourself();
+	private static final User bot;
 
 	private SoundPlayback() {
 		// Static class
 	}
 
 	static {
-		if (prefix == null || prefix.isBlank()) {
-			prefix = "b-";
-			ConfigManager.setProperty("prefix", prefix);
-		}
-		prefixPattern = Pattern.compile(Pattern.quote(prefix + "play"), Pattern.CASE_INSENSITIVE);
-		angleBracketPattern = Pattern.compile("[<>]");
+		try {
+			prefix = Bot.getPrefix();
+			prefixPattern = Pattern.compile(Pattern.quote(prefix + "play"), Pattern.CASE_INSENSITIVE);
+			angleBracketPattern = Pattern.compile("[<>]");
 
+			remotePlayerManager = new DefaultAudioPlayerManager();
+			localPlayerManager = new DefaultAudioPlayerManager();
+			
+			initialisePlayerManagers();
+
+			bot = Bot.getApi().getYourself();
+		} catch (Exception e) {
+			logger.error("Couldn't inilialise lavaplayer", e);
+			throw e;
+		}
+	}
+
+	private static void initialisePlayerManagers() {
 		AudioSourceManagers.registerRemoteSources(remotePlayerManager);
 		AudioSourceManagers.registerLocalSource(localPlayerManager);
 
@@ -80,59 +93,63 @@ public class SoundPlayback {
 		remotePlayerManager.registerSourceManager(new YandexMusicAudioSourceManager());
 
 		localPlayerManager.registerSourceManager(new LocalAudioSourceManager());
-
 	}
 
 	public static boolean checkMusicCommands(Message msg, String lowCaseTxt) {
-		if (lowCaseTxt.startsWith(prefix)) {
+		try {
+			if (lowCaseTxt.startsWith(prefix)) {
 
-			if (lowCaseTxt.startsWith(prefix + "play")) {
-				try {
-					SoundPlayback.play(msg);
-				} catch (Exception e1) {
-					logger.error("Play error", e1);
+				if (lowCaseTxt.contains(prefix + "play")) {
+					try {
+						SoundPlayback.play(msg);
+					} catch (Exception e1) {
+						logger.error("Play error", e1);
+					}
+					return true;
 				}
-				return true;
-			}
 
-			if (lowCaseTxt.startsWith(prefix + "cancel")) {
-				TrackScheduler.destroy(getServer(msg).getIdAsString());
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "cancel")) {
+					TrackScheduler.destroy(getServer(msg).getIdAsString());
+					return true;
+				}
 
-			if (lowCaseTxt.startsWith(prefix + "skip")) {
-				TrackScheduler.skip(getServer(msg).getIdAsString());
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "skip")) {
+					TrackScheduler.skip(getServer(msg).getIdAsString());
+					return true;
+				}
 
-			if (lowCaseTxt.startsWith(prefix + "pause")) {
-				TrackScheduler.pause(getServer(msg).getIdAsString());
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "pause")) {
+					TrackScheduler.pause(getServer(msg).getIdAsString());
+					return true;
+				}
 
-			if (lowCaseTxt.startsWith(prefix + "resume")) {
-				TrackScheduler.resume(getServer(msg).getIdAsString());
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "resume")) {
+					TrackScheduler.resume(getServer(msg).getIdAsString());
+					return true;
+				}
 
-			if (lowCaseTxt.startsWith(prefix + "buffer big")) {
-				remotePlayerManager.setFrameBufferDuration(3 * MINUTE);
-				localPlayerManager.setFrameBufferDuration(3 * MINUTE);
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "buffer big")) {
+					remotePlayerManager.setFrameBufferDuration(3 * MINUTE);
+					localPlayerManager.setFrameBufferDuration(3 * MINUTE);
+					return true;
+				}
 
-			if (lowCaseTxt.startsWith(prefix + "buffer small")) {
-				remotePlayerManager.setFrameBufferDuration(200);
-				localPlayerManager.setFrameBufferDuration(200);
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "buffer small")) {
+					remotePlayerManager.setFrameBufferDuration(200);
+					localPlayerManager.setFrameBufferDuration(200);
+					return true;
+				}
 
-			if (lowCaseTxt.startsWith(prefix + "info")) {
-				getPlaylistInfo(msg);
-				return true;
-			}
+				if (lowCaseTxt.contains(prefix + "info")) {
+					getPlaylistInfo(msg);
+					return true;
+				}
 
+			}
+		} catch (Exception e) {
+			logger.error(e);
 		}
+
 		return false;
 	}
 

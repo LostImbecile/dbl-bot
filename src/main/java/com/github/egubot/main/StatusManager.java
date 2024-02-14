@@ -30,7 +30,7 @@ public class StatusManager implements Shutdownable {
 	private boolean isStatusChangedToOnline = false;
 
 	public StatusManager() {
-		this.api = BotApi.getApi();
+		this.api = Bot.getApi();
 		this.testMode = Shared.isTestMode();
 		this.isStatusMsgSet = Shared.isTestMode();
 		try {
