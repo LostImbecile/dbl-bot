@@ -1,0 +1,1 @@
+com.github.egubot.commands.TestCommand
