@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.gpt2.DiscordAI;
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 
 public class CustomAIFacade {
 	private static final Logger logger = LogManager.getLogger(CustomAIFacade.class.getName());

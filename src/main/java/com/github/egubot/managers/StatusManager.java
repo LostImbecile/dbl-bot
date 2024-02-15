@@ -1,4 +1,4 @@
-package com.github.egubot.main;
+package com.github.egubot.managers;
 
 import java.util.Scanner;
 
@@ -9,6 +9,7 @@ import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.main.Bot;
 import com.github.egubot.shared.Shared;
 
 public class StatusManager implements Shutdownable {

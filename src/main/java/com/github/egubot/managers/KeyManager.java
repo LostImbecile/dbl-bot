@@ -1,4 +1,4 @@
-package com.github.egubot.main;
+package com.github.egubot.managers;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;

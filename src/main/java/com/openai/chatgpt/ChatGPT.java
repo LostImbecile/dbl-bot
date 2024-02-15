@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.JSONUtilities;
 
 public class ChatGPT {

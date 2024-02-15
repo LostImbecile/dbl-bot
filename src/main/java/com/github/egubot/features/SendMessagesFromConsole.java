@@ -9,7 +9,7 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 
 import com.github.egubot.main.Bot;
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.shared.Shared;
 

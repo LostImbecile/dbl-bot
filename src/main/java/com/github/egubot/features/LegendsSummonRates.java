@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
+import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,6 +17,7 @@ import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.objects.Characters;
 import com.github.egubot.objects.SummonBanner;
 import com.github.egubot.objects.SummonCharacter;
+import com.github.egubot.objects.SummonResults;
 import com.github.egubot.objects.SummonStep;
 
 public class LegendsSummonRates {
@@ -33,43 +33,50 @@ public class LegendsSummonRates {
 		SummonBanner banner = getBanner(summonURL);
 
 		List<Map<Integer, Double>> rotation = calculateRotationChance(banner);
-		int[] rotationCosts = calculateRotationCosts(banner);
+		List<SummonCharacter> focusCharacters = chooseCharacters(banner.getFeaturedUnits());
 
-		Map<Integer, Integer> focusCharacters = chooseCharacters(banner.getFeaturedUnits());
+		SummonResults results = new SummonResults(banner, focusCharacters);
+
+		int numOfRotationsToGetFocusCharacter = getRotationNumForGuaranteedFocus(focusCharacters, rotation);
 
 		Map<Integer, Double> oneRotation = combineSteps(rotation.get(0), rotation.get(1), banner.getFeaturedUnits());
-		Map<String, Double> oneRotationTotal = getTotalSummonsRates(banner, oneRotation);
+		results.setOneRotation(oneRotation);
 
 		Map<Integer, Double> threeRotation = combineSteps(rotation.get(0),
 				multiplyRotations(rotation.get(1), 3, banner.getFeaturedUnits()), banner.getFeaturedUnits());
-		Map<String, Double> threeRotationTotal = getTotalSummonsRates(banner, threeRotation);
-
-		int numOfRotationsToGetFocusCharacter = getRotationNumForGuaranteedFocus(focusCharacters, rotation);
+		results.setThreeRotation(threeRotation);
 
 		if (numOfRotationsToGetFocusCharacter > 3) {
 			Map<Integer, Double> customRotation = combineSteps(rotation.get(0),
 					multiplyRotations(rotation.get(1), numOfRotationsToGetFocusCharacter, banner.getFeaturedUnits()),
 					banner.getFeaturedUnits());
-			Map<String, Double> customRotationTotal = getTotalSummonsRates(banner, customRotation);
+			results.setCustomRotation(customRotation);
+			results.setNumOfRotationsToGetFocusCharacter(numOfRotationsToGetFocusCharacter);
 
-			// To avoid passing the number separately cuz the name is very long
-			// Needed for cc cost
-			customRotation.put(-1, (double) numOfRotationsToGetFocusCharacter);
-			customRotationTotal.put("-1", (double) numOfRotationsToGetFocusCharacter);
-
-			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(oneRotation, threeRotation, customRotation,
-					focusCharacters));
-			embeds.add(MessageFormats.buildSummonTotalEmbed(oneRotationTotal, threeRotationTotal, customRotationTotal,
-					rotationCosts, banner));
+			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(results));
+			embeds.add(MessageFormats.buildSummonTotalEmbed(results));
 		} else {
-			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(oneRotation, threeRotation, null, focusCharacters));
-			embeds.add(MessageFormats.buildSummonTotalEmbed(oneRotationTotal, threeRotationTotal, null, rotationCosts,
-					banner));
+			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(results));
+			embeds.add(MessageFormats.buildSummonTotalEmbed(results));
 		}
 		return embeds;
 	}
+	
+	public static int calculateAmountOfIndividualPulls(SummonBanner banner, int rotationNumber) {
+		int onceOnlySteps = 0;
+		int normalSteps = 0;
 
-	private static int[] calculateRotationCosts(SummonBanner banner) {
+		for (SummonStep step : banner.getOnceOnlySteps()) {
+			onceOnlySteps += step.getNumberOfPulls();
+		}
+
+		for (SummonStep step : banner.getNormalSteps()) {
+			normalSteps += step.getNumberOfPulls();
+		}
+		return onceOnlySteps + (normalSteps * rotationNumber);
+	}
+
+	public static int[] calculateRotationCosts(SummonBanner banner) {
 		int onceOnlySteps = 0;
 		int normalSteps = 0;
 
@@ -88,24 +95,25 @@ public class LegendsSummonRates {
 			return (int) Math.ceil(5000.0 / zPower);
 		return 0;
 	}
-	
+
 	public static int getSevenStarsPullsNeeded(int zPower) {
 		if (zPower > 0)
 			return (int) Math.ceil(3000.0 / zPower);
 		return 0;
 	}
 
-	public static double getConsecutiveChance(int pullsNeeded, Double chance) {
-		return Math.pow(chance, pullsNeeded);
+	public static double getMultipleSuccessChance(int successCount, Double chance, int trials) {
+		BinomialDistribution binomialDistribution = new BinomialDistribution(trials, chance);
+		return binomialDistribution.probability(successCount);
 	}
 
-	private static int getRotationNumForGuaranteedFocus(Map<Integer, Integer> focusCharacters,
+	private static int getRotationNumForGuaranteedFocus(List<SummonCharacter> focusCharacters,
 			List<Map<Integer, Double>> rotation) {
 		int numOfRotations = 1;
 		double targetChance = 0.8;
-		for (Entry<Integer, Integer> entry : focusCharacters.entrySet()) {
-			Characters character = LegendsDatabase.getCharacterHash().get(entry.getKey());
-			double rate = rotation.get(1).get(entry.getKey());
+		for (SummonCharacter summonCharacter : focusCharacters) {
+			Characters character = LegendsDatabase.getCharacterHash().get(summonCharacter.getCharacter().getSiteID());
+			double rate = rotation.get(1).get(character.getSiteID());
 			double newRate = rate;
 			for (int i = 2; newRate < targetChance; i++) {
 				newRate = 1 - Math.pow((1 - rate), i);
@@ -116,15 +124,15 @@ public class LegendsSummonRates {
 		return numOfRotations;
 	}
 
-	private static Map<Integer, Integer> chooseCharacters(List<SummonCharacter> featuredUnits) {
+	private static List<SummonCharacter> chooseCharacters(List<SummonCharacter> featuredUnits) {
 		// ID and the amount of z power you get
-		Map<Integer, Integer> focusCharacters = new HashMap<Integer, Integer>();
+		List<SummonCharacter> focusCharacters = new ArrayList<>();
 		List<SummonCharacter> potentialCharacters = new ArrayList<>();
 		boolean foundFocus = false;
 		for (SummonCharacter summonCharacter : featuredUnits) {
 			Characters character = summonCharacter.getCharacter();
 			if (summonCharacter.isNew() || character.isUltra()) {
-				focusCharacters.put(character.getSiteID(), summonCharacter.getzPowerAmount());
+				focusCharacters.add(summonCharacter);
 				foundFocus = true;
 			} else if (character.isLF()) {
 				potentialCharacters.add(summonCharacter);
@@ -148,19 +156,18 @@ public class LegendsSummonRates {
 
 			SummonCharacter maxCharacter = potentialCharacters.get(maxIndex);
 			if (maxIndex == minIndex) {
-				focusCharacters.put(maxCharacter.getCharacter().getSiteID(), maxCharacter.getzPowerAmount());
+				focusCharacters.add(maxCharacter);
 				foundFocus = true;
 			} else {
-				focusCharacters.put(maxCharacter.getCharacter().getSiteID(), maxCharacter.getzPowerAmount());
+				focusCharacters.add(maxCharacter);
 				SummonCharacter minCharacter = potentialCharacters.get(minIndex);
-				focusCharacters.put(minCharacter.getCharacter().getSiteID(), minCharacter.getzPowerAmount());
+				focusCharacters.add(minCharacter);
 				foundFocus = true;
 			}
 		}
 
 		if (!foundFocus)
-			focusCharacters.put(featuredUnits.get(0).getCharacter().getSiteID(),
-					featuredUnits.get(0).getzPowerAmount());
+			focusCharacters.add(featuredUnits.get(0));
 
 		return focusCharacters;
 	}
@@ -265,7 +272,7 @@ public class LegendsSummonRates {
 		}
 	}
 
-	private static Map<String, Double> getTotalSummonsRates(SummonBanner banner, Map<Integer, Double> ratesMap) {
+	public static Map<String, Double> getTotalSummonsRates(SummonBanner banner, Map<Integer, Double> ratesMap) {
 		// Order stays the same in this map
 		Map<String, Double> result = new LinkedHashMap<>();
 

@@ -11,7 +11,7 @@ import com.github.egubot.features.LegendsRoll;
 import com.github.egubot.features.LegendsSearch;
 import com.github.egubot.features.LegendsSummonRates;
 import com.github.egubot.interfaces.Shutdownable;
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.CharacterHash;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.FileUtilities;

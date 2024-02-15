@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.YoutubeInfo;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;

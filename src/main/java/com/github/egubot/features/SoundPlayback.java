@@ -110,22 +110,22 @@ public class SoundPlayback {
 				}
 
 				if (lowCaseTxt.contains(prefix + "cancel")) {
-					TrackScheduler.destroy(getServer(msg).getIdAsString());
+					TrackScheduler.destroy(getServer(msg).getId());
 					return true;
 				}
 
 				if (lowCaseTxt.contains(prefix + "skip")) {
-					TrackScheduler.skip(getServer(msg).getIdAsString());
+					TrackScheduler.skip(getServer(msg).getId());
 					return true;
 				}
 
 				if (lowCaseTxt.contains(prefix + "pause")) {
-					TrackScheduler.pause(getServer(msg).getIdAsString());
+					TrackScheduler.pause(getServer(msg).getId());
 					return true;
 				}
 
 				if (lowCaseTxt.contains(prefix + "resume")) {
-					TrackScheduler.resume(getServer(msg).getIdAsString());
+					TrackScheduler.resume(getServer(msg).getId());
 					return true;
 				}
 
@@ -161,7 +161,7 @@ public class SoundPlayback {
 
 	private static void getCurrentTrackInfo(Message msg) {
 		Server server = getServer(msg);
-		AudioTrack track = TrackScheduler.getCurrentTrack(server.getIdAsString());
+		AudioTrack track = TrackScheduler.getCurrentTrack(server.getId());
 		String videoID = track.getIdentifier();
 		EmbedBuilder embed = new EmbedBuilder();
 		embed.setAuthor(GetYoutubeVideoInfo.getName(videoID), GetYoutubeVideoInfo.getURL(videoID),
@@ -189,7 +189,7 @@ public class SoundPlayback {
 
 	private static void getPlaylistInfo(Message msg) {
 		Server server = getServer(msg);
-		Map<String, Long> map = TrackScheduler.getPlayListInfo(server.getIdAsString());
+		Map<String, Long> map = TrackScheduler.getPlayListInfo(server.getId());
 		EmbedBuilder embed = new EmbedBuilder();
 		embed.setAuthor(server.getName(), null, server.getIcon().get());
 		embed.setColor(Color.RED);
@@ -221,7 +221,7 @@ public class SoundPlayback {
 
 		String name = getPlayArgument(msg.getContent());
 
-		String serverID = getServer(msg).getIdAsString();
+		long serverID = getServer(msg).getId();
 		AudioPlayerManager manager = getManager(name);
 
 		boolean isNewPlayer = false;
@@ -247,7 +247,7 @@ public class SoundPlayback {
 
 	}
 
-	private static void connectToVoiceChannel(Message msg, ServerVoiceChannel channel, String name, String serverID,
+	private static void connectToVoiceChannel(Message msg, ServerVoiceChannel channel, String name, long serverID,
 			AudioPlayerManager manager, AudioPlayer player) {
 		channel.connect().thenAccept(audioConnection -> {
 
@@ -263,7 +263,7 @@ public class SoundPlayback {
 		});
 	}
 
-	private static void loadTracks(Message msg, String name, String serverID, AudioPlayerManager manager) {
+	private static void loadTracks(Message msg, String name, long serverID, AudioPlayerManager manager) {
 		if (!name.contains("search"))
 			manager.loadItem(name, new AudioLoadHandler(msg, serverID));
 		else

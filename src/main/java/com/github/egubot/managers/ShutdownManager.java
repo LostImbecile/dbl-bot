@@ -1,4 +1,4 @@
-package com.github.egubot.main;
+package com.github.egubot.managers;
 
 import java.util.ArrayList;
 import java.util.Collections;

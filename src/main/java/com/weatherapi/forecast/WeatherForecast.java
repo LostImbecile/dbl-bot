@@ -2,7 +2,8 @@ package com.weatherapi.forecast;
 
 import java.io.IOException;
 import java.net.URL;
-import com.github.egubot.main.KeyManager;
+
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;
 import com.google.gson.Gson;

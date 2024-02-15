@@ -13,7 +13,8 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.SummonBanner;
+import com.github.egubot.objects.SummonCharacter;
+import com.github.egubot.objects.SummonResults;
 
 public class MessageFormats {
 	// This replaces spaces with an invisible character
@@ -100,102 +101,103 @@ public class MessageFormats {
 
 	}
 
-	public static List<EmbedBuilder> buildSummonCharacterEmbeds(Map<Integer, Double> oneRotation,
-			Map<Integer, Double> threeRotation, Map<Integer, Double> customRotation,
-			Map<Integer, Integer> focusCharacters) {
-		List<EmbedBuilder> embeds = new ArrayList<>(focusCharacters.size());
+	public static List<EmbedBuilder> buildSummonCharacterEmbeds(SummonResults results) {
+		List<EmbedBuilder> embeds = new ArrayList<>(results.getFocusCharacters().size());
 		EmbedBuilder temp;
-		int numberOfRotations = 0;
-		if (customRotation != null)
-			numberOfRotations = (int) Math.ceil(customRotation.get(-1));
+		int numberOfRotations = results.getNumOfRotationsToGetFocusCharacter();
 
-		String rateFormat = "%.1f%%";
-
-		for (Entry<Integer, Integer> entry : focusCharacters.entrySet()) {
-			int id = entry.getKey();
+		for (SummonCharacter summonCharacter : results.getFocusCharacters()) {
+			int id = summonCharacter.getCharacter().getSiteID();
 			Characters character = LegendsDatabase.getCharacterHash().get(id);
 			temp = createCharacterEmbed(character);
 
-			double rate = oneRotation.get(id);
+			double getOnceRate = results.getOneRotation().get(id);
 
-			temp.addInlineField("One Rotation", getCharacterRatesField(rateFormat, rate, entry.getValue()));
+			temp.addInlineField("One Rotation", getCharacterRatesField(getOnceRate, summonCharacter, results, 1));
 
-			rate = threeRotation.get(id);
+			getOnceRate = results.getThreeRotation().get(id);
 
-			temp.addInlineField("Three Rotations", getCharacterRatesField(rateFormat, rate, entry.getValue()));
+			temp.addInlineField("Three Rotations", getCharacterRatesField(getOnceRate, summonCharacter, results, 3));
 
-			if (customRotation != null) {
-				rate = customRotation.get(id);
+			if (results.getCustomRotation() != null) {
+				getOnceRate = results.getCustomRotation().get(id);
 
 				temp.addInlineField(numberOfRotations + " Rotations",
-						getCharacterRatesField(rateFormat, rate, entry.getValue()));
+						getCharacterRatesField(getOnceRate, summonCharacter, results, numberOfRotations));
 
 			}
+
 			embeds.add(temp);
 		}
 		return embeds;
 	}
 
-	private static String getCharacterRatesField(String rateFormat, double rate, int zPower) {
-		int red2Pulls = LegendsSummonRates.getRed2PullsNeeded(zPower);
-		int sevenStarPulls = LegendsSummonRates.getSevenStarsPullsNeeded(zPower);
-		double getRedTwoChance = LegendsSummonRates.getConsecutiveChance(red2Pulls, rate);
-		double getSevenStarChance = LegendsSummonRates.getConsecutiveChance(sevenStarPulls, rate);
-		return "Once: " + String.format(rateFormat, rate * 100) + "\n7 Star: "
+	private static String getCharacterRatesField(double getOnceRate, SummonCharacter summonCharacter,
+			SummonResults results, int numOfRotations) {
+		String rateFormat = "%.1f%%";
+		double rate = summonCharacter.getSummonRate();
+		int individualPulls = results.getIndividualPulls(numOfRotations);
+
+		int red2Pulls = LegendsSummonRates.getRed2PullsNeeded(summonCharacter.getzPowerAmount());
+		int sevenStarPulls = LegendsSummonRates.getSevenStarsPullsNeeded(summonCharacter.getzPowerAmount());
+
+		double getRedTwoChance = LegendsSummonRates.getMultipleSuccessChance(red2Pulls, rate, individualPulls);
+		double getSevenStarChance = LegendsSummonRates.getMultipleSuccessChance(sevenStarPulls, rate, individualPulls);
+
+		return "Once: " + String.format(rateFormat, getOnceRate * 100) + "\n7 Star: "
 				+ String.format(rateFormat, getSevenStarChance * 100) + "\nRed 2: "
 				+ String.format(rateFormat, getRedTwoChance * 100) + INLINE_EQUALISE;
 	}
 
-	public static EmbedBuilder buildSummonTotalEmbed(Map<String, Double> oneRotationTotal,
-			Map<String, Double> threeRotationTotal, Map<String, Double> customRotationTotal, int[] rotationCosts,
-			SummonBanner banner) {
+	public static EmbedBuilder buildSummonTotalEmbed(SummonResults results) {
 
 		EmbedBuilder embed = new EmbedBuilder();
 		embed.setAuthor("Total Chance");
 		embed.setColor(Color.CYAN);
 		embed.setFooter("Fields exclude each other.");
-		embed.setDescription(banner.getTitle() + EQUALISE);
-		embed.setThumbnail(banner.getImageURL());
+		embed.setDescription(results.getBanner().getTitle() + EQUALISE);
+		embed.setThumbnail(results.getBanner().getImageURL());
 		String rateFormat = "%.1f%%";
+		int[] costs = results.getRotationCosts();
 
 		StringBuilder description = new StringBuilder();
-		for (Entry<String, Double> entry : oneRotationTotal.entrySet()) {
+		for (Entry<String, Double> entry : results.getRotationTotal(results.getOneRotation()).entrySet()) {
 			double rate = entry.getValue() * 100;
 			if (rate < 0.5)
 				continue;
 
 			description.append(entry.getKey() + ": " + String.format(rateFormat, rate) + "\n");
 		}
-		description.append("\nCost: " + String.format("%,d", (rotationCosts[0] + rotationCosts[1])));
+		description.append("\nCost: " + String.format("%,d", (costs[0] + costs[1])));
 		embed.addInlineField("One Rotation", description.toString() + INLINE_EQUALISE);
 
 		// reset
 		description.setLength(0);
 
-		for (Entry<String, Double> entry : threeRotationTotal.entrySet()) {
+		for (Entry<String, Double> entry : results.getRotationTotal(results.getThreeRotation()).entrySet()) {
 			double rate = entry.getValue() * 100;
 			if (rate < 0.5)
 				continue;
 
 			description.append(entry.getKey() + ": " + String.format(rateFormat, rate) + "\n");
 		}
-		description.append("\nCost: " + String.format("%,d", (rotationCosts[0] + 3 * rotationCosts[1])));
+		description.append("\nCost: " + String.format("%,d", (costs[0] + 3 * costs[1])));
 		embed.addInlineField("Three Rotations", description.toString() + INLINE_EQUALISE);
 
 		description.setLength(0);
 
-		if (customRotationTotal != null) {
+		Map<String, Double> customRotation = results.getRotationTotal(results.getCustomRotation());
+		if (customRotation != null) {
 			// Entry -1 has number of rotations
-			int numberOfRotations = (int) Math.ceil(customRotationTotal.get("-1"));
-			for (Entry<String, Double> entry : customRotationTotal.entrySet()) {
+			int numberOfRotations = results.getNumOfRotationsToGetFocusCharacter();
+			for (Entry<String, Double> entry : customRotation.entrySet()) {
 				double rate = entry.getValue() * 100;
 				if (rate < 0.5 || entry.getKey().equals("-1"))
 					continue;
 
 				description.append(entry.getKey() + ": " + String.format(rateFormat, rate) + "\n");
 			}
-			description.append(
-					"\nCost: " + String.format("%,d", (rotationCosts[0] + numberOfRotations * rotationCosts[1])));
+			description.append("\nCost: " + String.format("%,d", (costs[0] + numberOfRotations * costs[1])));
 			embed.addInlineField(numberOfRotations + " Rotations", description.toString() + INLINE_EQUALISE);
 		}
 

@@ -18,37 +18,37 @@ import com.sedmelluq.discord.lavaplayer.track.BasicAudioPlaylist;
 
 public class TrackScheduler extends AudioEventAdapter {
 	private static final Logger logger = LogManager.getLogger(TrackScheduler.class.getName());
-	private static final Map<String, AudioPlaylist> playlists = new HashMap<>();
-	private static final Map<String, AudioPlayer> players = new HashMap<>();
+	private static final Map<Long, AudioPlaylist> playlists = new HashMap<>();
+	private static final Map<Long, AudioPlayer> players = new HashMap<>();
 
 	private AudioPlayer player;
-	private String serverID;
+	private long serverID;
 
-	public TrackScheduler(AudioPlayer player, String serverID) {
+	public TrackScheduler(AudioPlayer player, long serverID) {
 		this.player = player;
 		this.serverID = serverID;
 		players.put(serverID, player);
 	}
 
-	public static boolean isServerPlayListEmpty(String serverID) {
+	public static boolean isServerPlayListEmpty(long serverID) {
 		return playlists.get(serverID) == null || playlists.get(serverID).getTracks().isEmpty();
 	}
 
-	public static boolean isServerPlaying(String serverID) {
+	public static boolean isServerPlaying(long serverID) {
 		return players.get(serverID) != null && players.get(serverID).getPlayingTrack() != null;
 	}
 
-	public static AudioPlayer getServerAudioPlayer(String serverID) {
+	public static AudioPlayer getServerAudioPlayer(long serverID) {
 		return players.get(serverID);
 	}
 
-	public static void queue(AudioTrack track, String serverID) {
+	public static void queue(AudioTrack track, long serverID) {
 		try {
 			AudioPlaylist playlist = playlists.get(serverID);
 			if (playlist == null) {
 				ArrayList<AudioTrack> list = new ArrayList<>();
 				list.add(track);
-				playlists.put(serverID, new BasicAudioPlaylist(serverID, list, track, false));
+				playlists.put(serverID, new BasicAudioPlaylist(serverID + "", list, track, false));
 			} else {
 				playlist.getTracks().add(track);
 			}
@@ -62,12 +62,12 @@ public class TrackScheduler extends AudioEventAdapter {
 		}
 	}
 
-	public static void queue(AudioPlaylist incomingPlayList, String serverID) {
+	public static void queue(AudioPlaylist incomingPlayList, long serverID) {
 		try {
 			AudioPlaylist playlist = playlists.get(serverID);
 			int maxVideos = Math.min(20, incomingPlayList.getTracks().size() - 1);
 			if (playlist == null) {
-				AudioPlaylist newList = new BasicAudioPlaylist(serverID,
+				AudioPlaylist newList = new BasicAudioPlaylist(serverID + "",
 						incomingPlayList.getTracks().subList(0, maxVideos), null, false);
 				playlists.put(serverID, newList);
 			} else {
@@ -83,7 +83,7 @@ public class TrackScheduler extends AudioEventAdapter {
 		}
 	}
 
-	public static Map<String, Long> getPlayListInfo(String serverID) {
+	public static Map<String, Long> getPlayListInfo(long serverID) {
 		AudioPlaylist list = playlists.get(serverID);
 		if (list == null || list.getTracks().isEmpty()) {
 			return Collections.emptyMap();
@@ -99,7 +99,7 @@ public class TrackScheduler extends AudioEventAdapter {
 		}
 	}
 
-	public static AudioTrack getCurrentTrack(String serverID) {
+	public static AudioTrack getCurrentTrack(long serverID) {
 		AudioPlaylist list = playlists.get(serverID);
 		if (list == null || list.getTracks().isEmpty())
 			return null;
@@ -108,7 +108,7 @@ public class TrackScheduler extends AudioEventAdapter {
 		}
 	}
 
-	public static void destroy(String serverID) {
+	public static void destroy(long serverID) {
 		playlists.remove(serverID);
 		if (players.get(serverID) != null)
 			players.get(serverID).destroy();
@@ -131,23 +131,23 @@ public class TrackScheduler extends AudioEventAdapter {
 		// A track started playing
 	}
 
-	public static void skip(String serverID) {
+	public static void skip(long serverID) {
 		goToNextTrack(serverID, 0);
 	}
 
-	public static void pause(String serverID) {
+	public static void pause(long serverID) {
 		if (players.get(serverID) != null) {
 			players.get(serverID).setPaused(true);
 		}
 	}
 
-	public static void resume(String serverID) {
+	public static void resume(long serverID) {
 		if (players.get(serverID) != null) {
 			players.get(serverID).setPaused(false);
 		}
 	}
 
-	private static void goToNextTrack(String serverID, int i) {
+	private static void goToNextTrack(long serverID, int i) {
 		AudioPlayer serverPlayer = players.get(serverID);
 		List<AudioTrack> list = playlists.get(serverID).getTracks();
 		list.remove(i);
@@ -201,19 +201,19 @@ public class TrackScheduler extends AudioEventAdapter {
 		this.player = player;
 	}
 
-	public String getServerID() {
+	public Long getServerID() {
 		return serverID;
 	}
 
-	public void setServerID(String serverID) {
+	public void setServerID(long serverID) {
 		this.serverID = serverID;
 	}
 
-	public static Map<String, AudioPlaylist> getPlaylists() {
+	public static Map<Long, AudioPlaylist> getPlaylists() {
 		return playlists;
 	}
 
-	public static void disconnect(String serverID) {
+	public static void disconnect(long serverID) {
 		try {
 			Bot.getApi().getServerById(serverID).get().getConnectedVoiceChannel(Bot.getApi().getYourself()).get()
 					.disconnect();

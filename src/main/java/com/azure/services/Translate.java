@@ -7,7 +7,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.JSONUtilities;
 import com.google.gson.JsonElement;

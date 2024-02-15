@@ -13,6 +13,8 @@ import com.github.egubot.handlers.LostConnectionHandler;
 import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.handlers.ReconnectEventHandler;
 import com.github.egubot.handlers.ResumeEventHandler;
+import com.github.egubot.managers.KeyManager;
+import com.github.egubot.managers.StatusManager;
 import com.github.egubot.shared.Shared;
 import com.github.egubot.storage.ConfigManager;
 

@@ -2,8 +2,8 @@ package com.github.egubot.shared;
 
 import java.util.Scanner;
 
-import com.github.egubot.main.ShutdownManager;
-import com.github.egubot.main.StatusManager;
+import com.github.egubot.managers.ShutdownManager;
+import com.github.egubot.managers.StatusManager;
 
 public class Shared {
 	private static ShutdownManager shutdown = new ShutdownManager();

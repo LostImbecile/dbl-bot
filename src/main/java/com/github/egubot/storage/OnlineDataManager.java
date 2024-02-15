@@ -17,7 +17,7 @@ import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.main.Bot;
-import com.github.egubot.main.KeyManager;
+import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.Shared;

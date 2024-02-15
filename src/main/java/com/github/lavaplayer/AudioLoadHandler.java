@@ -13,15 +13,15 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 	private static final Logger logger = LogManager.getLogger(AudioLoadHandler.class.getName());
 
 	Message msg;
-	String serverID;
+	long serverID;
 	boolean fromSearch = false;
 
-	public AudioLoadHandler(Message msg, String serverID) {
+	public AudioLoadHandler(Message msg, long serverID) {
 		this.msg = msg;
 		this.serverID = serverID;
 	}
 
-	public AudioLoadHandler(Message msg, String serverID, boolean fromSearch) {
+	public AudioLoadHandler(Message msg, long serverID, boolean fromSearch) {
 		this.msg = msg;
 		this.serverID = serverID;
 		this.fromSearch = fromSearch;
