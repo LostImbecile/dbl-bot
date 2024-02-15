@@ -1,4 +1,4 @@
-package com.github.egubot.objects;
+package com.github.egubot.objects.legends;
 
 public class SummonCharacter {
 	private Characters character;

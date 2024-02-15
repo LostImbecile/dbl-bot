@@ -12,9 +12,10 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.SummonCharacter;
-import com.github.egubot.objects.SummonResults;
+import com.github.egubot.features.legends.LegendsSummonRates;
+import com.github.egubot.objects.legends.Characters;
+import com.github.egubot.objects.legends.SummonCharacter;
+import com.github.egubot.objects.legends.SummonResults;
 
 public class MessageFormats {
 	// This replaces spaces with an invisible character

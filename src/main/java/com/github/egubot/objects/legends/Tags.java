@@ -1,4 +1,4 @@
-package com.github.egubot.objects;
+package com.github.egubot.objects.legends;
 
 public class Tags {
 	private static final String MAIN_TAG = "Main Tag";

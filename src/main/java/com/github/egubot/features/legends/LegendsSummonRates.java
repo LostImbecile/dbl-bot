@@ -1,4 +1,4 @@
-package com.github.egubot.features;
+package com.github.egubot.features.legends;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,11 +14,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.SummonBanner;
-import com.github.egubot.objects.SummonCharacter;
-import com.github.egubot.objects.SummonResults;
-import com.github.egubot.objects.SummonStep;
+import com.github.egubot.features.MessageFormats;
+import com.github.egubot.objects.legends.Characters;
+import com.github.egubot.objects.legends.SummonBanner;
+import com.github.egubot.objects.legends.SummonCharacter;
+import com.github.egubot.objects.legends.SummonResults;
+import com.github.egubot.objects.legends.SummonStep;
 
 public class LegendsSummonRates {
 	private static final String FEATURED = "Featured";

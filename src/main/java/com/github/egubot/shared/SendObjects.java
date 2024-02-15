@@ -8,8 +8,9 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.javacord.api.entity.message.Messageable;
-import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.Tags;
+
+import com.github.egubot.objects.legends.Characters;
+import com.github.egubot.objects.legends.Tags;
 
 public class SendObjects {
 	

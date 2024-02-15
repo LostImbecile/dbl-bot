@@ -11,9 +11,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.github.egubot.objects.CharacterHash;
-import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.Tags;
+import com.github.egubot.objects.legends.CharacterHash;
+import com.github.egubot.objects.legends.Characters;
+import com.github.egubot.objects.legends.Tags;
 
 /*
  * Implementation specific, the start() method works

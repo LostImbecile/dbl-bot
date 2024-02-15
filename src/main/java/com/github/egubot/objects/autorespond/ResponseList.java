@@ -1,4 +1,4 @@
-package com.github.egubot.objects;
+package com.github.egubot.objects.autorespond;
 
 import java.util.ArrayList;
 import java.util.List;

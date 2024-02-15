@@ -1,4 +1,4 @@
-package com.github.egubot.features;
+package com.github.egubot.features.legends;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +11,10 @@ import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
+import com.github.egubot.features.MessageFormats;
 import com.github.egubot.main.Bot;
-import com.github.egubot.objects.CharacterHash;
-import com.github.egubot.objects.Characters;
+import com.github.egubot.objects.legends.CharacterHash;
+import com.github.egubot.objects.legends.Characters;
 
 public class LegendsRoll extends LegendsPool {
 	

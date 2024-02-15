@@ -1,5 +1,6 @@
-package com.github.egubot.objects;
+package com.github.egubot.objects.autorespond;
 
+import com.github.egubot.objects.Attributes;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;

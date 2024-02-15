@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.javacord.api.entity.message.Messageable;
 
-import com.github.egubot.objects.Tags;
+import com.github.egubot.objects.legends.Tags;
 import com.github.egubot.storage.DataManagerHandler;
 
 public class RollTemplates extends DataManagerHandler {

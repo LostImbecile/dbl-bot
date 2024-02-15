@@ -1,9 +1,9 @@
-package com.github.egubot.objects;
+package com.github.egubot.objects.legends;
 
 import java.util.List;
 import java.util.Map;
 
-import com.github.egubot.features.LegendsSummonRates;
+import com.github.egubot.features.legends.LegendsSummonRates;
 
 public class SummonResults {
 	Map<Integer, Double> oneRotation;

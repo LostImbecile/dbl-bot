@@ -7,12 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.features.LegendsRoll;
-import com.github.egubot.features.LegendsSearch;
-import com.github.egubot.features.LegendsSummonRates;
+import com.github.egubot.features.legends.LegendsRoll;
+import com.github.egubot.features.legends.LegendsSearch;
+import com.github.egubot.features.legends.LegendsSummonRates;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.managers.KeyManager;
-import com.github.egubot.objects.CharacterHash;
+import com.github.egubot.objects.legends.CharacterHash;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.SendObjects;

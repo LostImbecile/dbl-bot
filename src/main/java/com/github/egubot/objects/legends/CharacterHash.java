@@ -1,4 +1,4 @@
-package com.github.egubot.objects;
+package com.github.egubot.objects.legends;
 
 import java.io.Serializable;
 import java.util.ArrayList;

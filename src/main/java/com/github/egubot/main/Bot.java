@@ -2,9 +2,11 @@ package com.github.egubot.main;
 
 import org.javacord.api.DiscordApi;
 
+import com.github.egubot.storage.ConfigManager;
+
 public class Bot {
 	private static DiscordApi api = null;
-	private static String prefix;
+	private static String prefix = null;
 
 	private Bot() {
 	}
@@ -17,11 +19,21 @@ public class Bot {
 		return api;
 	}
 
-	public static String getPrefix() {
+	// No real performance hit in new JVM versions
+	public static synchronized String getPrefix() {
+		if (prefix == null) {
+			String tempPrefix = ConfigManager.getProperty("prefix");
+			if (tempPrefix == null || tempPrefix.isBlank()) {
+				tempPrefix = "b-";
+				ConfigManager.setProperty("prefix", tempPrefix);
+			}
+			prefix = tempPrefix.toLowerCase();
+		}
 		return prefix;
+
 	}
 
-	public static void setPrefix(String prefix) {
+	public static synchronized void setPrefix(String prefix) {
 		Bot.prefix = prefix;
 	}
 }

@@ -1,4 +1,4 @@
-package com.github.egubot.features;
+package com.github.egubot.features.legends;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.Set;
 
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.build.RollTemplates;
-import com.github.egubot.objects.CharacterHash;
-import com.github.egubot.objects.Characters;
-import com.github.egubot.objects.Tags;
+import com.github.egubot.objects.legends.CharacterHash;
+import com.github.egubot.objects.legends.Characters;
+import com.github.egubot.objects.legends.Tags;
 
 public abstract class LegendsPool {
 	private List<String> rollTemplates;
