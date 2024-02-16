@@ -30,53 +30,68 @@ public class CommandExtractor {
 		current.isEndOfCommand = true;
 	}
 
-	// Inserts a prefix into the prefix trie, wiping the existing tree clean.
-	private void insertPrefix(String prefix) {
-	    prefix = prefix.toLowerCase();
-	    this.prefixRoot = new PrefixTrieNode();
-	    
-	    PrefixTrieNode current = prefixRoot;
-	    for (char c : prefix.toCharArray()) {
-	        int charIndex = getCharIndex(c);
-	        if (charIndex >= 0) {
-	            if (current.children[charIndex] == null) {
-	                current.children[charIndex] = new PrefixTrieNode();
-	            }
-	            current = current.children[charIndex];
-	        }
-	    }
-	    current.isEndOfPrefix = true;
+	/*
+	 * Inserts a prefix into the prefix trie, wiping the existing tree clean.
+	 * Only updates the tree if the prefix was fully added, which is the case when:
+	 * 1) There are no illegal characters used
+	 * 2) The prefix is not empty
+	 */
+	private boolean insertPrefix(String prefix) {
+		prefix = prefix.toLowerCase();
+		PrefixTrieNode newPrefixRoot = new PrefixTrieNode();
+		boolean prefixAdded = false;
 
-	    this.currentPrefix = prefix;
+		PrefixTrieNode current = newPrefixRoot;
+		for (char c : prefix.toCharArray()) {
+			int charIndex = getCharIndex(c);
+			if (charIndex >= 0) {
+				if (current.children[charIndex] == null) {
+					current.children[charIndex] = new PrefixTrieNode();
+					current = current.children[charIndex];
+					prefixAdded = true;
+				} else {
+					prefixAdded = false;
+					break;
+				}
+
+			}
+		}
+		current.isEndOfPrefix = true;
+
+		if (prefixAdded) {
+			this.prefixRoot = newPrefixRoot;
+			this.currentPrefix = prefix;
+		}
+		return prefixAdded;
 	}
 
 	public int findPrefix(String str) {
 		str = str.toLowerCase();
-	    PrefixTrieNode prefixCurrent = prefixRoot;
-	    int index = 0;
-	    int len = str.length();
+		PrefixTrieNode prefixCurrent = prefixRoot;
+		int index = 0;
+		int len = str.length();
 
-	    // Step 1: Traverse the prefix tree
-	    while (index < len) {
-	        char c = str.charAt(index);
-	        int charIndex = getCharIndex(c);
-	        if (charIndex >= 0) {
-	            prefixCurrent = prefixCurrent.children[charIndex];
-	        } else {
-	            // Prefix not found
-	            return -1;
-	        }
-	        if(prefixCurrent == null)
-	        	return -1;
-	        
-	        index++;
-	        if (prefixCurrent.isEndOfPrefix) {
-	            // Prefix found
-	            break;
-	        }
-	    }
+		// Step 1: Traverse the prefix tree
+		while (index < len) {
+			char c = str.charAt(index);
+			int charIndex = getCharIndex(c);
+			if (charIndex >= 0) {
+				prefixCurrent = prefixCurrent.children[charIndex];
+			} else {
+				// Prefix not found
+				return -1;
+			}
+			if (prefixCurrent == null)
+				return -1;
 
-	    return index;
+			index++;
+			if (prefixCurrent.isEndOfPrefix) {
+				// Prefix found
+				break;
+			}
+		}
+
+		return index;
 	}
 
 	// Defaults to detecting prefix
@@ -146,60 +161,60 @@ public class CommandExtractor {
 
 		public TrieNode() {
 			// Assuming lowercase alphabet characters only
-			children = new TrieNode[27]; 
+			children = new TrieNode[27];
 			isEndOfCommand = false;
 		}
 	}
 
 	private static class PrefixTrieNode {
-	    PrefixTrieNode[] children;
-	    boolean isEndOfPrefix;
+		PrefixTrieNode[] children;
+		boolean isEndOfPrefix;
 
-	    public PrefixTrieNode() {
-	        // 26 letters of the alphabet + 14 special characters
-	        children = new PrefixTrieNode[26 + 14];
-	        isEndOfPrefix = false;
-	    }
+		public PrefixTrieNode() {
+			// 26 letters of the alphabet + 14 special characters
+			children = new PrefixTrieNode[26 + 14];
+			isEndOfPrefix = false;
+		}
 	}
-	
+
 	private int getCharIndex(char c) {
-	    // Characters 'a' to 'z' are mapped to indices 0 to 25
-	    if (c >= 'a' && c <= 'z') {
-	        return c - 'a';
-	    }
-	    // Special characters are mapped to indices 26 to 39
-	    switch (c) {
-	        case '?':
-	            return 26;
-	        case '!':
-	            return 27;
-	        case '-':
-	            return 28;
-	        case '>':
-	            return 29;
-	        case '<':
-	            return 30;
-	        case '$':
-	            return 31;
-	        case '#':
-	            return 32;
-	        case '@':
-	            return 33;
-	        case '%':
-	            return 34;
-	        case '^':
-	            return 35;
-	        case '&':
-	            return 36;
-	        case '\\':
-	            return 37;
-	        case ':':
-	            return 38;
-	        case ';':
-	            return 39;
-	        default:
-	            return -1; // Invalid character
-	    }
+		// Characters 'a' to 'z' are mapped to indices 0 to 25
+		if (c >= 'a' && c <= 'z') {
+			return c - 'a';
+		}
+		// Special characters are mapped to indices 26 to 39
+		switch (c) {
+		case '?':
+			return 26;
+		case '!':
+			return 27;
+		case '-':
+			return 28;
+		case '>':
+			return 29;
+		case '<':
+			return 30;
+		case '$':
+			return 31;
+		case '#':
+			return 32;
+		case '@':
+			return 33;
+		case '%':
+			return 34;
+		case '^':
+			return 35;
+		case '&':
+			return 36;
+		case '\\':
+			return 37;
+		case ':':
+			return 38;
+		case ';':
+			return 39;
+		default:
+			return -1; // Invalid character
+		}
 	}
 
 }

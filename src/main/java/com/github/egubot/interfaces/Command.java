@@ -7,4 +7,6 @@ public interface Command {
 	public String getName();
 	
 	public boolean execute(Message msg, String arguments);
+	
+	public boolean isStartsWithPrefix();
 }
