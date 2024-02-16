@@ -10,15 +10,14 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.Messageable;
 
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.UpdatableObjects;
-import com.github.egubot.main.Bot;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.objects.Attributes;
 import com.github.egubot.objects.autorespond.Response;
 import com.github.egubot.objects.autorespond.ResponseList;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.JSONUtilities;
-import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.DataManagerHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -174,8 +173,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 
 	public void writeResponse(String msgText, Message e, boolean isOwner) {
 		try {
-			String newResponse = msgText.substring((Bot.getPrefix() + "response create").length()).replace("\n", "%n")
-					.strip();
+			String newResponse = msgText.replace("\n", "%n");
 
 			newResponse = reformatResponse(newResponse, isOwner);
 			boolean isNameExist = false;
@@ -228,9 +226,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			if (isOwner)
 				startIndex = 0;
 
-			String st = msgText.substring((Bot.getPrefix() + "response remove").length()).strip();
-
-			if (st.isBlank())
+			if (msgText.isBlank())
 				throw new Exception();
 
 			boolean isNameExist = false;
@@ -238,7 +234,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			Response response;
 			for (int j = startIndex; j < responses.size(); j++) {
 				response = responses.get(j);
-				if (Response.isInvocEqual(response.getInvocMsg(), st)) {
+				if (Response.isInvocEqual(response.getInvocMsg(), msgText)) {
 					if (response.getAttr().isDeletable() || isOwner) {
 						isNameExist = true;
 						responses.remove(j);
@@ -264,21 +260,20 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			if (isOwner)
 				startIndex = 0;
 
-			String st = msgText.substring((Bot.getPrefix() + "response edit").length()).strip();
-			if (st.isBlank())
+			if (msgText.isBlank())
 				throw new Exception();
 
-			String[] arguments = st.split(">>");
+			String[] arguments = msgText.split(">>");
 			if (arguments.length < 2)
 				throw new Exception();
 
-			st = arguments[0].strip();
+			msgText = arguments[0].strip();
 			boolean isResponseExist = false;
 
 			Response response = null;
 			for (int j = startIndex; j < responses.size(); j++) {
 				response = responses.get(j);
-				if (Response.isInvocEqual(response.getInvocMsg(), st)) {
+				if (Response.isInvocEqual(response.getInvocMsg(), msgText)) {
 					if (response.getAttr().isEditable() || isOwner)
 						isResponseExist = true;
 					break;

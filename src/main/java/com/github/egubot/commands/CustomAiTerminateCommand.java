@@ -2,25 +2,24 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.facades.CustomAIFacade;
 import com.github.egubot.interfaces.Command;
 
 public class CustomAiTerminateCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "ai terminate";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		CustomAIFacade.setCustomAIOn(false);
+		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

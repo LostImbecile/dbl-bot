@@ -2,31 +2,31 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.facades.LegendsCommandsContext;
+import com.github.egubot.facades.LegendsTemplatesContext;
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
-import com.github.egubot.shared.SendObjects;
 
-public class LegendsCharacterSendCommand implements Command {
+public class LegendsTemplateRemove implements Command {
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "character send";
+		return "template remove";
 	}
 
 	@Override
-	public boolean execute(Message msg, String arguments) {
+	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;
 		
-		SendObjects.sendCharacters(msg.getChannel(), LegendsDatabase.getCharactersList());
+		LegendsTemplatesContext.getTemplates().removeTemplate(arguments, msg.getChannel(),
+				UserInfoUtilities.isOwner(msg));
 		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

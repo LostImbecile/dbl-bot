@@ -12,7 +12,6 @@ public class RollTemplates extends DataManagerHandler {
 	private static String idKey = "Templates_Message_ID";
 	private static String resourcePath = "Filter_Templates.txt";
 
-
 	public RollTemplates() throws IOException {
 		super(idKey, resourcePath, "Filter Templates", true);
 	}
@@ -25,7 +24,7 @@ public class RollTemplates extends DataManagerHandler {
 			if (isOwner)
 				startIndex = 0;
 
-			String st = msgText.substring("b-template remove".length()).strip();
+			String st = msgText.toLowerCase();
 
 			try {
 				st = st.substring(0, st.indexOf(" "));
@@ -58,21 +57,20 @@ public class RollTemplates extends DataManagerHandler {
 
 	public void writeTemplate(String msgText, Messageable e) {
 		try {
-			String[] tokens = msgText.split("b-template create");
-			String newTemplate = tokens[1].strip().replaceFirst(" ", " (") + ")\n";
+			String newTemplate = msgText.replaceFirst(" ", " (") + ")\n";
 
 			String temp;
 			do {
-				temp = tokens[1];
+				temp = msgText;
 				for (String element : getData()) {
-					tokens[1] = tokens[1].replace(getTemplateName(element).toLowerCase(),
+					msgText = msgText.replace(getTemplateName(element).toLowerCase(),
 							(getTemplateBody(element).toLowerCase()));
 				}
-			} while (!temp.equals(tokens[1]));
+			} while (!temp.equals(msgText));
 
-			tokens[1] = tokens[1].replaceAll("[-()&|+\n\t]", " ").trim().replaceAll("\\s+", " ");
+			msgText = msgText.replaceAll("[-()&|+\n\t]", " ").trim().replaceAll("\\s+", " ");
 
-			tokens = tokens[1].split(" ");
+			String[] tokens = msgText.split(" ");
 			boolean isTag = false;
 			boolean isNameExist = false;
 

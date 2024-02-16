@@ -8,14 +8,13 @@ public class ParrotCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "parrot";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		msg.getChannel().sendMessage(arguments);
+		return true;
 	}
 
 	@Override

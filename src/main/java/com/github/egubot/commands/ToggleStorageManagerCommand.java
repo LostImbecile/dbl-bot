@@ -2,7 +2,9 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.storage.DataManagerSwitcher;
 
 public class ToggleStorageManagerCommand implements Command {
 
@@ -13,7 +15,10 @@ public class ToggleStorageManagerCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		return false;
+		if(UserInfoUtilities.isOwner(msg)) {
+			DataManagerSwitcher.setOnline(!DataManagerSwitcher.isOnline());
+		}
+		return true;
 	}
 
 	@Override

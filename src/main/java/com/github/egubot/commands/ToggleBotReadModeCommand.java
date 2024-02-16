@@ -2,6 +2,8 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.handlers.MessageCreateEventHandler;
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 
 public class ToggleBotReadModeCommand implements Command {
@@ -13,8 +15,9 @@ public class ToggleBotReadModeCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		if (UserInfoUtilities.isOwner(msg))
+			MessageCreateEventHandler.toggleBotReadMode();
+		return true;
 	}
 
 	@Override

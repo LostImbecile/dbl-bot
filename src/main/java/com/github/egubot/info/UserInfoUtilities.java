@@ -1,4 +1,4 @@
-package com.github.egubot.shared;
+package com.github.egubot.info;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;

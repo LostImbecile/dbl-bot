@@ -10,39 +10,37 @@ import com.github.egubot.interfaces.Shutdownable;
 
 public class StorageFacadesHandler implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(StorageFacadesHandler.class.getName());
-	private AutoRespondFacade autoRespond = null;
-	private LegendsCommandsFacade legends = null;
+	private static LegendsCommandsContext legends = null;
 
-	public StorageFacadesHandler() {
+	private StorageFacadesHandler() {
+	}
+
+	public static void initialise() {
 		try {
-			autoRespond = new AutoRespondFacade();
+			AutoRespondContext.initialise();
 		} catch (IOException e) {
 			logger.error("Autorespond broke", e);
-			autoRespond = null;
 		}
-		legends = new LegendsCommandsFacade();
+		LegendsCommandsContext.initialise();
 	}
 
-	public boolean checkCommands(Message msg, String msgText, String lowCaseTxt) {
-		return (autoRespond != null && autoRespond.checkCommands(msg, msgText))
-				|| legends.checkCommands(msg, lowCaseTxt);
+	public static boolean respond(Message msg, String msgText) {
+		return AutoRespondContext.respond(msgText, msg);
 	}
 
-	public boolean respond(Message msg, String msgText) {
-		return autoRespond != null && autoRespond.respond(msgText, msg);
-	}
-
-	@Override
-	public void shutdown() {
+	public static void shutdownStatic() {
 		try {
-			if (autoRespond != null)
-				autoRespond.shutdown();
+			AutoRespondContext.shutdownStatic();
 			if (legends != null)
 				legends.shutdown();
 		} catch (Exception e) {
 			logger.error("Failed to shut storage classes down.", e);
 		}
+	}
 
+	@Override
+	public void shutdown() {
+		shutdownStatic();
 	}
 
 	@Override

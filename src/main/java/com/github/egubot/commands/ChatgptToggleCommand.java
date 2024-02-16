@@ -2,6 +2,7 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.facades.ChatGPTContext;
 import com.github.egubot.interfaces.Command;
 
 public class ChatgptToggleCommand implements Command {
@@ -13,7 +14,8 @@ public class ChatgptToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		return false;
+		ChatGPTContext.toggleChatGPT();
+		return true;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.facades.WeatherFacade;
 import com.github.egubot.interfaces.Command;
 
 public class WeatherCommand implements Command {
@@ -14,8 +15,8 @@ public class WeatherCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		WeatherFacade.sendWeather(msg.getChannel(), arguments);
+		return true;
 	}
 
 	@Override

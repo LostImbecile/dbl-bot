@@ -25,24 +25,37 @@ public class CommandManager {
 		}
 	}
 
-	public static boolean processMessage(Message msg) {
+	public static boolean processMessage(Message msg) throws Exception {
 		String text = msg.getContent();
-		int index;
-		if (prefixExtractor.findPrefix(text) > 0) {
+		return processContent(msg, text);
+	}
+
+	private static boolean processContent(Message msg, String text) throws Exception {
+		int prefixIndex = prefixExtractor.findPrefix(text);
+
+		if (prefixIndex > 0) {
 			// For commands with prefixes
-			index = prefixExtractor.findCommand(text);
-			if (index > 0) {
-				return CommandRegistry.getPrefixCommand(text.substring(0, index)).execute(msg, text.substring(index));
+			int commandIndex = prefixExtractor.findCommand(text);
+			if (commandIndex > 0) {
+				String command = text.substring(prefixIndex, commandIndex);
+				String arguments = text.substring(commandIndex).strip();
+				return CommandRegistry.getPrefixCommand(command).execute(msg, arguments);
 			}
 		} else {
 			// Ignore prefix, for commands without prefixes
-			index = noPrefixExtractor.findCommand(text, true);
-			if (index > 0) {
-				return CommandRegistry.getNoPrefixCommand(text.substring(0, index)).execute(msg, text.substring(index));
+			int commandIndex = noPrefixExtractor.findCommand(text, true);
+			if (commandIndex > 0) {
+				String command = text.substring(0, commandIndex);
+				String arguments = text.substring(commandIndex).strip();
+				return CommandRegistry.getNoPrefixCommand(command).execute(msg, arguments);
 			}
 		}
 
 		return false;
+	}
+
+	public static void main(String[] args) throws Exception {
+		CommandManager.processContent(null, "b-response create");
 	}
 
 }

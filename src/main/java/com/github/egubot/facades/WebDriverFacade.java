@@ -12,7 +12,6 @@ import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.webautomation.InsultGenerator;
-import com.github.egubot.main.Bot;
 import com.github.egubot.webautomation.Ezgif;
 import com.github.egubot.webautomation.GrabYoutubeVideo;
 
@@ -20,30 +19,10 @@ public class WebDriverFacade {
 	private static final Logger logger = LogManager.getLogger(WebDriverFacade.class.getName());
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("\\.(?:jpg|jpeg|png|mp3|ogg|wav)+",
 			Pattern.CASE_INSENSITIVE);
-	private static final Pattern YOUTUBE_COMMAND_PATTERN = Pattern.compile("(?i)b-grab(?:\\s?mp3)?\\s*<?([^>]+)>?");
 	private static final String YOUTUBE_ICON = "https://cdn-icons-png.flaticon.com/256/1384/1384060.png";
 
-	public static boolean checkCommands(Message msg, String msgText, String lowCaseText) {
-		if (lowCaseText.matches(Bot.getPrefix() + "insult(?s).*")) {
-			checkInsultCommands(msg, lowCaseText);
-			return true;
-		}
-
-		if (lowCaseText.matches(Bot.getPrefix() + "convert(?s).*")) {
-			checkEzgifCommands(msg, lowCaseText.contains(Bot.getPrefix() + "convert gif"), lowCaseText.contains(Bot.getPrefix() + "convert vid"));
-			return true;
-		}
-
-		if (lowCaseText.matches(Bot.getPrefix() + "grab(?s).*")) {
-			msg.getChannel().sendMessage("one moment");
-			checkGrabCommands(msg, msgText);
-			return true;
-		}
-		return false;
-	}
-
-	private static void checkInsultCommands(Message msg, String lowCaseText) {
-		String[] options = lowCaseText.replaceFirst(Bot.getPrefix() + "insult", "").split(">>");
+	public static void checkInsultCommands(Message msg, String text) {
+		String[] options = text.split(">>");
 		if (options.length < 2) {
 			msg.getChannel().sendMessage("Hast thou no target, no foe, or no purpose in mind?");
 		} else {
@@ -58,11 +37,11 @@ public class WebDriverFacade {
 		}
 	}
 
-	private static void checkGrabCommands(Message msg, String msgText) {
+	public static void checkGrabCommands(Message msg, String text) {
 		try {
 			EmbedBuilder embed = null;
-			if (msgText.contains("youtu")) {
-				embed = getYoutubeLinkEmbed(msgText);
+			if (text.contains("youtu")) {
+				embed = getYoutubeLinkEmbed(text);
 			}
 
 			if (embed != null)
@@ -76,9 +55,8 @@ public class WebDriverFacade {
 		}
 	}
 
-	private static EmbedBuilder getYoutubeLinkEmbed(String text) {
-		Matcher matcher = YOUTUBE_COMMAND_PATTERN.matcher(text);
-		String link = matcher.replaceAll("$1").strip();
+	public static EmbedBuilder getYoutubeLinkEmbed(String text) {
+		String link = text.replace("<", "").replace(">", "");
 		String[] result = null;
 		String newLink = null;
 		String title = "Click To Download ";
@@ -110,7 +88,7 @@ public class WebDriverFacade {
 		}
 	}
 
-	private static void checkEzgifCommands(Message msg, boolean isKnownGif, boolean isKnownVid) {
+	public static void checkEzgifCommands(Message msg, boolean isKnownGif, boolean isKnownVid) {
 		String link;
 		List<Embed> embeds;
 		List<MessageAttachment> attachments;

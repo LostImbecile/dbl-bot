@@ -3,6 +3,9 @@ package com.github.egubot.commands;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.objects.Attributes;
+import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.JSONUtilities;
 
 public class AttributesSendCommand implements Command{
 
@@ -14,8 +17,10 @@ public class AttributesSendCommand implements Command{
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		msg.getChannel().sendMessage(
+				FileUtilities.toInputStream(JSONUtilities.toJsonPrettyPrint(new Attributes(), Attributes.class)),
+				"Attributes.txt");
+		return true;
 	}
 
 	@Override

@@ -81,8 +81,8 @@ public class SoundPlayback {
 			remotePlayerManager.setFrameBufferDuration(3 * MINUTE);
 			localPlayerManager.setFrameBufferDuration(3 * MINUTE);
 		} else {
-			remotePlayerManager.setFrameBufferDuration(200);
-			localPlayerManager.setFrameBufferDuration(200);
+			remotePlayerManager.setFrameBufferDuration(400);
+			localPlayerManager.setFrameBufferDuration(400);
 		}
 		remotePlayerManager.registerSourceManager(new YoutubeAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new BandcampAudioSourceManager());
@@ -96,70 +96,7 @@ public class SoundPlayback {
 		localPlayerManager.registerSourceManager(new LocalAudioSourceManager());
 	}
 
-	public static boolean checkMusicCommands(Message msg, String lowCaseTxt) {
-		try {
-			if (lowCaseTxt.startsWith(prefix)) {
-
-				if (lowCaseTxt.contains(prefix + "play")) {
-					try {
-						SoundPlayback.play(msg);
-					} catch (Exception e1) {
-						logger.error("Play error", e1);
-					}
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "cancel")) {
-					TrackScheduler.destroy(getServer(msg).getId());
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "skip")) {
-					TrackScheduler.skip(getServer(msg).getId());
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "pause")) {
-					TrackScheduler.pause(getServer(msg).getId());
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "resume")) {
-					TrackScheduler.resume(getServer(msg).getId());
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "buffer big")) {
-					remotePlayerManager.setFrameBufferDuration(3 * MINUTE);
-					localPlayerManager.setFrameBufferDuration(3 * MINUTE);
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "buffer small")) {
-					remotePlayerManager.setFrameBufferDuration(200);
-					localPlayerManager.setFrameBufferDuration(200);
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "info")) {
-					getPlaylistInfo(msg);
-					return true;
-				}
-
-				if (lowCaseTxt.contains(prefix + "now")) {
-					getCurrentTrackInfo(msg);
-					return true;
-				}
-
-			}
-		} catch (Exception e) {
-			logger.error(e);
-		}
-
-		return false;
-	}
-
-	private static void getCurrentTrackInfo(Message msg) {
+	public static void getCurrentTrackInfo(Message msg) {
 		Server server = getServer(msg);
 		AudioTrack track = TrackScheduler.getCurrentTrack(server.getId());
 		String videoID = track.getIdentifier();
@@ -187,7 +124,7 @@ public class SoundPlayback {
 		embed.setDescription("**" + positionString + " " + progressBar + " " + durationString + "**");
 	}
 
-	private static void getPlaylistInfo(Message msg) {
+	public static void getPlaylistInfo(Message msg) {
 		Server server = getServer(msg);
 		Map<String, Long> map = TrackScheduler.getPlayListInfo(server.getId());
 		EmbedBuilder embed = new EmbedBuilder();
@@ -300,6 +237,14 @@ public class SoundPlayback {
 		Matcher angleBracketMatcher = angleBracketPattern.matcher(name);
 		name = angleBracketMatcher.replaceAll("");
 		return name;
+	}
+
+	public static AudioPlayerManager getRemoteplayermanager() {
+		return remotePlayerManager;
+	}
+
+	public static AudioPlayerManager getLocalplayermanager() {
+		return localPlayerManager;
 	}
 
 }

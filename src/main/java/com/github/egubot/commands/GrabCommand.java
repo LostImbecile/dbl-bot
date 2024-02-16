@@ -2,6 +2,7 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.facades.WebDriverFacade;
 import com.github.egubot.interfaces.Command;
 
 public class GrabCommand implements Command {
@@ -14,8 +15,9 @@ public class GrabCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		msg.getChannel().sendMessage("one moment");
+		WebDriverFacade.checkGrabCommands(msg, arguments);
+		return true;
 	}
 
 	@Override

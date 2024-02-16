@@ -2,7 +2,10 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.build.LegendsDatabase;
+import com.github.egubot.facades.LegendsCommandsContext;
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.objects.legends.CharacterHash;
 
 public class LegendsCharacterSendIDsCommand implements Command {
 
@@ -13,8 +16,11 @@ public class LegendsCharacterSendIDsCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		if (!LegendsCommandsContext.isLegendsMode())
+			return false;
+		
+		CharacterHash.printEmptyIDs(LegendsDatabase.getCharacterHash());
+		return true;
 	}
 
 	@Override

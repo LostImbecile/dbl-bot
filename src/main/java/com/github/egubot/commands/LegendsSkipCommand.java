@@ -2,6 +2,7 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.facades.LegendsCommandsContext;
 import com.github.egubot.interfaces.Command;
 
 public class LegendsSkipCommand implements Command {
@@ -14,8 +15,14 @@ public class LegendsSkipCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		if (!LegendsCommandsContext.isLegendsMode())
+			return false;
+		
+		if (msg.getChannel().getIdAsString().equals(LegendsCommandsContext.getWheelChannelID())) {
+			LegendsCommandsContext.setAnimated(false);
+			msg.getChannel().sendMessage("Enabled roll animation :thumbs_up:");
+		}
+		return true;
 	}
 
 	@Override

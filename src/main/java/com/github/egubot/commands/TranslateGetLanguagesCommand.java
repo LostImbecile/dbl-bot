@@ -1,26 +1,33 @@
 package com.github.egubot.commands;
 
+import java.io.IOException;
+
 import org.javacord.api.entity.message.Message;
 
+import com.azure.services.Translate;
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.shared.FileUtilities;
 
 public class TranslateGetLanguagesCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "translate languages";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		try {
+			msg.getChannel().sendMessage(FileUtilities.toInputStream(Translate.getTranslateLanguages()),
+					"languages.txt");
+		} catch (IOException e1) {
+			msg.getChannel().sendMessage("Failed to send :thumbs_down");
+		}
+		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

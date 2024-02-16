@@ -47,3 +47,8 @@ com.github.egubot.commands.TranslateSetLanguageCommand
 com.github.egubot.commands.TranslateToggleCommand
 com.github.egubot.commands.VerseCommand
 com.github.egubot.commands.WeatherCommand
+com.github.egubot.commands.LegendsTemplateSend
+com.github.egubot.commands.LegendsTemplateRemove
+com.github.egubot.commands.LegendsTemplateLock
+com.github.egubot.commands.LegendsTemplateCreate
+com.github.egubot.commands.TestToggleCommand

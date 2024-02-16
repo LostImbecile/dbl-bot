@@ -3,6 +3,7 @@ package com.github.egubot.commands;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.shared.FileUtilities;
 
 public class VerseCommand implements Command {
 
@@ -14,8 +15,9 @@ public class VerseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		msg.getChannel().sendMessage(
+				FileUtilities.readURL("https://labs.bible.org/api/?passage=random&type=text&formatting=plain"));
+		return true;
 	}
 
 	@Override

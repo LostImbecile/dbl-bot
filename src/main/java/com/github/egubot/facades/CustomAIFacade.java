@@ -9,45 +9,52 @@ import com.github.egubot.managers.KeyManager;
 
 public class CustomAIFacade {
 	private static final Logger logger = LogManager.getLogger(CustomAIFacade.class.getName());
-	private String gpt2ChannelID = KeyManager.getID("GPT2_Channel_ID");
-	private boolean isCustomAIOn = false;
-	private boolean testMode;
+	private static String gpt2ChannelID = KeyManager.getID("GPT2_Channel_ID");
+	private static boolean isCustomAIOn = false;
+	private static boolean testMode;
 	
-	public boolean checkCommands(Message msg, String lowCaseTxt) {
-		String channelID = msg.getChannel().getIdAsString();
+	public static boolean respond(Message msg, String lowCaseTxt) {
 		// Personal AI, refer to its class for info
-		if (lowCaseTxt.equals("ai activate")) {
-			isCustomAIOn = true;
-			return true;
-		}
+		String channelID = msg.getChannel().getIdAsString();
 		
-		if (isCustomAIOn) {
-			if (lowCaseTxt.equals("ai terminate")) {
-				isCustomAIOn = false;
+		if (isCustomAIOn &&  (testMode || channelID.equals(gpt2ChannelID))) {
+				getAIResponse(msg, lowCaseTxt);
 				return true;
-			}
-
-			if (testMode || channelID.equals(gpt2ChannelID) || lowCaseTxt.matches("ai(?s).*")) {
-
-				try {
-					String aiUrl = "http://localhost:5000"; // Update with your AI server URL
-					try (DiscordAI discordAI = new DiscordAI(aiUrl)) {
-						String input = lowCaseTxt.replace("ai", "").strip();
-
-						String generatedText = discordAI.generateText(input);
-
-						if (!generatedText.matches("Error:(?s).*")) {
-							msg.getChannel().sendMessage(generatedText);
-						} else if (!generatedText.contains("Connect to localhost:5000"))
-							logger.warn("AI Response: {}", generatedText);
-					}
-				} catch (Exception e1) {
-					// not worth bothering with
-				}
-				return true;
-			}
 		}
 		
 		return false;
+	}
+
+	public static void getAIResponse(Message msg, String text) {
+		try {
+			String aiUrl = "http://localhost:5000"; // Update with your AI server URL
+			try (DiscordAI discordAI = new DiscordAI(aiUrl)) {
+
+				String generatedText = discordAI.generateText(text);
+
+				if (!generatedText.matches("Error:(?s).*")) {
+					msg.getChannel().sendMessage(generatedText);
+				} else if (!generatedText.contains("Connect to localhost:5000"))
+					logger.warn("AI Response: {}", generatedText);
+			}
+		} catch (Exception e1) {
+			// not worth bothering with
+		}
+	}
+
+	public static String getGpt2ChannelID() {
+		return gpt2ChannelID;
+	}
+
+	public static void setGpt2ChannelID(String gpt2ChannelID) {
+		CustomAIFacade.gpt2ChannelID = gpt2ChannelID;
+	}
+
+	public static boolean isCustomAIOn() {
+		return isCustomAIOn;
+	}
+
+	public static void setCustomAIOn(boolean isCustomAIOn) {
+		CustomAIFacade.isCustomAIOn = isCustomAIOn;
 	}
 }

@@ -150,9 +150,10 @@ public class LegendsSearch extends LegendsPool {
 
 	@Override
 	protected List<Characters> getPool(String msgText) {
-		String st = msgText.replaceFirst(Bot.getPrefix() + "search", "").trim();
 		CharacterHash filterPool;
 		CharacterHash namePool;
+
+		String st = msgText.toLowerCase();
 
 		int separateIndex = st.indexOf(" ");
 
@@ -198,7 +199,7 @@ public class LegendsSearch extends LegendsPool {
 		}
 
 		name = name.toLowerCase().replace("ssb", "ssgss").replace("dbl", "").replace("-", "")
-				.replace("frieza_no_brother", "cooler").replace("best_unit_in_the_game","5101s").strip();
+				.replace("frieza_no_brother", "cooler").replace("best_unit_in_the_game", "5101s").strip();
 
 		ArrayList<Characters> charactersList = (ArrayList<Characters>) LegendsDatabase.getCharactersList();
 

@@ -16,19 +16,17 @@ import org.javacord.api.entity.webhook.IncomingWebhook;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import com.github.egubot.facades.ChatGPTFacade;
+import com.github.egubot.facades.ChatGPTContext;
 import com.github.egubot.facades.CustomAIFacade;
 import com.github.egubot.facades.StorageFacadesHandler;
-import com.github.egubot.facades.WebFacadesHandler;
 import com.github.egubot.features.MessageTimers;
-import com.github.egubot.features.SoundPlayback;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.Bot;
+import com.github.egubot.managers.CommandManager;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.managers.ShutdownManager;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.Shared;
-import com.github.egubot.shared.UserInfoUtilities;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.DataManagerSwitcher;
 
@@ -36,54 +34,51 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
 	private static final long HOUR = 1000 * 60 * 60L;
 
-	private String testServerID = KeyManager.getID("Test_Server_ID");
-	private String userTargetID = KeyManager.getID("User_Target_ID");
-	private String mainServerID = KeyManager.getID("Main_Server_ID");
-	private String userTargetMsgID = KeyManager.getID("User_Target_Msg_ID");
-	private String userTargetChannelID = KeyManager.getID("User_Target_Msg_Channel_ID");
-	private String timerLengthMessage = KeyManager.getID("Dead_Chat_Timer_Msg");
-	private String userTargetMsgContent;
+	private static String testServerID = KeyManager.getID("Test_Server_ID");
+	private static String userTargetID = KeyManager.getID("User_Target_ID");
+	private static String mainServerID = KeyManager.getID("Main_Server_ID");
+	private static String userTargetMsgID = KeyManager.getID("User_Target_Msg_ID");
+	private static String userTargetChannelID = KeyManager.getID("User_Target_Msg_Channel_ID");
+	private static String timerLengthMessage = KeyManager.getID("Dead_Chat_Timer_Msg");
+	private static String userTargetMsgContent;
 
-	private boolean readBotMessages = false;
-	private DiscordApi api;
+	private static boolean readBotMessages = false;
+	private static DiscordApi api = Bot.getApi();
 
-	private StorageFacadesHandler storageFacades;
-	private WebFacadesHandler webFacades = new WebFacadesHandler();
-	private ChatGPTFacade gpt = new ChatGPTFacade();
-	private CustomAIFacade customAi = new CustomAIFacade();
+	private static boolean testMode = Shared.isTestMode();
 
-	private boolean testMode;
+	private static boolean isUserTimerOn = ConfigManager.getBooleanProperty("User_Target_Enable");
+	private static MessageTimers testTimer = null;
+	private static MessageTimers userTargetTimer = null;
+	private static MessageTimers deadChatTimer = null;
 
-	private boolean isUserTimerOn = ConfigManager.getBooleanProperty("User_Target_Enable");
-	private MessageTimers testTimer = null;
-	private MessageTimers userTargetTimer = null;
-	private MessageTimers deadChatTimer = null;
+	private static IncomingWebhook testWebhook = null;
+	private static IncomingWebhook egubotWebhook = null;
 
-	private IncomingWebhook testWebhook = null;
-	private IncomingWebhook egubotWebhook = null;
+	public static final ExecutorService executorService = Executors.newFixedThreadPool(10);
+	private static ShutdownManager shutdownManager = Shared.getShutdown();
+	private static boolean isTestActive = false;
 
-	private final ExecutorService executorService;
-	private ShutdownManager shutdownManager;
-	private boolean isTestActive = false;
-	private static String prefix = Bot.getPrefix();
+	private static boolean isInitialised = false;
 
 	public MessageCreateEventHandler() {
-		/*
-		 * I store templates, responses and all that stuff online in case someone
-		 * else uses the bot on their end, so the data needs to be initialised
-		 * from an online storage each time. I used discord for this, a cloud
-		 * services could do better.
-		 */
-		this.api = Bot.getApi();
-		this.testMode = Shared.isTestMode();
-		this.executorService = Executors.newFixedThreadPool(10);
-		this.shutdownManager = Shared.getShutdown();
 		shutdownManager.registerShutdownable(this);
+		initialise();
+	}
 
-		DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
-
-		storageFacades = new StorageFacadesHandler();
-		executorService.submit(this::initialiseWebhooks);
+	public static synchronized void initialise() {
+		if (!isInitialised) {
+			/*
+			 * I store templates, responses and all that stuff online in case someone
+			 * else uses the bot on their end, so the data needs to be initialised
+			 * from an online storage each time. I used discord for this, a cloud
+			 * services could do better.
+			 */
+			StorageFacadesHandler.initialise();
+			DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
+			executorService.submit(() -> initialiseWebhooks());
+			isInitialised = true;
+		}
 	}
 
 	@Override
@@ -93,25 +88,26 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	}
 
 	private void handleOnMessageCreate(MessageCreateEvent e) {
-		Message msg = e.getMessage();
-		// Regex replaces non-utf8 characters
-		String msgText = msg.getContent();
-		String lowCaseTxt = msgText.toLowerCase();
-
 		try {
+			Message msg = e.getMessage();
+			String msgText = msg.getContent();
+			String lowCaseTxt = msgText.toLowerCase();
 
-			if (gpt.checkCommands(msg, msgText, lowCaseTxt)) {
-				return;
-			}
+			ChatGPTContext.addAssistantResponse(msg, msgText);
 
 			// Ignore bots unless changed
 			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
 				return;
 			}
 
-			if (checkBotMessageControlCommands(msg, lowCaseTxt)) {
+			// This is so I can run a test version and a non-test version at the same time
+			if (testMode && !isTestServer(msg))
 				return;
-			}
+			if (!testMode && isTestServer(msg))
+				return;
+
+			if (CommandManager.processMessage(msg))
+				return;
 
 			try {
 				if (isTestActive) {
@@ -119,16 +115,9 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 					Method checkMethod = testClass.getMethod("check", MessageCreateEvent.class, Message.class,
 							String.class);
 					checkMethod.invoke(null, e, msg, msgText);
-				} else if (lowCaseTxt.equals(prefix + "test toggle")) {
-					isTestActive = !isTestActive;
 				}
 			} catch (Exception e1) {
 			}
-			// This is so I can run a test version and a non-test version at the same time
-			if (testMode && !isTestServer(msg))
-				return;
-			if (!testMode && isTestServer(msg))
-				return;
 
 			String authorID = msg.getAuthor().getIdAsString();
 
@@ -141,39 +130,19 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				lowCaseTxt = msgText.toLowerCase();
 			}
 
-			if (storageFacades.checkCommands(msg, msgText, lowCaseTxt)) {
+			if (testMode && (checkTimerTasks(msg, msgText))) {
 				return;
 			}
 
-			if (webFacades.checkCommands(msg, msgText, lowCaseTxt))
-				return;
-
-			try {
-				if (SoundPlayback.checkMusicCommands(msg, lowCaseTxt)) {
-					return;
-				}
-			} catch (Exception e1) {
-				logger.error(e1);
-			}
-
-			if (testMode && (checkTimerTasks(msg, msgText, lowCaseTxt))) {
+			if (ChatGPTContext.repond(msg, msgText)) {
 				return;
 			}
 
-			if (lowCaseTxt.equals(prefix + "verse")) {
-				msg.getChannel().sendMessage(
-						FileUtilities.readURL("https://labs.bible.org/api/?passage=random&type=text&formatting=plain"));
-			}
-
-			if (lowCaseTxt.matches("parrot(?s).*") && UserInfoUtilities.isOwner(msg)) {
-				e.getChannel().sendMessage(msgText.replaceFirst("parrot", ""));
+			if (CustomAIFacade.respond(msg, lowCaseTxt)) {
 				return;
 			}
 
-			if (customAi.checkCommands(msg, lowCaseTxt))
-				return;
-
-			if (storageFacades.respond(msg, msgText))
+			if (StorageFacadesHandler.respond(msg, msgText))
 				return;
 
 			if (userTargetTimer != null && authorID.equals(userTargetID)) {
@@ -190,56 +159,13 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		}
 	}
 
-	private boolean checkBotMessageControlCommands(Message msg, String lowCaseTxt) throws Exception {
-		if (lowCaseTxt.startsWith("terminate")) {
-			terminate(msg);
-			return true;
-		}
-
-		if (lowCaseTxt.equals("refresh")) {
-			refresh(msg);
-			return true;
-		}
-
-		if (lowCaseTxt.equals("toggle bot read mode") && UserInfoUtilities.isOwner(msg)) {
-			readBotMessages = !readBotMessages;
-			return true;
-		}
-
-		if (lowCaseTxt.equals(prefix + "toggle manager") && UserInfoUtilities.isOwner(msg)) {
-			DataManagerSwitcher.setOnline(!DataManagerSwitcher.isOnline());
-			return true;
-		}
-
-		if (UserInfoUtilities.isOwner(msg) && lowCaseTxt.matches(prefix + "message(?s).*")) {
-			try {
-				if (lowCaseTxt.contains(prefix + "message edit")) {
-					String st = lowCaseTxt.replaceFirst(prefix + "message edit", "").strip();
-					String id = st.substring(0, st.indexOf(" "));
-					String edit = st.substring(st.indexOf(" "));
-					api.getMessageById(id, msg.getChannel()).get().edit(edit);
-					return true;
-				}
-				if (lowCaseTxt.contains(prefix + "message delete")) {
-					String st = lowCaseTxt.replaceFirst(prefix + "message delete", "").strip();
-					api.getMessageById(st, msg.getChannel()).get().delete();
-					return true;
-				}
-			} catch (Exception e) {
-				Thread.currentThread().interrupt();
-				logger.error("Failed to change or delete a message.", e);
-			}
-		}
-		return false;
-	}
-
 	private boolean isTestServer(Message msg) {
 		if (msg.isServerMessage())
 			return msg.getServer().get().getIdAsString().equals(testServerID);
 		return false;
 	}
 
-	private void initialiseWebhooks() {
+	public static void initialiseWebhooks() {
 		if (testMode)
 			return;
 		/*
@@ -327,8 +253,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	}
 
-	private boolean checkTimerTasks(Message msg, String msgText, String lowCaseTxt) {
-		if (lowCaseTxt.equals("start task")) {
+	private boolean checkTimerTasks(Message msg, String msgText) {
+		if (msgText.equals("start task")) {
 			try {
 				testWebhook.updateAvatar(msg.getAuthor().getAvatar()).join();
 				testWebhook.updateChannel(msg.getChannel().asServerTextChannel().get());
@@ -340,7 +266,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			return true;
 		}
 
-		if (lowCaseTxt.equals("cancel task")) {
+		if (msgText.equals("cancel task")) {
 			try {
 				testTimer.cancelRecurringTimer();
 			} catch (Exception e1) {
@@ -350,38 +276,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		}
 
 		return false;
-	}
-
-	private void refresh(Message msg) {
-		if (UserInfoUtilities.isOwner(msg)) {
-			msg.getChannel().sendMessage("Refreshing...").join();
-			System.out.println("\nRefreshing " + MessageCreateEventHandler.class.getName() + ".");
-
-			// Important to make sure any remaining data is uploaded first
-			shutdownInternalClasses();
-
-			storageFacades = new StorageFacadesHandler();
-			executorService.submit(this::initialiseWebhooks);
-
-			msg.getChannel().sendMessage("Refreshed :ok_hand:");
-		} else {
-			msg.getChannel().sendMessage("no");
-		}
-	}
-
-	private void terminate(Message msg) {
-		boolean isOwner = UserInfoUtilities.isOwner(msg);
-
-		String st = msg.getContent().toLowerCase().replace("terminate", "").strip();
-		if (st.isBlank() || st.equals(api.getYourself().getMentionTag())) {
-			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
-				msg.getChannel().sendMessage("Terminating...").join();
-				logger.warn("\nTerminate message invoked.");
-				shutdownManager.initiateShutdown(0);
-			} else {
-				msg.getChannel().sendMessage("<a:no:1195656310356717689>");
-			}
-		}
 	}
 
 	private void checkChannelTimer(Message msg) {
@@ -399,7 +293,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		}
 	}
 
-	public void shutdownInternalClasses() {
+	public static void shutdownInternalClasses() {
 		try {
 			if (deadChatTimer != null)
 				deadChatTimer.terminateTimer();
@@ -407,8 +301,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				testTimer.terminateTimer();
 			if (userTargetTimer != null)
 				userTargetTimer.terminateTimer();
-			if (storageFacades != null)
-				storageFacades.shutdown();
+
+			StorageFacadesHandler.shutdownStatic();
 		} catch (Exception e) {
 			logger.error("Failed to shut timers down.", e);
 		}
@@ -430,6 +324,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 		}
 	}
 
+	public static void toggleBotReadMode() {
+		readBotMessages = !readBotMessages;
+	}
+
 	private String replaceAttachmentText(Message msg, String msgText) {
 		String st = "";
 
@@ -445,6 +343,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	@Override
 	public int getShutdownPriority() {
 		return 10;
+	}
+
+	public static void toggleTestClass() {
+		isTestActive = !isTestActive;
 	}
 
 }

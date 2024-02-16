@@ -2,7 +2,9 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.interfaces.Command;
+import com.github.lavaplayer.TrackScheduler;
 
 public class MusicCancelCommand implements Command {
 
@@ -14,13 +16,12 @@ public class MusicCancelCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		// TODO Auto-generated method stub
-		return false;
+		TrackScheduler.destroy(ServerInfoUtilities.getServer(msg).getId());
+		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

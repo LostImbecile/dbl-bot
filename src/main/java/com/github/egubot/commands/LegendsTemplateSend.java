@@ -3,26 +3,22 @@ package com.github.egubot.commands;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.LegendsCommandsContext;
+import com.github.egubot.facades.LegendsTemplatesContext;
 import com.github.egubot.interfaces.Command;
 
-public class LegendsSearchCommand implements Command{
+public class LegendsTemplateSend implements Command {
 
 	@Override
 	public String getName() {
-		return "search";
+		return "template send";
 	}
 
 	@Override
-	public boolean execute(Message msg, String arguments) {
+	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;
 		
-		try {
-			LegendsCommandsContext.getLegendsSearch().search(arguments, msg.getChannel());
-		} catch (Exception e) {
-			msg.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
-			logger.error("Legends commands error", e);
-		}
+		LegendsTemplatesContext.getTemplates().sendData(msg.getChannel());
 		return true;
 	}
 

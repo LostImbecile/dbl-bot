@@ -2,19 +2,19 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.features.SoundPlayback;
+import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.interfaces.Command;
 
-public class MusicTrackInfoCommand implements Command {
+public class TestToggleCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "now";
+		return "test toggle";
 	}
 
 	@Override
-	public boolean execute(Message msg, String arguments) {
-		SoundPlayback.getCurrentTrackInfo(msg);
+	public boolean execute(Message msg, String arguments) throws Exception {
+		MessageCreateEventHandler.toggleTestClass();
 		return true;
 	}
 

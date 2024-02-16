@@ -19,7 +19,7 @@ import com.github.egubot.shared.Shared;
 import com.github.egubot.storage.ConfigManager;
 
 public class Main {
-	private static final Logger logger = LogManager.getLogger(Main.class.getName());
+	public static final Logger logger = LogManager.getLogger(Main.class.getName());
 
 	/*
 	 * You can create your own bot and gets its token from here:

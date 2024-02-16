@@ -115,15 +115,15 @@ public class CommandExtractor {
 		while (index < len) {
 			char c = str.charAt(index);
 			int arrayIndex = c - 'a';
-
+			
 			// Check if there's a path
 			if (c == ' ') {
 				commandCurrent = commandCurrent.children[26]; // Space
-			} else if (arrayIndex > 0 && arrayIndex < 26) {
+			} else if (arrayIndex >= 0 && arrayIndex < 26) {
 				commandCurrent = commandCurrent.children[arrayIndex];
 			} else
 				return -1;
-
+			
 			if (commandCurrent == null) {
 				// Command not found
 				break; // Exit the loop if there's no path
