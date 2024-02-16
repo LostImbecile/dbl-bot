@@ -142,6 +142,9 @@ public class Main {
 
 	private static void restartMain(String[] args) throws IOException {
 		System.out.println();
+		// Done because you can't change the status to offline 
+		// without changing it to online first, to avoid a collision
+		Shared.getStatus().setStatusOnline();
 		Shared.getStatus().setStatusOffline();
 		Shared.getStatus().disconnect();
 		System.out.println("\nRestarting...\n");
