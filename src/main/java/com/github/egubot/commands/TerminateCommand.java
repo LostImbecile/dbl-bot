@@ -22,7 +22,7 @@ public class TerminateCommand implements Command {
 			
 			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
 				msg.getChannel().sendMessage("Terminating...").join();
-				Main.logger.warn("\nTerminate message invoked.");
+				Main.logger.warn("Terminate message invoked.");
 				Shared.getShutdown().initiateShutdown(0);
 			} else {
 				msg.getChannel().sendMessage("<a:no:1195656310356717689>");

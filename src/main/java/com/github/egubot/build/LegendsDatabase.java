@@ -27,14 +27,17 @@ public class LegendsDatabase {
 	private static CharacterHash characterHash = new CharacterHash();
 
 	public static final String WEBSITE_URL = "https://dblegends.net/characters";
-	private boolean isDataFetchSuccessfull;
+	private static boolean isDataFetchSuccessfull;
 
-	public LegendsDatabase(String st) {
+	private LegendsDatabase() {
+	}
+
+	public static void initialise(String st) {
 		Document document = Jsoup.parse(st);
 		getData(document);
 	}
 
-	public LegendsDatabase() throws IOException {
+	public static void initialise() throws IOException {
 		Document document = Jsoup.connect(WEBSITE_URL).get();
 		getData(document);
 	}
@@ -47,7 +50,7 @@ public class LegendsDatabase {
 		return tags;
 	}
 
-	public void getData(Document document) {
+	public static void getData(Document document) {
 		addSpecialTags();
 		getAllTags(document);
 
@@ -58,7 +61,7 @@ public class LegendsDatabase {
 	}
 
 	//
-	private void addSpecialTags() {
+	private static void addSpecialTags() {
 		/*
 		 * Index matters for some of the tags here so don't reorder
 		 * the lines, I can use the IDs to add them, but I want to
@@ -125,7 +128,7 @@ public class LegendsDatabase {
 			int siteID = getSiteID(charaUrl);
 			if (gameID.isBlank() || siteID == -1)
 				continue;
-						
+
 			Characters newCharacter = new Characters();
 			newCharacter.setSiteID(siteID);
 			newCharacter.setImageLink(imgUrl);
@@ -133,18 +136,18 @@ public class LegendsDatabase {
 			newCharacter.setGameID(gameID);
 			newCharacter.setRarity(rarity);
 			newCharacter.setCharacterName(processName(name));
-			
+
 			boolean zenkaiStatus = getZenkaiStatus(zenkai);
 			boolean lfStatus = getLFStatus(lf);
-			
-			if(zenkaiStatus)
+
+			if (zenkaiStatus)
 				getTags().get(12).getCharacters().put(newCharacter);
-			if(lfStatus)
+			if (lfStatus)
 				getTags().get(13).getCharacters().put(newCharacter);
-			
+
 			newCharacter.setZenkai(zenkaiStatus);
 			newCharacter.setLF(lfStatus);
-			
+
 			setTags(tags, newCharacter);
 			evaluateReleaseDate(gameID, newCharacter);
 			charactersList.add(newCharacter);
@@ -252,12 +255,12 @@ public class LegendsDatabase {
 		}
 	}
 
-	public boolean isDataFetchSuccessfull() {
+	public static boolean isDataFetchSuccessfull() {
 		return isDataFetchSuccessfull;
 	}
 
-	public void setDataFetchSuccessfull(boolean isDataFetchSuccessfull) {
-		this.isDataFetchSuccessfull = isDataFetchSuccessfull;
+	public static void setDataFetchSuccessfull(boolean isDataFetchSuccessfull) {
+		LegendsDatabase.isDataFetchSuccessfull = isDataFetchSuccessfull;
 	}
 
 	public static CharacterHash getCharacterHash() {
@@ -267,7 +270,7 @@ public class LegendsDatabase {
 	public static void setCharacterHash(CharacterHash characterHash) {
 		LegendsDatabase.characterHash = characterHash;
 	}
-	
+
 	public static void main(String[] args) throws IOException {
 		new LegendsDatabase();
 	}

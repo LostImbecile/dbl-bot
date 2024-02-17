@@ -10,7 +10,6 @@ import com.github.egubot.interfaces.Shutdownable;
 
 public class StorageFacadesHandler implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(StorageFacadesHandler.class.getName());
-	private static LegendsCommandsContext legends = null;
 
 	private StorageFacadesHandler() {
 	}
@@ -31,8 +30,7 @@ public class StorageFacadesHandler implements Shutdownable {
 	public static void shutdownStatic() {
 		try {
 			AutoRespondContext.shutdownStatic();
-			if (legends != null)
-				legends.shutdown();
+			LegendsTemplatesContext.shutdownStatic();
 		} catch (Exception e) {
 			logger.error("Failed to shut storage classes down.", e);
 		}

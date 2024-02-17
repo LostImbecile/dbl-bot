@@ -20,7 +20,6 @@ public class LegendsCommandsContext implements Shutdownable {
 	private static boolean backupWebsiteFlag = ConfigManager.getBooleanProperty("Backup_Website_Flag");
 	private static String wheelChannelID = KeyManager.getID("Wheel_Channel_ID");
 
-	private static LegendsDatabase legendsWebsite = null;
 	private static LegendsTemplatesContext templates = null;
 	private static LegendsRoll legendsRoll = null;
 	private static LegendsSearch legendsSearch = null;
@@ -36,8 +35,9 @@ public class LegendsCommandsContext implements Shutdownable {
 			// classes that are based on it, or doesn't if that fails
 			try {
 				System.out.println("\nFetching characters from dblegends.net...");
-				legendsWebsite = new LegendsDatabase();
-
+				
+				LegendsDatabase.initialise();
+				
 				backupLegendsWebsite();
 			} catch (Exception e) {
 				logger.warn("Failed to build character database. Relevant commands will be inactive.");
@@ -62,7 +62,7 @@ public class LegendsCommandsContext implements Shutdownable {
 	}
 
 	private static void backupLegendsWebsite() throws IOException {
-		if (legendsWebsite.isDataFetchSuccessfull()) {
+		if (LegendsDatabase.isDataFetchSuccessfull()) {
 
 			if (backupWebsiteFlag) {
 				System.out.println("Character database was successfully built!");
@@ -82,8 +82,8 @@ public class LegendsCommandsContext implements Shutdownable {
 		if (FileUtilities.isFileExist("Website_Backup.txt")) {
 			LocalDataManager backup = new LocalDataManager("Website Backup");
 			backup.initialise(false);
-			legendsWebsite = new LegendsDatabase(ConvertObjects.listToText(backup.getData()));
-			if (!legendsWebsite.isDataFetchSuccessfull()) {
+			LegendsDatabase.initialise(ConvertObjects.listToText(backup.getData()));
+			if (!LegendsDatabase.isDataFetchSuccessfull()) {
 				logger.warn("Backup is also missing information.");
 			}
 		} else {
@@ -119,10 +119,6 @@ public class LegendsCommandsContext implements Shutdownable {
 
 	public static String getWheelChannelID() {
 		return wheelChannelID;
-	}
-
-	public static LegendsDatabase getLegendsWebsite() {
-		return legendsWebsite;
 	}
 
 	public static LegendsTemplatesContext getTemplates() {

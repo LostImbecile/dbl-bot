@@ -16,8 +16,8 @@ public class LegendsTemplatesContext implements Shutdownable {
 	public static List<String> getRollTemplates() {
 		return templates.getRollTemplates();
 	}
-	
-	public void shutdownStatic() {
+
+	public static void shutdownStatic() {
 		if (templates != null)
 			templates.shutdown();
 	}
