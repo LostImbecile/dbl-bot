@@ -27,8 +27,6 @@ public class StatusManager implements Shutdownable {
 	protected DiscordApi api;
 
 	private boolean isStatusMsgSet;
-	// In case of exit when a different instance is online
-	private boolean isStatusChangedToOnline = false;
 
 	public StatusManager() {
 		this.api = Bot.getApi();
@@ -116,28 +114,25 @@ public class StatusManager implements Shutdownable {
 	}
 
 	public void setStatusOnline() {
-			try {
-				isStatusChangedToOnline = true;
-				statusMessage.edit("online").join();
-			} catch (NullPointerException e1) {
+		try {
+			statusMessage.edit("online").join();
+		} catch (NullPointerException e1) {
 
-			} catch (Exception e) {
-				logger.warn("Can't update status message");
-				logger.error("Couldn't update status message.",e);
-			}
+		} catch (Exception e) {
+			logger.warn("Can't update status message");
+			logger.error("Couldn't update status message.", e);
+		}
 	}
 
 	public void setStatusOffline() {
-		if (isStatusChangedToOnline) {
-			System.out.println("Updating status....");
-			try {
-				statusMessage.edit("offline").join();
-			} catch (NullPointerException e1) {
+		System.out.println("Updating status....");
+		try {
+			statusMessage.edit("offline").join();
+		} catch (NullPointerException e1) {
 
-			} catch (Exception e) {
-				logger.warn("Can't update status message");
-				logger.error("Couldn't update status message.",e);
-			}
+		} catch (Exception e) {
+			logger.warn("Can't update status message");
+			logger.error("Couldn't update status message.", e);
 		}
 	}
 
@@ -153,7 +148,7 @@ public class StatusManager implements Shutdownable {
 				api.updateActivity(ActivityType.PLAYING, "test mode");
 		} catch (Exception e) {
 			logger.warn("Can't change activity");
-			logger.error("Couldn't change activity.",e);
+			logger.error("Couldn't change activity.", e);
 		}
 	}
 
@@ -189,7 +184,7 @@ public class StatusManager implements Shutdownable {
 
 	private void updateStatusMessage() {
 		// Have your message be written as: Type >>> Message OR just message
-		if(testMode || activityMsgID.equals("-1"))
+		if (testMode || activityMsgID.equals("-1"))
 			return;
 		String separator = ">>>";
 		try {
@@ -206,7 +201,7 @@ public class StatusManager implements Shutdownable {
 
 			activityMsgType = activityMsgType.toLowerCase().strip();
 		} catch (Exception e) {
-			if (!activityMsgID.equals("-1")){
+			if (!activityMsgID.equals("-1")) {
 				System.err.println("Status Message ID is invalid, please enter a new one, or -1 to always skip"
 						+ "\nNote: Send a message in your status channel and copy its id.");
 

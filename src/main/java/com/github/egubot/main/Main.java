@@ -80,8 +80,6 @@ public class Main {
 				Shared.getShutdown().registerShutdownable(Shared.getStatus());
 				
 				printBotInviteLink();
-
-				getPrefix();
 				
 				addListeners();
 
@@ -101,16 +99,6 @@ public class Main {
 		} finally {
 			Shared.getShutdown().initiateShutdown(exitCode);
 		}
-	}
-
-	private static void getPrefix() {
-		String prefix = ConfigManager.getProperty("prefix");
-		if (prefix == null || prefix.isBlank()) {
-			prefix = "b-";
-			ConfigManager.setProperty("prefix", prefix);
-		}
-		prefix = prefix.toLowerCase();
-		Bot.setPrefix(prefix);
 	}
 
 	private static void checkServerList() {
@@ -144,9 +132,6 @@ public class Main {
 
 	private static void restartMain(String[] args) throws IOException {
 		System.out.println();
-		// Done because you can't change the status to offline 
-		// without changing it to online first, to avoid a collision
-		Shared.getStatus().setStatusOnline();
 		Shared.getStatus().setStatusOffline();
 		Shared.getStatus().disconnect();
 		System.out.println("\nRestarting...\n");
