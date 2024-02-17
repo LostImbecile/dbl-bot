@@ -16,7 +16,7 @@ public class MusicResumeCommand implements Command{
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		TrackScheduler.resume(ServerInfoUtilities.getServer(msg).getId());
+		TrackScheduler.resume(ServerInfoUtilities.getServerID(msg));
 		return true;
 	}
 

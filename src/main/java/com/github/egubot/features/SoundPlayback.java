@@ -16,6 +16,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.main.Bot;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.storage.ConfigManager;
@@ -97,7 +98,7 @@ public class SoundPlayback {
 	}
 
 	public static void getCurrentTrackInfo(Message msg) {
-		Server server = getServer(msg);
+		Server server = ServerInfoUtilities.getServer(msg);
 		AudioTrack track = TrackScheduler.getCurrentTrack(server.getId());
 		String videoID = track.getIdentifier();
 		EmbedBuilder embed = new EmbedBuilder();
@@ -125,7 +126,7 @@ public class SoundPlayback {
 	}
 
 	public static void getPlaylistInfo(Message msg) {
-		Server server = getServer(msg);
+		Server server = ServerInfoUtilities.getServer(msg);
 		Map<String, Long> map = TrackScheduler.getPlayListInfo(server.getId());
 		EmbedBuilder embed = new EmbedBuilder();
 		embed.setAuthor(server.getName(), null, server.getIcon().get());
@@ -147,10 +148,6 @@ public class SoundPlayback {
 		return hyperLink + " - " + duration;
 	}
 
-	private static Server getServer(Message msg) {
-		return msg.getServer().get();
-	}
-
 	public static void play(Message msg) {
 		ServerVoiceChannel channel = getVoiceChannel(msg);
 		if (channel == null)
@@ -158,7 +155,7 @@ public class SoundPlayback {
 
 		String name = getPlayArgument(msg.getContent());
 
-		long serverID = getServer(msg).getId();
+		long serverID = ServerInfoUtilities.getServerID(msg);
 		AudioPlayerManager manager = getManager(name);
 
 		boolean isNewPlayer = false;

@@ -15,7 +15,7 @@ public class MusicSkipCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		TrackScheduler.skip(ServerInfoUtilities.getServer(msg).getId());
+		TrackScheduler.skip(ServerInfoUtilities.getServerID(msg));
 		return true;
 	}
 

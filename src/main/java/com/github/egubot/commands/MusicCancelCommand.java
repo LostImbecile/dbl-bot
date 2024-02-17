@@ -16,7 +16,7 @@ public class MusicCancelCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		TrackScheduler.destroy(ServerInfoUtilities.getServer(msg).getId());
+		TrackScheduler.destroy(ServerInfoUtilities.getServerID(msg));
 		return true;
 	}
 

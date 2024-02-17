@@ -15,7 +15,7 @@ public class MusicPauseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		TrackScheduler.pause(ServerInfoUtilities.getServer(msg).getId());
+		TrackScheduler.pause(ServerInfoUtilities.getServerID(msg));
 		return true;
 	}
 
