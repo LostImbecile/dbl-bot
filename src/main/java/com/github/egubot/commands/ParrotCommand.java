@@ -2,6 +2,7 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 
 public class ParrotCommand implements Command {
@@ -13,7 +14,8 @@ public class ParrotCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		msg.getChannel().sendMessage(arguments);
+		if (UserInfoUtilities.isOwner(msg))
+			msg.getChannel().sendMessage(arguments);
 		return true;
 	}
 

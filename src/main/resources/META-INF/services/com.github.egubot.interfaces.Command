@@ -52,3 +52,4 @@ com.github.egubot.commands.LegendsTemplateRemove
 com.github.egubot.commands.LegendsTemplateLock
 com.github.egubot.commands.LegendsTemplateCreate
 com.github.egubot.commands.TestToggleCommand
+com.github.egubot.commands.HelpCommand

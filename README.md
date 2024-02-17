@@ -33,15 +33,12 @@ DBLegends Random Roll:
 - b-template create (name) (filters)
 - b-template remove (name)
 - b-template send
-- disable roll animation
-- enable roll animation
+- b-toggle roll animation
 
 DBLegends Character Search:
 - b-search \*(name) *(filters)
 - b-character send
 - b-tag send
-- b-tag create (name) *(characters)
-- b-tag update (name) (characters)
 
 DBLegends Summon Rate:
 - b-summon (banner_url)
@@ -53,8 +50,8 @@ Automatic Responses:
 - b-response remove (message)
 
 Translate:
-- b-translate set (on)/(off)
-- b-translate set (to)/(from-to)
+- b-translate toggle `[Translates all non-eng messages]`
+- b-translate set (to)/(from-to) `[Shortened form; en, fr]`
 - b-translate languages
 - b-translate (text)/(reply to the message)/(embed)
 
@@ -74,13 +71,12 @@ WebDriver:
 - b-insult (person name) >> (reason)
 - b-grab (youtube link)
 - b-grab mp3 (youtube link)
-- b-convert *(gif/vid) 
+- b-convert *(gif/vid) `[Type of your attachment]`
 
 ChatGPT 3.5:
-- chatgpt activate `[it's off by default]`
-- chatgpt deactivate
+- gpt toggle `[it's off by default]`
 - gpt (message)
-- gpt channel on/off
+- gpt channel toggle
 
 Custom AI:
 - ai (message)

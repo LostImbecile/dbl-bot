@@ -1,0 +1,57 @@
+Everything is case insensitive. Invocation has to be at the beginning of your message, not read otherwise.
+
+Round Brackets indicate operand, stars mean optional, square brackets for comments, everything else needs to be there.
+
+DBLegends Random Roll:
+- b-roll(n) *(filters)
+- b-template create (name) (filters)
+- b-template remove (name)
+- b-template send
+- b-toggle roll animation
+
+DBLegends Character Search:
+- b-search *(name) *(filters)
+- b-character send
+- b-tag send
+
+DBLegends Summon Rate:
+- b-summon (banner_url)
+
+Automatic Responses:
+
+[Types: contain, equal, match]
+- b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> *(reaction) >> *(reaction)...
+- b-response remove (message)
+
+Translate:
+- b-translate toggle [Translates all non-eng messages]
+- b-translate set (to)/(from-to) [Shortened form; en, fr]
+- b-translate languages
+- b-translate (text)/(reply to the message)/(embed)
+
+Weather:
+- b-weather (city) *detailed
+
+Music Player:
+- b-play (link)/(ytsearch: keyword)
+- b-cancel
+- b-pause
+- b-resume
+- b-skip
+- b-info [The playlist's]
+- b-now [Playing now]
+
+WebDriver:
+- b-insult (person name) >> (reason)
+- b-grab (youtube link)
+- b-grab mp3 (youtube link)
+- b-convert *(gif/vid) [Type of your attachment]
+
+ChatGPT 3.5:
+- gpt toggle [it's off by default]
+- gpt (message)
+- gpt channel toggle
+
+Custom AI:
+- ai (message)
+- ai terminate/activate
