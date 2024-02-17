@@ -24,7 +24,6 @@ public class RefreshCommand implements Command {
 			MessageCreateEventHandler.shutdownInternalClasses();
 
 			StorageFacadesHandler.initialise();
-			MessageCreateEventHandler.executorService.submit(MessageCreateEventHandler::initialiseWebhooks);
 
 			msg.getChannel().sendMessage("Refreshed :ok_hand:");
 		} else {
