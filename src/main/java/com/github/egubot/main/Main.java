@@ -68,7 +68,7 @@ public class Main {
 			 */
 			initialiseStatus();
 
-			if (Shared.getStatus().isOnline() && !Shared.isTestMode()) {
+			if (Shared.getStatus().isOnline()) {
 				System.out
 						.println("\nAn instance is already online.\n\nIf that isn't the case, type \"restart\" below.");
 				String st = Shared.getSystemInput().nextLine();
@@ -76,6 +76,9 @@ public class Main {
 					restartMain(args);
 				}
 			} else {
+				// To avoid registering it multiple times when restarting the class
+				Shared.getShutdown().registerShutdownable(Shared.getStatus());
+				
 				printBotInviteLink();
 
 				getPrefix();
@@ -133,7 +136,6 @@ public class Main {
 	private static void initialiseStatus() {
 		StatusManager status = new StatusManager();
 		Shared.setStatus(status);
-		Shared.getShutdown().registerShutdownable(status);
 
 		// Comment this out if you don't want a status message or
 		// configure it as you run the code, the latter is preferred.

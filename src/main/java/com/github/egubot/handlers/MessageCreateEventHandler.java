@@ -34,7 +34,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
 	private static final long HOUR = 1000 * 60 * 60L;
 
-	private static String testServerID = KeyManager.getID("Test_Server_ID");
 	private static String userTargetID = KeyManager.getID("User_Target_ID");
 	private static String mainServerID = KeyManager.getID("Main_Server_ID");
 	private static String userTargetMsgID = KeyManager.getID("User_Target_Msg_ID");
@@ -99,13 +98,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
 				return;
 			}
-
-			// This is so I can run a test version and a non-test version at the same time
-			if (testMode && !isTestServer(msg))
-				return;
-			if (!testMode && isTestServer(msg))
-				return;
-
+			
 			if (CommandManager.processMessage(msg))
 				return;
 
@@ -157,12 +150,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			logger.error("Main handler encountered an error.", e1);
 			Thread.currentThread().interrupt();
 		}
-	}
-
-	private boolean isTestServer(Message msg) {
-		if (msg.isServerMessage())
-			return msg.getServer().get().getIdAsString().equals(testServerID);
-		return false;
 	}
 
 	public static void initialiseWebhooks() {

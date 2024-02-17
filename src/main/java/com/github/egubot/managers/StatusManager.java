@@ -116,7 +116,6 @@ public class StatusManager implements Shutdownable {
 	}
 
 	public void setStatusOnline() {
-		if (!testMode) {
 			try {
 				isStatusChangedToOnline = true;
 				statusMessage.edit("online").join();
@@ -126,11 +125,10 @@ public class StatusManager implements Shutdownable {
 				logger.warn("Can't update status message");
 				logger.error("Couldn't update status message.",e);
 			}
-		}
 	}
 
 	public void setStatusOffline() {
-		if (!testMode && isStatusChangedToOnline) {
+		if (isStatusChangedToOnline) {
 			System.out.println("Updating status....");
 			try {
 				statusMessage.edit("offline").join();
