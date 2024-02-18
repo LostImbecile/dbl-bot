@@ -3,6 +3,8 @@ package com.github.egubot.build;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,10 +99,14 @@ public class LegendsDatabase {
 	private static void getAllTags(Document document) {
 		Elements optionElements = document.select("option");
 
+		Pattern removePattern = Pattern.compile("[é()]");
+		
 		for (Element option : optionElements) {
 			try {
 				int value = Integer.parseInt(option.attr("value"));
-				String label = option.text().toLowerCase().replace("é", "e");
+				String label = option.text().toLowerCase().replace(" ","_");
+				Matcher matcher = removePattern.matcher(label);
+				label = matcher.replaceAll("");
 				tags.add(new Tags(value, label));
 			} catch (NumberFormatException e) {
 				// Not an issue here
