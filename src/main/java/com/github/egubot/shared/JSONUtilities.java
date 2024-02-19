@@ -1,5 +1,12 @@
 package com.github.egubot.shared;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -47,6 +54,28 @@ public class JSONUtilities {
 	public static <T> T jsonToClass(String jsonTxt, Class<T> clazz){
 		Gson gson = new Gson();
 		return gson.fromJson(jsonTxt, clazz);
+	}
+
+	public static void writeListToJson(List<?> list, String fileName) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			gson.toJson(list, writer);
+		} catch (IOException e) {
+			FileUtilities.logger.error("Failed to write list to file.", e);
+		}
+	}
+
+	public static <T> List<T> readListFromJson(String fileName, Class<T[]> type) {
+		try (InputStream input = FileUtilities.getFileInputStream(fileName, true)) {
+			Gson gson = new Gson();
+			T[] array = gson.fromJson(new InputStreamReader(input), type);
+			if (array != null) {
+				return new ArrayList<>(List.of(array));
+			}
+		} catch (IOException e) {
+			FileUtilities.logger.error("Failed to read list from file.", e);
+		}
+		return new ArrayList<>();
 	}
 
 }

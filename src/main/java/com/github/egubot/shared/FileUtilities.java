@@ -14,24 +14,23 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class FileUtilities {
 	protected static final Logger logger = LogManager.getLogger(FileUtilities.class.getName());
 
-	public static void writeListToJson(List<?> list, String fileName) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			gson.toJson(list, writer);
-		} catch (IOException e) {
-			logger.error("Failed to write list to file.", e);
+	public static void createDirectory(String dirName) {
+		try {
+			File directory = new File(dirName);
+			if (!directory.exists()) {
+				directory.mkdirs();
+			}
+		} catch (Exception e) {
+			logger.error("Couldn't create directory.");
 		}
 	}
 
@@ -62,22 +61,9 @@ public class FileUtilities {
 
 		return input;
 	}
-	
+
 	public static boolean isFileExist(String fileName) {
 		return new File(fileName).exists();
-	}
-
-	public static <T> List<T> readListFromJson(String fileName, Class<T[]> type) {
-		try (InputStream input = getFileInputStream(fileName, true)) {
-			Gson gson = new Gson();
-			T[] array = gson.fromJson(new InputStreamReader(input), type);
-			if (array != null) {
-				return new ArrayList<>(List.of(array));
-			}
-		} catch (IOException e) {
-			logger.error("Failed to read list from file.", e);
-		}
-		return new ArrayList<>();
 	}
 
 	private static InputStream getNewFile(File file) {

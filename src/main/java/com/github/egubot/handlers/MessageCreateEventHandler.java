@@ -130,7 +130,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				logger.error("Executor Service shutdown was forced.");
 			}
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
 			logger.error("Shutdown failed.", e);
 		}
 	}
