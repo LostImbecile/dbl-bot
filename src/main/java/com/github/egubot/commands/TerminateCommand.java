@@ -2,6 +2,7 @@ package com.github.egubot.commands;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 import com.github.egubot.main.Bot;
@@ -20,7 +21,7 @@ public class TerminateCommand implements Command {
 		if (arguments.isBlank() || arguments.equals(Bot.getApi().getYourself().getMentionTag())) {
 			boolean isOwner = UserInfoUtilities.isOwner(msg);
 			
-			if (msg.getServer().get().getOwnerId() == msg.getAuthor().getId() || isOwner) {
+			if ( isOwner || ServerInfoUtilities.getServer(msg).getOwnerId() == msg.getAuthor().getId()) {
 				msg.getChannel().sendMessage("Terminating...").join();
 				Main.logger.warn("Terminate message invoked.");
 				Shared.getShutdown().initiateShutdown(0);

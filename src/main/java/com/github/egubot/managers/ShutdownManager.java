@@ -13,7 +13,6 @@ import com.github.egubot.interfaces.Shutdownable;
 
 public class ShutdownManager {
 	private static final Logger logger = LogManager.getLogger(ShutdownManager.class.getName());
-	private boolean hasShutdown = false;
 	private List<Shutdownable> shutdownables;
 
 	public ShutdownManager() {
@@ -25,25 +24,22 @@ public class ShutdownManager {
 	}
 
 	public synchronized void initiateShutdown(int exitCode) {
-		if (!hasShutdown) {
-			logger.info("Shutdown Sequence Initiated");
-			// Some classes need to shutdown last to avoid trouble
-			Collections.sort(shutdownables, Comparator.comparingInt(Shutdownable::getShutdownPriority));
+		logger.info("Shutdown Sequence Initiated");
+		// Some classes need to shutdown last to avoid trouble
+		Collections.sort(shutdownables, Comparator.comparingInt(Shutdownable::getShutdownPriority));
 
-			// Uses its own thread to avoid being run by a thread it's terminating
-			CompletableFuture.runAsync(() -> {
-				for (Shutdownable shutdownable : shutdownables) {
-					try {
-						shutdownable.shutdown();
-					} catch (Exception e) {
-						logger.error("Class shutdown failed.", e);
-					}
+		// Uses its own thread to avoid being run by a thread it's terminating
+		CompletableFuture.runAsync(() -> {
+			for (Shutdownable shutdownable : shutdownables) {
+				try {
+					shutdownable.shutdown();
+				} catch (Exception e) {
+					logger.error("Class shutdown failed.", e);
 				}
+			}
 
-				System.exit(exitCode);
-			});
-			hasShutdown = true;
-		}
+			System.exit(exitCode);
+		});
 	}
 
 }
