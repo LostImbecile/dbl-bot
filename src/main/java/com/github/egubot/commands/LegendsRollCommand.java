@@ -16,9 +16,10 @@ public class LegendsRollCommand implements Command {
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;
-		
+
 		try {
-			LegendsCommandsContext.getLegendsRoll().rollCharacters(arguments, msg.getChannel(),LegendsCommandsContext.isAnimated() );
+			LegendsCommandsContext.getLegendsRoll().rollCharacters(arguments, msg.getChannel(),
+					LegendsCommandsContext.isAnimated());
 		} catch (Exception e) {
 			msg.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
 			logger.error("Legends commands error", e);

@@ -43,7 +43,7 @@ public class LegendsRoll extends LegendsPool {
 		// System.out.println(size);
 		ArrayList<Characters> rolledCharacters = new ArrayList<>(0);
 		try {
-			rollAmount = Integer.parseInt(msgText.substring(6, 7));
+			rollAmount = Integer.parseInt(msgText.substring(0, 1));
 			if (rollAmount > 6)
 				rollAmount = 6;
 		} catch (Exception e1) {
@@ -92,13 +92,13 @@ public class LegendsRoll extends LegendsPool {
 		ArrayList<Characters> pool;
 
 		// Remove number in b-rolln if present
-		if (st.length() > 1 && st.substring(0,1).matches("[0-9]"))
+		if (st.length() > 1 && st.substring(0,1).matches("\\d"))
 			st = st.substring(1);
 		else if (st.length() == 1)
 			st = "";
 
 		st = st.strip();
-		// System.out.println(st);
+		
 		if (st.isBlank()) {
 			pool = (ArrayList<Characters>) LegendsDatabase.getCharactersList();
 		} else {
