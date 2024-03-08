@@ -69,7 +69,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
 				return;
 			}
-			
+
 			try {
 				if (isTestActive) {
 					Class<?> testClass = Class.forName("com.github.egubot.features.Test");
@@ -86,7 +86,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				msgText = replaceAttachmentText(msg, msgText);
 				lowCaseTxt = msgText.toLowerCase();
 			}
-			
+
 			// Check commands
 			if (CommandManager.processMessage(msg))
 				return;
@@ -102,14 +102,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (StorageFacadesHandler.respond(msg, msgText))
 				return;
 
-
 		} catch (Exception e1) {
-			logger.error("Main handler encountered an error.", e1);
+			logger.error("Main handler encountered an error.\nUser message: " + e.getMessageContent(), e1);
 			Thread.currentThread().interrupt();
 		}
 	}
-
-
 
 	public static void shutdownInternalClasses() {
 		try {
