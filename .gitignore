@@ -1,4 +1,5 @@
 /target/
+/.settings/
 /src/main/resources/IDs.txt
 /src/main/resources/Tokens.txt
 /src/main/resources/Autorespond.txt
