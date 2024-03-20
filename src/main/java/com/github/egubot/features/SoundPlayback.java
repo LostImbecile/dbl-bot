@@ -32,10 +32,8 @@ import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManag
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.nico.NicoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.yamusic.YandexMusicAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
@@ -89,10 +87,8 @@ public class SoundPlayback {
 		remotePlayerManager.registerSourceManager(new BandcampAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new BeamAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new GetyarnAudioSourceManager());
-		remotePlayerManager.registerSourceManager(new NicoAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new TwitchStreamAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new VimeoAudioSourceManager());
-		remotePlayerManager.registerSourceManager(new YandexMusicAudioSourceManager());
 
 		localPlayerManager.registerSourceManager(new LocalAudioSourceManager());
 	}
