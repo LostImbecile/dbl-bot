@@ -53,6 +53,10 @@ public class LegendsDatabase {
 	}
 
 	public static void getData(Document document) {
+		charactersList.clear();
+		tags.clear();
+		characterHash.clear();
+		
 		addSpecialTags();
 		getAllTags(document);
 
