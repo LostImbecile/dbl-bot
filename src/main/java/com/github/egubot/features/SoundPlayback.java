@@ -44,9 +44,6 @@ public class SoundPlayback {
 	private static final AudioPlayerManager remotePlayerManager;
 	private static final AudioPlayerManager localPlayerManager;
 
-	private static String prefix;
-
-	private static final Pattern prefixPattern;
 	private static final Pattern angleBracketPattern;
 	private static final User bot;
 
@@ -56,8 +53,6 @@ public class SoundPlayback {
 
 	static {
 		try {
-			prefix = Bot.getPrefix();
-			prefixPattern = Pattern.compile(Pattern.quote(prefix + "play"), Pattern.CASE_INSENSITIVE);
 			angleBracketPattern = Pattern.compile("[<>]");
 
 			remotePlayerManager = new DefaultAudioPlayerManager();
@@ -65,7 +60,7 @@ public class SoundPlayback {
 
 			initialisePlayerManagers();
 
-			bot = Bot.getApi().getYourself();
+			bot = Bot.getYourself();
 		} catch (Exception e) {
 			logger.error("Couldn't inilialise lavaplayer", e);
 			throw e;
@@ -222,11 +217,8 @@ public class SoundPlayback {
 	}
 
 	private static String getPlayArgument(String message) {
-		String name = message;
-		Matcher prefixMatcher = prefixPattern.matcher(name);
-		if (prefixMatcher.find()) {
-			name = prefixMatcher.replaceFirst("").strip();
-		}
+		String name = message.strip();
+		
 		Matcher angleBracketMatcher = angleBracketPattern.matcher(name);
 		name = angleBracketMatcher.replaceAll("");
 		return name;

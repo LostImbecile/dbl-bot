@@ -18,7 +18,7 @@ public class TerminateCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if (arguments.isBlank() || arguments.equals(Bot.getApi().getYourself().getMentionTag())) {
+		if (arguments.isBlank() || arguments.equals(Bot.getYourself().getMentionTag())) {
 			boolean isOwner = UserInfoUtilities.isOwner(msg);
 			
 			if ( isOwner || ServerInfoUtilities.getServer(msg).getOwnerId() == msg.getAuthor().getId()) {

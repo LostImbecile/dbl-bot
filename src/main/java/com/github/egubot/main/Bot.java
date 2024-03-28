@@ -1,22 +1,29 @@
 package com.github.egubot.main;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.user.User;
 
 import com.github.egubot.storage.ConfigManager;
 
 public class Bot {
 	private static DiscordApi api = null;
 	private static String prefix = null;
+	private static User botUser = null;
 
 	private Bot() {
 	}
 
 	public static void setApi(DiscordApi api) {
 		Bot.api = api;
+		botUser = api.getYourself();
 	}
 
 	public static DiscordApi getApi() {
 		return api;
+	}
+	
+	public static User getYourself() {
+		return botUser;
 	}
 
 	// No real performance hit in new JVM versions

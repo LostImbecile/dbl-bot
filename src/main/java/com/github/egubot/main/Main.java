@@ -145,7 +145,7 @@ public class Main {
 		Shared.getStatus().changeActivity();
 		Shared.getStatus().setStatusOnline();
 
-		String botName = Bot.getApi().getYourself().getName();
+		String botName = Bot.getYourself().getName();
 		botName = botName.replaceFirst("^\\p{L}", Character.toUpperCase(botName.charAt(0)) + "");
 
 		System.out.println(
