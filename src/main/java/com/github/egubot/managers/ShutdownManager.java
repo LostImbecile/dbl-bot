@@ -39,7 +39,7 @@ public class ShutdownManager {
 			}
 
 			System.exit(exitCode);
-		});
+		}).join();
 	}
 
 }
