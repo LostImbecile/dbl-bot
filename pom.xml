@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version> <!-- Use the latest version available -->
+			<version>(4.5.13,)</version> <!-- Use the latest version available -->
 		</dependency>
 
 		<dependency>
@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>4.17.0</version>
+			<version>(4.17.0,)</version>
 		</dependency>
 
 		<dependency>
@@ -92,6 +92,17 @@
 			<version>2.17.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>22</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+			<version>22</version>
+		</dependency>
 
 	</dependencies>
 
@@ -150,6 +161,15 @@
 				<configuration>
 					<!-- Set failOnError to false to ignore compilation errors -->
 					<failOnError>false</failOnError>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>0.0.8</version>
+				<configuration>
+					<mainClass>HelloFX</mainClass>
 				</configuration>
 			</plugin>
 
