@@ -109,7 +109,7 @@ public class Main {
 	}
 
 	private static void printBotInviteLink() {
-		System.out.println("You can invite the bot by using the following url:\n" + Bot.getApi().createBotInvite());
+		System.out.println("You can invite the bot by using the following url:\n" + Bot.getInvite());
 	}
 
 	private static String checkArguments(String[] args) {

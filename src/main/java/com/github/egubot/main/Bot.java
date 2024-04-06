@@ -9,6 +9,7 @@ public class Bot {
 	private static DiscordApi api = null;
 	private static String prefix = null;
 	private static User botUser = null;
+	private static String botInvite = null;
 
 	private Bot() {
 	}
@@ -16,12 +17,17 @@ public class Bot {
 	public static void setApi(DiscordApi api) {
 		Bot.api = api;
 		botUser = api.getYourself();
+		botInvite = api.createBotInvite();
+	}
+
+	public static String getInvite() {
+		return botInvite;
 	}
 
 	public static DiscordApi getApi() {
 		return api;
 	}
-	
+
 	public static User getYourself() {
 		return botUser;
 	}

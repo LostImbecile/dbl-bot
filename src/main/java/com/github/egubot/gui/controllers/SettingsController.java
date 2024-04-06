@@ -34,7 +34,7 @@ public class SettingsController {
     private TextField prefixText;
 
     @FXML
-    private ComboBox<?> storageCBox;
+    private ComboBox<String> storageCBox;
 
     @FXML
     void initialize() {
@@ -46,6 +46,8 @@ public class SettingsController {
         assert prefixText != null : "fx:id=\"prefixText\" was not injected: check your FXML file 'Settings.fxml'.";
         assert storageCBox != null : "fx:id=\"storageCBox\" was not injected: check your FXML file 'Settings.fxml'.";
 
+        storageCBox.getItems().addAll("Local","Database","Online");
+        storageCBox.getSelectionModel().select(0);
     }
 
 	public ResourceBundle getResources() {
@@ -112,11 +114,11 @@ public class SettingsController {
 		this.prefixText = prefixText;
 	}
 
-	public ComboBox<?> getStorageCBox() {
+	public ComboBox<String> getStorageCBox() {
 		return storageCBox;
 	}
 
-	public void setStorageCBox(ComboBox<?> storageCBox) {
+	public void setStorageCBox(ComboBox<String> storageCBox) {
 		this.storageCBox = storageCBox;
 	}
     

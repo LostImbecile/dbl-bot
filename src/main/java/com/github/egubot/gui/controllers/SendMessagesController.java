@@ -21,19 +21,19 @@ public class SendMessagesController {
     private TextField channelIDTextField;
 
     @FXML
-    private ListView<?> channelList;
+    private ListView<String> channelList;
 
     @FXML
     private Label channelNameLabel;
 
     @FXML
-    private ListView<?> emojiList;
+    private ListView<String> emojiList;
 
     @FXML
     private TextField reactIDTextField;
 
     @FXML
-    private ComboBox<?> replyReactSelect;
+    private ComboBox<String> replyReactSelect;
 
     @FXML
     private TextArea textArea;
@@ -48,7 +48,82 @@ public class SendMessagesController {
         assert replyReactSelect != null : "fx:id=\"replyReactSelect\" was not injected: check your FXML file 'SendMessages.fxml'.";
         assert textArea != null : "fx:id=\"textArea\" was not injected: check your FXML file 'SendMessages.fxml'.";
 
+        replyReactSelect.getItems().addAll("normal","reply", "react", "edit", "delete");
+        replyReactSelect.getSelectionModel().select(0);
+        
     }
+
+	public ResourceBundle getResources() {
+		return resources;
+	}
+
+	public void setResources(ResourceBundle resources) {
+		this.resources = resources;
+	}
+
+	public URL getLocation() {
+		return location;
+	}
+
+	public void setLocation(URL location) {
+		this.location = location;
+	}
+
+	public TextField getChannelIDTextField() {
+		return channelIDTextField;
+	}
+
+	public void setChannelIDTextField(TextField channelIDTextField) {
+		this.channelIDTextField = channelIDTextField;
+	}
+
+	public ListView<String> getChannelList() {
+		return channelList;
+	}
+
+	public void setChannelList(ListView<String> channelList) {
+		this.channelList = channelList;
+	}
+
+	public Label getChannelNameLabel() {
+		return channelNameLabel;
+	}
+
+	public void setChannelNameLabel(Label channelNameLabel) {
+		this.channelNameLabel = channelNameLabel;
+	}
+
+	public ListView<String> getEmojiList() {
+		return  emojiList;
+	}
+
+	public void setEmojiList(ListView<String> emojiList) {
+		this.emojiList = emojiList;
+	}
+
+	public TextField getReactIDTextField() {
+		return reactIDTextField;
+	}
+
+	public void setReactIDTextField(TextField reactIDTextField) {
+		this.reactIDTextField = reactIDTextField;
+	}
+
+	public ComboBox<String> getReplyReactSelect() {
+		return  replyReactSelect;
+	}
+
+	public void setReplyReactSelect(ComboBox<String> replyReactSelect) {
+		this.replyReactSelect = replyReactSelect;
+	}
+
+	public TextArea getTextArea() {
+		return textArea;
+	}
+
+	public void setTextArea(TextArea textArea) {
+		this.textArea = textArea;
+	}
 
 }
 
