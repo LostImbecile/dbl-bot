@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.gui.controllers.BotInfoController;
+import com.github.egubot.gui.controllers.SendMessagesController;
 import com.github.egubot.gui.controllers.SettingsController;
 import com.github.egubot.logging.JavaFXAppender;
 import com.github.egubot.shared.Shared;
@@ -42,6 +43,8 @@ public class GUIApplication extends Application {
 			configureMainWindow(primaryStage, mainRoot);
 			
 			configureSettingsWindow(mainController);
+			
+			configureSendMessagesWindow(mainController);
 
 			new Thread(() -> {
 				try {
@@ -63,22 +66,41 @@ public class GUIApplication extends Application {
 	}
 
 	@SuppressWarnings("unused")
+	private void configureSendMessagesWindow(BotInfoController mainController) throws IOException {
+		FXMLLoader sendMessagesLoader = new FXMLLoader(getClass().getResource("/fxml/SendMessages.fxml"));
+		Parent sendMessagesRootRoot = sendMessagesLoader.load();
+		SendMessagesController sendMessagesController = (SendMessagesController) sendMessagesLoader.getController();
+		
+		Stage sendMessagesStageStage = new Stage();
+	    sendMessagesStageStage.setTitle("Send Messages With Bot");
+	    setIcon(sendMessagesStageStage);
+
+	    Scene scene = new Scene(sendMessagesRootRoot);
+	    scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
+	    sendMessagesStageStage.setScene(scene);
+	    
+		mainController.getSendMessagesButton().setOnAction(e->{
+		    sendMessagesStageStage.show();
+		});
+	}
+
+	@SuppressWarnings("unused")
 	public void configureSettingsWindow(BotInfoController mainController) throws IOException {
 		FXMLLoader settingsLoader = new FXMLLoader(getClass().getResource("/fxml/Settings.fxml"));
 		Parent settingsRoot = settingsLoader.load();
 		SettingsController settingsController = (SettingsController) settingsLoader.getController();
 		
+		Stage settingsStage = new Stage();
+	    settingsStage.setTitle("Settings");
+	    setIcon(settingsStage);
+
+	    // Create a Scene for the settings
+	    Scene scene = new Scene(settingsRoot);
+	    scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
+	    // Set the settings scene to the stage
+	    settingsStage.setScene(scene);
+
 		mainController.getSettingsButton().setOnAction(e->{
-			Stage settingsStage = new Stage();
-		    settingsStage.setTitle("Settings");
-		    settingsStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/discordIcon.png")));
-
-		    // Create a Scene for the settings
-		    Scene scene = new Scene(settingsRoot);
-		    scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
-		    // Set the settings scene to the stage
-		    settingsStage.setScene(scene);
-
 		    // Show the settings stage
 		    settingsStage.show();
 		});
@@ -95,7 +117,7 @@ public class GUIApplication extends Application {
 		primaryStage.setMinHeight(462 + 20);
 		primaryStage.setMinWidth(740 + 20);
 		primaryStage.setTitle("Your GUI Title");
-		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/discordIcon.png")));
+		setIcon(primaryStage);
 		primaryStage.show();
 
 		// Set up action on close
@@ -105,8 +127,11 @@ public class GUIApplication extends Application {
 			Shared.getShutdown().initiateShutdown(0);
 		});
 	}
+	
+	public void setIcon(Stage stage) {
+		stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/discordIcon.png")));
+	}
 
-	// Method to access the command-line arguments
 	public String[] getArguments() {
 		return args;
 	}

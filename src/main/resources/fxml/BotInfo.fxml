@@ -13,78 +13,145 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="432.0" prefWidth="740.0" style="-fx-background-color: black;" stylesheets="@/css/tabpane.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.egubot.gui.controllers.BotInfoController">
-   <tabs>
-      <Tab closable="false" text="Home">
-        <content>
-          <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: black;">
-               <children>
-                  <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="406.0" prefWidth="740.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <center>
-                        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" prefHeight="442.0" prefWidth="763.0" BorderPane.alignment="CENTER">
-                           <content>
-                              <TextArea fx:id="infoArea" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="286.0" prefWidth="139.0" style="-fx-background-color: white;" wrapText="true" />
-                           </content>
-                        </ScrollPane>
-                     </center>
-                     <right>
-                        <VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="326.0" prefWidth="122.0" style="-fx-border-color: transparent transparent transparent black; -fx-background-color: white;" BorderPane.alignment="CENTER">
-                           <children>
-                              <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="321.0" prefWidth="119.0" spacing="10.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
-                                 <children>
-                                    <Button fx:id="sendMessagesButton" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="110.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;" text="Send Messages" />
-                                    <Button fx:id="copyInviteButton" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="100.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;" text="Copy Invite" />
-                                    <Button fx:id="helpButton" alignment="TOP_CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="50.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;" text="Help" />
-                                    <Button fx:id="settingsButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="12.0" prefWidth="31.0" style="-fx-background-color: transparent;" text="Settings" textAlignment="CENTER">
-                                       <graphic>
-                                          <ImageView fitHeight="23.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../images/settings.png" />
-                                             </image>
-                                             <viewport>
-                                                <Rectangle2D />
-                                             </viewport>
-                                          </ImageView>
-                                       </graphic>
-                                    </Button>
-                                 </children>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </VBox>
-                           </children>
-                        </VBox>
-                     </right>
-                  </BorderPane>
-               </children>
-            </AnchorPane>
-        </content>
-      </Tab>
-      <Tab closable="false" text="Events">
-        <content>
-          <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" prefHeight="404.0" prefWidth="758.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <content>
-                        <TextArea fx:id="eventsArea" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="402.0" prefWidth="748.0" wrapText="true" />
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
-        </content>
-      </Tab>
-      <Tab closable="false" text="Logs">
-        <content>
-          <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" prefHeight="408.0" prefWidth="772.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <content>
-                        <TextArea fx:id="logsArea" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="101.0" prefWidth="806.0" wrapText="true" />
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
-        </content>
-      </Tab>
-   </tabs>
+<TabPane maxHeight="1.7976931348623157E308"
+	maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+	minWidth="-Infinity" prefHeight="432.0" prefWidth="740.0"
+	style="-fx-background-color: black;" stylesheets="@/css/tabpane.css"
+	xmlns="http://javafx.com/javafx/20.0.1"
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="com.github.egubot.gui.controllers.BotInfoController">
+	<tabs>
+		<Tab closable="false" text="Home">
+			<content>
+				<AnchorPane maxHeight="1.7976931348623157E308"
+					maxWidth="1.7976931348623157E308" prefHeight="180.0"
+					prefWidth="200.0" style="-fx-background-color: black;">
+					<children>
+						<BorderPane maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" prefHeight="406.0"
+							prefWidth="740.0" AnchorPane.bottomAnchor="0.0"
+							AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+							AnchorPane.topAnchor="0.0">
+							<center>
+								<ScrollPane fitToHeight="true" fitToWidth="true"
+									hbarPolicy="NEVER" maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" pannable="true"
+									prefHeight="442.0" prefWidth="763.0"
+									BorderPane.alignment="CENTER">
+									<content>
+										<TextArea fx:id="infoArea" editable="false"
+											maxHeight="1.7976931348623157E308"
+											maxWidth="1.7976931348623157E308" prefHeight="286.0"
+											prefWidth="139.0" style="-fx-background-color: white;"
+											wrapText="true" />
+									</content>
+								</ScrollPane>
+							</center>
+							<right>
+								<VBox minHeight="-Infinity" minWidth="-Infinity"
+									prefHeight="326.0" prefWidth="122.0"
+									style="-fx-border-color: transparent transparent transparent black; -fx-background-color: white;"
+									BorderPane.alignment="CENTER">
+									<children>
+										<VBox alignment="TOP_CENTER"
+											maxHeight="1.7976931348623157E308"
+											maxWidth="1.7976931348623157E308" minWidth="-Infinity"
+											prefHeight="321.0" prefWidth="119.0" spacing="10.0"
+											style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
+											<children>
+												<Button fx:id="sendMessagesButton"
+													alignment="TOP_CENTER" maxWidth="-Infinity"
+													minWidth="-Infinity" mnemonicParsing="false"
+													prefHeight="28.0" prefWidth="110.0"
+													style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;"
+													text="Send Messages" />
+												<Button fx:id="copyInviteButton"
+													alignment="TOP_CENTER" maxWidth="-Infinity"
+													minWidth="-Infinity" mnemonicParsing="false"
+													prefHeight="28.0" prefWidth="100.0"
+													style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;"
+													text="Copy Invite" />
+												<Button fx:id="helpButton" alignment="TOP_CENTER"
+													contentDisplay="CENTER" mnemonicParsing="false"
+													prefHeight="26.0" prefWidth="50.0"
+													style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;"
+													text="Help" />
+												<Button fx:id="settingsButton" alignment="CENTER"
+													contentDisplay="GRAPHIC_ONLY" maxWidth="-Infinity"
+													mnemonicParsing="false" prefHeight="12.0" prefWidth="31.0"
+													style="-fx-background-color: transparent;" text="Settings"
+													textAlignment="CENTER">
+													<graphic>
+														<ImageView fitHeight="23.0" fitWidth="25.0"
+															pickOnBounds="true" preserveRatio="true">
+															<image>
+																<Image url="@../images/settings.png" />
+															</image>
+															<viewport>
+																<Rectangle2D />
+															</viewport>
+														</ImageView>
+													</graphic>
+												</Button>
+											</children>
+											<padding>
+												<Insets bottom="10.0" left="10.0" right="10.0"
+													top="10.0" />
+											</padding>
+										</VBox>
+									</children>
+								</VBox>
+							</right>
+						</BorderPane>
+					</children>
+				</AnchorPane>
+			</content>
+		</Tab>
+		<Tab closable="false" text="Events">
+			<content>
+				<AnchorPane maxHeight="1.7976931348623157E308"
+					maxWidth="1.7976931348623157E308" prefHeight="180.0"
+					prefWidth="200.0">
+					<children>
+						<ScrollPane fitToHeight="true" fitToWidth="true"
+							hbarPolicy="NEVER" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" pannable="true"
+							prefHeight="404.0" prefWidth="758.0"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<content>
+								<TextArea fx:id="eventsArea" editable="false"
+									maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" prefHeight="402.0"
+									prefWidth="748.0" wrapText="true" />
+							</content>
+						</ScrollPane>
+					</children>
+				</AnchorPane>
+			</content>
+		</Tab>
+		<Tab closable="false" text="Logs">
+			<content>
+				<AnchorPane maxHeight="1.7976931348623157E308"
+					maxWidth="1.7976931348623157E308" prefHeight="180.0"
+					prefWidth="200.0">
+					<children>
+						<ScrollPane fitToHeight="true" fitToWidth="true"
+							hbarPolicy="NEVER" maxHeight="1.7976931348623157E308"
+							maxWidth="1.7976931348623157E308" pannable="true"
+							prefHeight="408.0" prefWidth="772.0"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<content>
+								<TextArea fx:id="logsArea" editable="false"
+									maxHeight="1.7976931348623157E308"
+									maxWidth="1.7976931348623157E308" prefHeight="101.0"
+									prefWidth="806.0" wrapText="true" />
+							</content>
+						</ScrollPane>
+					</children>
+				</AnchorPane>
+			</content>
+		</Tab>
+	</tabs>
 </TabPane>

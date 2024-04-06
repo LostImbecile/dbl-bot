@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@/css/borderpane.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.egubot.gui.controllers.SendMessagesController">
+	<center>
+		<ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-border-color: black;" BorderPane.alignment="CENTER">
+			<content>
+				<TextArea fx:id="textArea" prefHeight="349.0" prefWidth="425.0" promptText="Press enter to send, or shift-enter for a newline" style="-fx-background-color: white;" wrapText="true" />
+			</content>
+		</ScrollPane>
+	</center>
+	<right>
+		<HBox style="-fx-border-color: black;" BorderPane.alignment="CENTER">
+			<children>
+				<VBox prefHeight="343.0" prefWidth="58.0" style="-fx-border-color: transparent black transparent transparent;">
+					<children>
+						<Label maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" />
+						<ListView fx:id="emojiList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="337.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+					</children>
+				</VBox>
+				<VBox prefHeight="343.0" prefWidth="67.0" style="-fx-border-color: transparent black transparent transparent;">
+					<children>
+						<Label maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" />
+						<ListView fx:id="channelList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+					</children>
+				</VBox>
+			</children>
+		</HBox>
+	</right>
+	<bottom>
+		<HBox prefHeight="24.0" prefWidth="600.0" style="-fx-border-color: black; -fx-background-color: white;" BorderPane.alignment="CENTER">
+			<children>
+				<ComboBox fx:id="replyReactSelect" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="27.0" prefWidth="147.0" />
+				<TextField fx:id="reactIDTextField" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="26.0" prefWidth="507.0" promptText="Message ID in current channel" style="-fx-border-color: transparent transparent transparent black;" HBox.hgrow="ALWAYS" />
+			</children>
+		</HBox>
+	</bottom>
+	<top>
+		<HBox prefHeight="24.0" prefWidth="600.0" style="-fx-border-color: black; -fx-background-color: white;" BorderPane.alignment="CENTER">
+			<children>
+				<TextField fx:id="channelIDTextField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="147.0" promptText="Enter a channel ID here" style="-fx-border-radius: 0;" />
+				<Label fx:id="channelNameLabel" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="26.0" prefWidth="691.0" style="-fx-border-color: transparent transparent transparent black;" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin></Label>
+			</children>
+		</HBox>
+	</top>
+</BorderPane>
