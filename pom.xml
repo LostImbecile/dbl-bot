@@ -161,6 +161,13 @@
 				<configuration>
 					<!-- Set failOnError to false to ignore compilation errors -->
 					<failOnError>false</failOnError>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.apache.logging.log4j</groupId>
+							<artifactId>log4j-core</artifactId>
+							<version>2.22.1</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 

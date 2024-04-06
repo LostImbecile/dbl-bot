@@ -1,0 +1,30 @@
+.tab-pane {
+    -fx-tab-max-height: 30px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 0;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: black; /* Set the background color of the tab content area */
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: black; /* Set the background color of the tab header area */
+}
+
+.tab-header-background {
+    -fx-background-color: black;
+}
+
+.tab {
+ 
+  -fx-background-color: black; 
+  -fx-font-size: 14px;
+  -fx-text-base-color:white;
+}
+
+.tab:selected {
+    -fx-border-style: solid;
+    -fx-border-color: black black white black;
+    -fx-border-width: 3px;
+}

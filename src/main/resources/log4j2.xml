@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="ERROR"
+	packages="com.github.egubot.logging">
 	<Properties>
 		<Property name="filename">./logs</Property>
 	</Properties>
@@ -42,16 +43,24 @@
 			<DefaultRolloverStrategy max="10" />
 		</RollingFile>
 
+		<JavaFXAppender name="GUILog">
+			<PatternLayout
+				pattern="%d{HH:mm:ss} %-5level %logger{0} - %msg%n" />
+		</JavaFXAppender>
+
 	</Appenders>
 	<Loggers>
 		<Root level="off">
 		</Root>
-		<Logger name="com.github.egubot.managers.ShutdownManager" level="info" additivity="false">
+		<Logger name="com.github.egubot.managers.ShutdownManager"
+			level="info" additivity="false">
 			<AppenderRef ref="ConsoleWithInfo" />
+			<AppenderRef ref="GUILog" />
 		</Logger>
 		<Logger name="com" level="warn" additivity="false">
 			<AppenderRef ref="ConsoleWithInfo" />
 			<AppenderRef ref="LogFile" level="error" />
+			<AppenderRef ref="GUILog" />
 		</Logger>
 		<Logger name="org.javacord" level="info" additivity="false">
 			<AppenderRef ref="JavacordLogFile" />
