@@ -9,6 +9,7 @@ import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
 import com.github.egubot.shared.Shared;
 
@@ -49,7 +50,7 @@ public class StatusManager implements Shutdownable {
 						.get();
 			} catch (Exception e) {
 				if (!statusMessageID.equals("-1")) {
-					System.out.println("No valid status message ID, send message? y/n");
+					StreamRedirector.println("","No valid status message ID, send message? y/n");
 
 					if (in.nextLine().equalsIgnoreCase("y")) {
 						try {
@@ -64,7 +65,7 @@ public class StatusManager implements Shutdownable {
 							checkChannelID();
 						}
 					} else {
-						System.out.println("Always skip this? y/n");
+						StreamRedirector.println("","Always skip this? y/n");
 						if (in.nextLine().equalsIgnoreCase("y")) {
 							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.idsFileName);
 						}
@@ -97,7 +98,7 @@ public class StatusManager implements Shutdownable {
 
 	public void disconnect() {
 		try {
-			System.out.println("Disconnecting...");
+			StreamRedirector.println("info","Disconnecting...");
 			api.disconnect();
 		} catch (Exception e) {
 			logger.error("Couldn't disconnect", e);
@@ -125,7 +126,7 @@ public class StatusManager implements Shutdownable {
 	}
 
 	public void setStatusOffline() {
-		System.out.println("Updating status....");
+		StreamRedirector.println("info","Updating status....");
 		try {
 			statusMessage.edit("offline").join();
 		} catch (NullPointerException e1) {

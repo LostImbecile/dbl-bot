@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.github.egubot.logging.StreamRedirector;
+
 public class CharacterHash extends HashSet<Characters> {
 
 	private static final long serialVersionUID = 1659741544544868218L;
@@ -176,7 +178,7 @@ public class CharacterHash extends HashSet<Characters> {
 	public static void printEmptyIDs(Set<Characters> characters) {
 		for (int i = 0; i < characters.size(); i++) {
 			if (((CharacterHash) characters).get(i) == null) {
-				System.out.println(i);
+				StreamRedirector.println("events",i);
 			}
 		}
 	}

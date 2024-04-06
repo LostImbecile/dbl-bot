@@ -39,13 +39,13 @@ public class DiscordAI implements AutoCloseable {
 			HttpResponse response = httpClient.execute(request);
 			String st = FileUtilities.readInputStream(response.getEntity().getContent());
 
-			// System.out.println("Response Status Line: " + response.getStatusLine());
+			// StreamRedirector.println("","Response Status Line: " + response.getStatusLine());
 			// Header[] headers = response.getAllHeaders();
 			// for (Header header : headers) {
-			// System.out.println(header.getName() + ": " + header.getValue());
+			// StreamRedirector.println("",header.getName() + ": " + header.getValue());
 			// }
-			// System.out.println("Response Content:");
-			// System.out.println(result.toString());
+			// StreamRedirector.println("","Response Content:");
+			// StreamRedirector.println("",result.toString());
 
 			st = JSONUtilities.dejsonify(st);
 			st = cleanDuplicates(st);

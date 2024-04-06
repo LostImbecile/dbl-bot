@@ -13,6 +13,7 @@ import com.github.egubot.handlers.LostConnectionHandler;
 import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.handlers.ReconnectEventHandler;
 import com.github.egubot.handlers.ResumeEventHandler;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.managers.StatusManager;
 import com.github.egubot.shared.Shared;
@@ -69,8 +70,8 @@ public class Main {
 			initialiseStatus();
 
 			if (Shared.getStatus().isOnline()) {
-				System.out
-						.println("\nAn instance is already online.\n\nIf that isn't the case, type \"restart\" below.");
+				StreamRedirector.println("info",
+						"\nAn instance is already online.\n\nIf that isn't the case, type \"restart\" below.");
 				String st = Shared.getSystemInput().nextLine();
 				if (st.strip().equalsIgnoreCase("restart")) {
 					restartMain(args);
@@ -78,9 +79,9 @@ public class Main {
 			} else {
 				// To avoid registering it multiple times when restarting the class
 				Shared.getShutdown().registerShutdownable(Shared.getStatus());
-				
+
 				printBotInviteLink();
-				
+
 				addListeners();
 
 				setBotOnline();
@@ -104,12 +105,12 @@ public class Main {
 	private static void checkServerList() {
 		if (Bot.getApi().getServers().isEmpty()) {
 			printBotInviteLink();
-			System.out.println("\nPlease invite it before continuing.");
+			StreamRedirector.println("", "\nPlease invite it before continuing.");
 		}
 	}
 
 	private static void printBotInviteLink() {
-		System.out.println("You can invite the bot by using the following url:\n" + Bot.getInvite());
+		StreamRedirector.println("", "You can invite the bot by using the following url:\n" + Bot.getInvite());
 	}
 
 	private static String checkArguments(String[] args) {
@@ -131,10 +132,10 @@ public class Main {
 	}
 
 	private static void restartMain(String[] args) throws IOException {
-		System.out.println();
+		StreamRedirector.println("", "");
 		Shared.getStatus().setStatusOffline();
 		Shared.getStatus().disconnect();
-		System.out.println("\nRestarting...\n");
+		StreamRedirector.println("", "\nRestarting...\n");
 
 		Main.main(args);
 	}
@@ -148,7 +149,7 @@ public class Main {
 		String botName = Bot.getYourself().getName();
 		botName = botName.replaceFirst("^\\p{L}", Character.toUpperCase(botName.charAt(0)) + "");
 
-		System.out.println(
+		StreamRedirector.println("",
 				"\n" + botName + " is fully online. Press enter here to exit, or write terminate in the server."
 						+ "\nPlease don't exit by closing the console.");
 	}

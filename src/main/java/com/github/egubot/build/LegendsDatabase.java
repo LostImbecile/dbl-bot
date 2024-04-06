@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.legends.CharacterHash;
 import com.github.egubot.objects.legends.Characters;
 import com.github.egubot.objects.legends.Tags;
@@ -236,7 +237,7 @@ public class LegendsDatabase {
 						tags.get(23).getCharacters().put(character);
 
 				} catch (NumberFormatException e) {
-					System.out.println("Failed to parse: " + st);
+					StreamRedirector.println("events","Failed to parse: " + st);
 				}
 			} else {
 				// Specific units someone wanted added

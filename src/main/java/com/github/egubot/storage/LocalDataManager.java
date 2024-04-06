@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.shared.FileUtilities;
 
 public class LocalDataManager implements DataManager {
@@ -31,7 +32,7 @@ public class LocalDataManager implements DataManager {
 	public void initialise(boolean verbose) {
 		readData(null);
 		if (verbose)
-			System.out.println("\n" + dataName + " data successfully loaded!\nDate of last update: "
+			StreamRedirector.println("info","\n" + dataName + " data successfully loaded!\nDate of last update: "
 					+ FileUtilities.getFileLastModified(fileName));
 	}
 

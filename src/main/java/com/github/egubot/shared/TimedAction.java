@@ -8,6 +8,8 @@ import java.util.TimerTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.egubot.logging.StreamRedirector;
+
 public class TimedAction {
 	public static final Logger logger = LogManager.getLogger(TimedAction.class.getName());
 	private volatile boolean isTimerOn;
@@ -138,10 +140,10 @@ public class TimedAction {
 					logger.error("Timer task failed to run.", e);
 
 					if (maxRetries > 0) {
-						System.out.println("Retrying failed task...");
+						StreamRedirector.println("events","Retrying failed task...");
 						startOneInstanceSingleTimer(task, maxRetries);
 					} else {
-						System.out.println("Max retries reached. Task failed.");
+						StreamRedirector.println("events","Max retries reached. Task failed.");
 					}
 				}
 

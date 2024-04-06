@@ -8,6 +8,7 @@ import java.util.Scanner;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.Abbreviations;
@@ -30,7 +31,7 @@ public class SendMessagesFromConsole {
 			String channelID = testChannelID, message = "";
 			TextChannel channel = api.getTextChannelById(channelID).get();
 
-			System.out.println("\nEnter messages you want to send. Notes:" + "\n1- Use %n to separate lines."
+			StreamRedirector.println("","\nEnter messages you want to send. Notes:" + "\n1- Use %n to separate lines."
 					+ "\n2- Paste the channel ID to switch to it."
 					+ "\n3- Press enter without writing anything to exit."
 					+ "\n4- Don't write emojis, mentions and the sort as is, they won't work, write their full name.");
@@ -74,7 +75,7 @@ public class SendMessagesFromConsole {
 	private static String getTestChannelID(DiscordApi api, Scanner in) {
 		String testChannelID = KeyManager.getID("Test_Channel_ID");
 		if (!api.getTextChannelById(testChannelID).isPresent()) {
-			System.out.println("No default starting channel was set, enter a channel ID below:");
+			StreamRedirector.println("","No default starting channel was set, enter a channel ID below:");
 			KeyManager.updateKeys("Test_Channel_ID", in.nextLine(), KeyManager.idsFileName);
 			testChannelID = KeyManager.getID("Test_Channel_ID");
 		}
@@ -108,7 +109,7 @@ public class SendMessagesFromConsole {
 							.addReaction(Abbreviations.getReactionId(element));
 
 			} catch (Exception e) {
-				System.out.println("Failed to send");
+				StreamRedirector.println("","Failed to send");
 			}
 		}
 		
@@ -130,7 +131,7 @@ public class SendMessagesFromConsole {
 				api.getMessageById(messageID, api.getTextChannelById(channelID).get()).get().reply(message,
 						false);
 			} catch (Exception e) {
-				System.out.println("Failed to send");
+				StreamRedirector.println("","Failed to send");
 			}
 		}
 	}

@@ -3,6 +3,8 @@ package com.weatherapi.forecast;
 import java.awt.Color;
 import java.util.List;
 
+import com.github.egubot.logging.StreamRedirector;
+
 public class Weather {
 	String name;
 	String region;
@@ -131,42 +133,42 @@ public class Weather {
 	// method to print the weather information
 	public void printWeather() {
 		if (isError) {
-			System.out.println(errorMessage);
+			StreamRedirector.println("",errorMessage);
 			return;
 		}
 		if (isNull) {
-			System.out.println("null");
+			StreamRedirector.println("","null");
 			return;
 		}
-		System.out.println("Name: " + name);
-		System.out.println("Region: " + region);
-		System.out.println("Country: " + country);
-		System.out.println("Localtime: " + localtime);
+		StreamRedirector.println("","Name: " + name);
+		StreamRedirector.println("","Region: " + region);
+		StreamRedirector.println("","Country: " + country);
+		StreamRedirector.println("","Localtime: " + localtime);
 
-		System.out.println("\nCurrent Weather:");
-		System.out.println("Temp C: " + currentTempC);
-		System.out.println("Condition: " + currentConditionText);
-		System.out.println("Icon: " + currentIcon);
-		System.out.println("Wind MPH: " + currentWindMph);
-		System.out.println("Wind Direction: " + currentWindDir);
-		System.out.println("Humidity: " + currentHumidity);
-		System.out.println("Feelslike C: " + currentFeelslikeC);
+		StreamRedirector.println("","\nCurrent Weather:");
+		StreamRedirector.println("","Temp C: " + currentTempC);
+		StreamRedirector.println("","Condition: " + currentConditionText);
+		StreamRedirector.println("","Icon: " + currentIcon);
+		StreamRedirector.println("","Wind MPH: " + currentWindMph);
+		StreamRedirector.println("","Wind Direction: " + currentWindDir);
+		StreamRedirector.println("","Humidity: " + currentHumidity);
+		StreamRedirector.println("","Feelslike C: " + currentFeelslikeC);
 
-		System.out.println("\nTomorrow's Weather:");
-		System.out.println("Date:" + tomorrowDate);
-		System.out.println("Max Temp: " + maxTempTomorrow);
-		System.out.println("Min Temp: " + minTempTomorrow);
-		System.out.println("Condition: " + conditionTomorrow);
+		StreamRedirector.println("","\nTomorrow's Weather:");
+		StreamRedirector.println("","Date:" + tomorrowDate);
+		StreamRedirector.println("","Max Temp: " + maxTempTomorrow);
+		StreamRedirector.println("","Min Temp: " + minTempTomorrow);
+		StreamRedirector.println("","Condition: " + conditionTomorrow);
 
-		System.out.println("\nTimeline:");
+		StreamRedirector.println("","\nTimeline:");
 		for (Hour hour : hourlyForecast) {
-			System.out.println("Time: " + hour.time);
-			System.out.println("Temp: " + hour.tempC);
-			System.out.println("Condition: " + hour.condition.text);
-			System.out.println("Icon: " + hour.condition.icon);
-			System.out.println("Chance of Rain: " + hour.chanceOfRain);
-			System.out.println("Chance of Snow: " + hour.chanceOfSnow);
-			System.out.println();
+			StreamRedirector.println("","Time: " + hour.time);
+			StreamRedirector.println("","Temp: " + hour.tempC);
+			StreamRedirector.println("","Condition: " + hour.condition.text);
+			StreamRedirector.println("","Icon: " + hour.condition.icon);
+			StreamRedirector.println("","Chance of Rain: " + hour.chanceOfRain);
+			StreamRedirector.println("","Chance of Snow: " + hour.chanceOfSnow);
+			StreamRedirector.println("","");
 		}
 	}
 

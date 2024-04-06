@@ -12,6 +12,7 @@ import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.KeyValue;
 import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.Shared;
@@ -134,22 +135,22 @@ public class KeyManager {
 		String id;
 
 		if (token.isBlank()) {
-			System.out.println("No token, please enter one below:");
+			StreamRedirector.println("","No token, please enter one below:");
 			id = in.nextLine();
 			updateKeys("Discord_API_Key", id, tokensFileName);
 		} else if (token.equals("-1")) {
-			System.out.println("Invalid token, please enter one below:");
+			StreamRedirector.println("","Invalid token, please enter one below:");
 			id = in.nextLine();
 			updateKeys("Discord_API_Key", id, tokensFileName);
 		}
 		if (!(testServerID.length() >= 17 && testServerID.matches("[\\d+]+")) && !testServerID.equals("-1")) {
-			System.out.println("No valid Test server ID, please enter one below, or -1 to always skip.");
+			StreamRedirector.println("","No valid Test server ID, please enter one below, or -1 to always skip.");
 			id = in.nextLine();
 			updateKeys("Test_Server_ID", id, idsFileName);
 		}
 
 		if (!(statusChannelID.length() >= 17 && statusChannelID.matches("[\\d+]+")) && !statusChannelID.equals("-1")) {
-			System.out.println("No valid status channel ID, please enter one below, or -1 to always skip.");
+			StreamRedirector.println("","No valid status channel ID, please enter one below, or -1 to always skip.");
 			id = in.nextLine();
 			updateKeys("Status_Channel_ID", id, idsFileName);
 		}

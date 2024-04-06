@@ -40,7 +40,7 @@ public class LegendsRoll extends LegendsPool {
 			return;
 		}
 		size = pool.size();
-		// System.out.println(size);
+		// StreamRedirector.println("",size);
 		ArrayList<Characters> rolledCharacters = new ArrayList<>(0);
 		try {
 			rollAmount = Integer.parseInt(msgText.substring(0, 1));

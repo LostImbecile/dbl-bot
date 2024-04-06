@@ -43,7 +43,7 @@ public class MessageTimers extends TimedAction {
 			return;
 		}
 
-		// System.out.println("Message is getting scheduled");
+		// StreamRedirector.println("","Message is getting scheduled");
 		TimerTask sendTask = new TimerTask() {
 
 			@Override

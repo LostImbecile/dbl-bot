@@ -16,6 +16,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.ConvertObjects;
@@ -93,14 +94,14 @@ public class OnlineDataManager implements DataManager {
 				storageMessage = api.getMessageById(storageMsgID, api.getTextChannelById(storageChannelID).get())
 						.join();
 				if (verbose)
-					System.out.println("\nNew " + dataName + " message was created.");
+					StreamRedirector.println("events","\nNew " + dataName + " message was created.");
 			} catch (Exception e) {
 				if (verbose)
 					logger.warn("Failed to create new {} message.", dataName);
 				logger.error("Failed to create new {} message.", dataName, e);
 			}
 		} else {
-			System.out.println("\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
+			StreamRedirector.println("","\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
 
 			storageChannelID = Shared.getSystemInput().nextLine();
 			KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);
@@ -176,7 +177,7 @@ public class OnlineDataManager implements DataManager {
 			getLastUpdateDate(newMessage);
 
 			if (verbose) {
-				System.out.println(
+				StreamRedirector.println("info",
 						"\n" + dataName + " data successfully loaded!\nDate of last update: " + lastUpdateDate);
 			}
 
@@ -187,7 +188,7 @@ public class OnlineDataManager implements DataManager {
 
 		} catch (IOException | NullPointerException e) {
 			if (verbose) {
-				System.out.println("\n" + dataName + " data failed to load, internal backup used.");
+				StreamRedirector.println("info","\n" + dataName + " data failed to load, internal backup used.");
 			}
 			logger.error("Reading online data failed.", e);
 			setInputStream(localInputStream);

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.logging.StreamRedirector;
 
 public class CommandRegistry {
 	private static final Logger logger = LogManager.getLogger(CommandRegistry.class.getName());
@@ -68,8 +69,8 @@ public class CommandRegistry {
 	
 	public static void main(String[] args) {
 		new CommandRegistry();
-		System.out.println(CommandRegistry.getNoPrefixCommandmap().size());
-		System.out.println(CommandRegistry.getPrefixCommandmap().size());
+		StreamRedirector.println("",CommandRegistry.getNoPrefixCommandmap().size());
+		StreamRedirector.println("",CommandRegistry.getPrefixCommandmap().size());
 		
 	}
 	

@@ -30,16 +30,16 @@ public abstract class LegendsPool {
 
 			// Turn to postfix from infix (5 + 3 to 3 5 + or so)
 			turnToPostfix(filters, opStack, conStack);
-			// System.out.println(conStack);
+			// StreamRedirector.println("",conStack);
 
-			// System.out.println(conStack.get(0));
+			// StreamRedirector.println("",conStack.get(0));
 			filters = conStack.get(0).split(" ");
 			conStack.clear();
 
 			// Evaluate the -now- postfix filters
 			evaluatePostfix(filters, conStack, pools);
 
-			// System.out.println("return");
+			// StreamRedirector.println("","return");
 			
 			return pools.get(0);
 		} catch (Exception e) {
@@ -79,17 +79,17 @@ public abstract class LegendsPool {
 		 */
 
 		for (String filter : filters) {
-			// System.out.println(st);
+			// StreamRedirector.println("",st);
 			if (isOperator(filter)) {
 				if (popTwo) {
-					// System.out.println("pop 2");
+					// StreamRedirector.println("","pop 2");
 					subPoolFilter = new String[2];
 					subPoolFilter[0] = pop(operandStack);
 					subPoolFilter[1] = pop(operandStack);
 					pools.push(getSubPool(subPoolFilter, new CharacterHash(), null, filter));
 					operandStack.push("-1");
 				} else {
-					// System.out.println("pop 1");
+					// StreamRedirector.println("","pop 1");
 					if (operandStack.size() >= 2
 							&& (!operandStack.get(0).equals("-1") || !operandStack.get(1).equals("-1"))) {
 						subPoolFilter = new String[1];
@@ -131,7 +131,7 @@ public abstract class LegendsPool {
 
 		// In the case of there being only one tag (no equation/subpools)
 		if (!operandStack.isEmpty() && pools.isEmpty()) {
-			// System.out.println("Pop remaining");
+			// StreamRedirector.println("","Pop remaining");
 			subPoolFilter = new String[1];
 			subPoolFilter[0] = pop(operandStack);
 			pools.push(getSubPool(subPoolFilter, new CharacterHash(), null, "&"));
@@ -209,7 +209,7 @@ public abstract class LegendsPool {
 			st = st.replaceAll("(\\w+|\\))(\\s)(\\w+|\\()", "$1 & $3").trim();
 		} while (!temp.equals(st));
 
-		// System.out.println(st);
+		// StreamRedirector.println("",st);
 		st = st.replace("frieza_no_brother", "cooler");
 		
 		return st;
@@ -272,7 +272,7 @@ public abstract class LegendsPool {
 		Tags tag;
 
 		if (subPool1 != null && subPool2 != null) {
-			// System.out.println("Pool1 " + operation + " Pool2");
+			// StreamRedirector.println("","Pool1 " + operation + " Pool2");
 			combineSubPools(subPool1, subPool2, operation);
 
 		} else if (subPoolFilter != null) {
@@ -281,7 +281,7 @@ public abstract class LegendsPool {
 					tag = LegendsDatabase.getTags().get(i);
 
 					if (tag.getName().equalsIgnoreCase(tagCondition)) {
-						// System.out.print(tagCondition + " ");
+						// StreamRedirector.print("",tagCondition + " ");
 						// Initialise subPool if it's empty
 						if (subPool1 != null) {
 							if (subPool1.isEmpty()) {
@@ -291,7 +291,7 @@ public abstract class LegendsPool {
 										((CharacterHash) subPool1).put(tag.getCharacters().get(k));
 								}
 							} else {
-								// System.out.println(" " + operation);
+								// StreamRedirector.println(""," " + operation);
 								combineSubPools(subPool1, tag.getCharacters(), operation);
 							}
 						} else {
@@ -302,7 +302,7 @@ public abstract class LegendsPool {
 								}
 							} else {
 								subPool1 = tag.getCharacters().clone();
-								// System.out.println(" " + operation);
+								// StreamRedirector.println(""," " + operation);
 								combineSubPools(subPool1, subPool2, operation);
 							}
 						}

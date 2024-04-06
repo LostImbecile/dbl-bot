@@ -11,7 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.gui.controllers.BotInfoController;
+import com.github.egubot.logging.CustomOutputStream;
 import com.github.egubot.logging.JavaFXAppender;
+import com.github.egubot.logging.StreamRedirector;
+import com.github.egubot.main.Main;
 import com.github.egubot.shared.Shared;
 
 public class GUIApplication extends Application {
@@ -37,20 +40,22 @@ public class GUIApplication extends Application {
 			JavaFXAppender.setTextArea(mainController.getLogsArea());
 
 			configureMainWindow(primaryStage, mainRoot, mainController);
+			
+			StreamRedirector.registerStream("info", new CustomOutputStream(mainController.getInfoArea()));
+			
+			
 
 			primaryStage.show();
-			
+
 			new Thread(() -> {
 				try {
-					// Main.main(getArguments());
+					 Main.main(getArguments());
 				} catch (Exception e) {
 					logger.fatal(e);
 					Shared.getShutdown().initiateShutdown(1);
 				}
 
 			}).start();
-
-			logger.warn("test");
 
 		} catch (Exception e) {
 			logger.fatal(e);
@@ -73,7 +78,7 @@ public class GUIApplication extends Application {
 		// Set up action on close
 		primaryStage.setOnCloseRequest(event -> {
 			// Perform actions on exit here
-			System.out.println("Exiting the application...");
+			StreamRedirector.println("info","Exiting the application...");
 			Shared.getShutdown().initiateShutdown(0);
 		});
 	}

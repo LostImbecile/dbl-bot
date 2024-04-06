@@ -8,6 +8,7 @@ import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.features.legends.LegendsRoll;
 import com.github.egubot.features.legends.LegendsSearch;
 import com.github.egubot.interfaces.Shutdownable;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.ConvertObjects;
 import com.github.egubot.shared.FileUtilities;
@@ -34,7 +35,7 @@ public class LegendsCommandsContext implements Shutdownable {
 			// Fetches data from the legends website and initialises
 			// classes that are based on it, or doesn't if that fails
 			try {
-				System.out.println("\nFetching characters from dblegends.net...");
+				StreamRedirector.println("info","\nFetching characters from dblegends.net...");
 				
 				LegendsDatabase.initialise();
 				
@@ -65,11 +66,11 @@ public class LegendsCommandsContext implements Shutdownable {
 		if (LegendsDatabase.isDataFetchSuccessfull()) {
 
 			if (backupWebsiteFlag) {
-				System.out.println("Character database was successfully built!");
+				StreamRedirector.println("info","Character database was successfully built!");
 				// Upload current website HTML as backup
 				saveLegendsWebsiteBackup();
 			} else {
-				System.out.println("Character database was successfully built!");
+				StreamRedirector.println("info","Character database was successfully built!");
 			}
 
 		} else {
