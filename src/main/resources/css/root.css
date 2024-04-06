@@ -37,3 +37,59 @@
 .button:pressed {
 	-fx-text-fill: black;
 }
+
+.combo-box{
+	
+	 -fx-focus-traversable:false;
+	 -fx-background-color: white;
+	 -fx-text-fill: black; 
+	 -fx-border-radius: 3.0 3.0 3.0 3.0;
+	 -fx-border-color: 	#D3D3D3;
+	 -fx-font-weight: normal;
+}
+
+.combo-box-popup .list-cell {    
+	
+     -fx-background-color: white;    
+     -fx-text-fill: black;
+      
+}
+
+.combo-box-popup .list-cell:hover {   
+	 
+     -fx-background-color: black;    
+     -fx-text-fill: white;
+}
+
+.combo-box-popup .list-view {    
+	
+     -fx-background-color: white;    
+    
+}
+
+.combo-box .arrow-button .arrow {
+	
+     -fx-background-color: black;
+}
+
+.combo-box .arrow-button {
+	
+     -fx-background-color: white;
+}
+
+.combo-box .text-input{
+	 -fx-padding: 3.0,3.0,3.0,3.0;
+	 -fx-border-radius: 3.0 3.0 3.0 3.0;
+	 -fx-border-color: 	#D3D3D3;
+     -fx-highlight-fill: black;
+}
+
+/* TextField */
+.text-field{
+	 -fx-background-color: white;
+	 -fx-text-fill: black; 
+	 -fx-border-color: 	#D3D3D3;
+	 -fx-border-radius: 3.0 3.0 3.0 3.0;
+	 -fx-highlight-fill: black;
+	
+}

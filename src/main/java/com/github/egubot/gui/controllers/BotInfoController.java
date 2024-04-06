@@ -1,4 +1,4 @@
-package com.github.egubot.gui;
+package com.github.egubot.gui.controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
