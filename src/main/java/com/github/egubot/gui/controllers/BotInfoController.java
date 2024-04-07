@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.github.egubot.commands.RefreshCommand;
 import com.github.egubot.main.Bot;
 
 import javafx.event.ActionEvent;
@@ -39,6 +40,9 @@ public class BotInfoController {
 	private Button helpButton;
 
 	@FXML
+	private Button refreshButton;
+
+	@FXML
 	private TextArea infoArea;
 
 	@FXML
@@ -56,6 +60,11 @@ public class BotInfoController {
 		content.putString(Bot.getInvite());
 
 		Clipboard.getSystemClipboard().setContent(content);
+	}
+
+	@FXML
+	void refreshStorage(ActionEvent event) {
+		RefreshCommand.refresh();
 	}
 
 	@FXML
@@ -106,7 +115,7 @@ public class BotInfoController {
 			settingsStage = new Stage();
 			settingsStage.setTitle("Settings");
 			setIcon(settingsStage);
-			
+
 			settingsStage.setMinHeight(420 + 20);
 			settingsStage.setMinWidth(600 + 20);
 
@@ -130,6 +139,7 @@ public class BotInfoController {
 		assert helpButton != null : "fx:id=\"helpButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert infoArea != null : "fx:id=\"infoArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert logsArea != null : "fx:id=\"logsArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
+		assert refreshButton != null : "fx:id=\"refreshButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert sendMessagesButton != null
 				: "fx:id=\"sendMessagesButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert settingsButton != null

@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.gui.controllers.BotInfoController;
-import com.github.egubot.logging.CustomOutputStream;
+import com.github.egubot.logging.TextAreaOutputStream;
 import com.github.egubot.logging.JavaFXAppender;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Main;
@@ -41,10 +41,10 @@ public class GUIApplication extends Application {
 
 			configureMainWindow(primaryStage, mainRoot, mainController);
 			
-			StreamRedirector.registerStream("info", new CustomOutputStream(mainController.getInfoArea()));
+			StreamRedirector.registerStream("info", new TextAreaOutputStream(mainController.getInfoArea()));
+			StreamRedirector.registerStream("events", new TextAreaOutputStream(mainController.getEventsArea()));
+			StreamRedirector.registerStream("logs", new TextAreaOutputStream(mainController.getLogsArea()));
 			
-			
-
 			primaryStage.show();
 
 			new Thread(() -> {

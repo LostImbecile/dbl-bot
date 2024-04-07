@@ -4,11 +4,15 @@ import javafx.scene.control.TextArea;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class CustomOutputStream extends OutputStream {
+public class TextAreaOutputStream extends OutputStream {
     private final TextArea textArea;
 
-    public CustomOutputStream(TextArea textArea) {
+    public TextAreaOutputStream(TextArea textArea) {
         this.textArea = textArea;
+    }
+    
+    public void reset() {
+    	textArea.clear();
     }
 
     @Override
