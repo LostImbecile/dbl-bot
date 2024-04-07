@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 
 import com.github.egubot.commands.RefreshCommand;
 import com.github.egubot.main.Bot;
+import com.github.egubot.main.Restart;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -53,6 +54,14 @@ public class BotInfoController {
 
 	@FXML
 	private Button settingsButton;
+
+	@FXML
+	private Button restartButton;
+
+	@FXML
+	void restart(ActionEvent event) throws IOException {
+		Restart.restart();
+	}
 
 	@FXML
 	void copyBotInvite(ActionEvent event) {

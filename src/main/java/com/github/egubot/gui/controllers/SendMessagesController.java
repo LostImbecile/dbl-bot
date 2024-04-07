@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 
 public class SendMessagesController {
 
@@ -37,6 +38,21 @@ public class SendMessagesController {
 
     @FXML
     private TextArea textArea;
+    
+    @FXML
+    void channelIDFieldOnKeyPressed(KeyEvent event) {
+
+    }
+
+    @FXML
+    void messageIDFieldOnKeyPressed(KeyEvent event) {
+
+    }
+
+    @FXML
+    void textAreaOnKeyPressed(KeyEvent event) {
+
+    }
 
     @FXML
     void initialize() {

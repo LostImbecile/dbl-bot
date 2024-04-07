@@ -45,7 +45,7 @@ public class GUIApplication extends Application {
 			StreamRedirector.registerStream("events", new TextAreaOutputStream(mainController.getEventsArea()));
 			StreamRedirector.registerStream("logs", new TextAreaOutputStream(mainController.getLogsArea()));
 			
-			primaryStage.show();
+			
 
 			new Thread(() -> {
 				try {
@@ -56,7 +56,9 @@ public class GUIApplication extends Application {
 				}
 
 			}).start();
-
+			
+			primaryStage.show();
+			
 		} catch (Exception e) {
 			logger.fatal(e);
 			e.printStackTrace();

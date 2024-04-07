@@ -74,7 +74,7 @@ public class Main {
 						"\nAn instance is already online.\n\nIf that isn't the case, type \"restart\" below.");
 				String st = Shared.getSystemInput().nextLine();
 				if (st.strip().equalsIgnoreCase("restart")) {
-					restartMain(args);
+					Restart.restart();
 				}
 			} else {
 				// To avoid registering it multiple times when restarting the class
@@ -129,15 +129,6 @@ public class Main {
 		// Comment this out if you don't want a status message or
 		// configure it as you run the code, the latter is preferred.
 		status.checkMessageID();
-	}
-
-	private static void restartMain(String[] args) throws IOException {
-		StreamRedirector.println("", "");
-		Shared.getStatus().setStatusOffline();
-		Shared.getStatus().disconnect();
-		StreamRedirector.println("", "\nRestarting...\n");
-
-		Main.main(args);
 	}
 
 	private static void setBotOnline() {
