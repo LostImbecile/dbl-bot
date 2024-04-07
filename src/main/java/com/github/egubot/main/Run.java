@@ -2,7 +2,9 @@ package com.github.egubot.main;
 
 import java.awt.GraphicsEnvironment;
 import java.io.Console;
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import com.github.egubot.gui.GUIApplication;
 import com.github.egubot.storage.ConfigManager;
@@ -47,8 +49,10 @@ public class Run {
 		// If the bot isn't already in a console it runs the main method
 		if (console == null && !GraphicsEnvironment.isHeadless()) {
 			try {
-				Runtime.getRuntime().exec(new String[] { "cmd", "/K", "Start \"" + title
-						+ "\" java -Xms100m -Xmx800m -jar bot.jar " + String.join(" ", args) + "&& exit", });
+
+				Runtime.getRuntime()
+						.exec(new String[] { "cmd", "/K", "Start \"" + title + "\" java -Xms100m -Xmx800m -jar "
+								+ getJarName() + " " + String.join(" ", args) + "&& exit", });
 			} catch (Exception e) {
 				// If you're not on windows just run the bot through the
 				// terminal or create a shell script for it.
@@ -58,6 +62,17 @@ public class Run {
 			// Arguments you send are handed down to the main class normally
 			Main.main(args);
 		}
+	}
+
+	public static String getJarName() {
+		String jar;
+		try {
+			jar = new File(Run.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getName();
+		} catch (URISyntaxException e) {
+			// default
+			jar = "bot.jar";
+		}
+		return jar;
 	}
 
 }
