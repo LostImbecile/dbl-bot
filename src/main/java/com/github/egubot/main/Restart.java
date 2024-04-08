@@ -10,30 +10,22 @@ public class Restart {
 	private Restart() {
 	}
 
-	public static void restart() throws IOException {
-		// Clean up resources if necessary
+	public static void restart() {
+		if (Run.getJarName().contains(".jar")) {
+			StreamRedirector.println("info", "\nRestarting...\n");
 
-		// Restart the application
-		String[] args = Run.getArgs();
-		ProcessBuilder builder = new ProcessBuilder(Run.getRunCommand(args, Run.getTitle()));
-
-		StreamRedirector.println("", "");
-		Shared.getStatus().setStatusOffline();
-		Shared.getStatus().disconnect();
-		StreamRedirector.println("", "\nRestarting...\n");
-		CompletableFuture.runAsync(() -> {
-			try {
-				if (Run.getJarName().contains(".jar"))
+			CompletableFuture.runAsync(() -> {
+				try {
+					ProcessBuilder builder = new ProcessBuilder(Run.getRunCommand());
 					builder.start();
-				else
-					Main.main(args);
+				} catch (IOException e) {
+					Run.logger.error(e);
+				}
 
-			} catch (IOException e) {
-				Main.logger.error(e);
-			}
-
-			System.exit(0);
-		});
+				Shared.getShutdown().initiateShutdown(2);
+			});
+			
+		}
 	}
 
 }

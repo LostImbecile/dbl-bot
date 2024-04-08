@@ -1,6 +1,5 @@
 package com.github.egubot.main;
 
-import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApiBuilder;
@@ -36,28 +35,18 @@ public class Main {
 	 * Javacord documentation:
 	 * https://javadoc.io/doc/org.javacord/javacord-api
 	 */
-	public static void main(String[] args) throws IOException {
-		FallbackLoggerConfiguration.setDebug(false);
+	public static void main(String[] args) {
 		int exitCode = 0;
-
-		String arguments = checkArguments(args);
-
-		// Important to have all keys. Some will be created for
-		// you, and the rest could be ignored.
-		KeyManager.checkKeys();
-		String token = KeyManager.getToken("Discord_API_Key");
-
 		try {
-			try {
-				// For info about intents check the links at the start of the class
-				Bot.setApi(new DiscordApiBuilder().setToken(token)
-						.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login()
-						.join());
-			} catch (Exception e1) {
-				logger.error("Invalid token. Exiting.");
-				KeyManager.updateKeys("Discord_API_Key", "-1", KeyManager.tokensFileName);
-				Shared.getShutdown().initiateShutdown(1);
-			}
+			FallbackLoggerConfiguration.setDebug(false);
+
+			String arguments = checkArguments(args);
+
+			// Important to have all keys. Some will be created for
+			// you, and the rest could be ignored.
+			KeyManager.checkKeys();
+
+			login();
 
 			checkServerList();
 
@@ -71,34 +60,49 @@ public class Main {
 
 			if (Shared.getStatus().isOnline()) {
 				StreamRedirector.println("info",
-						"\nAn instance is already online.\n\nIf that isn't the case, type \"restart\" below.");
+						"\nAn instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
 				String st = Shared.getSystemInput().nextLine();
-				if (st.strip().equalsIgnoreCase("restart")) {
-					Restart.restart();
+				if (st.strip().equalsIgnoreCase("ignore")) {
+					StreamRedirector.println("", "");;
+					startBot(arguments);
 				}
 			} else {
-				// To avoid registering it multiple times when restarting the class
-				Shared.getShutdown().registerShutdownable(Shared.getStatus());
-
-				printBotInviteLink();
-
-				addListeners();
-
-				setBotOnline();
-
-				checkSendMessagesFromConsoleArg(arguments);
+				startBot(arguments);
 			}
 		} catch (MissingIntentException e) {
 			logger.fatal("Missing intent. Program will exit.", e);
-			exitCode = 1;
-		} catch (IOException e) {
-			logger.fatal("Fatal Error: Database Not Found. Program will exit.", e);
 			exitCode = 1;
 		} catch (Exception e) {
 			logger.fatal("Fatal uncaught error. Program will exit.", e);
 			exitCode = 1;
 		} finally {
 			Shared.getShutdown().initiateShutdown(exitCode);
+		}
+	}
+
+	public static void startBot(String arguments) {
+		// To avoid registering it multiple times when restarting the class
+		Shared.getShutdown().registerShutdownable(Shared.getStatus());
+
+		printBotInviteLink();
+
+		addListeners();
+
+		setBotOnline();
+
+		checkSendMessagesFromConsoleArg(arguments);
+	}
+
+	public static void login() {
+		try {
+			String token = KeyManager.getToken("Discord_API_Key");
+			// For info about intents check the links at the start of the class
+			Bot.setApi(new DiscordApiBuilder().setToken(token)
+					.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login().join());
+		} catch (Exception e1) {
+			logger.error("Invalid token. Exiting.");
+			KeyManager.updateKeys("Discord_API_Key", "-1", KeyManager.tokensFileName);
+			Shared.getShutdown().initiateShutdown(1);
 		}
 	}
 

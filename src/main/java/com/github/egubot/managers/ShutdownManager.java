@@ -32,7 +32,8 @@ public class ShutdownManager {
 		CompletableFuture.runAsync(() -> {
 			for (Shutdownable shutdownable : shutdownables) {
 				try {
-					shutdownable.shutdown();
+					if (shutdownable != null)
+						shutdownable.shutdown();
 				} catch (Exception e) {
 					logger.error("Class shutdown failed.", e);
 				}

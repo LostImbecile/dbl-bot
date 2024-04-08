@@ -3,32 +3,27 @@ package com.github.egubot.main;
 import java.awt.GraphicsEnvironment;
 import java.io.Console;
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.github.egubot.gui.GUIApplication;
 import com.github.egubot.storage.ConfigManager;
 
 public class Run {
+	public static final Logger logger = LogManager.getLogger(Run.class.getName());
 	private static String[] args;
-	private static String title;
 
 	public static void main(String[] args) {
-		try {
-			Run.setArgs(args);
-			// For the GUI, not implemented so keep commented
-			if (ConfigManager.getBooleanProperty("CommandLine_Version"))
-				runInConsole(args);
-			else
-				GUIApplication.main(args);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		Run.setArgs(args);
+		// For the GUI, not implemented so keep commented
+		if (ConfigManager.getBooleanProperty("CommandLine_Version"))
+			runInConsole(args);
+		else
+			GUIApplication.main(args);
 	}
 
-	public static void runInConsole(String[] args) throws IOException {
+	public static void runInConsole(String[] args) {
 		/*
 		 * Runs cmd through another cmd and launches the bot
 		 * for info go here:
@@ -38,12 +33,10 @@ public class Run {
 		 */
 		Console console = System.console();
 
-		getCmdTitle(args);
-		
 		// If the bot isn't already in a console it runs the main method
 		if (console == null && !GraphicsEnvironment.isHeadless() && getJarName().contains(".jar")) {
 			try {
-				Runtime.getRuntime().exec(getRunCommand(args, getTitle()));
+				Runtime.getRuntime().exec(getRunInConsoleCommand());
 			} catch (Exception e) {
 				// If you're not on windows just run the bot through the
 				// terminal or create a shell script for it.
@@ -55,22 +48,28 @@ public class Run {
 		}
 	}
 
-	public static void getCmdTitle(String[] args) {
-		setTitle("Discord Bot");
+	public static String getCmdTitle() {
+		String title = "Discord Bot";
 		for (String arg : args) {
 			if (arg.toLowerCase().contains("title:")) {
-				setTitle(arg.replaceAll("[-\"]", "").replaceAll("(?i)title:", ""));
+				title = arg.replaceAll("[-\"]", "").replaceAll("(?i)title:", "");
 				break;
 			}
 		}
-		if (getTitle().isBlank()) {
-			setTitle("Discord Bot");
+		if (title.isBlank()) {
+			title = "Discord Bot";
 		}
+
+		return title;
 	}
 
-	public static String[] getRunCommand(String[] args, String title) {
-		return new String[] { "cmd", "/K", "Start \"" + title + "\" java -Xms100m -Xmx800m -jar " + getJarName() + " "
-				+ String.join(" ", args) + "&& exit", };
+	public static String[] getRunInConsoleCommand() {
+		return new String[] { "cmd", "/K", "Start \"" + getCmdTitle() + "\" java -Xms100m -Xmx800m -jar " + getJarName()
+				+ " " + String.join(" ", args) + "&& exit", };
+	}
+
+	public static String[] getRunCommand() {
+		return new String[] { "java -Xms100m -Xmx800m -jar " + getJarName() + " " + String.join(" ", args), };
 	}
 
 	public static String getJarName() {
@@ -90,14 +89,6 @@ public class Run {
 
 	public static void setArgs(String[] args) {
 		Run.args = args;
-	}
-
-	public static String getTitle() {
-		return title;
-	}
-
-	public static void setTitle(String title) {
-		Run.title = title;
 	}
 
 }
