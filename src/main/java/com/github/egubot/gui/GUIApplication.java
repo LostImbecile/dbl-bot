@@ -87,7 +87,7 @@ public class GUIApplication extends Application {
 		// Set up action on close
 		primaryStage.setOnCloseRequest(event -> {
 			// Perform actions on exit here
-			StreamRedirector.println("info", "Exiting the application...");
+			StreamRedirector.println("info", "\nExiting the application...");
 			Shared.getShutdown().initiateShutdown(0);
 		});
 	}

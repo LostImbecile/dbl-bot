@@ -16,6 +16,7 @@ public class Run {
 
 	public static void main(String[] args) {
 		Run.setArgs(args);
+
 		// For the GUI, not implemented so keep commented
 		if (ConfigManager.getBooleanProperty("CommandLine_Version"))
 			runInConsole(args);
@@ -64,12 +65,12 @@ public class Run {
 	}
 
 	public static String[] getRunInConsoleCommand() {
-		return new String[] { "cmd", "/K", "Start \"" + getCmdTitle() + "\" java -Xms100m -Xmx800m -jar " + getJarName()
-				+ " " + String.join(" ", args) + "&& exit", };
+		return new String[] { "cmd", "/K", "Start", "\"" + getCmdTitle() + "\"", "java", "-Xms100m", "-Xmx800m", "-jar",
+				getJarName(), String.join(" ", args), "&& exit" };
 	}
 
 	public static String[] getRunCommand() {
-		return new String[] { "java -Xms100m -Xmx800m -jar " + getJarName() + " " + String.join(" ", args), };
+		return new String[] { "java", "-Xms100m", "-Xmx800m", "-jar", getJarName(), String.join(" ", args) };
 	}
 
 	public static String getJarName() {

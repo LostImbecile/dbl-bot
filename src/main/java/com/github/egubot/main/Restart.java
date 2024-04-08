@@ -22,8 +22,10 @@ public class Restart {
 					Run.logger.error(e);
 				}
 
-				Shared.getShutdown().initiateShutdown(2);
-			});
+			}).thenRun(() -> {
+	            // Shut down the current process after starting the new one
+	            Shared.getShutdown().initiateShutdown(2);
+	        });
 			
 		}
 	}
