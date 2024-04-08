@@ -12,6 +12,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.features.MessageFormats;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.legends.CharacterHash;
 import com.github.egubot.objects.legends.Characters;
 
@@ -82,7 +83,7 @@ public class LegendsRoll extends LegendsPool {
 			}
 
 		} catch (CompletionException e1) {
-			System.err.println("rip at legends reroll");
+			StreamRedirector.println("","rip at legends reroll");
 		}
 
 	}

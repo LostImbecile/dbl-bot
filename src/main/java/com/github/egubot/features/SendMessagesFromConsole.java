@@ -10,6 +10,7 @@ import org.javacord.api.entity.channel.TextChannel;
 
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
+import com.github.egubot.main.Main;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.shared.Shared;
@@ -39,7 +40,7 @@ public class SendMessagesFromConsole {
 			while (true) {
 
 				message = in.nextLine();
-
+				
 				if (message.isBlank() || message.equals("\n") || message.equals("exit"))
 					break;
 
@@ -68,7 +69,8 @@ public class SendMessagesFromConsole {
 				}
 			}
 		} catch (NoSuchElementException e) {
-			System.err.println("\nSomething invalid was entered. Program will need to exit.");
+			Main.logger.error(e);
+			StreamRedirector.println("","\nSomething invalid was entered. Program will need to exit.");
 		}
 	}
 

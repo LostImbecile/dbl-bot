@@ -8,7 +8,10 @@
 	-fx-background-insets: 0.0;
 	-fx-border-width: 0.0;
 }
-
+.label {
+	 -fx-background-color: white;
+	 -fx-font-weight: bold;
+}
 .text-area .content {
 	-fx-background-color: white, white, white, white;
 }
@@ -88,7 +91,7 @@
 .text-field{
 	 -fx-background-color: white;
 	 -fx-text-fill: black; 
-	 -fx-border-color: 	#D3D3D3;
+	 -fx-border-color: 	black;
 	 -fx-border-radius: 3.0 3.0 3.0 3.0;
 	 -fx-highlight-fill: black;
 	
@@ -98,6 +101,6 @@
 	-fx-background-color: white;
 	-fx-background-image: null;
     -fx-mark-color: black;
-    -fx-border-radius: 15px;
+    -fx-border-radius: 15.0px;
     -fx-border-color: black;
 }

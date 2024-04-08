@@ -12,6 +12,7 @@ import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.UpdatableObjects;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.objects.Attributes;
 import com.github.egubot.objects.autorespond.Response;
@@ -83,7 +84,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			} else if (response.getResponseType().equalsIgnoreCase("Special")) {
 
 			} else {
-				System.err.println("\nThe following line is invalid and cannot be invoked:\n" + response.toString());
+				StreamRedirector.println("","\nThe following line is invalid and cannot be invoked:\n" + response.toString());
 			}
 		}
 

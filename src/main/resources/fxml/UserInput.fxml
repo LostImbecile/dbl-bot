@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity"
+	minHeight="-Infinity" minWidth="-Infinity" prefHeight="68.0"
+	prefWidth="573.0" xmlns="http://javafx.com/javafx/20.0.1"
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="com.github.egubot.gui.controllers.UserInputController">
+	<top>
+		<Label fx:id="promptLabel" maxHeight="1.7976931348623157E308"
+			maxWidth="1.7976931348623157E308" prefHeight="24.0" prefWidth="574.0"
+			text="Label" wrapText="true" BorderPane.alignment="CENTER" />
+	</top>
+	<center>
+		<TextField fx:id="inputField"
+			maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+			prefHeight="123.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+	</center>
+	<right>
+		<Button fx:id="submitButton" maxHeight="1.7976931348623157E308"
+			maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+			onAction="#submit"
+			style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;"
+			text="Submit" BorderPane.alignment="CENTER" />
+	</right>
+</BorderPane>

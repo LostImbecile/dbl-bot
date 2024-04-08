@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.build.RollTemplates;
+import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.legends.CharacterHash;
 import com.github.egubot.objects.legends.Characters;
 import com.github.egubot.objects.legends.Tags;
@@ -352,7 +353,7 @@ public abstract class LegendsPool {
 				pool1.remove(pool2.get(siteID));
 			}
 		} else {
-			System.err.println("undefined operation at legends reroll: " + operation);
+			StreamRedirector.println("","undefined operation at legends reroll: " + operation);
 		}
 
 	}
