@@ -1,4 +1,4 @@
-package com.github.egubot.logging;
+package com.github.egubot.io;
 
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;

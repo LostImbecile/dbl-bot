@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.github.egubot.logging.TextFieldInputStream;
+import com.github.egubot.io.TextFieldInputStream;
 
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;

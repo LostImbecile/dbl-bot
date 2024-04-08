@@ -13,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.egubot.gui.controllers.BotInfoController;
 import com.github.egubot.gui.controllers.UserInputController;
-import com.github.egubot.logging.TextAreaOutputStream;
+import com.github.egubot.io.LabelOutputStream;
+import com.github.egubot.io.TextAreaOutputStream;
 import com.github.egubot.logging.JavaFXAppender;
-import com.github.egubot.logging.LabelOutputStream;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Main;
 import com.github.egubot.main.Run;

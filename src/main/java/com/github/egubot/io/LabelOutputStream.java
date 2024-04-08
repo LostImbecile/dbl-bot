@@ -1,4 +1,4 @@
-package com.github.egubot.logging;
+package com.github.egubot.io;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
