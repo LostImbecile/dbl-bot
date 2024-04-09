@@ -10,20 +10,13 @@
  	-fx-text-fill: black;
 	-fx-highlight-fill: black;
 }
+
 .label {
 	 -fx-background-color: white;
 	 -fx-font-weight: bold;
 }
 .text-area .content {
 	-fx-background-color: white, white, white, white;
-}
-
-.text-area:focused .content {
-	-fx-background-color: white, white, white, white;
-}
-
-.text-area:focused {
-	-fx-highlight-fill: transparent;
 }
 
 .anchor-pane {
@@ -96,7 +89,6 @@
 	 -fx-border-color: 	black;
 	 -fx-border-radius: 3.0 3.0 3.0 3.0;
 	 -fx-highlight-fill: black;
-	
 }
 
 .radio-button .radio {
