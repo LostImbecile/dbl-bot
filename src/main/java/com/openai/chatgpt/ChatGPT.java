@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.github.egubot.managers.KeyManager;
-import com.github.egubot.shared.JSONUtilities;
+import com.github.egubot.shared.utils.JSONUtilities;
 
 public class ChatGPT {
 

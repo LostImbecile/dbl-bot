@@ -9,7 +9,7 @@ import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 import com.github.egubot.logging.StreamRedirector;
-import com.github.egubot.shared.ConvertObjects;
+import com.github.egubot.shared.utils.ConvertObjects;
 
 public class RefreshCommand implements Command {
 

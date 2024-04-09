@@ -18,7 +18,7 @@ import org.javacord.api.entity.user.User;
 
 import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.main.Bot;
-import com.github.egubot.shared.ConvertObjects;
+import com.github.egubot.shared.utils.ConvertObjects;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.webautomation.GetYoutubeVideoInfo;
 import com.github.lavaplayer.AudioLoadHandler;

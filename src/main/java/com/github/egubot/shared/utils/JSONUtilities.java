@@ -1,4 +1,4 @@
-package com.github.egubot.shared;
+package com.github.egubot.shared.utils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

@@ -6,8 +6,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import com.github.egubot.shared.FileUtilities;
-import com.github.egubot.shared.JSONUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
+import com.github.egubot.shared.utils.JSONUtilities;
 
 public class DiscordAI implements AutoCloseable {
 	private final CloseableHttpClient httpClient;

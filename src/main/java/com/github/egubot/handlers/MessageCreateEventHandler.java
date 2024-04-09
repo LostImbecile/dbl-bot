@@ -17,8 +17,8 @@ import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.managers.CommandManager;
 import com.github.egubot.managers.ShutdownManager;
-import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.Shared;
+import com.github.egubot.shared.utils.FileUtilities;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.DataManagerSwitcher;
 

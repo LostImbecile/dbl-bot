@@ -50,7 +50,7 @@ public class StatusManager implements Shutdownable {
 						.get();
 			} catch (Exception e) {
 				if (!statusMessageID.equals("-1")) {
-					StreamRedirector.println("","No valid status message ID, send message? y/n");
+					StreamRedirector.println("prompt","No valid status message ID, send message? y/n");
 
 					if (in.nextLine().equalsIgnoreCase("y")) {
 						try {
@@ -65,7 +65,7 @@ public class StatusManager implements Shutdownable {
 							checkChannelID();
 						}
 					} else {
-						StreamRedirector.println("","Always skip this? y/n");
+						StreamRedirector.println("prompt","Always skip this? y/n");
 						if (in.nextLine().equalsIgnoreCase("y")) {
 							KeyManager.updateKeys("Status_Message_ID", "-1", KeyManager.idsFileName);
 						}
@@ -80,7 +80,7 @@ public class StatusManager implements Shutdownable {
 	private void checkChannelID() {
 		if (!statusChannelID.equals("-1") && (!api.getTextChannelById(statusChannelID).isPresent())) {
 
-			StreamRedirector.println("","Status channel ID is invalid, please enter a new one, or -1 to always skip");
+			StreamRedirector.println("prompt","Status channel ID is invalid, please enter a new one, or -1 to always skip");
 
 			String id = Shared.getSystemInput().nextLine();
 			KeyManager.updateKeys("Status_Channel_ID", id, KeyManager.idsFileName);
@@ -203,7 +203,7 @@ public class StatusManager implements Shutdownable {
 			activityMsgType = activityMsgType.toLowerCase().strip();
 		} catch (Exception e) {
 			if (!activityMsgID.equals("-1")) {
-				StreamRedirector.println("","Status Message ID is invalid, please enter a new one, or -1 to always skip"
+				StreamRedirector.println("prompt","Status Message ID is invalid, please enter a new one, or -1 to always skip"
 						+ "\nNote: Send a message in your status channel and copy its id.");
 
 				String id = Shared.getSystemInput().nextLine();

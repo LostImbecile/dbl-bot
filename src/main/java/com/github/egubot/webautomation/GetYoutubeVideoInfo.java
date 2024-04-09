@@ -16,8 +16,8 @@ import org.jsoup.nodes.Document;
 
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.YoutubeInfo;
-import com.github.egubot.shared.FileUtilities;
-import com.github.egubot.shared.JSONUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
+import com.github.egubot.shared.utils.JSONUtilities;
 
 public class GetYoutubeVideoInfo {
 	private static final Logger logger = LogManager.getLogger(GetYoutubeVideoInfo.class.getName());

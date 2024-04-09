@@ -19,9 +19,9 @@ import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
 import com.github.egubot.managers.KeyManager;
-import com.github.egubot.shared.ConvertObjects;
-import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.Shared;
+import com.github.egubot.shared.utils.ConvertObjects;
+import com.github.egubot.shared.utils.FileUtilities;
 
 public class OnlineDataManager implements DataManager {
 	private static final Logger logger = LogManager.getLogger(OnlineDataManager.class.getName());
@@ -101,7 +101,7 @@ public class OnlineDataManager implements DataManager {
 				logger.error("Failed to create new {} message.", dataName, e);
 			}
 		} else {
-			StreamRedirector.println("","\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
+			StreamRedirector.println("prompt","\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
 
 			storageChannelID = Shared.getSystemInput().nextLine();
 			KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);

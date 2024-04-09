@@ -4,8 +4,8 @@ import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Command;
 import com.github.egubot.objects.Attributes;
-import com.github.egubot.shared.FileUtilities;
-import com.github.egubot.shared.JSONUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
+import com.github.egubot.shared.utils.JSONUtilities;
 
 public class AttributesSendCommand implements Command{
 

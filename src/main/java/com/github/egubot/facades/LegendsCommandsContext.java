@@ -10,9 +10,9 @@ import com.github.egubot.features.legends.LegendsSearch;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.managers.KeyManager;
-import com.github.egubot.shared.ConvertObjects;
-import com.github.egubot.shared.FileUtilities;
 import com.github.egubot.shared.Shared;
+import com.github.egubot.shared.utils.ConvertObjects;
+import com.github.egubot.shared.utils.FileUtilities;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.LocalDataManager;
 

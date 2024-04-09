@@ -3,7 +3,7 @@ package com.github.egubot.commands;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.interfaces.Command;
-import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
 
 public class VerseCommand implements Command {
 

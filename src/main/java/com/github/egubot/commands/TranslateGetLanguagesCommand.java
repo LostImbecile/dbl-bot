@@ -6,7 +6,7 @@ import org.javacord.api.entity.message.Message;
 
 import com.azure.services.Translate;
 import com.github.egubot.interfaces.Command;
-import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
 
 public class TranslateGetLanguagesCommand implements Command {
 

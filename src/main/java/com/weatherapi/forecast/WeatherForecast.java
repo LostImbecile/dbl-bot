@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import com.github.egubot.managers.KeyManager;
-import com.github.egubot.shared.FileUtilities;
-import com.github.egubot.shared.JSONUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
+import com.github.egubot.shared.utils.JSONUtilities;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
