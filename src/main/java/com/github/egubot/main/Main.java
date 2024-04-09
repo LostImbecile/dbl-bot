@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.intent.Intent;
-import org.javacord.api.exception.MissingIntentException;
 import org.javacord.api.util.logging.FallbackLoggerConfiguration;
 
 import com.github.egubot.features.SendMessagesFromConsole;
+import com.github.egubot.gui.GUIApplication;
 import com.github.egubot.handlers.LostConnectionHandler;
 import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.handlers.ReconnectEventHandler;
@@ -36,48 +36,38 @@ public class Main {
 	 * https://javadoc.io/doc/org.javacord/javacord-api
 	 */
 	public static void main(String[] args) {
-		int exitCode = 0;
-		try {
-			FallbackLoggerConfiguration.setDebug(false);
+		FallbackLoggerConfiguration.setDebug(false);
 
-			String arguments = checkArguments(args);
+		String arguments = checkArguments(args);
 
-			// Important to have all keys. Some will be created for
-			// you, and the rest could be ignored.
-			KeyManager.checkKeys();
+		// Important to have all keys. Some will be created for
+		// you, and the rest could be ignored.
+		KeyManager.checkKeys();
 
-			login();
+		login();
 
-			checkServerList();
+		checkServerList();
 
-			/*
-			 * Status message to prevent multiple instances being up at once, bot needs to
-			 * send and edit it.
-			 * 
-			 * If you won't give the bot to someone else this isn't needed.
-			 */
-			initialiseStatus();
+		/*
+		 * Status message to prevent multiple instances being up at once, bot needs to
+		 * send and edit it.
+		 * 
+		 * If you won't give the bot to someone else this isn't needed.
+		 */
+		initialiseStatus();
 
-			if (Shared.getStatus().isOnline()) {
-				StreamRedirector.println("info",
-						"\nAn instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
-				String st = Shared.getSystemInput().nextLine();
-				if (st.strip().equalsIgnoreCase("ignore")) {
-					StreamRedirector.println("", "");;
-					startBot(arguments);
-				}
-			} else {
+		if (Shared.getStatus().isOnline()) {
+			StreamRedirector.println("info",
+					"\nAn instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
+			String st = Shared.getSystemInput().nextLine();
+			if (st.strip().equalsIgnoreCase("ignore")) {
+				StreamRedirector.println("", "");
 				startBot(arguments);
 			}
-		} catch (MissingIntentException e) {
-			logger.fatal("Missing intent. Program will exit.", e);
-			exitCode = 1;
-		} catch (Exception e) {
-			logger.fatal("Fatal uncaught error. Program will exit.", e);
-			exitCode = 1;
-		} finally {
-			Shared.getShutdown().initiateShutdown(exitCode);
+		} else {
+			startBot(arguments);
 		}
+
 	}
 
 	public static void startBot(String arguments) {
@@ -90,7 +80,8 @@ public class Main {
 
 		setBotOnline();
 
-		checkSendMessagesFromConsoleArg(arguments);
+		if (!GUIApplication.isGUIOn)
+			checkSendMessagesFromConsoleArg(arguments);
 	}
 
 	public static void login() {

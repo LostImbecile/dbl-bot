@@ -30,7 +30,7 @@
 							<right>
 								<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="326.0" prefWidth="122.0" style="-fx-border-color: transparent transparent transparent black; -fx-background-color: white;" BorderPane.alignment="CENTER">
 									<children>
-										<VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="321.0" prefWidth="119.0" spacing="10.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
+										<VBox fx:id="buttonsVbox" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="321.0" prefWidth="119.0" spacing="10.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS">
 											<children>
 												<Button fx:id="sendMessagesButton" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openSendMessagesWindow" prefHeight="28.0" prefWidth="110.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;" text="Send Messages" />
 												<Button fx:id="copyInviteButton" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#copyBotInvite" prefHeight="28.0" prefWidth="100.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 5;" text="Copy Invite" />

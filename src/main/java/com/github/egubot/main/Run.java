@@ -7,7 +7,10 @@ import java.net.URISyntaxException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javacord.api.exception.MissingIntentException;
+
 import com.github.egubot.gui.GUIApplication;
+import com.github.egubot.shared.Shared;
 import com.github.egubot.storage.ConfigManager;
 
 public class Run {
@@ -16,12 +19,23 @@ public class Run {
 
 	public static void main(String[] args) {
 		Run.setArgs(args);
+		int exitCode = 0;
+		try {
+			// For the GUI, not implemented so keep commented
+			if (ConfigManager.getBooleanProperty("CommandLine_Version"))
+				runInConsole(args);
+			else
+				GUIApplication.main(args);
 
-		// For the GUI, not implemented so keep commented
-		if (ConfigManager.getBooleanProperty("CommandLine_Version"))
-			runInConsole(args);
-		else
-			GUIApplication.main(args);
+		} catch (MissingIntentException e) {
+			logger.fatal("Missing intent. Program will exit.", e);
+			exitCode = 1;
+		} catch (Exception e) {
+			logger.fatal("Fatal uncaught error. Program will exit.", e);
+			exitCode = 1;
+		} finally {
+			Shared.getShutdown().initiateShutdown(exitCode);
+		}
 	}
 
 	public static void runInConsole(String[] args) {

@@ -3,6 +3,7 @@ package com.github.egubot.info;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;
@@ -36,6 +37,12 @@ public class ServerInfoUtilities {
 
 	public static Server getServer(Message msg) {
 		Server server = msg.getServer().get();
+		addServer(server.getId(), server);
+		return server;
+	}
+	
+	public static Server getServer(ServerTextChannel channel) {
+		Server server = channel.getServer();
 		addServer(server.getId(), server);
 		return server;
 	}

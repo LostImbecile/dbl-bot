@@ -1,30 +1,22 @@
 package com.github.egubot.objects;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Abbreviations {
-	private String name, id;
+	private Map<String, String> abbreviationMap;
 
-	public Abbreviations(String name, String id) {
-		this.name = name;
-		this.id = id;
-	}
+    public Abbreviations() {
+        abbreviationMap = new HashMap<>();
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void addAbbreviation(String name, String id) {
+        abbreviationMap.put(name, id);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getAbbreviationId(String name) {
+        return abbreviationMap.get(name);
+    }
 
 	public static String getReactionId(String id) {
 		if (id.matches("<.*>"))
@@ -32,13 +24,23 @@ public class Abbreviations {
 		
 		return id;
 	}
+	
+	public String replaceReactionIds(String input) {
+		 for (Map.Entry<String, String> entry : abbreviationMap.entrySet()) {
+	            input = input.replace(entry.getValue(), getReactionId(entry.getValue()));
+	        }
+	        return input;
+	}
 
-	public static String replaceAbbreviations(String input, List<Abbreviations> abbreviations) {
-		for (Abbreviations abbreviation : abbreviations) {
-			input = input.replace(abbreviation.getName(), abbreviation.getId());
-		}
-		return input;
+	public String replaceAbbreviations(String input) {
+        for (Map.Entry<String, String> entry : abbreviationMap.entrySet()) {
+            input = input.replace(entry.getKey(), entry.getValue());
+        }
+        return input;
+    }
 
+	public Map<String, String> getAbbreviationMap() {
+		return abbreviationMap;
 	}
 
 }

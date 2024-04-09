@@ -44,7 +44,7 @@ public class UserInputController {
 	}
 
 	@FXML
-	void initialize() throws IOException {
+	void initialize() {
 		assert inputField != null : "fx:id=\"inputField\" was not injected: check your FXML file 'UserInput.fxml'.";
 		assert promptLabel != null : "fx:id=\"promptLabel\" was not injected: check your FXML file 'UserInput.fxml'.";
 		assert submitButton != null : "fx:id=\"submitButton\" was not injected: check your FXML file 'UserInput.fxml'.";

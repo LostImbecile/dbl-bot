@@ -24,14 +24,14 @@
 			<children>
 				<VBox prefHeight="343.0" prefWidth="58.0" style="-fx-border-color: transparent black transparent transparent;">
 					<children>
-						<Label maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" />
+						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" />
 						<ListView fx:id="emojiList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="337.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
 					</children>
 				</VBox>
-				<VBox prefHeight="343.0" prefWidth="67.0" style="-fx-border-color: transparent black transparent transparent;">
+				<VBox prefHeight="342.0" prefWidth="131.0" style="-fx-border-color: transparent black transparent transparent;" HBox.hgrow="SOMETIMES">
 					<children>
-						<Label maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" />
-						<ListView fx:id="channelList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" />
+						<ListView fx:id="channelList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="126.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
 					</children>
 				</VBox>
 			</children>
@@ -40,15 +40,15 @@
 	<bottom>
 		<HBox prefHeight="24.0" prefWidth="600.0" style="-fx-border-color: black; -fx-background-color: white;" BorderPane.alignment="CENTER">
 			<children>
-				<ComboBox fx:id="replyReactSelect" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="27.0" prefWidth="147.0" />
-				<TextField fx:id="reactIDTextField" maxHeight="-Infinity" minHeight="-Infinity" onKeyPressed="#messageIDFieldOnKeyPressed" prefHeight="26.0" prefWidth="507.0" promptText="Message ID in current channel" style="-fx-border-color: transparent transparent transparent black;" HBox.hgrow="ALWAYS" />
+				<ComboBox fx:id="messageTypeCombo" maxHeight="-Infinity" maxWidth="-Infinity" onAction="#messageSendTypeChange" prefHeight="27.0" prefWidth="147.0" />
+				<TextField fx:id="messageIDTextField" maxHeight="-Infinity" minHeight="-Infinity" onAction="#changeMessageID" prefHeight="26.0" prefWidth="507.0" promptText="Message ID in current channel" style="-fx-border-color: transparent transparent transparent black;" HBox.hgrow="ALWAYS" />
 			</children>
 		</HBox>
 	</bottom>
 	<top>
 		<HBox prefHeight="24.0" prefWidth="600.0" style="-fx-border-color: black; -fx-background-color: white;" BorderPane.alignment="CENTER">
 			<children>
-				<TextField fx:id="channelIDTextField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#channelIDFieldOnKeyPressed" prefHeight="26.0" prefWidth="147.0" promptText="Enter a channel ID here" style="-fx-border-radius: 0;" />
+				<TextField fx:id="channelIDTextField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#changeChannelID" prefHeight="26.0" prefWidth="147.0" promptText="Enter a channel ID here" style="-fx-border-radius: 0;" />
 				<Label fx:id="channelNameLabel" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="26.0" prefWidth="691.0" style="-fx-border-color: transparent transparent transparent black;" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets />

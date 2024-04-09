@@ -18,18 +18,22 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class BotInfoController {
-
 	private Stage settingsStage = null;
 	private Stage sendMessagesStage = null;
+	private SendMessagesController sendMessagesController = null;
 
 	@FXML
 	private ResourceBundle resources;
 
 	@FXML
 	private URL location;
+
+	@FXML
+	private VBox buttonsVbox;
 
 	@FXML
 	private Button copyInviteButton;
@@ -86,6 +90,8 @@ public class BotInfoController {
 			initialiseSendMessagesStage();
 			sendMessagesStage.show();
 			sendMessagesStage.toFront();
+
+			sendMessagesController.initialiseDefaultChannel();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -94,6 +100,8 @@ public class BotInfoController {
 	public void initialiseSendMessagesStage() throws IOException {
 		FXMLLoader sendMessagesLoader = new FXMLLoader(getClass().getResource("/fxml/SendMessages.fxml"));
 		Parent sendMessagesRootRoot = sendMessagesLoader.load();
+		sendMessagesController = sendMessagesLoader.getController();
+
 		sendMessagesStage = new Stage();
 		sendMessagesStage.setTitle("Send Messages With Bot");
 		setIcon(sendMessagesStage);
@@ -226,6 +234,14 @@ public class BotInfoController {
 
 	public void setSettingsButton(Button settingsButton) {
 		this.settingsButton = settingsButton;
+	}
+
+	public VBox getButtonsVbox() {
+		return buttonsVbox;
+	}
+
+	public void setButtonsVbox(VBox buttonsVbox) {
+		this.buttonsVbox = buttonsVbox;
 	}
 
 }

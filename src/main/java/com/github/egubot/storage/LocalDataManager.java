@@ -14,7 +14,7 @@ import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.interfaces.DataManager;
 import com.github.egubot.logging.StreamRedirector;
-import com.github.egubot.shared.FileUtilities;
+import com.github.egubot.shared.utils.FileUtilities;
 
 public class LocalDataManager implements DataManager {
 	private static final Logger logger = LogManager.getLogger(LocalDataManager.class.getName());

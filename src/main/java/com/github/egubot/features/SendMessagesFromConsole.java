@@ -1,7 +1,5 @@
 package com.github.egubot.features;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -16,15 +14,15 @@ import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.shared.Shared;
 
 public class SendMessagesFromConsole {
-	
+	private static Abbreviations emojis = getEmojis();
+
 	private SendMessagesFromConsole() {
-		
+
 	}
 
 	public static void start() {
 		DiscordApi api = Bot.getApi();
 		Scanner in = Shared.getSystemInput();
-		ArrayList<Abbreviations> emojis = (ArrayList<Abbreviations>) getEmojis();
 
 		String testChannelID = getTestChannelID(api, in);
 
@@ -32,7 +30,7 @@ public class SendMessagesFromConsole {
 			String channelID = testChannelID, message = "";
 			TextChannel channel = api.getTextChannelById(channelID).get();
 
-			StreamRedirector.println("","\nEnter messages you want to send. Notes:" + "\n1- Use %n to separate lines."
+			StreamRedirector.println("", "\nEnter messages you want to send. Notes:" + "\n1- Use %n to separate lines."
 					+ "\n2- Paste the channel ID to switch to it."
 					+ "\n3- Press enter without writing anything to exit."
 					+ "\n4- Don't write emojis, mentions and the sort as is, they won't work, write their full name.");
@@ -40,8 +38,8 @@ public class SendMessagesFromConsole {
 			while (true) {
 
 				message = in.nextLine();
-				
-				if (message.isBlank() || message.equals("\n") || message.equals("exit"))
+
+				if (message.isBlank() || message.equals("exit"))
 					break;
 
 				if (message.length() >= 17 && message.matches("[\\d+]+")) {
@@ -50,36 +48,36 @@ public class SendMessagesFromConsole {
 					continue;
 				}
 
-				message = Abbreviations.replaceAbbreviations(message, emojis);
-				
+				message = emojis.replaceAbbreviations(message);
+
 				message = addNewlines(message);
-				
+
 				if (message.contains("reply SET")) {
-					
+
 					sendReply(api, message, channel);
-					
+
 				} else if (message.contains("react SET")) {
-					
+
 					sendReaction(api, message, channel);
-					
+
 				} else {
-					
+
 					channel.sendMessage(message);
-					
+
 				}
 			}
 		} catch (NoSuchElementException e) {
 			Main.logger.error(e);
-			StreamRedirector.println("","\nSomething invalid was entered. Program will need to exit.");
+			StreamRedirector.println("", "\nSomething invalid was entered. Program will need to exit.");
 		}
 	}
 
 	private static String getTestChannelID(DiscordApi api, Scanner in) {
-		String testChannelID = KeyManager.getID("Test_Channel_ID");
+		String testChannelID = KeyManager.getID("Default_Message_Channel_ID");
 		if (!api.getTextChannelById(testChannelID).isPresent()) {
-			StreamRedirector.println("","No default starting channel was set, enter a channel ID below:");
-			KeyManager.updateKeys("Test_Channel_ID", in.nextLine(), KeyManager.idsFileName);
-			testChannelID = KeyManager.getID("Test_Channel_ID");
+			StreamRedirector.println("prompt", "No default starting channel was set, enter a channel ID below:");
+			KeyManager.updateKeys("Default_Message_Channel_ID", in.nextLine(), KeyManager.idsFileName);
+			testChannelID = KeyManager.getID("Default_Message_Channel_ID");
 		}
 		return testChannelID;
 	}
@@ -105,16 +103,14 @@ public class SendMessagesFromConsole {
 				channelID = channel.getIdAsString();
 
 			try {
-				messageArray = messageArray[3].split(" "); // Note: Separate emojis by spaces
-				for (String element : messageArray)
-					api.getMessageById(messageID, api.getTextChannelById(channelID).get()).get()
-							.addReaction(Abbreviations.getReactionId(element));
+				api.getMessageById(messageID, api.getTextChannelById(channelID).get()).get()
+						.addReaction(emojis.replaceReactionIds(messageArray[3]));
 
 			} catch (Exception e) {
-				StreamRedirector.println("","Failed to send");
+				StreamRedirector.println("", "Failed to send");
 			}
 		}
-		
+
 	}
 
 	private static void sendReply(DiscordApi api, String message, TextChannel channel) {
@@ -130,10 +126,9 @@ public class SendMessagesFromConsole {
 				channelID = channel.getIdAsString();
 
 			try {
-				api.getMessageById(messageID, api.getTextChannelById(channelID).get()).get().reply(message,
-						false);
+				api.getMessageById(messageID, api.getTextChannelById(channelID).get()).get().reply(message, false);
 			} catch (Exception e) {
-				StreamRedirector.println("","Failed to send");
+				StreamRedirector.println("", "Failed to send");
 			}
 		}
 	}
@@ -147,25 +142,25 @@ public class SendMessagesFromConsole {
 	 * 
 	 * I don't care enough to do that myself however.
 	 */
-	private static List<Abbreviations> getEmojis() {
-		ArrayList<Abbreviations> emojis = new ArrayList<>(0);
+	public static Abbreviations getEmojis() {
+		Abbreviations emojis = new Abbreviations();
 
-		emojis.add(new Abbreviations("shinsmug", "<:ShinSmug:792523496726331434>"));
-		emojis.add(new Abbreviations("friezasmug", "<:FriezaSmug:789862857206530098>"));
-		emojis.add(new Abbreviations("gokuhuh", "<:huh:1184466187938185286>"));
-		emojis.add(new Abbreviations("nohoney", "<:nohoney:879731892818174012>"));
-		emojis.add(new Abbreviations(":sad:", "<:sad:1020780174901522442>"));
-		emojis.add(new Abbreviations("pecansmug", "<:PikkonSmug:789966590649040946>"));
-		emojis.add(new Abbreviations("thisguy", "<:thisguy:955513164315918336>"));
-		emojis.add(new Abbreviations("pepelaugh", "<:pepelaughpoint:819703838533353482>"));
-		emojis.add(new Abbreviations("yeshoney", "<:yeshoney:797101097273131069>"));
-		emojis.add(new Abbreviations("turles", "<:Orenokachida:797720523127259166>"));
-		emojis.add(new Abbreviations("orang", "<:orang:1020780129129091232>"));
-		emojis.add(new Abbreviations("pepehm", "<:pepehime_orihime:1040386873840906290>"));
-		emojis.add(new Abbreviations("cooler1", "<a:saikyo:792521951100796958>"));
-		emojis.add(new Abbreviations("cooler2", "<a:da:792522031601287218>"));
-		emojis.add(new Abbreviations("IE", "<:InternetE:792524260454432768>"));
-		emojis.add(new Abbreviations("joea", "<:joea:1144008494568194099>"));
+		emojis.addAbbreviation("shinsmug", "<:ShinSmug:792523496726331434>");
+		emojis.addAbbreviation("friezasmug", "<:FriezaSmug:789862857206530098>");
+		emojis.addAbbreviation("gokuhuh", "<:huh:1184466187938185286>");
+		emojis.addAbbreviation("nohoney", "<:nohoney:879731892818174012>");
+		emojis.addAbbreviation(":sad:", "<:sad:1020780174901522442>");
+		emojis.addAbbreviation("pecansmug", "<:PikkonSmug:789966590649040946>");
+		emojis.addAbbreviation("thisguy", "<:thisguy:955513164315918336>");
+		emojis.addAbbreviation("pepelaugh", "<:pepelaughpoint:819703838533353482>");
+		emojis.addAbbreviation("yeshoney", "<:yeshoney:797101097273131069>");
+		emojis.addAbbreviation("turles", "<:Orenokachida:797720523127259166>");
+		emojis.addAbbreviation("orang", "<:orang:1020780129129091232>");
+		emojis.addAbbreviation("pepehm", "<:pepehime_orihime:1040386873840906290>");
+		emojis.addAbbreviation("cooler1", "<a:saikyo:792521951100796958>");
+		emojis.addAbbreviation("cooler2", "<a:da:792522031601287218>");
+		emojis.addAbbreviation("IE", "<:InternetE:792524260454432768>");
+		emojis.addAbbreviation("joea", "<:joea:1144008494568194099>");
 
 		return emojis;
 	}

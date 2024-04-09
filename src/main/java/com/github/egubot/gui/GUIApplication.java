@@ -23,12 +23,13 @@ import com.github.egubot.shared.Shared;
 
 public class GUIApplication extends Application {
 	private static final Logger logger = LogManager.getLogger(GUIApplication.class.getName());
-	// Store the command-line arguments
-	private static Thread mainThread = null;
+	public static boolean isGUIOn = false;
 
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			GUIApplication.setGUIOn(true);
+
 			// Load the FXML file
 			FXMLLoader mainLoader = new FXMLLoader(getClass().getResource("/fxml/BotInfo.fxml"));
 			Parent mainRoot = mainLoader.load();
@@ -44,8 +45,13 @@ public class GUIApplication extends Application {
 			StreamRedirector.registerStream("events", new TextAreaOutputStream(mainController.getEventsArea()));
 			StreamRedirector.registerStream("logs", new TextAreaOutputStream(mainController.getLogsArea()));
 
-			new Thread(() -> Main.main(Run.getArgs())).start();
-
+			Thread mainThread = new Thread(() -> {
+				Main.main(Run.getArgs());
+				mainController.getButtonsVbox().setDisable(false);
+			});
+			mainThread.start();
+			
+			mainController.getButtonsVbox().setDisable(true);
 			primaryStage.show();
 
 		} catch (Exception e) {
@@ -60,16 +66,16 @@ public class GUIApplication extends Application {
 		Parent userInputRoot = userInputWindowLoader.load();
 		UserInputController userInputController = (UserInputController) userInputWindowLoader.getController();
 
-		StreamRedirector.registerStream("question", new LabelOutputStream(userInputController.getPromptLabel()));
+		StreamRedirector.registerStream("prompt", new LabelOutputStream(userInputController.getPromptLabel()));
 
 		Scene scene = new Scene(userInputRoot);
 		scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
-		
+
 		Stage stage = new Stage();
 		stage.setScene(scene);
 		stage.setTitle("Pending input");
 		setIcon(stage);
-		
+
 		userInputController.initialiseInputStream(stage);
 	}
 
@@ -100,11 +106,12 @@ public class GUIApplication extends Application {
 		launch(args);
 	}
 
-	public static Thread getMainThread() {
-		return mainThread;
+	public static boolean isGUIOn() {
+		return isGUIOn;
 	}
 
-	public static void setMainThread(Thread mainThread) {
-		GUIApplication.mainThread = mainThread;
+	private static void setGUIOn(boolean isGUIOn) {
+		GUIApplication.isGUIOn = isGUIOn;
 	}
+
 }
