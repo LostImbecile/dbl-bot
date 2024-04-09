@@ -10,6 +10,7 @@ public class Bot {
 	private static String prefix = null;
 	private static User botUser = null;
 	private static String botInvite = null;
+	private static String botName = null;
 
 	private Bot() {
 	}
@@ -18,6 +19,11 @@ public class Bot {
 		Bot.api = api;
 		botUser = api.getYourself();
 		botInvite = api.createBotInvite();
+		botName = botUser.getName();
+	}
+	
+	public static String getName() {
+		return botName;
 	}
 
 	public static String getInvite() {

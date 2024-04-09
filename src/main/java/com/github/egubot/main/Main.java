@@ -80,7 +80,7 @@ public class Main {
 
 		setBotOnline();
 
-		if (!GUIApplication.isGUIOn)
+		if (!GUIApplication.isGUIOn())
 			checkSendMessagesFromConsoleArg(arguments);
 	}
 
@@ -132,7 +132,7 @@ public class Main {
 		Shared.getStatus().changeActivity();
 		Shared.getStatus().setStatusOnline();
 
-		String botName = Bot.getYourself().getName();
+		String botName = Bot.getName();
 		botName = botName.replaceFirst("^\\p{L}", Character.toUpperCase(botName.charAt(0)) + "");
 
 		StreamRedirector.println("",

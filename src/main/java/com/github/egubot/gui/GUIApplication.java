@@ -1,6 +1,7 @@
 package com.github.egubot.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,13 +18,14 @@ import com.github.egubot.io.LabelOutputStream;
 import com.github.egubot.io.TextAreaOutputStream;
 import com.github.egubot.logging.JavaFXAppender;
 import com.github.egubot.logging.StreamRedirector;
+import com.github.egubot.main.Bot;
 import com.github.egubot.main.Main;
 import com.github.egubot.main.Run;
 import com.github.egubot.shared.Shared;
 
 public class GUIApplication extends Application {
 	private static final Logger logger = LogManager.getLogger(GUIApplication.class.getName());
-	public static boolean isGUIOn = false;
+	private static boolean isGUIOn = false;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -48,9 +50,10 @@ public class GUIApplication extends Application {
 			Thread mainThread = new Thread(() -> {
 				Main.main(Run.getArgs());
 				mainController.getButtonsVbox().setDisable(false);
+				Platform.runLater(() -> primaryStage.setTitle(Bot.getName()));
 			});
 			mainThread.start();
-			
+
 			mainController.getButtonsVbox().setDisable(true);
 			primaryStage.show();
 
@@ -87,7 +90,7 @@ public class GUIApplication extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.setMinHeight(462 + 20);
 		primaryStage.setMinWidth(740 + 20);
-		primaryStage.setTitle("Your GUI Title");
+		primaryStage.setTitle("Loading...");
 		setIcon(primaryStage);
 
 		// Set up action on close
