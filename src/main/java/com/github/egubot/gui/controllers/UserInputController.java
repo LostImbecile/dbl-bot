@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.github.egubot.io.TextFieldInputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import com.github.egubot.io.TextFieldInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
@@ -21,7 +23,9 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class UserInputController {
+	public static final Logger logger = LogManager.getLogger(UserInputController.class.getName());
 	private PipedOutputStream pipedOutputStream;
+	private Stage userInputStage = null;
 
 	@FXML
 	private ResourceBundle resources;
@@ -54,6 +58,8 @@ public class UserInputController {
 		PipedInputStream pipedInputStream = new TextFieldInputStream(getInputField(), stage);
 		pipedOutputStream = new PipedOutputStream(pipedInputStream);
 
+		userInputStage = stage;
+
 		// Set an action listener on the text field to write to the output stream
 		getInputField().setOnAction(event -> {
 			flushText();
@@ -83,8 +89,9 @@ public class UserInputController {
 			pipedOutputStream.flush();
 
 			getInputField().clear();
-		} catch (IOException e) {
-			e.printStackTrace();
+			userInputStage.close();
+		} catch (Exception e) {
+			logger.error(e);
 		}
 	}
 
