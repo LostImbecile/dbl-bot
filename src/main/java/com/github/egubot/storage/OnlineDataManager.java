@@ -101,7 +101,7 @@ public class OnlineDataManager implements DataManager {
 				logger.error("Failed to create new {} message.", dataName, e);
 			}
 		} else {
-			StreamRedirector.println("prompt","\nStorage channel ID is invalid, please enter a new one, or -1 to always skip.");
+			StreamRedirector.println("prompt","Storage channel ID is invalid, please enter a new one, or -1 to always skip.");
 
 			storageChannelID = Shared.getSystemInput().nextLine();
 			KeyManager.updateKeys("Storage_Channel_ID", storageChannelID, KeyManager.idsFileName);

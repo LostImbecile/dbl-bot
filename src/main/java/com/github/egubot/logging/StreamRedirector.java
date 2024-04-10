@@ -50,6 +50,24 @@ public class StreamRedirector {
 		}
 		defaultPrintStream.println(message);
 	}
+	
+	public static void println(String identifier) {
+		OutputStream outputStream = outputStreams.get(identifier);
+		if (outputStream != null) {
+			PrintStream printStream = new PrintStream(outputStream);
+			printStream.println();
+			printStream.flush();
+		}
+		defaultPrintStream.println();
+	}
+	
+	public static void println() {
+		defaultPrintStream.println();
+	}
+	
+	public static void println(Object message) {
+		defaultPrintStream.println(message);
+	}
 
 	public static void print(String identifier, Object message) {
 		OutputStream outputStream = outputStreams.get(identifier);

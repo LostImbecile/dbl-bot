@@ -83,7 +83,7 @@ public class LegendsRoll extends LegendsPool {
 			}
 
 		} catch (CompletionException e1) {
-			StreamRedirector.println("","rip at legends reroll");
+			StreamRedirector.println("events","rip at legends reroll");
 		}
 
 	}

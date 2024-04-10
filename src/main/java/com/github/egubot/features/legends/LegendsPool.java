@@ -353,7 +353,7 @@ public abstract class LegendsPool {
 				pool1.remove(pool2.get(siteID));
 			}
 		} else {
-			StreamRedirector.println("","undefined operation at legends reroll: " + operation);
+			StreamRedirector.println("events","undefined operation at legends reroll: " + operation);
 		}
 
 	}

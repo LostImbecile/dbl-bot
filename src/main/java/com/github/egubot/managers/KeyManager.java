@@ -38,7 +38,7 @@ public class KeyManager {
 		InputStream input = FileUtilities.getFileInputStream(tokensFileName, true);
 
 		if (input == null) {
-			StreamRedirector.println("","Couldn't find or create tokens file");
+			StreamRedirector.println("events","Couldn't find or create tokens file");
 			return "";
 		}
 
@@ -50,7 +50,7 @@ public class KeyManager {
 		InputStream input = FileUtilities.getFileInputStream(idsFileName, true);
 
 		if (input == null) {
-			StreamRedirector.println("","Couldn't find or create IDs file");
+			StreamRedirector.println("events","Couldn't find or create IDs file");
 			return "";
 		}
 
@@ -122,7 +122,7 @@ public class KeyManager {
 			}
 		} catch (IOException e) {
 			logger.error("Error updating input files.", e);
-			StreamRedirector.println("","Couldn't update keys.");
+			StreamRedirector.println("events","Couldn't update keys.");
 		}
 	}
 

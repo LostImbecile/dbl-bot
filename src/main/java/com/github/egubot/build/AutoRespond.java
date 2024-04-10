@@ -84,7 +84,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			} else if (response.getResponseType().equalsIgnoreCase("Special")) {
 
 			} else {
-				StreamRedirector.println("","\nThe following line is invalid and cannot be invoked:\n" + response.toString());
+				StreamRedirector.println("events","\nThe following line is invalid and cannot be invoked:\n" + response.toString());
 			}
 		}
 

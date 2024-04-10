@@ -57,8 +57,9 @@ public class Main {
 		initialiseStatus();
 
 		if (Shared.getStatus().isOnline()) {
-			StreamRedirector.println("info",
-					"\nAn instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
+			StreamRedirector.println("An instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
+			StreamRedirector.printlnOnce("prompt", "An instance is already online. If that isn't the case, type \"ignore\" below.");
+
 			String st = Shared.getSystemInput().nextLine();
 			if (st.strip().equalsIgnoreCase("ignore")) {
 				StreamRedirector.println("", "");
