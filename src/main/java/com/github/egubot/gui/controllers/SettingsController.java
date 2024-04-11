@@ -3,12 +3,16 @@ package com.github.egubot.gui.controllers;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.github.egubot.features.SoundPlayback;
+import com.github.egubot.main.Bot;
+import com.github.egubot.storage.ConfigManager;
+import com.github.egubot.storage.DataManagerSwitcher;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 
 public class SettingsController {
 
@@ -40,39 +44,36 @@ public class SettingsController {
 	private ComboBox<String> storageCBox;
 
 	@FXML
-	void chromeProfileDirectoryKeyPressed(KeyEvent event) {
-		if (event.getCode().isWhitespaceKey()) {
-
-		}
+	void chromeProfileDirectoryChange(ActionEvent event) {
+		ConfigManager.setProperty("User_Data_Directory", chromeUserDataText.getText().strip());
 	}
 
 	@FXML
-	void chromeProfileNameKeyPressed(KeyEvent event) {
-		if (event.getCode().isWhitespaceKey()) {
-
-		}
+	void chromeProfileNameChange(ActionEvent event) {
+		ConfigManager.setProperty("User_Profile_Name", chromeProfileNameText.getText().strip());
 	}
 
 	@FXML
 	void cmdChange(ActionEvent event) {
-		System.out.println(cmdToggleButton.selectedProperty().get());
+		ConfigManager.setBooleanProperty("CommandLine_Version", cmdToggleButton.selectedProperty().get());
 	}
 
 	@FXML
 	void dblFeaturesChange(ActionEvent event) {
-
+		ConfigManager.setBooleanProperty("DBL_OFF", !dblegendsToggleButton.selectedProperty().get());
 	}
 
 	@FXML
-	void playerBufferKeyPressed(KeyEvent event) {
-		if (event.getCode().isWhitespaceKey()) {
-		}
+	void playerBufferChange(ActionEvent event) {
+		int bufferSize = Integer.parseInt(bufferSizeText.getText());
+		
+		ConfigManager.setIntProperty("Player_Buffer_Size_MS", bufferSize);
+		SoundPlayback.updateBufferDuration(bufferSize);
 	}
 
 	@FXML
-	void prefixKeyPressed(KeyEvent event) {
-		if (event.getCode().isWhitespaceKey()) {
-		}
+	void prefixChange(ActionEvent event) {
+		Bot.setPrefix(prefixText.getText());
 	}
 
 	@FXML
@@ -81,10 +82,12 @@ public class SettingsController {
 
 		switch (selected) {
 		case "Local":
+			DataManagerSwitcher.setOnline(false);
 			break;
 		case "Database":
 			break;
 		case "Online":
+			DataManagerSwitcher.setOnline(true);
 			break;
 		default:
 		}
@@ -105,7 +108,7 @@ public class SettingsController {
 		assert prefixText != null : "fx:id=\"prefixText\" was not injected: check your FXML file 'Settings.fxml'.";
 		assert storageCBox != null : "fx:id=\"storageCBox\" was not injected: check your FXML file 'Settings.fxml'.";
 
-		storageCBox.getItems().addAll("Local", "Database", "Online");
+		storageCBox.getItems().addAll("Local", "Database (Not Implemented)", "Online");
 		storageCBox.getSelectionModel().select(0);
 
 		initialisePrefixField();
@@ -115,33 +118,48 @@ public class SettingsController {
 	}
 
 	private void initialiseChromeProfileField() {
-		chromeProfileNameText.focusedProperty().addListener((o, oldValue, newValue) -> {
-			if (oldValue) {
+		String temp = ConfigManager.getProperty("User_Profile_Name");
+		if (temp != null)
+			chromeProfileNameText.setText(temp);
 
+		chromeProfileNameText.focusedProperty().addListener((o, oldValue, newValue) -> {
+			if (Boolean.TRUE.equals(oldValue)) {
+				chromeProfileNameChange(null);
 			}
 		});
 	}
 
 	private void initialiseChromeLocField() {
-		chromeUserDataText.focusedProperty().addListener((o, oldValue, newValue) -> {
-			if (oldValue) {
+		String temp = ConfigManager.getProperty("User_Data_Directory");
+		if (temp != null)
+			chromeUserDataText.setText(temp);
 
+		chromeUserDataText.focusedProperty().addListener((o, oldValue, newValue) -> {
+			if (Boolean.TRUE.equals(oldValue)) {
+				chromeProfileDirectoryChange(null);
 			}
 		});
 	}
 
 	private void initialiseBufferField() {
+		int bufferSize = ConfigManager.getIntProperty("Player_Buffer_Size_MS");
+		if (bufferSize < 0) {
+			bufferSize = 400;
+			ConfigManager.setIntProperty("Player_Buffer_Size_MS", bufferSize);
+		}
+		bufferSizeText.setText(bufferSize + "");
+		
 		bufferSizeText.focusedProperty().addListener((o, oldValue, newValue) -> {
-			if (oldValue) {
-				
+			if (Boolean.TRUE.equals(oldValue)) {
+				playerBufferChange(null);
 			}
 		});
 	}
 
 	private void initialisePrefixField() {
 		prefixText.focusedProperty().addListener((o, oldValue, newValue) -> {
-			if (oldValue) {
-
+			if (Boolean.TRUE.equals(oldValue)) {
+				prefixChange(null);
 			}
 		});
 	}

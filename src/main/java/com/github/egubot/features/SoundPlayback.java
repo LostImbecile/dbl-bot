@@ -39,7 +39,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 public class SoundPlayback {
 	private static final Logger logger = LogManager.getLogger(SoundPlayback.class.getName());
-	private static final int MINUTE = 60 * 60 * 1000;
 
 	private static final AudioPlayerManager remotePlayerManager;
 	private static final AudioPlayerManager localPlayerManager;
@@ -71,13 +70,14 @@ public class SoundPlayback {
 		AudioSourceManagers.registerRemoteSources(remotePlayerManager);
 		AudioSourceManagers.registerLocalSource(localPlayerManager);
 
-		if (ConfigManager.getBooleanProperty("Is_Buffer_Huge")) {
-			remotePlayerManager.setFrameBufferDuration(3 * MINUTE);
-			localPlayerManager.setFrameBufferDuration(3 * MINUTE);
-		} else {
-			remotePlayerManager.setFrameBufferDuration(400);
-			localPlayerManager.setFrameBufferDuration(400);
+		int bufferSize = ConfigManager.getIntProperty("Player_Buffer_Size_MS");
+
+		if (bufferSize < 0) {
+			bufferSize = 400;
+			ConfigManager.setIntProperty("Player_Buffer_Size_MS", bufferSize);
 		}
+		updateBufferDuration(bufferSize);
+
 		remotePlayerManager.registerSourceManager(new YoutubeAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new BandcampAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new BeamAudioSourceManager());
@@ -86,6 +86,11 @@ public class SoundPlayback {
 		remotePlayerManager.registerSourceManager(new VimeoAudioSourceManager());
 
 		localPlayerManager.registerSourceManager(new LocalAudioSourceManager());
+	}
+
+	public static void updateBufferDuration(int bufferSize) {
+		remotePlayerManager.setFrameBufferDuration(bufferSize);
+		localPlayerManager.setFrameBufferDuration(bufferSize);
 	}
 
 	public static void getCurrentTrackInfo(Message msg) {
@@ -218,7 +223,7 @@ public class SoundPlayback {
 
 	private static String getPlayArgument(String message) {
 		String name = message.strip();
-		
+
 		Matcher angleBracketMatcher = angleBracketPattern.matcher(name);
 		name = angleBracketMatcher.replaceAll("");
 		return name;

@@ -54,5 +54,6 @@ public class Bot {
 
 	public static synchronized void setPrefix(String prefix) {
 		Bot.prefix = prefix;
+		ConfigManager.setProperty("prefix",prefix);
 	}
 }

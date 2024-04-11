@@ -6,15 +6,14 @@ Public so server members can look at it or add to it.
 
 Notes:
 ---------------------------------
-Some of the classes are implementation specific, you'll want to change some of them as needed, the rest should work as is, but you should modify their messages, clear them up, or add more to them.
+Some of the classes are implementation specific, you might want to change some as needed, the rest should work as is, but you should modify their messages, clear them up, completely remove or add more to them.
 
-You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created for certain things, 
+You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
 but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
-Selenium was added to interact with some websites, remove it from pom.xml if you don't need its features as it greatly increases
-the size, it will not interfere with the running of the app if you do, but it's otherwise useful.
-
 This bot was made for use on single servers and stores its data on discord or locally. It isn't yet made to handle cases where you're running it with multiple servers (storage is completely shared), to keep things simple.
+
+The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart.
  
 Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the API is switching 
 to java 11 soon.

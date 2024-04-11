@@ -15,19 +15,21 @@ public class MusicBufferSizeCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(arguments.equals("big")) {
-			SoundPlayback.getLocalplayermanager().setFrameBufferDuration(3 * MINUTE);
-			SoundPlayback.getRemoteplayermanager().setFrameBufferDuration(3 * MINUTE);
-		}else {
-			SoundPlayback.getLocalplayermanager().setFrameBufferDuration(400);
-			SoundPlayback.getRemoteplayermanager().setFrameBufferDuration(400);
+		if (arguments.equals("big")) {
+			SoundPlayback.updateBufferDuration(3 * MINUTE);
+		} else if (arguments.equals("small") || arguments.isBlank()) {
+			SoundPlayback.updateBufferDuration(400);
+		} else {
+			try {
+				SoundPlayback.updateBufferDuration(Integer.parseInt(arguments));
+			} catch (NumberFormatException e) {
+			}
 		}
 		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
