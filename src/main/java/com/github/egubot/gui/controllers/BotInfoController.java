@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.github.egubot.commands.RefreshCommand;
+import com.github.egubot.commands.botcontrol.RefreshCommand;
 import com.github.egubot.main.Bot;
 import com.github.egubot.main.Restart;
 
