@@ -1,7 +1,7 @@
 package com.github.egubot.facades;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,44 +12,34 @@ import com.openai.chatgpt.ChatGPT;
 
 public class ChatGPTContext {
 	private static final Logger logger = LogManager.getLogger(ChatGPTContext.class.getName());
-	private static List<String> chatgptConversation = Collections.synchronizedList(new ArrayList<String>(20));
+	private static List<String> conversation = Collections.synchronizedList(new LinkedList<String>());
 	private static boolean isChatGPTOn = false;
 	private static String chatGPTActiveChannelID = "";
 	
 	public static boolean repond(Message msg, String msgText) {
 
-		if (isChatGPTOn) {
-
-			if (msg.getChannel().getIdAsString().equals(chatGPTActiveChannelID)) {
-
+		if (isChatGPTOn &&  (msg.getChannel().getIdAsString().equals(chatGPTActiveChannelID))) {
 				respond(msg, msgText);
-
 				return true;
-			}
-
-			chatgptConversation.add(ChatGPT.reformatInput(msgText, msg.getAuthor().getName()));
 		}
 		return false;
 
 	}
 
-	public static void addAssistantResponse(Message msg, String msgText) {
-		if (isChatGPTOn && msg.getAuthor().isYourself()) {
-			chatgptConversation.add(ChatGPT.reformatInput(msgText, "assistant"));
-		}
-	}
-
 	public static void respond(Message msg, String msgText) {
 		try {
-			String[] response = ChatGPT.chatGPT(msgText, msg.getAuthor().getName(), chatgptConversation);
+			conversation.add(ChatGPT.reformatInput(msgText, msg.getAuthor().getName()));
+			
+			String[] response = ChatGPT.chatGPT(msgText, msg.getAuthor().getName(), conversation);
 			msg.getChannel().sendMessage(response[0]);
+			conversation.add(ChatGPT.reformatInput(response[0], "assistant"));
 			// 4096 Token limit that includes sent messages
 			// Important to stay under it
 			try {
 				if (Integer.parseInt(response[1]) > 3300) {
 
 					for (int i = 0; i < 5; i++) {
-						chatgptConversation.remove(0);
+						conversation.remove(0);
 					}
 				}
 			} catch (Exception e1) {
@@ -65,11 +55,11 @@ public class ChatGPTContext {
 	}
 
 	public static List<String> getChatgptConversation() {
-		return chatgptConversation;
+		return conversation;
 	}
 
 	public static void setChatgptConversation(List<String> chatgptConversation) {
-		ChatGPTContext.chatgptConversation = chatgptConversation;
+		ChatGPTContext.conversation = chatgptConversation;
 	}
 
 	public static boolean isChatGPTOn() {
@@ -87,4 +77,5 @@ public class ChatGPTContext {
 	public static void setChatGPTActiveChannelID(String chatGPTActiveChannelID) {
 		ChatGPTContext.chatGPTActiveChannelID = chatGPTActiveChannelID;
 	}
+
 }

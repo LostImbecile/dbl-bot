@@ -76,10 +76,15 @@ ChatGPT 3.5:
 - gpt toggle `[it's off by default]`
 - gpt (message)
 - gpt channel toggle
+- gpt clear
 
 Custom AI:
 - ai (message)
 - ai terminate/activate
+
+LLama3 AI:
+- llm (message)
+- llm clear
 
 Bot Control (Owner):
 - terminate

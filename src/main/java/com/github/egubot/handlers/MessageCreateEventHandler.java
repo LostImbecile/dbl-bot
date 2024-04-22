@@ -63,8 +63,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			String msgText = msg.getContent();
 			String lowCaseTxt = msgText.toLowerCase();
 
-			ChatGPTContext.addAssistantResponse(msg, msgText);
-
 			// Ignore bots unless changed
 			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
 				return;

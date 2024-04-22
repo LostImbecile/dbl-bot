@@ -54,3 +54,5 @@ com.github.egubot.commands.legends.LegendsTemplateCreate
 com.github.egubot.commands.botcontrol.TestToggleCommand
 com.github.egubot.commands.botcontrol.HelpCommand
 com.github.egubot.commands.legends.LegendsKitSearchCommand
+com.github.egubot.commands.LLama3Command
+com.github.egubot.commands.Llama3ConversationClearCommand

@@ -8,19 +8,19 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.github.egubot.main.Bot;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.utils.JSONUtilities;
 
 public class ChatGPT {
+	static String url = "https://api.openai.com/v1/chat/completions";
+	static String apiKey = KeyManager.getToken("ChatGPT_API_Key");
+	static String model = "gpt-3.5-turbo";
 
 	public static String[] chatGPT(String prompt, String author, List<String> conversation) {
 
 		String[] evaluatedResponse = new String[2];
 		try {
-
-			String url = "https://api.openai.com/v1/chat/completions";
-			String apiKey = KeyManager.getToken("ChatGPT_API_Key");
-			String model = "gpt-3.5-turbo";
 
 			URL obj;
 			HttpURLConnection connection;
@@ -44,7 +44,8 @@ public class ChatGPT {
 			 */
 			StringBuilder body = new StringBuilder();
 			body.append("{\"model\": \"" + model + "\"" + ", \"messages\": " + "[{\"role\": \"system\""
-					+ ", \"content\": \"You are a discord bot called bamox in a discord server, you are not to assist, "
+					+ ", \"content\": \"You are a discord bot called " + Bot.getName()
+					+ " in a discord server, you are not to assist, "
 					+ "but have casual conversations, pretend that you are not an AI but a human. "
 					+ "You will not speak like an AI, and prefer to send short responses. "
 					+ "Since the server has many people, the prompt will start with the message author's name\"}");

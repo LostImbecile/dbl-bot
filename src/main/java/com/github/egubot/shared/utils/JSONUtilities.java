@@ -29,9 +29,6 @@ public class JSONUtilities {
 		Gson gson = new Gson();
 		String st = gson.toJson(input);
 		return st.substring(1, st.length() - 1);
-		// input = input.replace("\\", "\\\\");
-		// input = input.replace("\n", "\\n").replace("\"", "\\\"").replace("\t",
-		// "\\t").replace("/", "\\/");
 	}
 
 	public static String dejsonify(String input) {
