@@ -1,4 +1,4 @@
-package com.github.egubot.commands;
+package com.github.egubot.commands.llama3;
 
 import org.javacord.api.entity.message.Message;
 
@@ -9,7 +9,7 @@ public class Llama3ConversationClearCommand implements Command{
 
 	@Override
 	public String getName() {
-		return "llm clear";
+		return "aa clear";
 	}
 
 	@Override

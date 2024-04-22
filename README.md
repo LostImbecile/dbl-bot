@@ -83,8 +83,9 @@ Custom AI:
 - ai terminate/activate
 
 LLama3 AI:
-- llm (message)
-- llm clear
+- aa (message)
+- aa clear
+- aa tokens
 
 Bot Control (Owner):
 - terminate

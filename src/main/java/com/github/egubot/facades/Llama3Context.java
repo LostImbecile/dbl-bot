@@ -16,6 +16,7 @@ import com.openai.chatgpt.ChatGPT;
 public class Llama3Context {
 	private static final Logger logger = LogManager.getLogger(Llama3Context.class.getName());
 	private static List<String> conversation = Collections.synchronizedList(new LinkedList<String>());
+	private static int lastTokens = 0;
 
 	public static boolean respond(Message msg, String msgText) {
 		try {
@@ -26,7 +27,8 @@ public class Llama3Context {
 				msg.getChannel().sendMessage(response.getResponse());
 				conversation.add(ChatGPT.reformatInput(response.getResponse(), "assistant"));
 				
-				if (response.getPromptTokens() > 7000) {
+				lastTokens = response.getPromptTokens();
+				if (lastTokens > 7000) {
 					for (int i = 0; i < 10; i++) {
 						conversation.remove(0);
 					}
@@ -45,5 +47,9 @@ public class Llama3Context {
 
 	public static void setConversation(List<String> conversation) {
 		Llama3Context.conversation = conversation;
+	}
+
+	public static int getLastTokens() {
+		return lastTokens;
 	}
 }

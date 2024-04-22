@@ -11,6 +11,7 @@ public class Bot {
 	private static User botUser = null;
 	private static String botInvite = null;
 	private static String botName = null;
+	private static User ownerUser = null;
 
 	private Bot() {
 	}
@@ -20,6 +21,7 @@ public class Bot {
 		botUser = api.getYourself();
 		botInvite = api.createBotInvite();
 		botName = botUser.getName();
+		setOwnerUser(api.getOwner().get().join());
 	}
 	
 	public static String getName() {
@@ -55,5 +57,13 @@ public class Bot {
 	public static synchronized void setPrefix(String prefix) {
 		Bot.prefix = prefix;
 		ConfigManager.setProperty("prefix",prefix);
+	}
+
+	public static User getOwnerUser() {
+		return ownerUser;
+	}
+
+	public static void setOwnerUser(User ownerUser) {
+		Bot.ownerUser = ownerUser;
 	}
 }

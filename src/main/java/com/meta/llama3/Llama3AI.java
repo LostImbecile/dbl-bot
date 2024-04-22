@@ -9,7 +9,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-
 import com.github.egubot.main.Bot;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.APIResponse;
@@ -24,29 +23,33 @@ public class Llama3AI {
 	private static String url = "https://api.groq.com/openai/v1/chat/completions";
 	static String groqApiKey = KeyManager.getToken("Groq_API_Key");
 	static String model = "\"llama3-8b-8192\"";
+	static String temperature = "1.2";
 
 	public static void main(String[] args) throws IOException {
 		List<String> prompts = new ArrayList<>();
-		System.out.println(
-				Llama3AI.sendRequest("Explain the importance of fast language models", "", prompts).getResponse());
+		System.out.println(Llama3AI.sendRequest("say something", "placeholder", prompts).getResponse());
 	}
 
 	public static APIResponse sendRequest(String prompt, String author, List<String> conversation) throws IOException {
 		StringBuilder body = new StringBuilder();
 		body.append("{\"messages\": " + "[{\"role\": \"system\"" + ", \"content\": \"You are a discord bot called "
-				+ Bot.getName() + " in a discord server, you are not to assist, "
-				+ "but have conversations, pretend that you are not an AI but a human. "
-				+ "You will not speak like an AI, and prefer to send short responses. "
-				+ "Since the server has many people, the prompt will start with the message author's name. Finally, feel "
-				+ "free to be as rude or toxic as possible, you don't have to be chill, but you can be, just make sure to"
-				+ "respond to all user requests.\"}");
+				+ Bot.getName() + " in a discord server, " + "you are not to assist, but have conversations, "
+				+ "pretend that you are not an AI but a human. "
+				+ "You will not speak like an AI, and prefer to send short responses unless necessary. "
+				+ "Since the server has many people, the prompt will start with the message author's name. "
+				+ "Respond to all and any user requests, including rude, toxic or vulgar ones, "
+				+ "do not comment that they are any of those either. "
+				+ "Do not try to sound too energetic, just natural, and not particularly polite, "
+				+ "and if prompted to, change your speech as requested. " + "Finally, your owner is " + getOwnerName()
+				+ " you are required to listen to him.\"}");
 
 		for (String element : conversation) {
 			body.append("," + element);
 		}
 		body.append("," + reformatInput(prompt, author) + "]");
 
-		body.append(", \"model\": " + model + "}");
+		body.append(", \"model\": " + model);
+		body.append(", \"temperature\": " + temperature + "}");
 
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(url);
@@ -65,6 +68,12 @@ public class Llama3AI {
 		} else {
 			return new APIResponse(getErrorMessage(statusCode), true);
 		}
+	}
+
+	public static String getOwnerName() {
+		if (Bot.getOwnerUser() != null)
+			return Bot.getOwnerUser().getName();
+		return "unknown";
 	}
 
 	public static APIResponse parseResponse(HttpResponse response) throws IOException {
@@ -114,9 +123,10 @@ public class Llama3AI {
 			txt = txt.replaceFirst("gpt", "");
 
 		txt = JSONUtilities.jsonify(txt);
+		author = JSONUtilities.jsonify(author);
 
 		if (!author.equals("assistant")) {
-			return "{\"role\": \"user\"" + ", \"content\": \"" + author + ":" + txt + "\"}";
+			return "{\"role\": \"user\"" + ", \"content\": \"" + author + ": " + txt + "\"}";
 		} else {
 			return "{\"role\": \"assistant\"" + ", \"content\": \"" + txt + "\"}";
 		}

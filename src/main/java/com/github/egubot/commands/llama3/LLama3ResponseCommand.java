@@ -1,15 +1,15 @@
-package com.github.egubot.commands;
+package com.github.egubot.commands.llama3;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.Llama3Context;
 import com.github.egubot.interfaces.Command;
 
-public class LLama3Command implements Command {
+public class LLama3ResponseCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "llm";
+		return "aa";
 	}
 
 	@Override
