@@ -142,14 +142,6 @@ public class CommandExtractor {
 		return commandEndIndex;
 	}
 
-	// Removes a command from the string and returns the index of its end.
-	public int removeCommand(String str, int endIndex) {
-		while (endIndex < str.length() && Character.isWhitespace(str.charAt(endIndex))) {
-			endIndex++;
-		}
-		return endIndex;
-	}
-
 	public synchronized String getCurrentPrefix() {
 		return currentPrefix;
 	}

@@ -37,7 +37,7 @@ public class CommandManager {
 			// For commands with prefixes
 			int commandIndex = prefixExtractor.findCommand(text);
 			if (commandIndex > 0) {
-				String command = text.substring(prefixIndex, commandIndex);
+				String command = text.substring(prefixIndex, commandIndex).toLowerCase();
 				String arguments = text.substring(commandIndex).strip();
 				return CommandRegistry.getPrefixCommand(command).execute(msg, arguments);
 			}
@@ -45,7 +45,7 @@ public class CommandManager {
 			// Ignore prefix, for commands without prefixes
 			int commandIndex = noPrefixExtractor.findCommand(text, true);
 			if (commandIndex > 0) {
-				String command = text.substring(0, commandIndex);
+				String command = text.substring(0, commandIndex).toLowerCase();
 				String arguments = text.substring(commandIndex).strip();
 				return CommandRegistry.getNoPrefixCommand(command).execute(msg, arguments);
 			}

@@ -45,9 +45,9 @@ public class CommandRegistry {
 	private static void registerCommand(Command command) {
 		// Due to some duplicates overwriting each other
 		if (command.isStartsWithPrefix())
-			prefixCommandMap.put(command.getName(), command);
+			prefixCommandMap.put(command.getName().toLowerCase(), command);
 		else
-			noPrefixCommandMap.put(command.getName(), command);
+			noPrefixCommandMap.put(command.getName().toLowerCase(), command);
 	}
 
 	public static Command getPrefixCommand(String commandName) {
