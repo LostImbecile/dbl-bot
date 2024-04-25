@@ -89,7 +89,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (CommandManager.processMessage(msg))
 				return;
 
-			if (ChatGPTContext.repond(msg, msgText)) {
+			if (ChatGPTContext.respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 

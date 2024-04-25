@@ -1,7 +1,5 @@
 package com.github.egubot.commands.botcontrol;
 
-import java.time.Instant;
-
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.StorageFacadesHandler;
@@ -9,7 +7,7 @@ import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 import com.github.egubot.logging.StreamRedirector;
-import com.github.egubot.shared.utils.ConvertObjects;
+import com.github.egubot.shared.utils.DateUtils;
 
 public class RefreshCommand implements Command {
 
@@ -42,7 +40,7 @@ public class RefreshCommand implements Command {
 	}
 
 	public static void printMessages() {
-		String time = ConvertObjects.instantToString(Instant.now());
+		String time = DateUtils.getDateTimeNow();
 		StreamRedirector.println("", "\n" + time + ": Refreshing Storage.");
 
 		// For GUI

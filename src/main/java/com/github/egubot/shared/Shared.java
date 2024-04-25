@@ -11,6 +11,7 @@ public class Shared {
 	private static Scanner input = new Scanner(System.in);
 	private static boolean testMode = false;
 	private static boolean dbLegendsMode = true;
+	private static String timeZone = null;
 	
 	private Shared() {
 	}
@@ -53,6 +54,14 @@ public class Shared {
 
 	public static void setDbLegendsMode(boolean dbLegendsMode) {
 		Shared.dbLegendsMode = dbLegendsMode;
+	}
+
+	public static String getTimeZone() {
+		return timeZone;
+	}
+
+	public static void setTimeZone(String timeZone) {
+		Shared.timeZone = timeZone;
 	}
 
 }

@@ -21,8 +21,7 @@ public class ConvertObjects {
 	}
 
 	public static String instantToString(Instant instant) {
-		String[] date = instant.toString().split("[Tz.]");
-		return date[0] + ", " + date[1].substring(0, date[1].length() - 3);
+		return DateUtils.getDateTime(instant);
 	}
 
 	public static String convertMilliSecondsToTime(long ms) {

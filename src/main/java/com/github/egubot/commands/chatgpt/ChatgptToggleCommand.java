@@ -14,7 +14,7 @@ public class ChatgptToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		ChatGPTContext.toggleChatGPT();
+		ChatGPTContext.toggle();
 		return true;
 	}
 

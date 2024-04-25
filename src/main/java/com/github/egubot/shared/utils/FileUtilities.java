@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -142,10 +141,7 @@ public class FileUtilities {
 		if (!file.exists())
 			return "null";
 
-		long lastModifiedTime = file.lastModified();
-
-		Instant instant = Instant.ofEpochMilli(lastModifiedTime);
-		return ConvertObjects.instantToString(instant);
+		return DateUtils.getDateTime(file.lastModified());
 	}
 
 	public static BufferedReader getBufferedReader(InputStream is) {

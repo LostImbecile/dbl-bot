@@ -20,7 +20,7 @@ import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.shared.Shared;
-import com.github.egubot.shared.utils.ConvertObjects;
+import com.github.egubot.shared.utils.DateUtils;
 import com.github.egubot.shared.utils.FileUtilities;
 
 public class OnlineDataManager implements DataManager {
@@ -198,7 +198,7 @@ public class OnlineDataManager implements DataManager {
 	}
 
 	private void getLastUpdateDate(Message newMessage) {
-		lastUpdateDate = ConvertObjects.instantToString(newMessage.getCreationTimestamp());
+		lastUpdateDate = DateUtils.getDateTime(newMessage.getCreationTimestamp());
 	}
 
 	private void readInput() throws IOException {

@@ -14,7 +14,7 @@ public class ChatgptResponseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!ChatGPTContext.isChatGPTOn())
+		if(!ChatGPTContext.isAIOn())
 			return false;
 		
 		ChatGPTContext.respond(msg, arguments);

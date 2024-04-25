@@ -37,6 +37,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		FallbackLoggerConfiguration.setDebug(false);
+		Shared.setTimeZone("Europe/London");
 
 		String arguments = checkArguments(args);
 

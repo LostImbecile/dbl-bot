@@ -14,13 +14,13 @@ public class ChatgptChannelToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!ChatGPTContext.isChatGPTOn())
+		if(!ChatGPTContext.isAIOn())
 			return false;
 		
-		if (ChatGPTContext.getChatGPTActiveChannelID().equals("")) {
-			ChatGPTContext.setChatGPTActiveChannelID(msg.getChannel().getIdAsString());
+		if (ChatGPTContext.getActiveChannelID().equals("")) {
+			ChatGPTContext.setActiveChannelID(msg.getChannel().getIdAsString());
 		} else {
-			ChatGPTContext.setChatGPTActiveChannelID("");
+			ChatGPTContext.setActiveChannelID("");
 		}
 		return true;
 	}
