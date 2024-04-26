@@ -28,7 +28,6 @@ public class DiscordAI implements AutoCloseable {
 			// Make sure URL is the same as the other side's
 			HttpPost request = new HttpPost(aiUrl + "/generate");
 
-			// Important step to avoid format induced errors
 			input = JSONUtilities.jsonify(input);
 
 			// You set all of these by yourself, the two sides need to be compatible

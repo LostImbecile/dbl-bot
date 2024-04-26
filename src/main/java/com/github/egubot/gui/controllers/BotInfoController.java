@@ -136,10 +136,8 @@ public class BotInfoController {
 			settingsStage.setMinHeight(420 + 20);
 			settingsStage.setMinWidth(600 + 20);
 
-			// Create a Scene for the settings
 			Scene scene = new Scene(settingsRoot);
 			scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
-			// Set the settings scene to the stage
 			settingsStage.setScene(scene);
 		}
 	}

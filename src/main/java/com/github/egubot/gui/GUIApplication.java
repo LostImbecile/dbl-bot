@@ -86,16 +86,14 @@ public class GUIApplication extends Application {
 		Scene scene = new Scene(mainRoot);
 
 		scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
-		// Set the scene and show the stage
+		
 		primaryStage.setScene(scene);
 		primaryStage.setMinHeight(462 + 20);
 		primaryStage.setMinWidth(740 + 20);
 		primaryStage.setTitle("Loading...");
 		setIcon(primaryStage);
 
-		// Set up action on close
 		primaryStage.setOnCloseRequest(event -> {
-			// Perform actions on exit here
 			StreamRedirector.println("info", "\nExiting the application...");
 			Shared.getShutdown().initiateShutdown(0);
 		});

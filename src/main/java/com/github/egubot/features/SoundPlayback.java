@@ -47,7 +47,6 @@ public class SoundPlayback {
 	private static final User bot;
 
 	private SoundPlayback() {
-		// Static class
 	}
 
 	static {

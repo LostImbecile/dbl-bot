@@ -18,11 +18,6 @@ import com.github.egubot.objects.legends.CharacterHash;
 import com.github.egubot.objects.legends.Characters;
 import com.github.egubot.objects.legends.Tags;
 
-/*
- * Implementation specific, the start() method works
- * for all websites, everything else however is for
- * this specific one.
- */
 public class LegendsDatabase {
 	private static final Logger logger = LogManager.getLogger(LegendsDatabase.class.getName());
 	private static ArrayList<Characters> charactersList = new ArrayList<>(500);

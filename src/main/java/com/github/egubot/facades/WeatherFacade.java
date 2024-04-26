@@ -8,6 +8,9 @@ import com.weatherapi.forecast.Weather;
 import com.weatherapi.forecast.WeatherForecast;
 
 public class WeatherFacade {
+	
+	private WeatherFacade() {
+	}
 
 	public static void sendWeather(Messageable e, String text) {
 		String[] args = text.toLowerCase().split(" ");

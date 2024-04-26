@@ -40,12 +40,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	public static synchronized void initialise() {
 		if (!isInitialised) {
-			/*
-			 * I store templates, responses and all that stuff online in case someone
-			 * else uses the bot on their end, so the data needs to be initialised
-			 * from an online storage each time. I used discord for this, a cloud
-			 * services could do better.
-			 */
 			StorageFacadesHandler.initialise();
 			DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
 			isInitialised = true;

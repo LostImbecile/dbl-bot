@@ -71,7 +71,6 @@ public class CommandExtractor {
 		int index = 0;
 		int len = str.length();
 
-		// Step 1: Traverse the prefix tree
 		while (index < len) {
 			char c = str.charAt(index);
 			int charIndex = getCharIndex(c);

@@ -108,7 +108,6 @@ public class SendMessagesController {
 			if (event.isShiftDown()) {
 				textArea.appendText("\n");
 			} else {
-				// Enter
 				event.consume();
 				submitMessage();
 			}

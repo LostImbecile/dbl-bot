@@ -59,18 +59,12 @@ public class Translate implements Shutdownable{
         String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
         HttpPost httpPost = new HttpPost(url);
 
-        // Set headers
-        httpPost.setHeader("Ocp-Apim-Subscription-Key", key);
-        httpPost.setHeader("Ocp-Apim-Subscription-Region", location);
-        httpPost.setHeader("Content-type", "application/json");
+        setHeaders(httpPost);
 
-        // Set request body
         httpPost.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
 
-        // Execute the request
         HttpResponse response = client.execute(httpPost);
 
-        // Process the response
         int statusCode = response.getStatusLine().getStatusCode();
         if (statusCode == 200) {
             String result = FileUtilities.readInputStream(response.getEntity().getContent());
@@ -157,15 +151,10 @@ public class Translate implements Shutdownable{
 	    String requestBody = "[{\"Text\": \"" + JSONUtilities.jsonify(text) + "\"}]";
 	    HttpPost httpPost = new HttpPost("https://api.cognitive.microsofttranslator.com/detect?api-version=3.0");
 
-	    // Set headers
-	    httpPost.setHeader("Ocp-Apim-Subscription-Key", key);
-	    httpPost.setHeader("Ocp-Apim-Subscription-Region", location);
-	    httpPost.setHeader("Content-type", "application/json");
+	    setHeaders(httpPost);
 
-	    // Set request body
 	    httpPost.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
 
-	    // Execute the request
 	    HttpResponse response = client.execute(httpPost);
 
 	    // Process the response
@@ -176,6 +165,12 @@ public class Translate implements Shutdownable{
 	    } else {
 	        return checkStatusCode(statusCode);
 	    }
+	}
+
+	public void setHeaders(HttpPost httpPost) {
+		httpPost.setHeader("Ocp-Apim-Subscription-Key", key);
+	    httpPost.setHeader("Ocp-Apim-Subscription-Region", location);
+	    httpPost.setHeader("Content-type", "application/json");
 	}
 
 	private String checkStatusCode(int statusCode) {

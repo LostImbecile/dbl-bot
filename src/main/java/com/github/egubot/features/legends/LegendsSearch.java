@@ -141,7 +141,6 @@ public class LegendsSearch extends LegendsPool {
 				msg.edit(embeds).join();
 				messageComponentInteraction.acknowledge();
 			} catch (Exception e) {
-				// logger.error(e);
 			}
 
 		}

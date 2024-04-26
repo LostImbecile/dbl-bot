@@ -21,6 +21,9 @@ public class WebDriverFacade {
 			Pattern.CASE_INSENSITIVE);
 	private static final String YOUTUBE_ICON = "https://cdn-icons-png.flaticon.com/256/1384/1384060.png";
 
+	private WebDriverFacade() {
+	}
+	
 	public static void checkInsultCommands(Message msg, String text) {
 		String[] options = text.split(">>");
 		if (options.length < 2) {

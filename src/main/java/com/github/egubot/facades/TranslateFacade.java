@@ -11,6 +11,9 @@ public class TranslateFacade {
 	private static Translate translate = new Translate();
 	private static boolean isTranslateOn = false;
 	
+	private TranslateFacade() {
+	}
+	
 	public static void toggleTranslate() {
 		isTranslateOn = !isTranslateOn;
 	}
