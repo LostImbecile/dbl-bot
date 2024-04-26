@@ -4,7 +4,7 @@ import com.github.egubot.ai.AIModelHandler;
 import com.meta.llama3.Llama3AI;
 import com.openai.chatgpt.ChatGPT;
 
-public class AIContext {
+public class AIContext{
 	private static final AIModelHandler llama3 =  new AIModelHandler(new Llama3AI());
 	private static final AIModelHandler gpt3 =  new AIModelHandler(new ChatGPT());
 	

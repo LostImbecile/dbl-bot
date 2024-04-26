@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.APIResponse;
 import com.github.egubot.shared.utils.DateUtils;
@@ -18,7 +22,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-public class AIModel {
+public class AIModel implements Shutdownable{
+	private static final Logger logger = LogManager.getLogger(AIModel.class.getName());
+	private final CloseableHttpClient httpClient;
 	protected String model;
 	protected String apiKey;
 	protected String url;
@@ -42,6 +48,13 @@ public class AIModel {
 				+ "and if prompted to, change your speech as requested. " + "Finally, your owner is " + getOwnerName()
 				+ " you are required to listen to him.";
 
+		httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setSocketTimeout(30000)
+                        .setConnectTimeout(15000)
+                        .setConnectionRequestTimeout(10000)
+                        .build())
+                .build();
 	}
 
 	public AIModel(String model, String apiKey, String url, String temperature) {
@@ -61,24 +74,28 @@ public class AIModel {
 	}
 
 	public APIResponse sendRequest(String prompt, String author, List<String> conversation) throws IOException {
-		HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost postRequest = getPost();
+
+        String body = buildRequestBody(prompt, author, conversation);
+        StringEntity entity = new StringEntity(body, "UTF-8");
+        postRequest.setEntity(entity);
+
+        HttpResponse response = httpClient.execute(postRequest);
+
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode == 200) {
+            return parseResponse(response);
+        } else {
+            return new APIResponse(getErrorMessage(statusCode), true);
+        }
+    }
+
+	public HttpPost getPost() {
 		HttpPost postRequest = new HttpPost(url);
 
-		postRequest.addHeader("Authorization", "Bearer " + apiKey);
-		postRequest.addHeader("Content-Type", "application/json");
-
-		String body = buildRequestBody(prompt, author, conversation);
-		StringEntity entity = new StringEntity(body, "UTF-8");
-		postRequest.setEntity(entity);
-
-		HttpResponse response = httpClient.execute(postRequest);
-
-		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == 200) {
-			return parseResponse(response);
-		} else {
-			return new APIResponse(getErrorMessage(statusCode), true);
-		}
+        postRequest.addHeader("Authorization", "Bearer " + apiKey);
+        postRequest.addHeader("Content-Type", "application/json");
+		return postRequest;
 	}
 
 	public static APIResponse parseResponse(HttpResponse response) throws IOException {
@@ -172,5 +189,19 @@ public class AIModel {
 
 	public void setTokenLimit(int tokenLimit) {
 		this.tokenLimit = tokenLimit;
+	}
+
+	@Override
+	public void shutdown() {
+		try {
+			httpClient.close();
+		} catch (IOException e) {
+			logger.error(e);
+		}
+	}
+
+	@Override
+	public int getShutdownPriority() {
+		return 0;
 	}
 }

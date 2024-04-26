@@ -10,8 +10,9 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.objects.APIResponse;
+import com.github.egubot.shared.Shared;
 
-public class AIModelHandler {
+public class AIModelHandler{
 	private static final Logger logger = LogManager.getLogger(AIModelHandler.class.getName());
 	private List<String> conversation = Collections.synchronizedList(new LinkedList<String>());
 	private boolean isAIOn = false;
@@ -21,6 +22,7 @@ public class AIModelHandler {
 
 	public AIModelHandler(AIModel model) {
 		this.model = model;
+		Shared.getShutdown().registerShutdownable(model);
 	}
 
 	public boolean respondIfChannelActive(Message msg, String msgText) {
@@ -51,6 +53,7 @@ public class AIModelHandler {
 			}
 			return true;
 		} catch (IOException e) {
+			msg.getChannel().sendMessage("Timed out.");
 			logger.error(e);
 		}
 		return false;
