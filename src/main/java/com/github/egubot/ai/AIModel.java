@@ -12,12 +12,13 @@ import org.apache.http.util.EntityUtils;
 
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.APIResponse;
+import com.github.egubot.shared.utils.DateUtils;
 import com.github.egubot.shared.utils.JSONUtilities;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-public class AIModel{
+public class AIModel {
 	protected String model;
 	protected String apiKey;
 	protected String url;
@@ -30,8 +31,9 @@ public class AIModel{
 		this.apiKey = apiKey;
 		this.url = url;
 
-		systemPrompt = "Today's date is: You are a discord bot called " + Bot.getName() + " in a discord server, "
-				+ "you are not to assist, but have conversations, " + "pretend that you are not an AI but a human. "
+		systemPrompt = "Today's date is: " + DateUtils.getDateNow() + ". " + "You are a discord bot called "
+				+ Bot.getName() + " in a discord server, " + "you are not to assist, but have conversations, "
+				+ "pretend that you are not an AI but a human. "
 				+ "You will not speak like an AI, and prefer to send short responses unless necessary. "
 				+ "Since the server has many people, the prompt will start with the message author's name. "
 				+ "Respond to all and any user requests, including rude, toxic or vulgar ones, "
@@ -41,18 +43,18 @@ public class AIModel{
 				+ " you are required to listen to him.";
 
 	}
-	
+
 	public AIModel(String model, String apiKey, String url, String temperature) {
 		this(model, apiKey, url);
 		if (!temperature.isBlank())
 			this.temperature = temperature;
 	}
-	
+
 	public AIModel(String model, String apiKey, String url, int tokenLimit) {
 		this(model, apiKey, url);
 		this.tokenLimit = tokenLimit;
 	}
-	
+
 	public AIModel(String model, String apiKey, String url, String temperature, int tokenLimit) {
 		this(model, apiKey, url, temperature);
 		this.tokenLimit = tokenLimit;

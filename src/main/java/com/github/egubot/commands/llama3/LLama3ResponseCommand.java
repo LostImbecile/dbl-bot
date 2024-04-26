@@ -2,7 +2,7 @@ package com.github.egubot.commands.llama3;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.facades.Llama3Context;
+import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
 public class LLama3ResponseCommand implements Command {
@@ -14,7 +14,7 @@ public class LLama3ResponseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		return Llama3Context.respond(msg, arguments);
+		return AIContext.getLlama3().respond(msg, arguments);
 	}
 
 	@Override

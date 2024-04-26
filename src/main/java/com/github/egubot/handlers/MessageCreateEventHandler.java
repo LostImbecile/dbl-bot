@@ -11,7 +11,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import com.github.egubot.facades.ChatGPTContext;
+import com.github.egubot.facades.AIContext;
 import com.github.egubot.facades.CustomAIFacade;
 import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.interfaces.Shutdownable;
@@ -89,7 +89,11 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (CommandManager.processMessage(msg))
 				return;
 
-			if (ChatGPTContext.respondIfChannelActive(msg, msgText)) {
+			if (AIContext.getGpt3().respondIfChannelActive(msg, msgText)) {
+				return;
+			}
+			
+			if (AIContext.getLlama3().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 

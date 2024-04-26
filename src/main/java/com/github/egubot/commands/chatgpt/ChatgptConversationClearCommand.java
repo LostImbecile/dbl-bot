@@ -2,7 +2,7 @@ package com.github.egubot.commands.chatgpt;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.facades.ChatGPTContext;
+import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
 public class ChatgptConversationClearCommand implements Command {
@@ -15,10 +15,10 @@ public class ChatgptConversationClearCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!ChatGPTContext.isAIOn())
+		if(!AIContext.getGpt3().isAIOn())
 			return false;
 		
-		ChatGPTContext.getConversation().clear();
+		AIContext.getGpt3().getConversation().clear();
 		msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
 		return true;
 	}

@@ -2,7 +2,7 @@ package com.github.egubot.commands.chatgpt;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.facades.ChatGPTContext;
+import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
 public class ChatgptChannelToggleCommand implements Command {
@@ -14,13 +14,13 @@ public class ChatgptChannelToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!ChatGPTContext.isAIOn())
+		if(!AIContext.getGpt3().isAIOn())
 			return false;
 		
-		if (ChatGPTContext.getActiveChannelID().equals("")) {
-			ChatGPTContext.setActiveChannelID(msg.getChannel().getIdAsString());
+		if (AIContext.getGpt3().getActiveChannelID().equals("")) {
+			AIContext.getGpt3().setActiveChannelID(msg.getChannel().getIdAsString());
 		} else {
-			ChatGPTContext.setActiveChannelID("");
+			AIContext.getGpt3().setActiveChannelID("");
 		}
 		return true;
 	}

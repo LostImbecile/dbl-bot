@@ -2,7 +2,7 @@ package com.github.egubot.commands.chatgpt;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.facades.ChatGPTContext;
+import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
 public class ChatgptResponseCommand implements Command {
@@ -14,10 +14,10 @@ public class ChatgptResponseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!ChatGPTContext.isAIOn())
+		if(!AIContext.getGpt3().isAIOn())
 			return false;
 		
-		ChatGPTContext.respond(msg, arguments);
+		AIContext.getGpt3().respond(msg, arguments);
 		return true;
 	}
 
