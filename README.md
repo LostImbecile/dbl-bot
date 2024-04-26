@@ -11,9 +11,9 @@ Some of the classes are implementation specific, you might want to change some a
 You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
 but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
-This bot was made for use on single servers and stores its data on discord or locally. It isn't yet made to handle cases where you're running it with multiple servers (storage is completely shared), to keep things simple.
+This bot was made for use on single servers and stores its data on discord or locally. It isn't yet fully made to handle cases where you're running it with multiple servers (storage is sometimes shared), to keep things simple.
 
-The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart.
+The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart, the main class is "Run.java".
  
 Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the API is switching 
 to java 11 soon.
