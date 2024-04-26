@@ -77,15 +77,14 @@ ChatGPT 3.5:
 - gpt (message)
 - gpt channel toggle
 - gpt clear
+- gpt tokens
+
+LLama 3 AI:
+- same as gpt but "aa"
 
 Custom AI:
 - ai (message)
 - ai terminate/activate
-
-LLama3 AI:
-- aa (message)
-- aa clear
-- aa tokens
 
 Bot Control (Owner):
 - terminate

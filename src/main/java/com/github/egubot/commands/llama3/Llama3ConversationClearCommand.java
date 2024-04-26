@@ -14,8 +14,7 @@ public class Llama3ConversationClearCommand implements Command{
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		
-		AIContext.getLlama3().getConversation().clear();
+		AIContext.getLlama3().clearConversation(msg);
 		msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
 		return true;
 	}

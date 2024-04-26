@@ -14,11 +14,7 @@ public class Llama3ChannelToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if (AIContext.getLlama3().getActiveChannelID().equals("")) {
-			AIContext.getLlama3().setActiveChannelID(msg.getChannel().getIdAsString());
-		} else {
-			AIContext.getLlama3().setActiveChannelID("");
-		}
+		AIContext.getLlama3().toggleChannel(msg);
 		return true;
 	}
 

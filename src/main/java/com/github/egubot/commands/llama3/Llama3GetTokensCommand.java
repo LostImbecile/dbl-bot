@@ -14,7 +14,7 @@ public class Llama3GetTokensCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getLlama3().getLastTokens() + "\"```");
+		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getLlama3().getLastTokens(msg) + "\"```");
 		return true;
 	}
 

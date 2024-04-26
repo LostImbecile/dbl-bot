@@ -14,11 +14,7 @@ public class ChatgptChannelToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if (AIContext.getGpt3().getActiveChannelID().equals("")) {
-			AIContext.getGpt3().setActiveChannelID(msg.getChannel().getIdAsString());
-		} else {
-			AIContext.getGpt3().setActiveChannelID("");
-		}
+		AIContext.getLlama3().toggleChannel(msg);
 		return true;
 	}
 

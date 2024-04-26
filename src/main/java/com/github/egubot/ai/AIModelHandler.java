@@ -1,9 +1,10 @@
 package com.github.egubot.ai;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,12 +13,13 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.objects.APIResponse;
 import com.github.egubot.shared.Shared;
 
-public class AIModelHandler{
+public class AIModelHandler {
 	private static final Logger logger = LogManager.getLogger(AIModelHandler.class.getName());
-	private List<String> conversation = Collections.synchronizedList(new LinkedList<String>());
-	private boolean isAIOn = false;
-	private String activeChannelID = "";
-	private int lastTokens = 0;
+	private Map<Long, List<String>> conversations = new HashMap<>();
+	private Map<Long, Integer> lastTokens = new HashMap<>();
+	private Map<Long, Boolean> isActive = new HashMap<>();
+
+	private boolean isAIOn = true;
 	private AIModel model = null;
 
 	public AIModelHandler(AIModel model) {
@@ -26,16 +28,21 @@ public class AIModelHandler{
 	}
 
 	public boolean respondIfChannelActive(Message msg, String msgText) {
-
-		if (isAIOn && (msg.getChannel().getIdAsString().equals(activeChannelID))) {
-			return respond(msg, msgText);
+		if (isAIOn) {
+			Long channelId = msg.getChannel().getId();
+			if (Boolean.TRUE.equals(isActive.getOrDefault(channelId, false))) {
+				return respond(msg, msgText);
+			}
 		}
 		return false;
-
 	}
 
 	public boolean respond(Message msg, String msgText) {
 		try {
+			Long channelId = msg.getChannel().getId();
+			conversations.putIfAbsent(channelId, new LinkedList<>());
+			List<String> conversation = conversations.get(channelId);
+
 			conversation.add(AIModel.reformatInput(msgText, msg.getAuthor().getName()));
 			APIResponse response = getModel().sendRequest(msgText, msg.getAuthor().getName(), conversation);
 
@@ -43,12 +50,10 @@ public class AIModelHandler{
 				msg.getChannel().sendMessage(response.getResponse());
 				conversation.add(AIModel.reformatInput(response.getResponse(), "assistant"));
 
-				lastTokens = response.getTotalTokens();
-				if (lastTokens > getModel().getTokenLimit() - 1000) {
+				lastTokens.put(channelId, response.getTotalTokens());
+				if (lastTokens.get(channelId) > getModel().getTokenLimit() - 1000) {
 					int deleteCount = Math.min(getModel().getTokenLimit() / 4096, 5);
-					for (int i = 0; i < deleteCount; i++) {
-						conversation.remove(0);
-					}
+					conversations.get(channelId).subList(0, deleteCount).clear();
 				}
 			}
 			return true;
@@ -59,16 +64,16 @@ public class AIModelHandler{
 		return false;
 	}
 
-	public List<String> getConversation() {
-		return conversation;
+	public void clearConversation(Message msg) {
+		Long channelId = msg.getChannel().getId();
+		if (conversations.containsKey(channelId)) {
+			conversations.get(channelId).clear();
+			lastTokens.put(channelId, 0);
+		}
 	}
 
-	public void setConversation(List<String> conversation) {
-		this.conversation = conversation;
-	}
-
-	public int getLastTokens() {
-		return lastTokens;
+	public int getLastTokens(Message msg) {
+		return lastTokens.getOrDefault(msg.getChannel().getId(), 0);
 	}
 
 	public AIModel getModel() {
@@ -79,20 +84,18 @@ public class AIModelHandler{
 		return isAIOn;
 	}
 
-	public void setAIOn(boolean isChatGPTOn) {
-		isAIOn = isChatGPTOn;
+	public void setAIOn(boolean isOn) {
+		isAIOn = isOn;
+	}
+
+	public void toggleChannel(Message msg) {
+		Long channelId = msg.getChannel().getId();
+		boolean value = isActive.getOrDefault(channelId, false);
+		isActive.put(channelId, !value);
 	}
 
 	public void toggle() {
 		isAIOn = !isAIOn;
-	}
-
-	public String getActiveChannelID() {
-		return activeChannelID;
-	}
-
-	public void setActiveChannelID(String chatGPTActiveChannelID) {
-		activeChannelID = chatGPTActiveChannelID;
 	}
 
 	public void setModel(AIModel model) {

@@ -15,10 +15,7 @@ public class ChatgptConversationClearCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!AIContext.getGpt3().isAIOn())
-			return false;
-		
-		AIContext.getGpt3().getConversation().clear();
+		AIContext.getGpt3().clearConversation(msg);
 		msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
 		return true;
 	}
