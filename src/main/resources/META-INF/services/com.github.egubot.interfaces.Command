@@ -5,6 +5,7 @@ com.github.egubot.commands.chatgpt.ChatgptChannelToggleCommand
 com.github.egubot.commands.chatgpt.ChatgptConversationClearCommand
 com.github.egubot.commands.chatgpt.ChatgptResponseCommand
 com.github.egubot.commands.chatgpt.ChatgptToggleCommand
+com.github.egubot.commands.chatgpt.ChatgptGetTokensCommand
 com.github.egubot.commands.webdriver.ConvertCommand
 com.github.egubot.commands.customai.CustomAIActivateCommand
 com.github.egubot.commands.customai.CustomAIRespondCommand
@@ -57,3 +58,5 @@ com.github.egubot.commands.legends.LegendsKitSearchCommand
 com.github.egubot.commands.llama3.LLama3ResponseCommand
 com.github.egubot.commands.llama3.Llama3ConversationClearCommand
 com.github.egubot.commands.llama3.Llama3GetTokensCommand
+com.github.egubot.commands.llama3.Llama3ChannelToggleCommand
+com.github.egubot.commands.llama3.Llama3ToggleCommand

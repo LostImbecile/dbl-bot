@@ -1,23 +1,23 @@
-package com.github.egubot.commands.chatgpt;
+package com.github.egubot.commands.llama3;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class ChatgptChannelToggleCommand implements Command {
+public class Llama3ChannelToggleCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "gpt channel toggle";
+		return "aa channel toggle";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if (AIContext.getGpt3().getActiveChannelID().equals("")) {
-			AIContext.getGpt3().setActiveChannelID(msg.getChannel().getIdAsString());
+		if (AIContext.getLlama3().getActiveChannelID().equals("")) {
+			AIContext.getLlama3().setActiveChannelID(msg.getChannel().getIdAsString());
 		} else {
-			AIContext.getGpt3().setActiveChannelID("");
+			AIContext.getLlama3().setActiveChannelID("");
 		}
 		return true;
 	}
