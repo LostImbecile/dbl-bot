@@ -5,11 +5,11 @@
 }
 
 .tab-pane .tab-content-area {
-    -fx-background-color: black; /* Set the background color of the tab content area */
+    -fx-background-color: black; /* Set the background colour of the tab content area */
 }
 
 .tab-pane .tab-header-area {
-    -fx-background-color: black; /* Set the background color of the tab header area */
+    -fx-background-color: black; /* Set the background colour of the tab header area */
 }
 
 .tab-header-background {

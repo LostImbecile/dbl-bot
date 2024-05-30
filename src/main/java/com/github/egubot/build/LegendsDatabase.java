@@ -52,7 +52,7 @@ public class LegendsDatabase {
 		charactersList.clear();
 		tags.clear();
 		characterHash.clear();
-		
+
 		addSpecialTags();
 		getAllTags(document);
 
@@ -94,17 +94,19 @@ public class LegendsDatabase {
 		tags.add(new Tags(-1, "old"));// 22
 		tags.add(new Tags(-1, "new"));// 23
 		tags.add(new Tags(-1, "event"));// 24
+		tags.add(new Tags(-1, "all")); // 25
+		tags.add(new Tags(-1, "assist")); // 26
 	}
 
 	private static void getAllTags(Document document) {
 		Elements optionElements = document.select("option");
 
 		Pattern removePattern = Pattern.compile("[é()]");
-		
+
 		for (Element option : optionElements) {
 			try {
 				int value = Integer.parseInt(option.attr("value"));
-				String label = option.text().toLowerCase().replace(" ","_");
+				String label = option.text().toLowerCase().replace(" ", "_");
 				Matcher matcher = removePattern.matcher(label);
 				label = matcher.replaceAll("");
 				tags.add(new Tags(value, label));
@@ -182,6 +184,10 @@ public class LegendsDatabase {
 	private static void setTags(String line, Characters character) {
 		String[] token = line.split(" ");
 
+		tags.get(25).getCharacters().put(character);
+		if (character.getCharacterName().toLowerCase().contains("assist"))
+			tags.get(26).getCharacters().put(character);
+
 		for (String id : token) {
 			getTag(id, character);
 		}
@@ -189,9 +195,9 @@ public class LegendsDatabase {
 
 	private static String processName(String line) {
 		try {
-			return line.replace("Super Saiyan ", "SSJ").replace("SSJGod", "SSG").replace("SSG SS", "SSGSS").strip();
+			return line.replace("Super Saiyan", "SSJ").replace("SSJ 2", "SSJ2").replace("SSJ 3", "SSJ3")
+					.replace("SSJ 4", "SSJ4").replace("SSJ God", "SSG").replace("SSG SS", "SSGSS").strip();
 		} catch (StringIndexOutOfBoundsException e) {
-			logger.error(e);
 			return "Error";
 		}
 	}
@@ -232,7 +238,7 @@ public class LegendsDatabase {
 						tags.get(23).getCharacters().put(character);
 
 				} catch (NumberFormatException e) {
-					StreamRedirector.println("events","Failed to parse: " + st);
+					StreamRedirector.println("events", "Failed to parse: " + st);
 				}
 			} else {
 				// Specific units someone wanted added
@@ -253,8 +259,12 @@ public class LegendsDatabase {
 
 	private static void getTag(String st, Characters character) {
 		int id = Integer.parseInt(st);
+		tags.get(25).getCharacters().put(character);
+
 		for (Tags tag : tags) {
 			if (tag.getId() == id) {
+				if (id >= 50000 && id < 8000000)
+					character.setBaseName(tag.getName());
 				tag.getCharacters().put(character);
 				return;
 			}
