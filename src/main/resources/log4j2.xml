@@ -25,9 +25,14 @@
 			</PatternLayout>
 			<Policies>
 				<OnStartupTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="50 KB" />
+				<SizeBasedTriggeringPolicy size="200 KB" />
 			</Policies>
-			<DefaultRolloverStrategy max="10" />
+			<DefaultRolloverStrategy max="10">
+				<Delete basePath="${filename}" maxDepth="1">
+					<IfFileName glob="errorLog-*.log" />
+					<IfAccumulatedFileSize exceeds="30MB" />
+				</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 
 		<RollingFile name="JavacordLogFile"
@@ -40,7 +45,12 @@
 				<OnStartupTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="1 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="10" />
+			<DefaultRolloverStrategy max="10">
+				<Delete basePath="${filename}" maxDepth="1">
+					<IfFileName glob="javacordLog-*.log" />
+					<IfAccumulatedFileSize exceeds="30MB" />
+				</Delete>
+			</DefaultRolloverStrategy>
 		</RollingFile>
 
 		<JavaFXAppender name="GUILog">
