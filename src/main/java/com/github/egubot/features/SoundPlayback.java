@@ -34,8 +34,10 @@ import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.track.YoutubeAudioTrack;
 
 public class SoundPlayback {
 	private static final Logger logger = LogManager.getLogger(SoundPlayback.class.getName());
@@ -77,7 +79,7 @@ public class SoundPlayback {
 		}
 		updateBufferDuration(bufferSize);
 
-		remotePlayerManager.registerSourceManager(new YoutubeAudioSourceManager());
+		remotePlayerManager.registerSourceManager(new YoutubeAudioSourceManager()); // lavalink youtube source
 		remotePlayerManager.registerSourceManager(new BandcampAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new BeamAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new GetyarnAudioSourceManager());
@@ -95,12 +97,16 @@ public class SoundPlayback {
 	public static void getCurrentTrackInfo(Message msg) {
 		Server server = ServerInfoUtilities.getServer(msg);
 		AudioTrack track = TrackScheduler.getCurrentTrack(server.getId());
-		String videoID = track.getIdentifier();
+		
 		EmbedBuilder embed = new EmbedBuilder();
-		embed.setAuthor(GetYoutubeVideoInfo.getName(videoID), GetYoutubeVideoInfo.getURL(videoID),
-				server.getIcon().get());
+		if (track.getSourceManager() instanceof YoutubeAudioSourceManager) {
+			YoutubeAudioTrack ytTrack = (YoutubeAudioTrack) track;
+			embed.setAuthor(ytTrack.getInfo().title, ytTrack.getInfo().uri,
+					server.getIcon().get());
+			embed.setImage(ytTrack.getInfo().artworkUrl);
+		}
+		
 		embed.setColor(Color.RED);
-		embed.setImage(GetYoutubeVideoInfo.getThumb(videoID));
 
 		addProgressBar(track, embed);
 		msg.getChannel().sendMessage(embed);
@@ -189,7 +195,10 @@ public class SoundPlayback {
 			AudioSource source = new LavaplayerAudioSource(player);
 			audioConnection.setAudioSource(source);
 			loadTracks(msg, name, serverID, manager);
-		});
+		}).exceptionally(e -> {
+		    logger.error("Failed to connect to voice channel", e);
+		    return null;
+		});;
 	}
 
 	private static void loadTracks(Message msg, String name, long serverID, AudioPlayerManager manager) {
