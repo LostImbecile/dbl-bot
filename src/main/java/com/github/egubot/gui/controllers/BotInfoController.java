@@ -40,6 +40,9 @@ public class BotInfoController {
 
 	@FXML
 	private TextArea eventsArea;
+	
+    @FXML
+    private TextArea debugTextArea;
 
 	@FXML
 	private Button helpButton;
@@ -53,6 +56,9 @@ public class BotInfoController {
 	@FXML
 	private TextArea logsArea;
 
+    @FXML
+    private TextArea javacordLogsArea;
+    
 	@FXML
 	private Button sendMessagesButton;
 
@@ -82,6 +88,7 @@ public class BotInfoController {
 
 	@FXML
 	void openHelpWindow(ActionEvent event) {
+		// not yet implemented
 	}
 
 	@FXML
@@ -240,6 +247,22 @@ public class BotInfoController {
 
 	public void setButtonsVbox(VBox buttonsVbox) {
 		this.buttonsVbox = buttonsVbox;
+	}
+
+	public TextArea getJavacordLogsArea() {
+		return javacordLogsArea;
+	}
+
+	public void setJavacordLogsArea(TextArea javacordLogsArea) {
+		this.javacordLogsArea = javacordLogsArea;
+	}
+
+	public TextArea getDebugTextArea() {
+		return debugTextArea;
+	}
+
+	public void setDebugTextArea(TextArea debugTextArea) {
+		this.debugTextArea = debugTextArea;
 	}
 
 }

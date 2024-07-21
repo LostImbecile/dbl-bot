@@ -60,20 +60,26 @@
 
 	</Appenders>
 	<Loggers>
-		<Root level="off">
+		<Root level="debug" additivity="false">
+			<AppenderRef ref="GUILog" />
 		</Root>
+
 		<Logger name="com.github.egubot.managers.ShutdownManager"
 			level="info" additivity="false">
 			<AppenderRef ref="ConsoleWithInfo" />
 			<AppenderRef ref="GUILog" />
 		</Logger>
+		
 		<Logger name="com" level="warn" additivity="false">
 			<AppenderRef ref="ConsoleWithInfo" />
 			<AppenderRef ref="LogFile" level="error" />
 			<AppenderRef ref="GUILog" />
 		</Logger>
+		
 		<Logger name="org.javacord" level="info" additivity="false">
 			<AppenderRef ref="JavacordLogFile" />
+			<AppenderRef ref="GUILog" />
 		</Logger>
+
 	</Loggers>
 </Configuration>

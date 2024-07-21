@@ -9,6 +9,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +39,9 @@ public class GUIApplication extends Application {
 			Parent mainRoot = mainLoader.load();
 			BotInfoController mainController = (BotInfoController) mainLoader.getController();
 
-			JavaFXAppender.setTextArea(mainController.getLogsArea());
+			JavaFXAppender.registerTextArea("com", Level.ERROR, mainController.getLogsArea());
+			JavaFXAppender.registerTextArea("org.javacord", Level.INFO, mainController.getJavacordLogsArea());
+			JavaFXAppender.registerTextArea("", Level.DEBUG, mainController.getDebugTextArea());
 
 			configureMainWindow(primaryStage, mainRoot, mainController);
 
@@ -86,7 +90,7 @@ public class GUIApplication extends Application {
 		Scene scene = new Scene(mainRoot);
 
 		scene.getStylesheets().add(getClass().getResource("/css/root.css").toExternalForm());
-		
+
 		primaryStage.setScene(scene);
 		primaryStage.setMinHeight(462 + 20);
 		primaryStage.setMinWidth(740 + 20);
