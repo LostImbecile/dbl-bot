@@ -22,25 +22,27 @@ public class ServerInfoUtilities {
 	}
 
 	private static void addServer(long serverID, Server server) {
-		serverMap.put(serverID, server);
+		if (server != null)
+			serverMap.put(serverID, server);
 	}
 
 	public static Server getServer(long serverID) {
 		Server server = serverMap.getOrDefault(serverID, null);
 
 		if (server == null) {
-			server = Bot.getApi().getServerById(serverID).get();
+			server = Bot.getApi().getServerById(serverID).orElse(null);
 			addServer(serverID, server);
 		}
 		return server;
 	}
 
 	public static Server getServer(Message msg) {
-		Server server = msg.getServer().get();
-		addServer(server.getId(), server);
+		Server server = msg.getServer().orElse(null);
+		if (server != null)
+			addServer(server.getId(), server);
 		return server;
 	}
-	
+
 	public static Server getServer(ServerTextChannel channel) {
 		Server server = channel.getServer();
 		addServer(server.getId(), server);
@@ -48,11 +50,17 @@ public class ServerInfoUtilities {
 	}
 
 	public static ServerVoiceChannel getConnectedVoiceChannel(long serverID) {
-		return getServer(serverID).getConnectedVoiceChannel(Bot.getYourself()).get();
+		Server server = getServer(serverID);
+		if (server == null)
+			return null;
+		return server.getConnectedVoiceChannel(Bot.getYourself()).orElse(null);
 	}
 
 	public static ServerVoiceChannel getConnectedVoiceChannel(Message msg) {
-		return getServer(msg).getConnectedVoiceChannel(Bot.getYourself()).get();
+		Server server = getServer(msg);
+		if (server == null)
+			return null;
+		return server.getConnectedVoiceChannel(Bot.getYourself()).orElse(null);
 	}
 
 	public static long getServerID(Message msg) {
@@ -60,7 +68,10 @@ public class ServerInfoUtilities {
 		long serverID = channelServerMap.getOrDefault(channelID, -1L);
 
 		if (serverID == -1) {
-			serverID = getServer(msg).getId();
+			Server server = getServer(msg);
+			if (server == null)
+				return -1;
+			serverID = server.getId();
 			addChannelServer(channelID, serverID);
 		}
 
