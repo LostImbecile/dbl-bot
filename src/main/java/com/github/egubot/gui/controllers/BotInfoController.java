@@ -40,9 +40,9 @@ public class BotInfoController {
 
 	@FXML
 	private TextArea eventsArea;
-	
-    @FXML
-    private TextArea debugTextArea;
+
+	@FXML
+	private TextArea debugTextArea;
 
 	@FXML
 	private Button helpButton;
@@ -56,9 +56,9 @@ public class BotInfoController {
 	@FXML
 	private TextArea logsArea;
 
-    @FXML
-    private TextArea javacordLogsArea;
-    
+	@FXML
+	private TextArea javacordLogsArea;
+
 	@FXML
 	private Button sendMessagesButton;
 
@@ -155,13 +155,18 @@ public class BotInfoController {
 
 	@FXML
 	void initialize() {
+		assert buttonsVbox != null : "fx:id=\"buttonsVbox\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert copyInviteButton != null
 				: "fx:id=\"copyInviteButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
+		assert debugTextArea != null : "fx:id=\"debugTextArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert eventsArea != null : "fx:id=\"eventsArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert helpButton != null : "fx:id=\"helpButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert infoArea != null : "fx:id=\"infoArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
+		assert javacordLogsArea != null
+				: "fx:id=\"javacordLogsArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert logsArea != null : "fx:id=\"logsArea\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert refreshButton != null : "fx:id=\"refreshButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
+		assert restartButton != null : "fx:id=\"restartButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert sendMessagesButton != null
 				: "fx:id=\"sendMessagesButton\" was not injected: check your FXML file 'BotInfo.fxml'.";
 		assert settingsButton != null

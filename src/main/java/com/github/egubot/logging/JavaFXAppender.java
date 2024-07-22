@@ -24,7 +24,8 @@ public class JavaFXAppender extends AbstractAppender {
 	}
 
 	public static void registerTextArea(String loggerName, Level level, TextArea textArea) {
-		textAreas.computeIfAbsent(level, k -> new HashMap<>()).put(loggerName, textArea);
+		if (!level.equals(Level.OFF))
+			textAreas.computeIfAbsent(level, k -> new HashMap<>()).put(loggerName, textArea);
 	}
 
 	@PluginFactory
@@ -60,6 +61,9 @@ public class JavaFXAppender extends AbstractAppender {
 				longestMatch = entry.getKey();
 				matchedTextArea = entry.getValue();
 			}
+		}
+		if (longestMatch.isEmpty()) {
+			matchedTextArea = levelTextAreas.getOrDefault("all", null);
 		}
 		return matchedTextArea;
 	}

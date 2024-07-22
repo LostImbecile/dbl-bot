@@ -60,7 +60,7 @@
 
 	</Appenders>
 	<Loggers>
-		<Root level="debug" additivity="false">
+		<Root level="trace">
 			<AppenderRef ref="GUILog" />
 		</Root>
 
@@ -69,13 +69,13 @@
 			<AppenderRef ref="ConsoleWithInfo" />
 			<AppenderRef ref="GUILog" />
 		</Logger>
-		
-		<Logger name="com" level="warn" additivity="false">
-			<AppenderRef ref="ConsoleWithInfo" />
+
+		<Logger name="com" additivity="false">
+			<AppenderRef ref="ConsoleWithInfo" level="warn" />
 			<AppenderRef ref="LogFile" level="error" />
-			<AppenderRef ref="GUILog" />
+			<AppenderRef ref="GUILog" level="trace" />
 		</Logger>
-		
+
 		<Logger name="org.javacord" level="info" additivity="false">
 			<AppenderRef ref="JavacordLogFile" />
 			<AppenderRef ref="GUILog" />
