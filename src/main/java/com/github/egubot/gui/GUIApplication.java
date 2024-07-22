@@ -41,7 +41,7 @@ public class GUIApplication extends Application {
 
 			JavaFXAppender.registerTextArea("com", Level.ERROR, mainController.getLogsArea());
 			JavaFXAppender.registerTextArea("org.javacord", Level.INFO, mainController.getJavacordLogsArea());
-			JavaFXAppender.registerTextArea("", Level.DEBUG, mainController.getDebugTextArea());
+			JavaFXAppender.registerTextArea("all", Level.DEBUG, mainController.getDebugTextArea());
 
 			configureMainWindow(primaryStage, mainRoot, mainController);
 
