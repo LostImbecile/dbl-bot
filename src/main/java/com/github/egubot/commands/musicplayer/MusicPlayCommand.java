@@ -14,7 +14,7 @@ public class MusicPlayCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		SoundPlayback.play(msg);
+		SoundPlayback.play(msg, arguments);
 		return true;
 	}
 

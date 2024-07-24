@@ -20,7 +20,6 @@ import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.main.Bot;
 import com.github.egubot.shared.utils.ConvertObjects;
 import com.github.egubot.storage.ConfigManager;
-import com.github.egubot.webautomation.GetYoutubeVideoInfo;
 import com.github.lavaplayer.AudioLoadHandler;
 import com.github.lavaplayer.LavaplayerAudioSource;
 import com.github.lavaplayer.TrackScheduler;
@@ -31,7 +30,9 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -68,7 +69,6 @@ public class SoundPlayback {
 	}
 
 	private static void initialisePlayerManagers() {
-		AudioSourceManagers.registerRemoteSources(remotePlayerManager);
 		AudioSourceManagers.registerLocalSource(localPlayerManager);
 
 		int bufferSize = ConfigManager.getIntProperty("Player_Buffer_Size_MS");
@@ -85,6 +85,8 @@ public class SoundPlayback {
 		remotePlayerManager.registerSourceManager(new GetyarnAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new TwitchStreamAudioSourceManager());
 		remotePlayerManager.registerSourceManager(new VimeoAudioSourceManager());
+		remotePlayerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
+		remotePlayerManager.registerSourceManager(new HttpAudioSourceManager());
 
 		localPlayerManager.registerSourceManager(new LocalAudioSourceManager());
 	}
@@ -97,15 +99,17 @@ public class SoundPlayback {
 	public static void getCurrentTrackInfo(Message msg) {
 		Server server = ServerInfoUtilities.getServer(msg);
 		AudioTrack track = TrackScheduler.getCurrentTrack(server.getId());
-		
+
 		EmbedBuilder embed = new EmbedBuilder();
 		if (track.getSourceManager() instanceof YoutubeAudioSourceManager) {
 			YoutubeAudioTrack ytTrack = (YoutubeAudioTrack) track;
-			embed.setAuthor(ytTrack.getInfo().title, ytTrack.getInfo().uri,
-					server.getIcon().get());
+			embed.setAuthor(ytTrack.getInfo().title, ytTrack.getInfo().uri, server.getIcon().orElse(null));
 			embed.setImage(ytTrack.getInfo().artworkUrl);
+		}else {
+			embed.setAuthor(track.getIdentifier(), null, server.getIcon().orElse(null));
+			embed.setImage(track.getInfo().artworkUrl);
 		}
-		
+
 		embed.setColor(Color.RED);
 
 		addProgressBar(track, embed);
@@ -130,7 +134,7 @@ public class SoundPlayback {
 		Server server = ServerInfoUtilities.getServer(msg);
 		Map<String, Long> map = TrackScheduler.getPlayListInfo(server.getId());
 		EmbedBuilder embed = new EmbedBuilder();
-		embed.setAuthor(server.getName(), null, server.getIcon().get());
+		embed.setAuthor(server.getName(), null, server.getIcon().orElse(null));
 		embed.setColor(Color.RED);
 		StringBuilder description = new StringBuilder(50);
 		for (Entry<String, Long> entry : map.entrySet()) {
@@ -142,42 +146,36 @@ public class SoundPlayback {
 	}
 
 	private static String convertTrackInfoToText(Entry<String, Long> entry) {
-		String name = GetYoutubeVideoInfo.getName(entry.getKey());
-		String url = GetYoutubeVideoInfo.getURL(entry.getKey());
-		String hyperLink = "[" + name + "](" + url + ")";
 		String duration = ConvertObjects.convertMilliSecondsToTime(entry.getValue());
-		return hyperLink + " - " + duration;
+		return entry.getKey()+ " - " + duration;
 	}
 
-	public static void play(Message msg) {
+	public static void play(Message msg, String arguments) {
 		ServerVoiceChannel channel = getVoiceChannel(msg);
 		if (channel == null)
 			return;
 
-		String name = getPlayArgument(msg.getContent());
+		String name = getPlayArgument(arguments);
 
 		long serverID = ServerInfoUtilities.getServerID(msg);
 		AudioPlayerManager manager = getManager(name);
 
 		boolean isNewPlayer = false;
-		AudioPlayer player;
-		if (TrackScheduler.getServerAudioPlayer(serverID) == null) {
-			player = manager.createPlayer();
-			TrackScheduler trackScheduler = new TrackScheduler(player, serverID);
-			player.addListener(trackScheduler);
-			isNewPlayer = true;
-		} else {
-			player = TrackScheduler.getServerAudioPlayer(serverID);
-		}
 
 		try {
-			if (isNewPlayer || !channel.isConnected(bot)) {
+			if (TrackScheduler.getServerAudioPlayer(serverID) == null || !channel.isConnected(bot)) {
+				isNewPlayer = true;
+				AudioPlayer player = manager.createPlayer();
+				TrackScheduler trackScheduler = new TrackScheduler(player, serverID);
+				player.addListener(trackScheduler);
 				connectToVoiceChannel(msg, channel, name, serverID, manager, player);
 			} else {
-				loadTracks(msg, name, serverID, manager);
+				manager.loadItem(name, new AudioLoadHandler(msg, serverID));
 			}
 		} catch (Exception e) {
-			TrackScheduler.destroy(serverID);
+			logger.error(e);
+			if (isNewPlayer)
+				TrackScheduler.destroy(serverID);
 		}
 
 	}
@@ -185,7 +183,6 @@ public class SoundPlayback {
 	private static void connectToVoiceChannel(Message msg, ServerVoiceChannel channel, String name, long serverID,
 			AudioPlayerManager manager, AudioPlayer player) {
 		channel.connect().thenAccept(audioConnection -> {
-
 			channel.addServerVoiceChannelMemberLeaveListener(event -> {
 				if (channel.getConnectedUserIds().size() < 2 || !channel.isConnected(bot)) {
 					TrackScheduler.destroy(serverID);
@@ -194,18 +191,13 @@ public class SoundPlayback {
 
 			AudioSource source = new LavaplayerAudioSource(player);
 			audioConnection.setAudioSource(source);
-			loadTracks(msg, name, serverID, manager);
-		}).exceptionally(e -> {
-		    logger.error("Failed to connect to voice channel", e);
-		    return null;
-		});;
-	}
-
-	private static void loadTracks(Message msg, String name, long serverID, AudioPlayerManager manager) {
-		if (!name.contains("search"))
 			manager.loadItem(name, new AudioLoadHandler(msg, serverID));
-		else
-			manager.loadItem(name, new AudioLoadHandler(msg, serverID, true));
+		}).exceptionally(e -> {
+			logger.error("Failed to connect to voice channel", e);
+			TrackScheduler.destroy(serverID);
+			return null;
+		});
+
 	}
 
 	private static AudioPlayerManager getManager(String name) {
@@ -221,7 +213,7 @@ public class SoundPlayback {
 	private static ServerVoiceChannel getVoiceChannel(Message msg) {
 		ServerVoiceChannel channel;
 		try {
-			channel = msg.getAuthor().getConnectedVoiceChannel().get();
+			channel = msg.getAuthor().getConnectedVoiceChannel().orElseThrow();
 		} catch (NoSuchElementException e) {
 			msg.getChannel().sendMessage("Connect to a voice channel first.");
 			return null;

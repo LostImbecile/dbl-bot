@@ -14,30 +14,26 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 
 	Message msg;
 	long serverID;
-	boolean fromSearch = false;
 
 	public AudioLoadHandler(Message msg, long serverID) {
 		this.msg = msg;
 		this.serverID = serverID;
 	}
 
-	public AudioLoadHandler(Message msg, long serverID, boolean fromSearch) {
-		this.msg = msg;
-		this.serverID = serverID;
-		this.fromSearch = fromSearch;
-	}
-
 	@Override
 	public void trackLoaded(AudioTrack track) {
 		TrackScheduler.queue(track, serverID);
+		logger.debug("Queued track {}", track.getInfo().uri);
 	}
 
 	@Override
 	public void playlistLoaded(AudioPlaylist playlist) {
-		if (!fromSearch)
+		if (!playlist.isSearchResult())
 			TrackScheduler.queue(playlist, serverID);
 		else
 			TrackScheduler.queue(playlist.getTracks().get(0), serverID);
+		
+		logger.debug("Queued playlist {} ", playlist.getName());
 	}
 
 	@Override
@@ -54,7 +50,7 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 		if (!TrackScheduler.isServerPlaying(serverID)) {
 			TrackScheduler.destroy(serverID);
 		}
-		logger.error(exception);
+		logger.debug(exception);
 	}
 
 }

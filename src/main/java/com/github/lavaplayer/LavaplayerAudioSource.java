@@ -25,7 +25,7 @@ public class LavaplayerAudioSource extends AudioSourceBase {
     @Override
     public byte[] getNextFrame() {
         if (lastFrame == null) {
-            return null;
+            return new byte[0];
         }
         return applyTransformers(lastFrame.getData());
     }
