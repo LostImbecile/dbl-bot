@@ -1,7 +1,10 @@
 package com.github.egubot.logging;
 
+import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
@@ -16,6 +19,7 @@ import java.util.Map;
 
 @Plugin(name = "JavaFXAppender", category = "Core", elementType = "appender", printObject = true)
 public class JavaFXAppender extends AbstractAppender {
+	static final Logger logger = LogManager.getLogger(JavaFXAppender.class.getName());
 
 	private static Map<Level, Map<String, TextArea>> textAreas = new HashMap<>();
 
@@ -38,17 +42,23 @@ public class JavaFXAppender extends AbstractAppender {
 
 	@Override
 	public void append(LogEvent event) {
-		if (event != null) {
-			Level eventLevel = event.getLevel();
-			Map<String, TextArea> levelTextAreas = getLevelTextAreas(eventLevel);
-			if (!levelTextAreas.isEmpty()) {
-				String loggerName = event.getLoggerName();
-				TextArea matchedTextArea = getLongestMatch(loggerName, levelTextAreas);
+		try {
+			if (event != null && getLayout() != null && event.getLoggerName() != null) {
+				Level eventLevel = event.getLevel();
+				Map<String, TextArea> levelTextAreas = getLevelTextAreas(eventLevel);
+				if (!levelTextAreas.isEmpty()) {
+					String loggerName = event.getLoggerName();
+					TextArea matchedTextArea = getLongestMatch(loggerName, levelTextAreas);
 
-				if (matchedTextArea != null && getLayout() != null) {
-					matchedTextArea.appendText(getLayout().toSerializable(event).toString() + "\n");
+					String message = getLayout().toSerializable(event).toString() + "\n";
+					if (matchedTextArea != null && !message.isBlank()) {
+						Platform.runLater(
+								() -> matchedTextArea.appendText(message));
+					}
 				}
 			}
+		} catch (Exception e) {
+			logger.error("Couldn't append log event. Logger name: {}", event.getLoggerName() + "", e);
 		}
 	}
 

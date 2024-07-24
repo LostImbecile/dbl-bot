@@ -80,6 +80,10 @@
 			<AppenderRef ref="JavacordLogFile" />
 			<AppenderRef ref="GUILog" />
 		</Logger>
+		
+		<Logger name="org.apache.http" additivity="false">
+			<AppenderRef ref="GUILog" level="warn"/>
+		</Logger>
 
 	</Loggers>
 </Configuration>

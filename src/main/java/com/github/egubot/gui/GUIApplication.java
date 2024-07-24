@@ -39,7 +39,7 @@ public class GUIApplication extends Application {
 			Parent mainRoot = mainLoader.load();
 			BotInfoController mainController = (BotInfoController) mainLoader.getController();
 
-			JavaFXAppender.registerTextArea("com", Level.ERROR, mainController.getLogsArea());
+			JavaFXAppender.registerTextArea("com", Level.WARN, mainController.getLogsArea());
 			JavaFXAppender.registerTextArea("org.javacord", Level.INFO, mainController.getJavacordLogsArea());
 			JavaFXAppender.registerTextArea("all", Level.DEBUG, mainController.getDebugTextArea());
 
