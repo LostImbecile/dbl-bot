@@ -15,7 +15,14 @@ public class MusicSkipCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		TrackScheduler.skip(ServerInfoUtilities.getServerID(msg));
+		int i;
+		try {
+			i = Integer.parseInt(arguments);
+			i = i < 1 ? 1 : i;
+		} catch (NumberFormatException e) {
+			i = 1;
+		}
+		TrackScheduler.skip(ServerInfoUtilities.getServerID(msg), i);
 		return true;
 	}
 
