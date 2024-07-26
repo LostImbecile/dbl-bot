@@ -79,6 +79,10 @@ public class FileUtilities {
 			return null;
 		}
 	}
+	
+	public static String readFile(String fileName) {
+		return readInputStream(getFileInputStream(fileName, false), "\n");
+	}
 
 	public static String readInputStream(InputStream is) {
 		StringBuilder result = new StringBuilder();
