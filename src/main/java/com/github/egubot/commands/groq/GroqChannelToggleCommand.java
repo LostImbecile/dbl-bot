@@ -1,11 +1,11 @@
-package com.github.egubot.commands.Groq;
+package com.github.egubot.commands.groq;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class Llama3ChannelToggleCommand implements Command {
+public class GroqChannelToggleCommand implements Command {
 
 	@Override
 	public String getName() {

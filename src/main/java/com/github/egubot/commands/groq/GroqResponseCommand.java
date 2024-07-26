@@ -1,21 +1,20 @@
-package com.github.egubot.commands.Groq;
+package com.github.egubot.commands.groq;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class Llama3ToggleCommand implements Command {
+public class GroqResponseCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "aa toggle";
+		return "aa";
 	}
 
 	@Override
-	public boolean execute(Message msg, String arguments) {
-		AIContext.getLlama3().toggle();
-		return true;
+	public boolean execute(Message msg, String arguments) throws Exception {
+		return AIContext.getLlama3().respond(msg, arguments);
 	}
 
 	@Override
