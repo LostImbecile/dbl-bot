@@ -10,7 +10,7 @@ DBLegends Random Roll:
 - b-toggle roll animation
 
 DBLegends Character Search:
-- b-search *(name) *(filters)
+- b-search \*(name) *(filters)
 - b-character send
 - b-tag send
 
@@ -19,13 +19,13 @@ DBLegends Summon Rate:
 
 Automatic Responses:
 
-[Types: contain, equal, match]
-- b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> *(reaction) >> *(reaction)...
+ `[Types: contain, equal, match]`
+- b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> *(reaction)...
 - b-response remove (message)
 
 Translate:
-- b-translate toggle [Translates all non-eng messages]
-- b-translate set (to)/(from-to) [Shortened form; en, fr]
+- b-translate toggle `[Translates all non-eng messages]`
+- b-translate set (to)/(from-to) `[Shortened form; en, fr]`
 - b-translate languages
 - b-translate (text)/(reply to the message)/(embed)
 
@@ -37,21 +37,35 @@ Music Player:
 - b-cancel
 - b-pause
 - b-resume
-- b-skip
-- b-info [The playlist's]
-- b-now [Playing now]
+- b-skip *(amount)
+- b-info `[The playlist's]`
+- b-now `[Playing now]`
 
 WebDriver:
 - b-insult (person name) >> (reason)
 - b-grab (youtube link)
 - b-grab mp3 (youtube link)
-- b-convert *(gif/vid) [Type of your attachment]
+- b-convert *(gif/vid) `[Type of your attachment]`
 
-ChatGPT 3.5:
-- gpt toggle [it's off by default]
+OpenAI Model:
+- gpt toggle `[it's off by default]`
 - gpt (message)
 - gpt channel toggle
+- gpt clear
+- gpt tokens
+
+Groq Model:
+- same as gpt but "aa"
 
 Custom AI:
 - ai (message)
 - ai terminate/activate
+
+Bot Control (Owner):
+- terminate
+- refresh
+- b-message edit (messageId) (message)
+- b-message delete (messageId)
+- parrot (msg)
+- b-toggle manager `[Toggles storage]`
+- toggle bot read mode `[Toggles reading bot message]`

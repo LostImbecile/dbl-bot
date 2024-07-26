@@ -4,6 +4,8 @@ Discord bot I've made for a specific server. Its features mostly have to do with
 
 Public so server members can look at it or add to it.
 
+Uses [Javacord](https://github.com/Javacord/Javacord).
+
 Notes:
 ---------------------------------
 Some of the classes are implementation specific, you might want to change some as needed, the rest should work as is, but you should modify their messages, clear them up, completely remove or add more to them.
@@ -15,7 +17,7 @@ This bot was made for use on single servers and stores its data on discord or lo
 
 The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart, the main class is "Run.java".
  
-Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as the API is switching 
+Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as javacord is switching 
 to java 11 soon.
 
 Also works on Linux (tested), but resource locations behave differently, isn't a problem however.
@@ -62,7 +64,7 @@ Music Player:
 - b-cancel
 - b-pause
 - b-resume
-- b-skip
+- b-skip *(amount)
 - b-info `[The playlist's]`
 - b-now `[Playing now]`
 
@@ -72,14 +74,14 @@ WebDriver:
 - b-grab mp3 (youtube link)
 - b-convert *(gif/vid) `[Type of your attachment]`
 
-ChatGPT 3.5:
+OpenAI Model:
 - gpt toggle `[it's off by default]`
 - gpt (message)
 - gpt channel toggle
 - gpt clear
 - gpt tokens
 
-LLama 3 AI:
+Groq Model:
 - same as gpt but "aa"
 
 Custom AI:
