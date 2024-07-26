@@ -74,7 +74,7 @@ public class SoundPlayback {
 		int bufferSize = ConfigManager.getIntProperty("Player_Buffer_Size_MS");
 
 		if (bufferSize < 0) {
-			bufferSize = 400;
+			bufferSize = 5000;
 			ConfigManager.setIntProperty("Player_Buffer_Size_MS", bufferSize);
 		}
 		updateBufferDuration(bufferSize);
@@ -99,13 +99,17 @@ public class SoundPlayback {
 	public static void getCurrentTrackInfo(Message msg) {
 		Server server = ServerInfoUtilities.getServer(msg);
 		AudioTrack track = TrackScheduler.getCurrentTrack(server.getId());
+		if(track == null) {
+			msg.getChannel().sendMessage("There is no track playing");
+			return;
+		}
 
 		EmbedBuilder embed = new EmbedBuilder();
 		if (track.getSourceManager() instanceof YoutubeAudioSourceManager) {
 			YoutubeAudioTrack ytTrack = (YoutubeAudioTrack) track;
 			embed.setAuthor(ytTrack.getInfo().title, ytTrack.getInfo().uri, server.getIcon().orElse(null));
 			embed.setImage(ytTrack.getInfo().artworkUrl);
-		}else {
+		} else {
 			embed.setAuthor(track.getIdentifier(), null, server.getIcon().orElse(null));
 			embed.setImage(track.getInfo().artworkUrl);
 		}
@@ -133,6 +137,10 @@ public class SoundPlayback {
 	public static void getPlaylistInfo(Message msg) {
 		Server server = ServerInfoUtilities.getServer(msg);
 		Map<String, Long> map = TrackScheduler.getPlayListInfo(server.getId());
+		if (map.isEmpty()) {
+			msg.getChannel().sendMessage("Playlist is empty");
+			return;
+		}
 		EmbedBuilder embed = new EmbedBuilder();
 		embed.setAuthor(server.getName(), null, server.getIcon().orElse(null));
 		embed.setColor(Color.RED);
@@ -147,7 +155,7 @@ public class SoundPlayback {
 
 	private static String convertTrackInfoToText(Entry<String, Long> entry) {
 		String duration = ConvertObjects.convertMilliSecondsToTime(entry.getValue());
-		return entry.getKey()+ " - " + duration;
+		return entry.getKey() + " - " + duration;
 	}
 
 	public static void play(Message msg, String arguments) {

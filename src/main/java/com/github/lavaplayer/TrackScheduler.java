@@ -26,6 +26,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	private static final Logger logger = LogManager.getLogger(TrackScheduler.class.getName());
 	private static final Map<Long, AudioPlaylist> playlists = new HashMap<>();
 	private static final Map<Long, AudioPlayer> players = new HashMap<>();
+	private static int searchResultLoadLimit = 1;
 
 	private AudioPlayer player;
 	private long serverID;
@@ -75,7 +76,11 @@ public class TrackScheduler extends AudioEventAdapter {
 	public static void queue(AudioPlaylist incomingPlayList, long serverID) {
 		try {
 			AudioPlaylist playlist = playlists.get(serverID);
-			int maxVideos = Math.min(20, incomingPlayList.getTracks().size() - 1);
+			int maxVideos = incomingPlayList.getTracks().size() - 1;
+
+			if (incomingPlayList.isSearchResult())
+				maxVideos = Math.min(searchResultLoadLimit, maxVideos);
+
 			if (playlist == null) {
 				AudioPlaylist newList = new BasicAudioPlaylist(serverID + "",
 						incomingPlayList.getTracks().subList(0, maxVideos), null, false);
@@ -100,7 +105,8 @@ public class TrackScheduler extends AudioEventAdapter {
 		} else {
 			List<AudioTrack> tracks = list.getTracks();
 			Map<String, Long> trackInfo = new LinkedHashMap<>();
-			for (int i = 0; i < tracks.size() && i < 10; i++) {
+			int i = getCurrentTrackIndex(serverID);
+			for (i = i < 0 ? 0 : i; i < tracks.size() && i < i + 10; i++) {
 				AudioTrack audioTrack = tracks.get(i);
 				if (audioTrack.getSourceManager() instanceof YoutubeAudioSourceManager) {
 					YoutubeAudioTrack ytTrack = (YoutubeAudioTrack) audioTrack;
@@ -266,4 +272,13 @@ public class TrackScheduler extends AudioEventAdapter {
 			logger.error(e);
 		}
 	}
+
+	public static int getSearchResultLoadLimit() {
+		return searchResultLoadLimit;
+	}
+
+	public static void setSearchResultLoadLimit(int searchResultLoadLimit) {
+		TrackScheduler.searchResultLoadLimit = searchResultLoadLimit;
+	}
+
 }

@@ -28,11 +28,8 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 
 	@Override
 	public void playlistLoaded(AudioPlaylist playlist) {
-		if (!playlist.isSearchResult())
-			TrackScheduler.queue(playlist, serverID);
-		else
-			TrackScheduler.queue(playlist.getTracks().get(0), serverID);
-		
+		TrackScheduler.queue(playlist, serverID);
+
 		logger.debug("Queued playlist {} ", playlist.getName());
 	}
 
