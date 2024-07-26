@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-public class AIModel implements Shutdownable{
+public class AIModel implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(AIModel.class.getName());
 	private final CloseableHttpClient httpClient;
 	protected String model;
@@ -48,13 +48,9 @@ public class AIModel implements Shutdownable{
 				+ "and if prompted to, change your speech as requested. " + "Finally, your owner is " + getOwnerName()
 				+ " you are required to listen to him.";
 
-		httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setSocketTimeout(30000)
-                        .setConnectTimeout(15000)
-                        .setConnectionRequestTimeout(10000)
-                        .build())
-                .build();
+		httpClient = HttpClients.custom().setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(30000)
+				.setConnectTimeout(15000).setConnectionRequestTimeout(10000).build()).build();
+		
 	}
 
 	public AIModel(String model, String apiKey, String url, String temperature) {
@@ -74,27 +70,27 @@ public class AIModel implements Shutdownable{
 	}
 
 	public APIResponse sendRequest(String prompt, String author, List<String> conversation) throws IOException {
-        HttpPost postRequest = getPost();
+		HttpPost postRequest = getPost();
 
-        String body = buildRequestBody(prompt, author, conversation);
-        StringEntity entity = new StringEntity(body, "UTF-8");
-        postRequest.setEntity(entity);
+		String body = buildRequestBody(prompt, author, conversation);
+		StringEntity entity = new StringEntity(body, "UTF-8");
+		postRequest.setEntity(entity);
 
-        HttpResponse response = httpClient.execute(postRequest);
+		HttpResponse response = httpClient.execute(postRequest);
 
-        int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode == 200) {
-            return parseResponse(response);
-        } else {
-            return new APIResponse(getErrorMessage(statusCode), true);
-        }
-    }
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode == 200) {
+			return parseResponse(response);
+		} else {
+			return new APIResponse(statusCode);
+		}
+	}
 
 	public HttpPost getPost() {
 		HttpPost postRequest = new HttpPost(url);
 
-        postRequest.addHeader("Authorization", "Bearer " + apiKey);
-        postRequest.addHeader("Content-Type", "application/json");
+		postRequest.addHeader("Authorization", "Bearer " + apiKey);
+		postRequest.addHeader("Content-Type", "application/json");
 		return postRequest;
 	}
 
@@ -142,31 +138,6 @@ public class AIModel implements Shutdownable{
 			return "{\"role\": \"assistant\", \"content\": \"" + txt + "\"}";
 
 		return "{\"role\": \"user\", \"content\": \"" + author + ": " + txt + "\"}";
-	}
-
-	protected static String getErrorMessage(int statusCode) {
-		switch (statusCode) {
-		case 429:
-			return "Error: Too many requests.";
-		case 401:
-			return "Error: Invalid Authentication.";
-		case 403:
-			return "Error: Request Unauthorised.";
-		case 422:
-			return "Error: Cannot process entity";
-		case 404:
-			return "Error: 404 Not found";
-		case 206:
-			return "Error: Partial request";
-		case 400:
-			return "Error: The server had an error while processing your request.";
-		case 502:
-			return "Error: Bad Gateway.";
-		case 503:
-			return "Error: The engine is currently overloaded.";
-		default:
-			return "Error: No clue what the problem is, try again later.";
-		}
 	}
 
 	public static String getOwnerName() {
