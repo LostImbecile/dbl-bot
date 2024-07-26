@@ -1,21 +1,20 @@
-package com.github.egubot.commands.llama3;
+package com.github.egubot.commands.Groq;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class Llama3ConversationClearCommand implements Command{
+public class Llama3GetTokensCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "aa clear";
+		return "aa tokens";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		AIContext.getLlama3().clearConversation(msg);
-		msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
+		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getLlama3().getLastTokens(msg) + "\"```");
 		return true;
 	}
 

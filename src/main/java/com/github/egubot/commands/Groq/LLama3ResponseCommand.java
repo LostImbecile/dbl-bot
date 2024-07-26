@@ -1,21 +1,20 @@
-package com.github.egubot.commands.llama3;
+package com.github.egubot.commands.Groq;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class Llama3GetTokensCommand implements Command {
+public class LLama3ResponseCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "aa tokens";
+		return "aa";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getLlama3().getLastTokens(msg) + "\"```");
-		return true;
+		return AIContext.getLlama3().respond(msg, arguments);
 	}
 
 	@Override

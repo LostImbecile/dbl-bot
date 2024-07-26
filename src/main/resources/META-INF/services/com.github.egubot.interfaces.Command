@@ -55,8 +55,8 @@ com.github.egubot.commands.legends.LegendsTemplateCreate
 com.github.egubot.commands.botcontrol.TestToggleCommand
 com.github.egubot.commands.botcontrol.HelpCommand
 com.github.egubot.commands.legends.LegendsKitSearchCommand
-com.github.egubot.commands.llama3.LLama3ResponseCommand
-com.github.egubot.commands.llama3.Llama3ConversationClearCommand
-com.github.egubot.commands.llama3.Llama3GetTokensCommand
-com.github.egubot.commands.llama3.Llama3ChannelToggleCommand
-com.github.egubot.commands.llama3.Llama3ToggleCommand
+com.github.egubot.commands.Groq.LLama3ResponseCommand
+com.github.egubot.commands.Groq.Llama3ConversationClearCommand
+com.github.egubot.commands.Groq.Llama3GetTokensCommand
+com.github.egubot.commands.Groq.Llama3ChannelToggleCommand
+com.github.egubot.commands.Groq.Llama3ToggleCommand
