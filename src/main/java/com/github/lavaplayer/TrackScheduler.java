@@ -112,9 +112,9 @@ public class TrackScheduler extends AudioEventAdapter {
 					YoutubeAudioTrack ytTrack = (YoutubeAudioTrack) audioTrack;
 					String name = ytTrack.getInfo().title;
 					String url = ytTrack.getInfo().uri;
-					trackInfo.put("(" + i + ") [" + name + "](" + url + ")", audioTrack.getDuration());
+					trackInfo.put("(" + i + 1 + ") [" + name + "](" + url + ")", audioTrack.getDuration());
 				} else
-					trackInfo.put("(" + i + ") " + audioTrack.getIdentifier(), audioTrack.getDuration());
+					trackInfo.put("(" + i + 1 + ") " + audioTrack.getIdentifier(), audioTrack.getDuration());
 			}
 
 			return trackInfo;
