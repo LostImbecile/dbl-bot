@@ -6,7 +6,7 @@
 	<groupId>com.github.discord</groupId>
 	<artifactId>egubot</artifactId>
 	<version>1.0.0</version>
-	
+
 	<name>Egubot</name>
 	<url>https://github.com/Lostlmbecile/dbl-bot</url>
 	<description>Discord Bot</description>
@@ -126,11 +126,16 @@
 			<version>22.0.2</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
 			<version>22.0.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.10.2</version>
 		</dependency>
 
 	</dependencies>
