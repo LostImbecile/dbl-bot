@@ -1,256 +1,314 @@
 package com.github.egubot.objects;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.Duration;
-import java.util.List;
+import java.util.*;
+import java.util.regex.*;
 
 import com.github.egubot.shared.Shared;
 import com.google.gson.annotations.SerializedName;
 
 public class TimerObject {
-    @SerializedName("task")
-    private String task;
-    @SerializedName("task_arguments")
-    private String taskArguments;
-    @SerializedName("target_channel")
-    private List<Long> targetChannel;
-    @SerializedName("activated_flag")
-    private boolean activatedFlag;
-    @SerializedName("next_execution")
-    private String nextExecution; // MM:dd:HH:mm:ss format
-    @SerializedName("exit_time")
-    private String exitTime; // UK time on app exit
-    @SerializedName("summer_time")
-    private boolean summerTime;
-    @SerializedName("recurring")
-    private boolean recurring;
-    @SerializedName("delay")
-    private String delay; // 0M0w0d0h0m0s format
-    @SerializedName("start_date")
-    private String startDate; // null if not set
-    @SerializedName("send_on_miss")
-    private boolean sendOnMiss;
-    @SerializedName("continue_on_miss")
-    private boolean continueOnMiss;
-    @SerializedName("terminate_on_miss")
-    private boolean terminateOnMiss;
-    @SerializedName("miss_tolerance")
-    private String missTolerance; // 0M0w0d0h0m0s format or 0 if half the delay or less
+	@SerializedName("task")
+	private String task = "";
+	@SerializedName("task_arguments")
+	private String taskArguments = "";
+	@SerializedName("target_channel")
+	private List<Long> targetChannel = new ArrayList<>(1);
+	@SerializedName("activated_flag")
+	private boolean activatedFlag = true;
+	@SerializedName("next_execution")
+	private String nextExecution; // dd-MM-yyyy, H:mm format
+	@SerializedName("exit_time")
+	private String exitTime; // UK time on app exit. dd-MM-yyyy, H:mm format
+	@SerializedName("summer_time")
+	private boolean summerTime;
+	@SerializedName("recurring")
+	private boolean recurring = false;
+	@SerializedName("delay")
+	private String delay = "1s"; // 0M0w0d0h0m0s format
+	@SerializedName("start_date")
+	private String startDate = null; // null if not set. dd-MM-yyyy, H:mm format
+	@SerializedName("send_on_miss")
+	private boolean sendOnMiss = false;
+	@SerializedName("continue_on_miss")
+	private boolean continueOnMiss = true;
+	@SerializedName("terminate_on_miss")
+	private boolean terminateOnMiss = false;
+	@SerializedName("miss_tolerance")
+	private String missTolerance = "5s"; // 0M0w0d0h0m0s format or 0 if half the delay or less
 
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM:dd:HH:mm:ss");
+	public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy, H:mm");
+	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private static final Pattern timePattern = Pattern.compile("(\\d+)([Mwdhms])");
 
-    public boolean isActivatedFlag() {
-        return activatedFlag;
-    }
+	// Getters and Setters
 
-    public void setActivatedFlag(boolean activatedFlag) {
-        this.activatedFlag = activatedFlag;
-    }
+	public boolean isActivatedFlag() {
+		return activatedFlag;
+	}
 
-    public void setNextExecution(String nextExecution) {
-        if (isValidDateTime(nextExecution)) {
-            this.nextExecution = nextExecution;
-        } else {
-            throw new IllegalArgumentException("Invalid nextExecution format: " + nextExecution);
-        }
-    }
+	public void setActivatedFlag(boolean activatedFlag) {
+		this.activatedFlag = activatedFlag;
+	}
 
-    public void setExitTime(String exitTime) {
-        if (isValidDateTime(exitTime)) {
-            this.exitTime = exitTime;
-        } else {
-            throw new IllegalArgumentException("Invalid exitTime format: " + exitTime);
-        }
-    }
+	public void setNextExecution(String nextExecution) {
+		if (isValidDateTime(nextExecution)) {
+			this.nextExecution = nextExecution;
+		} else {
+			throw new IllegalArgumentException("Invalid nextExecution format: " + nextExecution);
+		}
+	}
 
-    public boolean isSummerTime() {
-        return summerTime;
-    }
+	public void setExitTime(String exitTime) {
+		if (isValidDateTime(exitTime)) {
+			this.exitTime = exitTime;
+			adjustTimesForSummerTime();
+		} else {
+			throw new IllegalArgumentException("Invalid exitTime format: " + exitTime);
+		}
+	}
 
-    public void setSummerTime(boolean summerTime) {
-        this.summerTime = summerTime;
-    }
+	public boolean isSummerTime() {
+		return summerTime;
+	}
 
-    public boolean isRecurring() {
-        return recurring;
-    }
+	public void setSummerTime(boolean summerTime) {
+		this.summerTime = summerTime;
+	}
 
-    public void setRecurring(boolean recurring) {
-        this.recurring = recurring;
-    }
+	public boolean isRecurring() {
+		return recurring;
+	}
 
-    public void setDelay(String delay) {
-        if (isValidDelay(delay)) {
-            this.delay = delay;
-        } else {
-            throw new IllegalArgumentException("Invalid delay format: " + delay);
-        }
-    }
+	public void setRecurring(boolean recurring) {
+		this.recurring = recurring;
+	}
 
-    public void setStartDate(String startDate) {
-        if (startDate == null || isValidDateTime(startDate)) {
-            this.startDate = startDate;
-        } else {
-            throw new IllegalArgumentException("Invalid startDate format: " + startDate);
-        }
-    }
+	public void setDelay(String delay) {
+		if (isValidDelay(delay)) {
+			this.delay = delay;
+		} else {
+			throw new IllegalArgumentException("Invalid delay format: " + delay);
+		}
+	}
 
-    public String getTask() {
-        return task;
-    }
+	public void setStartDate(String startDate) {
+		if (startDate == null || isValidDateTime(startDate)) {
+			this.startDate = startDate;
+		} else {
+			throw new IllegalArgumentException("Invalid startDate format: " + startDate);
+		}
+	}
 
-    public void setTask(String task) {
-        this.task = task;
-    }
+	public String getTask() {
+		return task;
+	}
 
-    public String getTaskArguments() {
-        return taskArguments;
-    }
+	public void setTask(String task) {
+		this.task = task;
+	}
 
-    public void setTaskArguments(String taskArguments) {
-        this.taskArguments = taskArguments;
-    }
+	public String getTaskArguments() {
+		return taskArguments;
+	}
 
-    public List<Long> getTargetChannel() {
-        return targetChannel;
-    }
+	public void setTaskArguments(String taskArguments) {
+		this.taskArguments = taskArguments;
+	}
 
-    public void setTargetChannel(List<Long> targetChannel) {
-        this.targetChannel = targetChannel;
-    }
+	public List<Long> getTargetChannel() {
+		return targetChannel;
+	}
 
-    public boolean isSendOnMiss() {
-        return sendOnMiss;
-    }
+	public void setTargetChannel(List<Long> targetChannel) {
+		this.targetChannel = targetChannel;
+	}
 
-    public void setSendOnMiss(boolean sendOnMiss) {
-        this.sendOnMiss = sendOnMiss;
-    }
+	public boolean isSendOnMiss() {
+		return sendOnMiss;
+	}
 
-    public boolean isContinueOnMiss() {
-        return continueOnMiss;
-    }
+	public void setSendOnMiss(boolean sendOnMiss) {
+		this.sendOnMiss = sendOnMiss;
+	}
 
-    public void setContinueOnMiss(boolean continueOnMiss) {
-        this.continueOnMiss = continueOnMiss;
-    }
+	public boolean isContinueOnMiss() {
+		return continueOnMiss;
+	}
 
-    public boolean isTerminateOnMiss() {
-        return terminateOnMiss;
-    }
+	public void setContinueOnMiss(boolean continueOnMiss) {
+		this.continueOnMiss = continueOnMiss;
+	}
 
-    public void setTerminateOnMiss(boolean terminateOnMiss) {
-        this.terminateOnMiss = terminateOnMiss;
-    }
+	public boolean isTerminateOnMiss() {
+		return terminateOnMiss;
+	}
 
-    public String getMissTolerance() {
-        return missTolerance;
-    }
+	public void setTerminateOnMiss(boolean terminateOnMiss) {
+		this.terminateOnMiss = terminateOnMiss;
+	}
 
-    public void setMissTolerance(String missTolerance) {
-        if (missTolerance.equals("0") || isValidDelay(missTolerance)) {
-            this.missTolerance = missTolerance;
-        } else {
-            throw new IllegalArgumentException("Invalid missTolerance format: " + missTolerance);
-        }
-    }
+	public String getMissTolerance() {
+		return missTolerance;
+	}
 
-    private boolean isValidDateTime(String dateTime) {
-        try {
-            LocalDateTime.parse(dateTime, dateFormatter);
-            return true;
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-    }
+	public void setMissTolerance(String missTolerance) {
+		if ("0".equals(missTolerance)) {
+			this.missTolerance = formatDuration(getDelayDuration().dividedBy(2));
+		} else if (isValidDelay(missTolerance)) {
+			this.missTolerance = missTolerance;
+		} else {
+			throw new IllegalArgumentException("Invalid missTolerance format: " + missTolerance);
+		}
+	}
 
-    private boolean isValidDelay(String delayString) {
-        String[] parts = delayString.split("[Mwdhms]");
-        if (parts.length != 6) {
-            return false;
-        }
-        try {
-            for (String part : parts) {
-                Integer.parseInt(part);
-            }
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
+	// Time Handling Methods
 
-    private Duration parseDelayString(String delayString) {
-        String[] parts = delayString.split("[Mwdhms]");
-        try {
-            int months = Integer.parseInt(parts[0]);
-            int weeks = Integer.parseInt(parts[1]);
-            int days = Integer.parseInt(parts[2]);
-            int hours = Integer.parseInt(parts[3]);
-            int minutes = Integer.parseInt(parts[4]);
-            int seconds = Integer.parseInt(parts[5]);
-            return Duration.ofDays((long) months * 30 + weeks * 7 + days)
-                    .plusHours(hours)
-                    .plusMinutes(minutes)
-                    .plusSeconds(seconds);
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Invalid delay format: " + delayString, e);
-        }
-    }
-    
-    public Duration getMissToleranceDuration() {
-        if (missTolerance.equals("0")) {
-            return parseDelayString(delay).dividedBy(2);
-        } else {
-            return parseDelayString(missTolerance);
-        }
-    }
+	private boolean isValidDateTime(String dateTime) {
+		try {
+			LocalDateTime.parse(dateTime, timeFormatter);
+			return true;
+		} catch (DateTimeParseException e) {
+			return false;
+		}
+	}
 
-    public LocalDateTime getNextExecutionTime() {
-        return parseTimeStringWithSummerTime(nextExecution);
-    }
+	private boolean isValidDelay(String delayString) {
+		return delayString.matches("(?:\\d+[smhdwM]){1,6}");
+	}
 
-    public LocalDateTime getExitTimeAsDateTime() {
-        return parseTimeStringWithSummerTime(exitTime);
-    }
+	private Duration parseDelayString(String delayString) {
+		int months = 0;
+		int weeks = 0;
+		int days = 0;
+		int hours = 0;
+		int minutes = 0;
+		int seconds = 0;
 
-    public Duration getDelayDuration() {
-        return parseDelayString(delay);
-    }
+		Matcher matcher = timePattern.matcher(delayString);
+		while (matcher.find()) {
+			int value = Integer.parseInt(matcher.group(1));
+			switch (matcher.group(2)) {
+			case "M":
+				months = value;
+				break;
+			case "w":
+				weeks = value;
+				break;
+			case "d":
+				days = value;
+				break;
+			case "h":
+				hours = value;
+				break;
+			case "m":
+				minutes = value;
+				break;
+			case "s":
+				seconds = value;
+				break;
+			default:
+				seconds = 1;
+			}
+		}
 
-    public LocalDateTime getStartDateTime() {
-        return startDate == null ? null : parseTimeStringWithSummerTime(startDate);
-    }
+		Duration totalDuration = Duration.ofDays((long) months * 30 + weeks * 7 + days).plusHours(hours)
+				.plusMinutes(minutes).plusSeconds(seconds);
+		return totalDuration.compareTo(Duration.ofSeconds(1)) < 0 ? Duration.ofSeconds(1) : totalDuration;
+	}
 
-    private LocalDateTime parseTimeStringWithSummerTime(String timeString) {
-        LocalDateTime localDateTime = parseTimeString(timeString);
-        return applySummerTimeAdjustment(localDateTime);
-    }
+	public Duration getMissToleranceDuration() {
+		return missTolerance.equals("0") ? parseDelayString(delay).dividedBy(2) : parseDelayString(missTolerance);
+	}
 
-    private LocalDateTime parseTimeString(String timeString) {
-        try {
-            return LocalDateTime.parse(timeString, DateTimeFormatter.ofPattern("MM:dd:HH:mm:ss"));
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid time format: " + timeString, e);
-        }
-    }
+	public ZonedDateTime getNextExecutionTime() {
+		return parseTimeStringWithTimeZone(nextExecution);
+	}
 
-    private LocalDateTime applySummerTimeAdjustment(LocalDateTime localDateTime) {
-        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of(Shared.getTimeZone()));
-        boolean isCurrentlySummerTime = zonedDateTime.getZone().getRules().isDaylightSavings(zonedDateTime.toInstant());
-        if (summerTime && !isCurrentlySummerTime) {
-            zonedDateTime = zonedDateTime.plusHours(1);
-        } else if (!summerTime && isCurrentlySummerTime) {
-            zonedDateTime = zonedDateTime.minusHours(1);
-        }
-        return zonedDateTime.toLocalDateTime();
-    }
+	public ZonedDateTime getExitTimeAsDateTime() {
+		return exitTime == null ? null : parseTimeStringWithTimeZone(exitTime);
+	}
 
-    public String formatTimeString(LocalDateTime time) {
-        return time.format(DateTimeFormatter.ofPattern("MM:dd:HH:mm:ss"));
-    }
+	public Duration getDelayDuration() {
+		return parseDelayString(delay);
+	}
+
+	private void adjustTimesForSummerTime() {
+		if (summerTime) {
+			ZonedDateTime nextExecutionTime = getNextExecutionTime();
+			nextExecutionTime = applySummerTimeAdjustment(nextExecutionTime);
+			setNextExecution(formatTimeString(nextExecutionTime));
+		}
+	}
+
+	private String formatDuration(Duration duration) {
+		long seconds = duration.toSeconds();
+		long days = seconds / (24 * 3600);
+		seconds %= (24 * 3600);
+		long hours = seconds / 3600;
+		seconds %= 3600;
+		long minutes = seconds / 60;
+		seconds %= 60;
+		return String.format("%dw%dd%dh%dm%ds", days / 7, days % 7, hours, minutes, seconds);
+	}
+
+	public ZonedDateTime getStartDateTime() {
+		return startDate == null ? null : parseTimeStringWithTimeZone(startDate);
+	}
+
+	private ZonedDateTime parseTimeStringWithTimeZone(String timeString) {
+		LocalDateTime localDateTime = parseTimeString(timeString);
+		return localDateTime.atZone(ZoneId.of(Shared.getTimeZone()));
+	}
+
+	private LocalDateTime parseTimeString(String timeString) {
+		try {
+			return LocalDateTime.parse(timeString, timeFormatter);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid time format: " + timeString, e);
+		}
+	}
+
+	private ZonedDateTime applySummerTimeAdjustment(ZonedDateTime zonedDateTime) {
+		boolean isCurrentlySummerTime = zonedDateTime.getZone().getRules().isDaylightSavings(zonedDateTime.toInstant());
+		if (summerTime && !isCurrentlySummerTime) {
+			return zonedDateTime.plusHours(1);
+		} else if (!summerTime && isCurrentlySummerTime) {
+			return zonedDateTime.minusHours(1);
+		}
+		return zonedDateTime;
+	}
+
+	private String formatTimeString(ZonedDateTime zonedDateTime) {
+		return zonedDateTime.format(timeFormatter);
+	}
+
+	@Override
+	public String toString() {
+		return String.format(
+				"TimerObject[task='%s', taskArguments='%s', targetChannel='%s', activatedFlag='%s', nextExecution='%s', exitTime='%s', summerTime='%s', recurring='%s', delay='%s', startDate='%s', sendOnMiss='%s', continueOnMiss='%s', terminateOnMiss='%s', missTolerance='%s']",
+				task, taskArguments, targetChannel, activatedFlag, nextExecution, exitTime, summerTime, recurring,
+				delay, startDate, sendOnMiss, continueOnMiss, terminateOnMiss, missTolerance);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(delay, recurring, task, taskArguments);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TimerObject other = (TimerObject) obj;
+		return Objects.equals(delay, other.delay) && recurring == other.recurring && Objects.equals(task, other.task)
+				&& Objects.equals(taskArguments, other.taskArguments);
+	}
 
 }
