@@ -9,19 +9,19 @@ public class ConvertObjects {
 	}
 
 	public static String listToText(List<String> data) {
-		return String.join(" ", data);
+		return data == null ? null : String.join(" ", data);
 	}
 
 	public static String listToText(List<String> data, String joinLinesWith) {
-		return String.join(joinLinesWith, data);
+		return data == null ? null : String.join(joinLinesWith, data);
 	}
 
 	public static List<String> textToList(String jsonData) {
-		return new ArrayList<>(List.of(jsonData.split("\n")));
+		return jsonData == null ? new ArrayList<>() : new ArrayList<>(List.of(jsonData.split("\n")));
 	}
 
 	public static String instantToString(Instant instant) {
-		return DateUtils.getDateTime(instant);
+		return instant == null ? null : DateUtils.getDateTime(instant);
 	}
 
 	public static String convertMilliSecondsToTime(long ms) {
