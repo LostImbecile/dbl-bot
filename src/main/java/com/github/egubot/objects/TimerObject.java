@@ -21,7 +21,7 @@ public class TimerObject {
 	@SerializedName("next_execution")
 	private String nextExecution; // dd-MM-yyyy, H:mm format
 	@SerializedName("exit_time")
-	private String exitTime; // UK time on app exit. dd-MM-yyyy, H:mm format
+	private String exitTime = null; // UK time on app exit. dd-MM-yyyy, H:mm format
 	@SerializedName("summer_time")
 	private boolean summerTime;
 	@SerializedName("recurring")
@@ -66,7 +66,7 @@ public class TimerObject {
 			this.exitTime = exitTime;
 			adjustTimesForSummerTime();
 		} else {
-			throw new IllegalArgumentException("Invalid exitTime format: " + exitTime);
+			this.exitTime = null;
 		}
 	}
 
@@ -132,6 +132,10 @@ public class TimerObject {
 
 	public void setSendOnMiss(boolean sendOnMiss) {
 		this.sendOnMiss = sendOnMiss;
+		if (sendOnMiss) {
+			terminateOnMiss = false;
+			continueOnMiss = false;
+		}
 	}
 
 	public boolean isContinueOnMiss() {
@@ -140,6 +144,10 @@ public class TimerObject {
 
 	public void setContinueOnMiss(boolean continueOnMiss) {
 		this.continueOnMiss = continueOnMiss;
+		if (continueOnMiss) {
+			terminateOnMiss = false;
+			sendOnMiss = false;
+		}
 	}
 
 	public boolean isTerminateOnMiss() {
@@ -148,6 +156,10 @@ public class TimerObject {
 
 	public void setTerminateOnMiss(boolean terminateOnMiss) {
 		this.terminateOnMiss = terminateOnMiss;
+		if (terminateOnMiss) {
+			continueOnMiss = false;
+			sendOnMiss = false;
+		}
 	}
 
 	public String getMissTolerance() {
@@ -156,13 +168,16 @@ public class TimerObject {
 
 	public void setMissTolerance(String missTolerance) {
 		if ("0".equals(missTolerance)) {
-			this.missTolerance = formatDuration(getDelayDuration().dividedBy(2));
+			this.missTolerance = formatDuration(Duration.ZERO);
 		} else if (isValidDelay(missTolerance)) {
+			Duration maxTolerance = getDelayDuration().dividedBy(10); // 10% of the delay duration
 			Duration tolerance = parseDelayString(missTolerance);
-			if (getDelayDuration().dividedBy(2).compareTo(tolerance) <= 0) {
-				this.missTolerance = formatDuration(getDelayDuration().dividedBy(2));
-			} else
+
+			if (tolerance.compareTo(maxTolerance) > 0) {
+				this.missTolerance = formatDuration(maxTolerance);
+			} else {
 				this.missTolerance = missTolerance;
+			}
 		} else {
 			throw new IllegalArgumentException("Invalid missTolerance format: " + missTolerance);
 		}
@@ -171,6 +186,9 @@ public class TimerObject {
 	// Time Handling Methods
 
 	private boolean isValidDateTime(String dateTime) {
+		if (dateTime == null) {
+			return false;
+		}
 		try {
 			LocalDateTime.parse(dateTime, timeFormatter);
 			return true;

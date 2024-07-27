@@ -118,6 +118,7 @@ public class TimerHandler {
 
 	private void scheduleTimer(TimerObject timer) {
 		Duration delay;
+
 		if (timer.getStartDateTime() != null) {
 			delay = Duration.between(LocalDateTime.now(ZoneId.of(Shared.getTimeZone())), timer.getStartDateTime());
 			if (delay.isNegative()) {
@@ -125,10 +126,28 @@ public class TimerHandler {
 			}
 		} else {
 			delay = Duration.between(LocalDateTime.now(ZoneId.of(Shared.getTimeZone())), timer.getNextExecutionTime());
+			// Check if the timer is to continue on miss
+			if (timer.isContinueOnMiss() && timer.getExitTimeAsDateTime() != null) {
+				// Calculate the delay from the next execution time
+				ZonedDateTime nextExecutionTime = timer.getNextExecutionTime();
+				ZonedDateTime exitTime = timer.getExitTimeAsDateTime();
+				Duration missTolerance = timer.getMissToleranceDuration();
+				ZonedDateTime adjustedNextExecutionTime = nextExecutionTime.plus(missTolerance);
+				ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+
+				if (now.isAfter(adjustedNextExecutionTime)) {
+					Duration remainingDelay = Duration.between(exitTime, nextExecutionTime);
+					delay = Duration.between(LocalDateTime.now(ZoneId.of(Shared.getTimeZone())),
+							LocalDateTime.now(ZoneId.of(Shared.getTimeZone())).plus(remainingDelay));
+
+					// Reset exit time
+					timer.setExitTime(null);
+				}
+			}
 		}
+
 		ScheduledFuture<?> future = scheduler.schedule(() -> handleTimerExecution(timer), delay.toMillis(),
 				TimeUnit.MILLISECONDS);
-
 		scheduledFutures.put(timer, future);
 	}
 

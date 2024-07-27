@@ -89,7 +89,7 @@ Custom AI:
 - ai terminate/activate
 
 Timers: `[Tasks: weather, parrot, verse]`
-- b-timer \*every \*(0M0w0d0h0m0s) \*(2024-7-13, 20:00) "(task) \*(arguments)" \*(channels)
+- b-timer \*every \*(0M0w0d0h0m0s) \*(2024-7-13, 20:00) "(task) \*(arguments)" \*(send on miss/terminate on miss) \*(channels)
 - b-timer remove ^^^
 - b-timer toggle ^^^
 - b-timer send

@@ -190,11 +190,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		if (startDate != null) {
 			timer.setStartDate(startDate);
 		}
-		timer.setTask(task);
-		timer.setTaskArguments(taskArguments);
-		timer.setTargetChannel(channels);
-		timer.setRecurring(isRecurring);
-		timer.setActivatedFlag(true);
 
 		// Validation
 		if (!isRecurring && delay == null && startDate == null) {
@@ -207,6 +202,12 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 				msg.getChannel().sendMessage("Delay must be provided for recurring tasks.");
 			return null;
 		}
+
+		timer.setTask(task);
+		timer.setTaskArguments(taskArguments);
+		timer.setTargetChannel(channels);
+		timer.setRecurring(isRecurring);
+		timer.setActivatedFlag(true);
 
 		// Determine the next execution time
 		ZonedDateTime nextExecution = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
@@ -235,6 +236,13 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		String nextExecutionString = nextExecution.format(outputFormatter);
 
 		timer.setNextExecution(nextExecutionString);
+
+		String stripped = msgText.toLowerCase().replace("_", "").replace(" ", "");
+		if (stripped.contains("terminateonmiss")) {
+			timer.setTerminateOnMiss(true);
+		} else if (stripped.contains("sendonmiss")) {
+			timer.setSendOnMiss(true);
+		}
 
 		return timer;
 	}
