@@ -17,7 +17,7 @@ public class CommandRegistry {
 	private static final Map<String, Command> noPrefixCommandMap = new HashMap<>();
 
 	static {
-		Reflections reflections = new Reflections("com.github.egubot", Scanners.SubTypes);
+		Reflections reflections = new Reflections("com.github.egubot.commands", Scanners.SubTypes);
 
 		// Find all classes that implement Command
 		Set<Class<? extends Command>> commandClasses = reflections.getSubTypesOf(Command.class);
