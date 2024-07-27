@@ -47,4 +47,8 @@ public class ScheduledTasksContext implements Shutdownable {
 	public static boolean remove(Message msg, String msgText) {
 		return scheduledTasks.remove(msg, msgText);
 	}
+	
+	public static boolean toggle(Message msg, String msgText) {
+		return scheduledTasks.toggleTimer(msg, msgText);
+	}
 }

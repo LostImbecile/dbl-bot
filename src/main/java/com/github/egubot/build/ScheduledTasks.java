@@ -52,14 +52,19 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	public boolean schedule(Message msg, String msgText, boolean isRecurring) {
 		try {
 			TimerObject timer = createTimer(msg, msgText, isRecurring);
-			if (timer == null)
+			if (timer == null) {
+				msg.getChannel().sendMessage("Incorrect formatting");
 				return false;
+			}
 
-			// Add timer and save
-			if (timerHandler.registerTimer(timer)) {
+			if (isTimerExist(timer)) {
+				msg.getChannel().sendMessage("Similar timer already exists");
+			} else if (timerHandler.registerTimer(timer)) {
 				updateDataFromObjects();
 				writeData(msg.getChannel());
 				return true;
+			} else {
+				msg.getChannel().sendMessage("Failed to register timer");
 			}
 		} catch (Exception e) {
 			msg.getChannel().sendMessage("Error scheduling the task.");
@@ -76,26 +81,62 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 			TimerObject timer = createTimer(msg, msgText, recurring);
 
-			if (timer != null) {
-				boolean containsTimer = timers.contains(timer);
-				if (!containsTimer && !recurring) {
-					timer.setRecurring(true);
-					containsTimer = timers.contains(timer);
-				}
-
-				if (containsTimer) {
-					timerHandler.removeTask(timer);
-					updateDataFromObjects();
-					writeData(msg.getChannel());
-					return true;
-				}
-			}
-			msg.getChannel().sendMessage("Timer doesn't exist");
+			if (isTimerExist(timer)) {
+				timerHandler.removeTask(getTimer(timer));
+				updateDataFromObjects();
+				writeData(msg.getChannel());
+			} else
+				msg.getChannel().sendMessage("Timer doesn't exist");
 
 		} catch (Exception e) {
 			msg.getChannel().sendMessage("Error removing the task.");
+			logger.error(e);
 		}
 		return true;
+	}
+
+	public boolean isTimerExist(TimerObject timer) {
+		if (timer == null)
+			return false;
+		boolean containsTimer = timers.contains(timer);
+		if (!containsTimer) {
+			timer.setRecurring(!timer.isRecurring());
+			containsTimer = timers.contains(timer);
+			timer.setRecurring(!timer.isRecurring());
+		}
+		return containsTimer;
+	}
+
+	public TimerObject getTimer(TimerObject timer) {
+		if (isTimerExist(timer)) {
+			int i = timers.indexOf(timer);
+			if (i < 0) {
+				timer.setRecurring(!timer.isRecurring());
+				i = timers.indexOf(timer);
+			}
+			return timers.get(i);
+		}
+
+		return null;
+	}
+
+	public boolean toggleTimer(Message msg, String msgText) {
+		try {
+			TimerObject timer = createTimer(msg, msgText, false);
+			timer = getTimer(timer);
+			if (timer != null) {
+				timer.setActivatedFlag(!timer.isActivatedFlag());
+				updateDataFromObjects();
+				writeData(msg.getChannel());
+				return true;
+			} else {
+				msg.getChannel().sendMessage("Timer doesn't exist");
+			}
+		} catch (Exception e) {
+			msg.getChannel().sendMessage("Error toggling timer");
+			logger.error(e);
+		}
+		return false;
 	}
 
 	public TimerObject createTimer(Message msg, String msgText, boolean isRecurring) {
@@ -150,7 +191,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			timer.setStartDate(startDate);
 		}
 		timer.setTask(task);
-		timer.setTaskArguments(taskArguments.isEmpty() ? null : taskArguments);
+		timer.setTaskArguments(taskArguments);
 		timer.setTargetChannel(channels);
 		timer.setRecurring(isRecurring);
 		timer.setActivatedFlag(true);
@@ -268,4 +309,5 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		}
 
 	}
+
 }

@@ -158,7 +158,11 @@ public class TimerObject {
 		if ("0".equals(missTolerance)) {
 			this.missTolerance = formatDuration(getDelayDuration().dividedBy(2));
 		} else if (isValidDelay(missTolerance)) {
-			this.missTolerance = missTolerance;
+			Duration tolerance = parseDelayString(missTolerance);
+			if (getDelayDuration().dividedBy(2).compareTo(tolerance) <= 0) {
+				this.missTolerance = formatDuration(getDelayDuration().dividedBy(2));
+			} else
+				this.missTolerance = missTolerance;
 		} else {
 			throw new IllegalArgumentException("Invalid missTolerance format: " + missTolerance);
 		}

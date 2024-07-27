@@ -71,7 +71,10 @@ public class TimerHandler {
 	}
 
 	public void removeTask(TimerObject timer) {
-		timers.remove(timer);
+		int i = timers.indexOf(timer);
+		// Make sure the timer doesn't keep re-scheduling even past cancelling
+		timers.get(i).setActivatedFlag(false);
+		timers.remove(i);
 		ScheduledFuture<?> future = scheduledFutures.remove(timer);
 		if (future != null) {
 			future.cancel(false); // Attempt to cancel the scheduled task
@@ -130,6 +133,8 @@ public class TimerHandler {
 	}
 
 	private void handleTimerExecution(TimerObject timer) {
+		if (!timer.isActivatedFlag())
+			return;
 		ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
 		ZonedDateTime nextExecutionTime = timer.getNextExecutionTime();
 		Duration missTolerance = timer.getMissToleranceDuration();
