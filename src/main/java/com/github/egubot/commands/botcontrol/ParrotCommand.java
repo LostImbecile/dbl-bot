@@ -2,10 +2,12 @@ package com.github.egubot.commands.botcontrol;
 
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.interfaces.DiscordTimerTask;
 
-public class ParrotCommand implements Command {
+public class ParrotCommand implements Command, DiscordTimerTask {
 
 	@Override
 	public String getName() {
@@ -21,8 +23,13 @@ public class ParrotCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public boolean execute(long targetChannel, String arguments) throws Exception {
+		ServerInfoUtilities.getTextableRegularServerChannel(targetChannel).sendMessage(arguments);
+		return true;
 	}
 
 }
