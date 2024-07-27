@@ -1,4 +1,4 @@
-package com.github.egubot.managers;
+package com.github.egubot.managers.commands;
 
 import java.util.Map.Entry;
 
