@@ -88,6 +88,11 @@ Custom AI:
 - ai (message)
 - ai terminate/activate
 
+Timers: `[Tasks: weather, parrot, verse]`
+- b-timer \*every \*(0M0w0d0h0m0s) \*(2024-7-13, 20:00) "(task) \*(arguments)" \*(channels)
+- b-timer remove ^^^
+- b-timer toggle ^^^
+
 Bot Control (Owner):
 - terminate
 - refresh
