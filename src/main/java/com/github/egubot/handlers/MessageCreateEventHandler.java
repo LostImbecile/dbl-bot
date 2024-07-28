@@ -86,12 +86,19 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (AIContext.getGpt3().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
-			
+
 			if (AIContext.getLlama3().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 
 			if (CustomAIFacade.respond(msg, lowCaseTxt)) {
+				return;
+			}
+
+			if (lowCaseTxt.contains("https://x.com")) {
+				msg.delete();
+				msg.getChannel().sendMessage("<@" + msg.getAuthor().getId() + ">: "
+						+ msgText.replace("https://x.com", "https://fixupx.com"));
 				return;
 			}
 
