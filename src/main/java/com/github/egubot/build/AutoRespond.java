@@ -198,10 +198,19 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			}
 		} catch (NullPointerException | StringIndexOutOfBoundsException e1) {
 			e.getChannel()
-					.sendMessage("Correct format:"
-							+ "\nb-response create type >> message >> response (>> reaction1 >> reaction2 >>...)"
-							+ "\n\nAlternative:\nb-response create type >> message >> option1 ?? option2 ?? ... >> ..."
-							+ "\n\nTypes:" + "\nContain, equal and match");
+					.sendMessage("""
+						Correct format:\
+						
+						b-response create type >> message >> response (>> reaction1 >> reaction2 >>...)\
+						
+						
+						Alternative:
+						b-response create type >> message >> option1 ?? option2 ?? ... >> ...\
+						
+						
+						Types:\
+						
+						Contain, equal and match""");
 		} catch (Exception e1) {
 			String error = "Problematic Message: \"" + msgText + "\"";
 			logger.error(error, e1);

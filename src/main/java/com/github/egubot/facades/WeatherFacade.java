@@ -74,27 +74,65 @@ public class WeatherFacade {
 
 	private static String getAfterTomorrowDescription(Weather weather) {
 		String description;
-		description = "After Tomorrow, " + weather.getConditionAfterTomorrow() + "\nMax: "
-				+ weather.getMaxTempAfterTomorrow() + "C\nMin: " + weather.getMinTempAfterTomorrow() + "C\nHumidity: "
-				+ weather.getAfterTomorrowHumidity() + "%\nWind: " + weather.getAfterTomorrowWind()
-				+ "mph\n\nChance of Rain: " + weather.getAfterTomorrowChanceOfRain() + "%\nChance of Snow: "
-				+ weather.getAfterTomorrowChanceOfSnow() + "%" + MessageFormats.EQUALISE;
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("After Tomorrow, ");
+		stringBuilder.append(weather.getConditionAfterTomorrow());
+		stringBuilder.append("\nMax: ");
+		stringBuilder.append(weather.getMaxTempAfterTomorrow());
+		stringBuilder.append("C\nMin: ");
+		stringBuilder.append(weather.getMinTempAfterTomorrow());
+		stringBuilder.append("C\nHumidity: ");
+		stringBuilder.append(weather.getAfterTomorrowHumidity());
+		stringBuilder.append("%\nWind: ");
+		stringBuilder.append(weather.getAfterTomorrowWind());
+		stringBuilder.append("mph\n\nChance of Rain: ");
+		stringBuilder.append(weather.getAfterTomorrowChanceOfRain());
+		stringBuilder.append("%\nChance of Snow: ");
+		stringBuilder.append(weather.getAfterTomorrowChanceOfSnow());
+		stringBuilder.append("%");
+		stringBuilder.append(MessageFormats.EQUALISE);
+		description = stringBuilder.toString();
 		return description;
 	}
 
 	private static String getTomorrowDescription(Weather weather, boolean minimal) {
 		String description;
 		if (!minimal) {
-			description = "Tomorrow, " + weather.getConditionTomorrow() + "\nMax: " + weather.getMaxTempTomorrow()
-					+ "C\nMin: " + weather.getMinTempTomorrow() + "C\nHumidity: " + weather.getTomorrowHumidity()
-					+ "%\nWind: " + weather.getTomorrowWind() + "mph\n\nChance of Rain: "
-					+ weather.getTomorrowChanceOfRain() + "%\nChance of Snow: " + weather.getTomorrowChanceOfSnow()
-					+ "%" + MessageFormats.EQUALISE;
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("Tomorrow, ");
+			stringBuilder.append(weather.getConditionTomorrow());
+			stringBuilder.append("\nMax: ");
+			stringBuilder.append(weather.getMaxTempTomorrow());
+			stringBuilder.append("C\nMin: ");
+			stringBuilder.append(weather.getMinTempTomorrow());
+			stringBuilder.append("C\nHumidity: ");
+			stringBuilder.append(weather.getTomorrowHumidity());
+			stringBuilder.append("%\nWind: ");
+			stringBuilder.append(weather.getTomorrowWind());
+			stringBuilder.append("mph\n\nChance of Rain: ");
+			stringBuilder.append(weather.getTomorrowChanceOfRain());
+			stringBuilder.append("%\nChance of Snow: ");
+			stringBuilder.append(weather.getTomorrowChanceOfSnow());
+			stringBuilder.append("%");
+			stringBuilder.append(MessageFormats.EQUALISE);
+			description = stringBuilder.toString();
 		} else {
-			description = "Tomorrow, " + weather.getConditionTomorrow() + "\nMax: " + weather.getMaxTempTomorrow()
-					+ "C, Min: " + weather.getMinTempTomorrow() + "C\nWind: " + weather.getTomorrowWind()
-					+ "mph\nRain: " + weather.getTomorrowChanceOfRain() + "%, Snow: "
-					+ weather.getTomorrowChanceOfSnow() + "%" + MessageFormats.EQUALISE;
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("Tomorrow, ");
+			stringBuilder.append(weather.getConditionTomorrow());
+			stringBuilder.append("\nMax: ");
+			stringBuilder.append(weather.getMaxTempTomorrow());
+			stringBuilder.append("C, Min: ");
+			stringBuilder.append(weather.getMinTempTomorrow());
+			stringBuilder.append("C\nWind: ");
+			stringBuilder.append(weather.getTomorrowWind());
+			stringBuilder.append("mph\nRain: ");
+			stringBuilder.append(weather.getTomorrowChanceOfRain());
+			stringBuilder.append("%, Snow: ");
+			stringBuilder.append(weather.getTomorrowChanceOfSnow());
+			stringBuilder.append("%");
+			stringBuilder.append(MessageFormats.EQUALISE);
+			description = stringBuilder.toString();
 		}
 		return description;
 	}
@@ -102,17 +140,47 @@ public class WeatherFacade {
 	private static String getTodayDescription(Weather weather, boolean minimal) {
 		String description;
 		if (!minimal) {
-			description = "Today " + weather.getLocaltime().replaceAll(".* ", "") + ", "
-					+ weather.getCurrentConditionText() + "\nNow: " + weather.getCurrentTempC() + "C" + "\nFeels Like: "
-					+ weather.getCurrentFeelslikeC() + "C\nHumidty: " + weather.getCurrentHumidity() + "%\nWind: "
-					+ weather.getCurrentWindMph() + "mph, " + weather.getCurrentWindDir() + "\n\nChance of Rain: "
-					+ weather.getTodayChanceOfRain() + "%\nChance of Snow: " + weather.getAfterTomorrowChanceOfSnow()
-					+ "%" + MessageFormats.EQUALISE;
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("Today ");
+			stringBuilder.append(weather.getLocaltime().replaceAll(".* ", ""));
+			stringBuilder.append(", ");
+			stringBuilder.append(weather.getCurrentConditionText());
+			stringBuilder.append("\nNow: ");
+			stringBuilder.append(weather.getCurrentTempC());
+			stringBuilder.append("C");
+			stringBuilder.append("\nFeels Like: ");
+			stringBuilder.append(weather.getCurrentFeelslikeC());
+			stringBuilder.append("C\nHumidty: ");
+			stringBuilder.append(weather.getCurrentHumidity());
+			stringBuilder.append("%\nWind: ");
+			stringBuilder.append(weather.getCurrentWindMph());
+			stringBuilder.append("mph, ");
+			stringBuilder.append(weather.getCurrentWindDir());
+			stringBuilder.append("\n\nChance of Rain: ");
+			stringBuilder.append(weather.getTodayChanceOfRain());
+			stringBuilder.append("%\nChance of Snow: ");
+			stringBuilder.append(weather.getAfterTomorrowChanceOfSnow());
+			stringBuilder.append("%");
+			stringBuilder.append(MessageFormats.EQUALISE);
+			description = stringBuilder.toString();
 		} else {
-			description = "Today " + weather.getLocaltime().replaceAll(".* ", "") + ", "
-					+ weather.getCurrentConditionText() + "\nNow: " + weather.getCurrentTempC() + "C\nWind: "
-					+ weather.getCurrentWindMph() + "mph" + "\nRain: " + weather.getTodayChanceOfRain() + "%, Snow: "
-					+ weather.getAfterTomorrowChanceOfSnow() + "%" + MessageFormats.EQUALISE;
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("Today ");
+			stringBuilder.append(weather.getLocaltime().replaceAll(".* ", ""));
+			stringBuilder.append(", ");
+			stringBuilder.append(weather.getCurrentConditionText());
+			stringBuilder.append("\nNow: ");
+			stringBuilder.append(weather.getCurrentTempC());
+			stringBuilder.append("C\nWind: ");
+			stringBuilder.append(weather.getCurrentWindMph());
+			stringBuilder.append("mph");
+			stringBuilder.append("\nRain: ");
+			stringBuilder.append(weather.getTodayChanceOfRain());
+			stringBuilder.append("%, Snow: ");
+			stringBuilder.append(weather.getAfterTomorrowChanceOfSnow());
+			stringBuilder.append("%");
+			stringBuilder.append(MessageFormats.EQUALISE);
+			description = stringBuilder.toString();
 		}
 		return description;
 	}

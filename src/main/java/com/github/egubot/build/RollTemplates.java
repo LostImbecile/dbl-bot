@@ -104,7 +104,7 @@ public class RollTemplates extends DataManagerHandler {
 				writeData(e);
 			}
 		} catch (Exception e1) {
-			e.sendMessage("Correct format:" + "\nb-template create name filters");
+			e.sendMessage("Correct format:\nb-template create name filters");
 		}
 	}
 

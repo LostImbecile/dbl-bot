@@ -72,8 +72,10 @@ public class LocalWebDriver implements AutoCloseable {
 
 		if (isHeadless) {
 			// Some pages will be blank in headless mode, this is to circumvent it
-			options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-					+ " AppleWebKit/537.36 (KHTML, like Gecko)" + " Chrome/121.0.0.0 Safari/537.36");
+			options.addArguments("""
+				--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)\
+				 AppleWebKit/537.36 (KHTML, like Gecko)\
+				 Chrome/121.0.0.0 Safari/537.36""");
 			
 			options.addArguments("--headless");
 			if (userDataDirectory != null && userProfile != null) {

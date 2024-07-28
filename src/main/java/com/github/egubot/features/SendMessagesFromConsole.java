@@ -30,10 +30,17 @@ public class SendMessagesFromConsole {
 			String channelID = testChannelID, message = "";
 			TextChannel channel = api.getTextChannelById(channelID).get();
 
-			StreamRedirector.println("", "\nEnter messages you want to send. Notes:" + "\n1- Use %n to separate lines."
-					+ "\n2- Paste the channel ID to switch to it."
-					+ "\n3- Press enter without writing anything to exit."
-					+ "\n4- Don't write emojis, mentions and the sort as is, they won't work, write their full name.");
+			StreamRedirector.println("", """
+				
+				Enter messages you want to send. Notes:\
+				
+				1- Use %n to separate lines.\
+				
+				2- Paste the channel ID to switch to it.\
+				
+				3- Press enter without writing anything to exit.\
+				
+				4- Don't write emojis, mentions and the sort as is, they won't work, write their full name.""");
 
 			while (true) {
 

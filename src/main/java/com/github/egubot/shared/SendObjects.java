@@ -29,14 +29,14 @@ public class SendObjects {
 				String formattedSize = String.format("%1$3d", tags.get(0).getCharacters().getOccupiedSize());
 
 				file.write(prevCategory + ":\n");
-				file.write("[" + formattedSize + "]" + " - " + tags.get(0).getName() + "\n");
+				file.write(String.format("[%s] - %s\n", formattedSize, tags.get(0).getName()));
 				for (int i = 1; i < tags.size(); i++) {
 					formattedSize = String.format("%1$3d", tags.get(i).getCharacters().getOccupiedSize());
 					if (!prevCategory.equals(tags.get(i).getCategory())) {
 						prevCategory = tags.get(i).getCategory();
 						file.write("\n" + prevCategory + ":\n");
 					}
-					file.write("[" + formattedSize + "]" + " - " + tags.get(i).getName() + "\n");
+					file.write(String.format("[%s] - %s\n", formattedSize, tags.get(i).getName()));
 				}
 			}
 			InputStream stream = new FileInputStream(fileName);
