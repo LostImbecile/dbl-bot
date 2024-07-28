@@ -37,6 +37,9 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	private TimerHandler timerHandler;
 	private List<TimerObject> timers;
 
+	private static final Pattern delayPattern = Pattern.compile("(?:\\d+[smhdwM]){1,6}");
+	private static final Pattern datePattern = Pattern.compile("\\d{1,2}-\\d{1,2}-\\d{4},\\s*\\d{1,2}:\\d{2}");
+
 	public ScheduledTasks() throws IOException {
 		super(idKey, resourcePath, "Timers", true);
 		initializeTimerHandler();
@@ -151,9 +154,8 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 		// Extract task and arguments
 		String taskAndArgs = parts[1].trim();
-		String[] before = parts[0].trim().split("(?<=\\d)\\s+");
+		String[] before = parts[0].trim().split("(?<=[\\dA-Za-z])\\s+");
 
-		logger.debug("Task: {}", taskAndArgs);
 		// Extract delay and start date
 		String delay = null;
 		String startDate = null;
@@ -162,13 +164,16 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 		// Check for delay and start date in the remaining part
 		for (String part : before) {
-			if (part.matches("(?:\\d+[smhdwM]){1,6}")) {
-				delay = part;
-			} else if (part.matches("\\d{1,2}-\\d{1,2}-\\d{4},\\s*\\d{1,2}:\\d{2}")) {
+			Matcher delayMatcher = delayPattern.matcher(part);
+            Matcher dateMatcher = datePattern.matcher(part);
+
+            if (delayMatcher.matches()) {
+                delay = part;
+            } else if (dateMatcher.matches()) {
 				startDate = part;
-			}
+            }
+            
 		}
-		logger.debug("Delay: {}, StartDate: {}", delay, startDate);
 
 		// Extract channels, if present
 		List<Long> channels = new ArrayList<>();
@@ -221,7 +226,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			} catch (DateTimeParseException e) {
 				if (msg != null)
 					msg.getChannel().sendMessage("Invalid start date format.");
-				logger.error(e);
 				return null;
 			}
 		} else if (delay != null) {
