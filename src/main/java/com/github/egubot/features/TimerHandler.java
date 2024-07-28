@@ -126,6 +126,9 @@ public class TimerHandler {
 	}
 
 	private void scheduleTimer(TimerObject timer) {
+		if(!timer.isActivatedFlag())
+			return;
+		
 		timer.adjustTimesForSummerTime();
 		Duration delay;
 
