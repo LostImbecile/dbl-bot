@@ -131,29 +131,34 @@ public class TimerHandler {
 
 		if (timer.getStartDateTime() != null) {
 			delay = Duration.between(getNow(), timer.getStartDateTime());
-			if (delay.isNegative()) {
-				delay = Duration.ZERO;
-			}
+			// It starts using delay next if recurring
+			timer.setStartDate(null);
 		} else {
 			delay = Duration.between(getNow(), timer.getNextExecutionTime());
 			// Check if the timer is to continue on miss
 			if (timer.isContinueOnMiss() && timer.getExitTimeAsDateTime() != null) {
 				// Calculate the delay from the next execution time
 				ZonedDateTime nextExecutionTime = timer.getNextExecutionTime();
-				ZonedDateTime exitTime = timer.getExitTimeAsDateTime();
 				Duration missTolerance = timer.getMissToleranceDuration();
 				ZonedDateTime adjustedNextExecutionTime = nextExecutionTime.plus(missTolerance);
 				ZonedDateTime now = getNow();
 
 				if (now.isAfter(adjustedNextExecutionTime)) {
+					ZonedDateTime exitTime = timer.getExitTimeAsDateTime();
 					Duration remainingDelay = Duration.between(exitTime, nextExecutionTime);
 					delay = Duration.between(getNow(), getNow().plus(remainingDelay));
 
 					// Reset exit time
 					timer.setExitTime(null);
+					timer.setNextExecution(nextExecutionTime.plus(remainingDelay).format(TimerObject.timeFormatter));
 				}
 			}
 		}
+		if (delay.isNegative()) {
+			delay = Duration.ZERO;
+		}
+		
+		logger.debug("Next execution time for timer {} is {}", timer.getTask(), timer.getNextExecutionTime());
 
 		ScheduledFuture<?> future = scheduler.schedule(() -> handleTimerExecution(timer), delay.toMillis(),
 				TimeUnit.MILLISECONDS);
@@ -171,7 +176,6 @@ public class TimerHandler {
 		ZonedDateTime nextExecutionTime = timer.getNextExecutionTime();
 		Duration missTolerance = timer.getMissToleranceDuration();
 
-		logger.debug("Executing timer {} with next execution time {}", timer.getTask(), nextExecutionTime);
 		// Adjust the next execution time by adding miss tolerance
 		ZonedDateTime adjustedNextExecutionTime = nextExecutionTime.plus(missTolerance);
 
@@ -185,7 +189,6 @@ public class TimerHandler {
 
 			if (timer.isContinueOnMiss()) {
 				scheduleTimer(timer);
-				logger.debug("Next execution time for timer {} is {}", timer.getTask(), timer.getNextExecutionTime());
 				return;
 			}
 
@@ -195,7 +198,6 @@ public class TimerHandler {
 
 		if (timer.isRecurring()) {
 			scheduleTimer(timer); // Reschedule with updated nextExecutionTime
-			logger.debug("Next execution time for timer {} is {}", timer.getTask(), timer.getNextExecutionTime());
 		} else {
 			removeTask(timer);
 		}
