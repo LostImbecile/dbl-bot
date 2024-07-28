@@ -291,8 +291,8 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		updateDataFromObjects();
 	}
 
-	public void registerTask(DiscordTimerTask task) {
-		timerHandler.registerTask(task);
+	public static void registerTask(DiscordTimerTask task) {
+		TimerHandler.registerTask(task);
 	}
 
 	public void startTimers() {

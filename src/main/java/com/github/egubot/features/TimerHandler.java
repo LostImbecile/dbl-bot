@@ -24,22 +24,13 @@ import com.github.egubot.shared.Shared;
 
 public class TimerHandler {
 	private static final Logger logger = LogManager.getLogger(TimerHandler.class.getName());
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
 	private static final Map<String, DiscordTimerTask> tasks = new HashMap<>();
 	private List<TimerObject> timers;
 	private final Map<TimerObject, ScheduledFuture<?>> scheduledFutures = new HashMap<>();
 	private ZonedDateTime lastCheckTime;
 
-	public TimerHandler(List<TimerObject> timers) {
-		if (timers != null) {
-			this.timers = timers;
-			for (int i = 0; i < timers.size(); i++) {
-				TimerObject timer = timers.get(i);
-				if (!isValid(timer)) {
-					i--;
-				}
-			}
-		}
+	static {
 		Reflections reflections = new Reflections("com.github.egubot", Scanners.SubTypes);
 
 		// Find all classes that implement DiscordTimerTask
@@ -53,9 +44,18 @@ public class TimerHandler {
 				logger.error("Failed to register task: {}", taskClass.getName(), e);
 			}
 		}
-
-		lastCheckTime = getNow();
-		startSystemTimeCheck();
+	}
+	
+	public TimerHandler(List<TimerObject> timers) {
+		if (timers != null) {
+			this.timers = timers;
+			for (int i = 0; i < timers.size(); i++) {
+				TimerObject timer = timers.get(i);
+				if (!isValid(timer)) {
+					i--;
+				}
+			}
+		}
 	}
 
 	private boolean isValid(TimerObject timer) {
@@ -69,7 +69,7 @@ public class TimerHandler {
 		return false;
 	}
 
-	public void registerTask(DiscordTimerTask task) {
+	public static void registerTask(DiscordTimerTask task) {
 		tasks.put(task.getName(), task);
 	}
 
@@ -104,6 +104,8 @@ public class TimerHandler {
 		for (TimerObject timer : timers) {
 			scheduleTimer(timer);
 		}
+		lastCheckTime = getNow();
+		startSystemTimeCheck();
 	}
 
 	public void stop() {
@@ -228,7 +230,7 @@ public class TimerHandler {
 	private void startSystemTimeCheck() {
 		scheduler.scheduleAtFixedRate(() -> {
 			ZonedDateTime now = getNow();
-			Duration timeDifference = Duration.between(lastCheckTime, now);
+			Duration timeDifference = Duration.between(lastCheckTime, now).minus(Duration.ofSeconds(5));
 
 			if (Math.abs(timeDifference.toMinutes()) > 1) {
 				adjustTimers(timeDifference);
