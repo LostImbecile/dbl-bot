@@ -42,8 +42,8 @@ public class TimerObject {
 	public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d-M-yyyy, H:mm");
 	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private static final Pattern timePattern = Pattern.compile("(\\d+)([Mwdhms])");
-	public static int maxMissTolerancePercent = 10;
-	public static int minMissTolerancePercent = 1;
+	private static int maxMissTolerancePercent = 10;
+	private static int minMissTolerancePercent = 1;
 
 	// Getters and Setters
 
@@ -172,9 +172,9 @@ public class TimerObject {
 			this.missTolerance = formatDuration(Duration.ZERO);
 		} else if (isValidDelay(missTolerance)) {
 			// 10% of the delay duration
-			Duration maxTolerance = getDelayDuration().dividedBy(100 / maxMissTolerancePercent); 
+			Duration maxTolerance = getDelayDuration().dividedBy(100 / maxMissTolerancePercent);
 			// 1% of the delay duration
-			Duration minTolerance = getDelayDuration().dividedBy(100 / minMissTolerancePercent); 
+			Duration minTolerance = getDelayDuration().dividedBy(100 / minMissTolerancePercent);
 			Duration tolerance = parseDelayString(missTolerance);
 
 			if (tolerance.compareTo(maxTolerance) > 0) {
@@ -352,8 +352,15 @@ public class TimerObject {
 		if (getClass() != obj.getClass())
 			return false;
 		TimerObject other = (TimerObject) obj;
+		String arg1 = taskArguments.indexOf(">") > -1 ? taskArguments.substring(0, taskArguments.indexOf(">"))
+				: taskArguments;
+		String arg2 = other.taskArguments.indexOf(">") > -1
+				? other.taskArguments.substring(0, other.taskArguments.indexOf(">"))
+				: other.taskArguments;
+
+		boolean isArgumentsEqual = Objects.equals(arg1, arg2);
 		return Objects.equals(delay, other.delay) && recurring == other.recurring && Objects.equals(task, other.task)
-				&& Objects.equals(taskArguments, other.taskArguments);
+				&& isArgumentsEqual;
 	}
 
 	public static int getMaxMissTolerancePercent() {

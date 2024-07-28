@@ -88,7 +88,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			TimerObject timer = createTimer(msg, msgText, recurring);
 
 			if (isTimerExist(timer)) {
-				timerHandler.removeTask(getTimer(timer));
+				timerHandler.removeTimer(getTimer(timer));
 				updateDataFromObjects();
 				writeData(msg.getChannel());
 			} else
@@ -293,7 +293,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 	public void removeTimer(TimerObject timer) {
 		timers.remove(timer);
-		timerHandler.removeTask(timer);
+		timerHandler.removeTimer(timer);
 		updateDataFromObjects();
 	}
 

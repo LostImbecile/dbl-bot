@@ -73,7 +73,7 @@ public class TimerHandler {
 		tasks.put(task.getName(), task);
 	}
 
-	public void removeTask(TimerObject timer) {
+	public void removeTimer(TimerObject timer) {
 		int i = timers.indexOf(timer);
 		// Make sure the timer doesn't keep re-scheduling even past cancelling
 		timers.get(i).setActivatedFlag(false);
@@ -87,7 +87,6 @@ public class TimerHandler {
 
 	public boolean registerTimer(TimerObject timer) {
 		try {
-			formatTimeString(timer.getNextExecutionTime());
 			logger.debug("Registered timer {} with next execution time {}", timer.getTask(),
 					timer.getNextExecutionTime());
 			timers.add(timer);
@@ -166,7 +165,7 @@ public class TimerHandler {
 		scheduledFutures.put(timer, future);
 	}
 
-	public ZonedDateTime getNow() {
+	public static ZonedDateTime getNow() {
 		return ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
 	}
 
@@ -180,15 +179,14 @@ public class TimerHandler {
 		// Adjust the next execution time by adding miss tolerance
 		ZonedDateTime adjustedNextExecutionTime = nextExecutionTime.plus(missTolerance);
 
-		updateNextExecution(timer);
-
 		if (now.isAfter(adjustedNextExecutionTime) && !timer.isSendOnMiss()) {
 			if (timer.isTerminateOnMiss()) {
-				removeTask(timer);
+				removeTimer(timer);
 				return;
 			}
 
 			if (timer.isContinueOnMiss()) {
+				updateNextExecution(timer);
 				scheduleTimer(timer);
 				return;
 			}
@@ -200,9 +198,10 @@ public class TimerHandler {
 		if (timer.isRecurring()) {
 			// Start using delay next
 			timer.setStartDate(null);
+			updateNextExecution(timer);
 			scheduleTimer(timer); // Reschedule with updated nextExecutionTime
 		} else {
-			removeTask(timer);
+			removeTimer(timer);
 		}
 
 	}
@@ -214,7 +213,7 @@ public class TimerHandler {
 		while (nextExecution.isBefore(getNow())) {
 			nextExecution = nextExecution.plus(delay);
 		}
-		timer.setNextExecution(formatTimeString(nextExecution.plus(delay)));
+		timer.setNextExecution(formatTimeString(nextExecution));
 	}
 
 	private void executeTask(TimerObject timer) {
