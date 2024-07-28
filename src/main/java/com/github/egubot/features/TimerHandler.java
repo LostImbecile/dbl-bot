@@ -45,7 +45,7 @@ public class TimerHandler {
 			}
 		}
 	}
-	
+
 	public TimerHandler(List<TimerObject> timers) {
 		if (timers != null) {
 			this.timers = timers;
@@ -131,8 +131,6 @@ public class TimerHandler {
 
 		if (timer.getStartDateTime() != null) {
 			delay = Duration.between(getNow(), timer.getStartDateTime());
-			// It starts using delay next if recurring
-			timer.setStartDate(null);
 		} else {
 			delay = Duration.between(getNow(), timer.getNextExecutionTime());
 			// Check if the timer is to continue on miss
@@ -157,7 +155,7 @@ public class TimerHandler {
 		if (delay.isNegative()) {
 			delay = Duration.ZERO;
 		}
-		
+
 		logger.debug("Next execution time for timer {} is {}", timer.getTask(), timer.getNextExecutionTime());
 
 		ScheduledFuture<?> future = scheduler.schedule(() -> handleTimerExecution(timer), delay.toMillis(),
@@ -197,6 +195,8 @@ public class TimerHandler {
 		executeTask(timer);
 
 		if (timer.isRecurring()) {
+			// Start using delay next
+			timer.setStartDate(null);
 			scheduleTimer(timer); // Reschedule with updated nextExecutionTime
 		} else {
 			removeTask(timer);

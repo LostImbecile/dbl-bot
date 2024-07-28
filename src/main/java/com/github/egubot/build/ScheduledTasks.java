@@ -53,7 +53,10 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		try {
 			TimerObject timer = createTimer(msg, msgText, isRecurring);
 			if (timer == null) {
-				msg.getChannel().sendMessage("Incorrect formatting");
+				msg.getChannel().sendMessage("""
+						Delay format: 0M0w0d0h0s
+						Date format: d-m-yyyy, H:m
+						Be sure to wrap the task and its arguments in quotes.""");
 				return false;
 			}
 
@@ -143,8 +146,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		// Split by quotes to separate the task and its arguments
 		String[] parts = msgText.split("\"");
 		if (parts.length < 2) {
-			if (msg != null)
-				msg.getChannel().sendMessage("Invalid format.");
 			return null;
 		}
 
@@ -187,9 +188,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		if (delay != null) {
 			timer.setDelay(delay);
 		}
-		if (startDate != null) {
-			timer.setStartDate(startDate);
-		}
 
 		// Validation
 		if (!isRecurring && delay == null && startDate == null) {
@@ -209,17 +207,21 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		timer.setRecurring(isRecurring);
 		timer.setActivatedFlag(true);
 
+		DateTimeFormatter outputFormatter = TimerObject.timeFormatter;
 		// Determine the next execution time
-		ZonedDateTime nextExecution = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+		ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+		ZonedDateTime nextExecution = now;
 
 		if (startDate != null) {
-			DateTimeFormatter formatter = TimerObject.dateFormatter;
+			DateTimeFormatter dateFormatter = TimerObject.dateFormatter;
 			try {
-				LocalDateTime dateTime = LocalDateTime.parse(startDate, formatter);
+				LocalDateTime dateTime = LocalDateTime.parse(startDate, dateFormatter);
 				nextExecution = dateTime.atZone(ZoneId.of(Shared.getTimeZone()));
+				timer.setStartDate(nextExecution.format(outputFormatter));
 			} catch (DateTimeParseException e) {
 				if (msg != null)
 					msg.getChannel().sendMessage("Invalid start date format.");
+				logger.error(e);
 				return null;
 			}
 		} else if (delay != null) {
@@ -227,11 +229,11 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			nextExecution = nextExecution.plus(duration);
 		}
 
-		boolean summerTime = nextExecution.getZone().getRules().isDaylightSavings(nextExecution.toInstant());
+		boolean summerTime = now.getZone().getRules().isDaylightSavings(now.toInstant());
 		timer.setSummerTime(summerTime);
 
 		// Format the nextExecution time as a String
-		DateTimeFormatter outputFormatter = TimerObject.timeFormatter;
+
 		String nextExecutionString = nextExecution.format(outputFormatter);
 
 		timer.setNextExecution(nextExecutionString);

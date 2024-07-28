@@ -39,7 +39,7 @@ public class TimerObject {
 	@SerializedName("miss_tolerance")
 	private String missTolerance = "5s"; // 0M0w0d0h0m0s format or 0 if half the delay or less
 
-	public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy, H:mm");
+	public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d-M-yyyy, H:mm");
 	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private static final Pattern timePattern = Pattern.compile("(\\d+)([Mwdhms])");
 	public static int maxMissTolerancePercent = 10;
