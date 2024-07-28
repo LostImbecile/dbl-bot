@@ -64,7 +64,6 @@ public class TimerObject {
 	public void setExitTime(String exitTime) {
 		if (isValidDateTime(exitTime)) {
 			this.exitTime = exitTime;
-			adjustTimesForSummerTime();
 		} else {
 			this.exitTime = null;
 		}
@@ -257,12 +256,29 @@ public class TimerObject {
 		return parseDelayString(delay);
 	}
 
-	private void adjustTimesForSummerTime() {
-		if (summerTime) {
-			ZonedDateTime nextExecutionTime = getNextExecutionTime();
-			nextExecutionTime = applySummerTimeAdjustment(nextExecutionTime);
-			setNextExecution(formatTimeString(nextExecutionTime));
-		}
+	public void adjustTimesForSummerTime() {
+	    // Adjust nextExecution time
+	    ZonedDateTime nextExecutionTime = getNextExecutionTime();
+	    nextExecutionTime = applySummerTimeAdjustment(nextExecutionTime);
+	    setNextExecution(formatTimeString(nextExecutionTime));
+
+	    // Adjust startDate
+	    if (startDate != null) {
+	        ZonedDateTime startDateTime = getStartDateTime();
+	        startDateTime = applySummerTimeAdjustment(startDateTime);
+	        startDate = formatTimeString(startDateTime);
+	    }
+
+	    // Adjust exitTime
+	    if (exitTime != null) {
+	        ZonedDateTime exitDateTime = getExitTimeAsDateTime();
+	        exitDateTime = applySummerTimeAdjustment(exitDateTime);
+	        exitTime = formatTimeString(exitDateTime);
+	    }
+	    
+	    ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+	    boolean isCurrentlySummerTime = now.getZone().getRules().isDaylightSavings(now.toInstant());
+		summerTime = isCurrentlySummerTime;
 	}
 
 	private String formatDuration(Duration duration) {

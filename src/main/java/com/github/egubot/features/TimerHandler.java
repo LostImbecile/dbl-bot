@@ -1,7 +1,6 @@
 package com.github.egubot.features;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +28,7 @@ public class TimerHandler {
 	private static final Map<String, DiscordTimerTask> tasks = new HashMap<>();
 	private List<TimerObject> timers;
 	private final Map<TimerObject, ScheduledFuture<?>> scheduledFutures = new HashMap<>();
+	private ZonedDateTime lastCheckTime;
 
 	public TimerHandler(List<TimerObject> timers) {
 		if (timers != null) {
@@ -53,6 +53,9 @@ public class TimerHandler {
 				logger.error("Failed to register task: {}", taskClass.getName(), e);
 			}
 		}
+
+		lastCheckTime = getNow();
+		startSystemTimeCheck();
 	}
 
 	private boolean isValid(TimerObject timer) {
@@ -105,27 +108,32 @@ public class TimerHandler {
 
 	public void stop() {
 		scheduler.shutdown();
-		String exitTime = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone())).format(TimerObject.timeFormatter);
-		for (TimerObject timerObject : timers) {
-			timerObject.setExitTime(exitTime);
-		}
 		// Cancel all scheduled tasks
 		for (ScheduledFuture<?> future : scheduledFutures.values()) {
 			future.cancel(false);
 		}
 		scheduledFutures.clear();
+
+		// Set exit time for all timers
+		String exitTime = getNow().format(TimerObject.timeFormatter);
+		for (TimerObject timerObject : timers) {
+			timerObject.adjustTimesForSummerTime();
+			timerObject.setExitTime(exitTime);
+		}
+
 	}
 
 	private void scheduleTimer(TimerObject timer) {
+		timer.adjustTimesForSummerTime();
 		Duration delay;
 
 		if (timer.getStartDateTime() != null) {
-			delay = Duration.between(LocalDateTime.now(ZoneId.of(Shared.getTimeZone())), timer.getStartDateTime());
+			delay = Duration.between(getNow(), timer.getStartDateTime());
 			if (delay.isNegative()) {
 				delay = Duration.ZERO;
 			}
 		} else {
-			delay = Duration.between(LocalDateTime.now(ZoneId.of(Shared.getTimeZone())), timer.getNextExecutionTime());
+			delay = Duration.between(getNow(), timer.getNextExecutionTime());
 			// Check if the timer is to continue on miss
 			if (timer.isContinueOnMiss() && timer.getExitTimeAsDateTime() != null) {
 				// Calculate the delay from the next execution time
@@ -133,12 +141,11 @@ public class TimerHandler {
 				ZonedDateTime exitTime = timer.getExitTimeAsDateTime();
 				Duration missTolerance = timer.getMissToleranceDuration();
 				ZonedDateTime adjustedNextExecutionTime = nextExecutionTime.plus(missTolerance);
-				ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+				ZonedDateTime now = getNow();
 
 				if (now.isAfter(adjustedNextExecutionTime)) {
 					Duration remainingDelay = Duration.between(exitTime, nextExecutionTime);
-					delay = Duration.between(LocalDateTime.now(ZoneId.of(Shared.getTimeZone())),
-							LocalDateTime.now(ZoneId.of(Shared.getTimeZone())).plus(remainingDelay));
+					delay = Duration.between(getNow(), getNow().plus(remainingDelay));
 
 					// Reset exit time
 					timer.setExitTime(null);
@@ -151,10 +158,14 @@ public class TimerHandler {
 		scheduledFutures.put(timer, future);
 	}
 
+	public ZonedDateTime getNow() {
+		return ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+	}
+
 	private void handleTimerExecution(TimerObject timer) {
 		if (!timer.isActivatedFlag())
 			return;
-		ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+		ZonedDateTime now = getNow();
 		ZonedDateTime nextExecutionTime = timer.getNextExecutionTime();
 		Duration missTolerance = timer.getMissToleranceDuration();
 
@@ -193,7 +204,7 @@ public class TimerHandler {
 		ZonedDateTime nextExecution = timer.getNextExecutionTime();
 		Duration delay = timer.getDelayDuration();
 		// Keep adding delay to nextExecutionTime until it is after the current time
-		while (nextExecution.isBefore(ZonedDateTime.now(ZoneId.of(Shared.getTimeZone())))) {
+		while (nextExecution.isBefore(getNow())) {
 			nextExecution = nextExecution.plus(delay);
 		}
 		timer.setNextExecution(formatTimeString(nextExecution.plus(delay)));
@@ -212,5 +223,36 @@ public class TimerHandler {
 	private String formatTimeString(ZonedDateTime zonedDateTime) {
 		DateTimeFormatter dateFormatter = TimerObject.timeFormatter;
 		return zonedDateTime.format(dateFormatter);
+	}
+
+	private void startSystemTimeCheck() {
+		scheduler.scheduleAtFixedRate(() -> {
+			ZonedDateTime now = getNow();
+			Duration timeDifference = Duration.between(lastCheckTime, now);
+
+			if (Math.abs(timeDifference.toMinutes()) > 1) {
+				adjustTimers(timeDifference);
+			}
+
+			lastCheckTime = now;
+		}, 0, 1, TimeUnit.MINUTES);
+	}
+
+	private void adjustTimers(Duration timeDifference) {
+		for (TimerObject timer : timers) {
+			timer.adjustTimesForSummerTime();
+			ScheduledFuture<?> future = scheduledFutures.get(timer);
+			if (future != null) {
+				future.cancel(false);
+				Duration newDelay = Duration.between(getNow(), timer.getNextExecutionTime()).minus(timeDifference);
+				if (newDelay.isNegative()) {
+					newDelay = Duration.ZERO;
+				}
+				ScheduledFuture<?> newFuture = scheduler.schedule(() -> handleTimerExecution(timer),
+						newDelay.toMillis(), TimeUnit.MILLISECONDS);
+				scheduledFutures.put(timer, newFuture);
+				logger.info("Adjusted timer {} with new delay of {}", timer.getTask(), newDelay);
+			}
+		}
 	}
 }

@@ -213,8 +213,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		ZonedDateTime nextExecution = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
 
 		if (startDate != null) {
-			DateTimeFormatter formatter = TimerObject.dateFormatter; // Assuming this is a static DateTimeFormatter in
-																		// TimerObject
+			DateTimeFormatter formatter = TimerObject.dateFormatter;
 			try {
 				LocalDateTime dateTime = LocalDateTime.parse(startDate, formatter);
 				nextExecution = dateTime.atZone(ZoneId.of(Shared.getTimeZone()));
