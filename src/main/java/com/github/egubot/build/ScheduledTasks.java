@@ -247,6 +247,8 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			timer.setTerminateOnMiss(true);
 		} else if (stripped.contains("sendonmiss")) {
 			timer.setSendOnMiss(true);
+		} else if (isRecurring && !stripped.contains("continueonmiss")) {
+			timer.setSendOnMiss(true);
 		}
 
 		return timer;
