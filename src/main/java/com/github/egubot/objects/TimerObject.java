@@ -288,7 +288,7 @@ public class TimerObject {
 		summerTime = isCurrentlySummerTime;
 	}
 
-	private String formatDuration(Duration duration) {
+	public static String formatDuration(Duration duration) {
 		long seconds = duration.toSeconds();
 		long days = seconds / (24 * 3600);
 		seconds %= (24 * 3600);

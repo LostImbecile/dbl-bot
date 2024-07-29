@@ -150,12 +150,14 @@ public class TimerHandler {
 
 					// Reset exit time
 					timer.setExitTime(null);
+					// Update next execution time so the task continues normally
 					timer.setNextExecution(nextExecutionTime.plus(remainingDelay).format(TimerObject.timeFormatter));
 				}
 			}
 		}
 		if (delay.isNegative()) {
 			delay = Duration.ZERO;
+			// Don't update next execution, so it can be handled by the handler
 		}
 
 		logger.debug("Next execution time for timer {} is {}", timer.getTask(), timer.getNextExecutionTime());
@@ -180,7 +182,7 @@ public class TimerHandler {
 		ZonedDateTime adjustedNextExecutionTime = nextExecutionTime.plus(missTolerance);
 
 		if (now.isAfter(adjustedNextExecutionTime) && !timer.isSendOnMiss()) {
-			if (timer.isTerminateOnMiss()) {
+			if (timer.isTerminateOnMiss() && !timer.isRecurring()) {
 				removeTimer(timer);
 				return;
 			}
@@ -237,27 +239,29 @@ public class TimerHandler {
 			Duration timeDifference = Duration.between(lastCheckTime, now).minus(Duration.ofSeconds(5));
 
 			if (Math.abs(timeDifference.toMinutes()) > 1) {
-				adjustTimers(timeDifference);
+				adjustTimers();
 			}
 
 			lastCheckTime = now;
 		}, 0, 1, TimeUnit.MINUTES);
 	}
 
-	private void adjustTimers(Duration timeDifference) {
+	private void adjustTimers() {
 		for (TimerObject timer : timers) {
 			timer.adjustTimesForSummerTime();
 			ScheduledFuture<?> future = scheduledFutures.get(timer);
 			if (future != null) {
 				future.cancel(false);
-				Duration newDelay = Duration.between(getNow(), timer.getNextExecutionTime()).minus(timeDifference);
+				scheduledFutures.remove(timer);
+				Duration newDelay = Duration.between(getNow(), timer.getNextExecutionTime());
 				if (newDelay.isNegative()) {
 					newDelay = Duration.ZERO;
 				}
 				ScheduledFuture<?> newFuture = scheduler.schedule(() -> handleTimerExecution(timer),
 						newDelay.toMillis(), TimeUnit.MILLISECONDS);
 				scheduledFutures.put(timer, newFuture);
-				logger.info("Adjusted timer {} with new delay of {}", timer.getTask(), newDelay);
+				String formattedDelay = TimerObject.formatDuration(newDelay);
+				logger.debug("Adjusted timer {} with new delay of {}", timer.getTask(), formattedDelay);
 			}
 		}
 	}
