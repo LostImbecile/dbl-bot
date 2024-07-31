@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
 import com.github.egubot.interfaces.DiscordTimerTask;
+import com.github.egubot.interfaces.TimerUpdateListener;
 import com.github.egubot.objects.TimerObject;
 import com.github.egubot.shared.Shared;
 
@@ -28,6 +30,7 @@ public class TimerHandler {
 	private static final Map<String, DiscordTimerTask> tasks = new HashMap<>();
 	private List<TimerObject> timers;
 	private final Map<TimerObject, ScheduledFuture<?>> scheduledFutures = new HashMap<>();
+	private List<TimerUpdateListener> listeners = new ArrayList<>(1);
 	private ZonedDateTime lastCheckTime;
 
 	static {
@@ -52,6 +55,7 @@ public class TimerHandler {
 			for (int i = 0; i < timers.size(); i++) {
 				TimerObject timer = timers.get(i);
 				if (!isValid(timer)) {
+					timers.remove(i);
 					i--;
 				}
 			}
@@ -60,11 +64,12 @@ public class TimerHandler {
 
 	private boolean isValid(TimerObject timer) {
 		try {
-			formatTimeString(timer.getNextExecutionTime());
-			return true;
+			if (timer != null) {
+				formatTimeString(timer.getNextExecutionTime());
+				return true;
+			}
 		} catch (Exception e) {
 			logger.error("Failed to register timer", e);
-			timers.remove(timer);
 		}
 		return false;
 	}
@@ -76,22 +81,31 @@ public class TimerHandler {
 	public void removeTimer(TimerObject timer) {
 		int i = timers.indexOf(timer);
 		// Make sure the timer doesn't keep re-scheduling even past cancelling
-		timers.get(i).setActivatedFlag(false);
-		timers.remove(i);
+		if (i != -1) {
+			timers.get(i).setActivatedFlag(false);
+			timers.remove(i);
+			removeFuture(timer);
+			logger.debug("Removed timer {} meant for {}", timer.getTask(), timer.getNextExecutionTime());
+			notifyListeners();
+		}
+	}
+
+	public void removeFuture(TimerObject timer) {
 		ScheduledFuture<?> future = scheduledFutures.remove(timer);
 		if (future != null) {
 			future.cancel(false); // Attempt to cancel the scheduled task
 		}
-		logger.debug("Removed timer {} meant for {}", timer.getTask(), timer.getNextExecutionTime());
 	}
 
 	public boolean registerTimer(TimerObject timer) {
 		try {
-			logger.debug("Registered timer {} with next execution time {}", timer.getTask(),
-					timer.getNextExecutionTime());
-			timers.add(timer);
-			scheduleTimer(timer); // Schedule the timer immediately upon registration
-			return true;
+			if (isValid(timer)) {
+				logger.debug("Registered timer {} with next execution time {}", timer.getTask(),
+						timer.getNextExecutionTime());
+				timers.add(timer);
+				scheduleTimer(timer); // Schedule the timer immediately upon registration
+				return true;
+			}
 		} catch (Exception e) {
 			logger.error("Failed to register timer", e);
 		}
@@ -125,9 +139,11 @@ public class TimerHandler {
 	}
 
 	private void scheduleTimer(TimerObject timer) {
-		if(!timer.isActivatedFlag())
+		if (!timer.isActivatedFlag())
 			return;
-		
+
+		removeFuture(timer);
+
 		timer.adjustTimesForSummerTime();
 		Duration delay;
 
@@ -157,7 +173,7 @@ public class TimerHandler {
 		}
 		if (delay.isNegative()) {
 			delay = Duration.ZERO;
-			// Don't update next execution, so it can be handled by the handler
+			// Don't update next execution
 		}
 
 		logger.debug("Next execution time for timer {} is {}", timer.getTask(), timer.getNextExecutionTime());
@@ -165,6 +181,7 @@ public class TimerHandler {
 		ScheduledFuture<?> future = scheduler.schedule(() -> handleTimerExecution(timer), delay.toMillis(),
 				TimeUnit.MILLISECONDS);
 		scheduledFutures.put(timer, future);
+		notifyListeners();
 	}
 
 	public static ZonedDateTime getNow() {
@@ -239,6 +256,7 @@ public class TimerHandler {
 			Duration timeDifference = Duration.between(lastCheckTime, now).minus(Duration.ofSeconds(5));
 
 			if (Math.abs(timeDifference.toMinutes()) > 1) {
+				logger.debug("System time changed by {}", TimerObject.formatDuration(timeDifference));
 				adjustTimers();
 			}
 
@@ -247,22 +265,24 @@ public class TimerHandler {
 	}
 
 	private void adjustTimers() {
-		for (TimerObject timer : timers) {
-			timer.adjustTimesForSummerTime();
-			ScheduledFuture<?> future = scheduledFutures.get(timer);
-			if (future != null) {
-				future.cancel(false);
-				scheduledFutures.remove(timer);
-				Duration newDelay = Duration.between(getNow(), timer.getNextExecutionTime());
-				if (newDelay.isNegative()) {
-					newDelay = Duration.ZERO;
-				}
-				ScheduledFuture<?> newFuture = scheduler.schedule(() -> handleTimerExecution(timer),
-						newDelay.toMillis(), TimeUnit.MILLISECONDS);
-				scheduledFutures.put(timer, newFuture);
-				String formattedDelay = TimerObject.formatDuration(newDelay);
-				logger.debug("Adjusted timer {} with new delay of {}", timer.getTask(), formattedDelay);
-			}
+		List<TimerObject> timersCopy = new ArrayList<>(this.timers);
+		for (TimerObject timer : timersCopy) {
+			// Also cancels the current timer task before rescheduling
+			scheduleTimer(timer);
+		}
+	}
+
+	public void addListener(TimerUpdateListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(TimerUpdateListener listener) {
+		listeners.remove(listener);
+	}
+
+	public void notifyListeners() {
+		for (TimerUpdateListener listener : listeners) {
+			listener.onTimerUpdated();
 		}
 	}
 }

@@ -17,6 +17,7 @@ import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.features.TimerHandler;
 import com.github.egubot.interfaces.DiscordTimerTask;
+import com.github.egubot.interfaces.TimerUpdateListener;
 import com.github.egubot.interfaces.UpdatableObjects;
 import com.github.egubot.objects.TimerObject;
 import com.github.egubot.storage.DataManagerHandler;
@@ -30,7 +31,7 @@ import com.github.egubot.shared.utils.JSONUtilities;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects {
+public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects, TimerUpdateListener {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasks.class.getName());
 	private static String resourcePath = "Timers.txt";
 	private static String idKey = "Timers_Message_ID";
@@ -43,6 +44,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	public ScheduledTasks() throws IOException {
 		super(idKey, resourcePath, "Timers", true);
 		initializeTimerHandler();
+		timerHandler.addListener(this);
 	}
 
 	private void initializeTimerHandler() {
@@ -66,8 +68,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			if (isTimerExist(timer)) {
 				msg.getChannel().sendMessage("Similar timer already exists");
 			} else if (timerHandler.registerTimer(timer)) {
-				updateDataFromObjects();
-				writeData(msg.getChannel());
+				msg.getChannel().sendMessage("Scheduled :ok_hand:");
 				return true;
 			} else {
 				msg.getChannel().sendMessage("Failed to register timer");
@@ -89,8 +90,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 			if (isTimerExist(timer)) {
 				timerHandler.removeTimer(getTimer(timer));
-				updateDataFromObjects();
-				writeData(msg.getChannel());
+				msg.getChannel().sendMessage("Removed :ok_hand:");
 			} else
 				msg.getChannel().sendMessage("Timer doesn't exist");
 
@@ -323,6 +323,12 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			return Collections.synchronizedList(new ArrayList<TimerObject>(timers));
 		}
 
+	}
+
+	@Override
+	public void onTimerUpdated() {
+		updateDataFromObjects();
+		writeData(null);
 	}
 
 }

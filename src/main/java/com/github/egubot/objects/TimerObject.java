@@ -21,7 +21,7 @@ public class TimerObject {
 	@SerializedName("next_execution")
 	private String nextExecution; // dd-MM-yyyy, H:mm format
 	@SerializedName("exit_time")
-	private String exitTime = null; // UK time on app exit. dd-MM-yyyy, H:mm format
+	private String exitTime = null; // default time zone time on app exit. dd-MM-yyyy, H:mm format
 	@SerializedName("summer_time")
 	private boolean summerTime;
 	@SerializedName("recurring")
@@ -340,7 +340,9 @@ public class TimerObject {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(delay, recurring, task, taskArguments);
+		String args = taskArguments.indexOf(">") > -1 ? taskArguments.substring(0, taskArguments.indexOf(">"))
+				: taskArguments;
+		return Objects.hash(delay, recurring, task, args);
 	}
 
 	@Override
