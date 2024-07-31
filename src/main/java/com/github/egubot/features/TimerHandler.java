@@ -204,25 +204,26 @@ public class TimerHandler {
 				return;
 			}
 
-			if (timer.isContinueOnMiss()) {
-				updateNextExecution(timer);
-				scheduleTimer(timer);
-				return;
-			}
+			scheduleNext(timer);
+			return;
 
 		}
 
 		executeTask(timer);
 
 		if (timer.isRecurring()) {
-			// Start using delay next
-			timer.setStartDate(null);
-			updateNextExecution(timer);
-			scheduleTimer(timer); // Reschedule with updated nextExecutionTime
+			scheduleNext(timer);
 		} else {
 			removeTimer(timer);
 		}
 
+	}
+
+	public void scheduleNext(TimerObject timer) {
+		// Start using delay next
+		timer.setStartDate(null);
+		updateNextExecution(timer);
+		scheduleTimer(timer); // Reschedule with updated nextExecutionTime
 	}
 
 	private void updateNextExecution(TimerObject timer) {
