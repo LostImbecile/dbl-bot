@@ -1,5 +1,6 @@
 package com.github.egubot.storage;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 	private String dataName;
 	private boolean verbose;
 	private InputStream localInput = null;
+	private long uniqueID = -1;
 
 	public DataManagerSwitcher() {
 		registerToggleable(this);
@@ -62,6 +64,19 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		this.localInput = localInput;
 		this.dataName = dataName;
 		this.verbose = verbose;
+		this.isOnlineCapable = true;
+		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
+		toggle();
+	}
+
+	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, long uniqueID, boolean verbose)
+			throws IOException {
+		this();
+		this.storageKey = storageKey;
+		this.resourcePath = resourcePath;
+		this.dataName = dataName;
+		this.verbose = verbose;
+		this.uniqueID = uniqueID;
 		this.isOnlineCapable = true;
 		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
 		toggle();
@@ -105,16 +120,22 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 	}
 
 	private void getLocalManager(boolean initialise) throws IOException {
-		manager = new LocalDataManager(dataName);
+		String name = dataName;
+		if (uniqueID > 0)
+			name = uniqueID + File.separator + dataName;
+		manager = new LocalDataManager(name);
 		if (initialise)
 			initialise(verbose);
 	}
 
 	private void getOnlineManager(boolean initialise) throws IOException {
+		String name = dataName;
+		if (uniqueID > 0)
+			name = uniqueID + "_" + dataName;
 		if (localInput == null)
-			manager = new OnlineDataManager(storageKey, resourcePath, dataName);
+			manager = new OnlineDataManager(storageKey, resourcePath, name);
 		else
-			manager = new OnlineDataManager(storageKey, localInput, dataName);
+			manager = new OnlineDataManager(storageKey, localInput, name);
 
 		if (initialise)
 			initialise(verbose);
