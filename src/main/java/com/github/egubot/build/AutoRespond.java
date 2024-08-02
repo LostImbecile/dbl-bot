@@ -68,6 +68,8 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 					if (msg.getAuthor().getIdAsString().equals(response.getInvocMsg().replaceAll("[<>@ ]", "")))
 						deleteFlag = true;
 					break;
+				default:
+					continue;
 				}
 				if (replyFlag) {
 					respond(msg, reactions, replyFlag, response);
@@ -84,14 +86,17 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			} else if (response.getResponseType().equalsIgnoreCase("Special")) {
 
 			} else {
-				StreamRedirector.println("events","\nThe following line is invalid and cannot be invoked:\n" + response.toString());
+				StreamRedirector.println("events",
+						"\nThe following line is invalid and cannot be invoked:\n" + response.toString());
 			}
 		}
 
 		return false;
 	}
 
-	private boolean respond(Message msg, List<String> reactions, boolean replyFlag, Response response) {
+	private void respond(Message msg, List<String> reactions, boolean replyFlag, Response response) {
+		if (response.getAttr().isDisabled())
+			return;
 		Message reference;
 		String replyMsg;
 		response.incrementUsage();
@@ -125,7 +130,6 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			writeData(null);
 		} catch (Exception e1) {
 		}
-		return replyFlag;
 	}
 
 	private boolean isReplyToReference(Response response, Message msg) {
@@ -197,20 +201,19 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 				writeData(e.getChannel());
 			}
 		} catch (NullPointerException | StringIndexOutOfBoundsException e1) {
-			e.getChannel()
-					.sendMessage("""
-						Correct format:\
-						
-						b-response create type >> message >> response (>> reaction1 >> reaction2 >>...)\
-						
-						
-						Alternative:
-						b-response create type >> message >> option1 ?? option2 ?? ... >> ...\
-						
-						
-						Types:\
-						
-						Contain, equal and match""");
+			e.getChannel().sendMessage("""
+					Correct format:\
+
+					b-response create type >> message >> response (>> reaction1 >> reaction2 >>...)\
+
+
+					Alternative:
+					b-response create type >> message >> option1 ?? option2 ?? ... >> ...\
+
+
+					Types:\
+
+					Contain, equal and match""");
 		} catch (Exception e1) {
 			String error = "Problematic Message: \"" + msgText + "\"";
 			logger.error(error, e1);

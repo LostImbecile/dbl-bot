@@ -13,7 +13,7 @@ public class UserInfoUtilities {
 	}
 
 	public static boolean isServerOwner(Message msg) {
-		return !msg.isPrivateMessage() && msg.getServer().get().getOwnerId() == msg.getAuthor().getId();
+		return !msg.isPrivateMessage() && ServerInfoUtilities.getServer(msg).getOwnerId() == msg.getAuthor().getId();
 	}
 
 	public static boolean isUserEqual(String id1, String id2) {

@@ -12,6 +12,7 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
 import com.github.egubot.facades.AIContext;
+import com.github.egubot.facades.AutoRespondContext;
 import com.github.egubot.facades.CustomAIFacade;
 import com.github.egubot.facades.StorageFacadesHandler;
 import com.github.egubot.interfaces.Shutdownable;
@@ -102,7 +103,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				return;
 			}
 
-			if (StorageFacadesHandler.respond(msg, msgText))
+			if (AutoRespondContext.respond(msgText, msg))
 				return;
 
 		} catch (Exception e1) {

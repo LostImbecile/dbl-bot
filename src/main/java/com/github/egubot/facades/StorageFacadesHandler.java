@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javacord.api.entity.message.Message;
-
 import com.github.egubot.interfaces.Shutdownable;
 
 public class StorageFacadesHandler implements Shutdownable {
@@ -26,14 +24,6 @@ public class StorageFacadesHandler implements Shutdownable {
 			logger.error("ScheduledTasks broke", e);
 		}
 		LegendsCommandsContext.initialise();
-	}
-
-	public static boolean respond(Message msg, String msgText) {
-		return AutoRespondContext.respond(msgText, msg);
-	}
-	
-	public static boolean schedule(Message msg, String msgText) {
-		return ScheduledTasksContext.schedule(msg, msgText);
 	}
 
 	public static void shutdownStatic() {
