@@ -9,7 +9,6 @@ public class LegendsAutoRollCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "roll";
 	}
 
@@ -19,7 +18,7 @@ public class LegendsAutoRollCommand implements Command {
 			return false;
 
 		if (msg.getChannel().getIdAsString().equals(LegendsCommandsContext.getWheelChannelID())) {
-			LegendsCommandsContext.getLegendsRoll().rollCharacters("6 t1", msg.getChannel(),
+			LegendsCommandsContext.getLegendsRoll(msg).rollCharacters("6 t1", msg.getChannel(),
 					LegendsCommandsContext.isAnimated());
 		}
 		return true;
@@ -27,7 +26,6 @@ public class LegendsAutoRollCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

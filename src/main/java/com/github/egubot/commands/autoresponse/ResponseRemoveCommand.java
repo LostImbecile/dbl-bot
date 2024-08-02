@@ -10,19 +10,17 @@ public class ResponseRemoveCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "response remove";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		AutoRespondContext.getAutoRespond().removeResponse(arguments, msg.getChannel(), UserInfoUtilities.isOwner(msg));
+		AutoRespondContext.getAutoRespond(msg).removeResponse(arguments, msg.getChannel(), UserInfoUtilities.isPrivilegedOwner(msg));
 		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

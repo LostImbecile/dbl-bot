@@ -10,20 +10,18 @@ public class ResponseSendCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "response send";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if (UserInfoUtilities.isOwner(msg))
-			AutoRespondContext.getAutoRespond().sendData(msg.getChannel());
+		if (UserInfoUtilities.isPrivilegedOwner(msg))
+			AutoRespondContext.getAutoRespond(msg).sendData(msg.getChannel());
 		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

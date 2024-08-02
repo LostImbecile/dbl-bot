@@ -14,8 +14,7 @@ public class TimerSendCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (ScheduledTasksContext.getScheduledTasks() != null)
-			ScheduledTasksContext.getScheduledTasks().sendData(msg.getChannel());
+		ScheduledTasksContext.getScheduledTasks(msg).sendData(msg.getChannel());
 		return true;
 	}
 

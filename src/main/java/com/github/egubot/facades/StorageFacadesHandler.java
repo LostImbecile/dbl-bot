@@ -1,7 +1,5 @@
 package com.github.egubot.facades;
 
-import java.io.IOException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.github.egubot.interfaces.Shutdownable;
@@ -13,16 +11,6 @@ public class StorageFacadesHandler implements Shutdownable {
 	}
 
 	public static void initialise() {
-		try {
-			AutoRespondContext.initialise();
-		} catch (IOException e) {
-			logger.error("Autorespond broke", e);
-		}
-		try {
-			ScheduledTasksContext.initialise();
-		}catch (IOException e) {
-			logger.error("ScheduledTasks broke", e);
-		}
 		LegendsCommandsContext.initialise();
 	}
 

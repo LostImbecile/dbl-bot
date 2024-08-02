@@ -10,7 +10,6 @@ public class LegendsTemplateCreate implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "template create";
 	}
 
@@ -19,7 +18,7 @@ public class LegendsTemplateCreate implements Command {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;
 		
-		LegendsTemplatesContext.getTemplates().writeTemplate(arguments, msg.getChannel());
+		LegendsTemplatesContext.getTemplates(msg).writeTemplate(arguments, msg.getChannel());
 		return true;
 	}
 

@@ -1,25 +1,44 @@
 package com.github.egubot.facades;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.RollTemplates;
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.interfaces.Shutdownable;
 
 public class LegendsTemplatesContext implements Shutdownable {
-	private static RollTemplates templates = null;
+	private static Map<Long, RollTemplates> templatesMap = new HashMap<>();
+	private static RollTemplates defaultTemplates;
 
 	public static void initialise() throws IOException {
-		templates = new RollTemplates();
+		defaultTemplates = new RollTemplates();
 	}
 
-	public static List<String> getRollTemplates() {
-		return templates.getRollTemplates();
+	public static List<String> getRollTemplates(Message msg) {
+		RollTemplates templates = getTemplates(msg);
+		return templates == null ? null : templates.getRollTemplates();
+	}
+	
+	public static List<String> getDefaultRollTemplates() {
+		RollTemplates templates = getDefaultTemplates();
+		return templates == null ? null : templates.getRollTemplates();
+	}
+
+	private static RollTemplates getDefaultTemplates() {
+		return defaultTemplates;
 	}
 
 	public static void shutdownStatic() {
-		if (templates != null)
-			templates.shutdown();
+		for (RollTemplates templates : templatesMap.values()) {
+			if (templates != null) {
+				templates.shutdown();
+			}
+		}
 	}
 
 	@Override
@@ -32,7 +51,18 @@ public class LegendsTemplatesContext implements Shutdownable {
 		return 0;
 	}
 
-	public static RollTemplates getTemplates() {
-		return templates;
+	public static RollTemplates getTemplates(Message msg) {
+		long serverID = ServerInfoUtilities.getServerID(msg);
+		if (serverID == -1) {
+			return null;
+		}
+		return templatesMap.computeIfAbsent(serverID, k -> {
+			try {
+				return new RollTemplates(serverID);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return null;
+		});
 	}
 }

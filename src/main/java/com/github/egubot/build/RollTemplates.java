@@ -16,6 +16,10 @@ public class RollTemplates extends DataManagerHandler {
 		super(idKey, resourcePath, "Filter Templates", true);
 	}
 
+	public RollTemplates(long serverID) throws IOException {
+		super(idKey, resourcePath, "Filter Templates", serverID, false);
+	}
+
 	public void removeTemplate(String msgText, Messageable e, boolean isOwner) {
 
 		try {

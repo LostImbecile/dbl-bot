@@ -11,7 +11,6 @@ public class LegendsTemplateRemove implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "template remove";
 	}
 
@@ -20,7 +19,7 @@ public class LegendsTemplateRemove implements Command {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;
 		
-		LegendsTemplatesContext.getTemplates().removeTemplate(arguments, msg.getChannel(),
+		LegendsTemplatesContext.getTemplates(msg).removeTemplate(arguments, msg.getChannel(),
 				UserInfoUtilities.isOwner(msg));
 		return true;
 	}

@@ -47,6 +47,12 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		timerHandler.addListener(this);
 	}
 
+	public ScheduledTasks(long serverID) throws IOException {
+		super(idKey, resourcePath, "Timers", serverID, false);
+		initializeTimerHandler();
+		timerHandler.addListener(this);
+	}
+
 	private void initializeTimerHandler() {
 		updateObjects();
 		this.timerHandler = new TimerHandler(timers);

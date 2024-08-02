@@ -15,7 +15,7 @@ public abstract class LegendsPool {
 	private List<String> rollTemplates;
 
 	protected LegendsPool(List<String> rollTemplates) {
-		this.rollTemplates =  rollTemplates;
+		this.rollTemplates = rollTemplates;
 	}
 
 	protected abstract List<Characters> getPool(String msgText);
@@ -134,12 +134,12 @@ public abstract class LegendsPool {
 	private void turnToPostfix(String[] filters, List<String> operators, List<String> operands) {
 		LinkedList<String> opStack = (LinkedList<String>) operators;
 		LinkedList<String> conStack = (LinkedList<String>) operands;
-		
+
 		String temp;
 		// This is done the exact same way it is for any infix
 		// to postfix conversion, so read the details online.
 		for (String filter : filters) {
-			
+
 			if (isOperator(filter)) {
 
 				if (isHigherPriority(opStack, filter)) {
@@ -203,7 +203,7 @@ public abstract class LegendsPool {
 		} while (!temp.equals(st));
 
 		st = st.replace("frieza_no_brother", "cooler");
-		
+
 		return st;
 	}
 
@@ -275,7 +275,7 @@ public abstract class LegendsPool {
 						// Initialise subPool if it's empty
 						if (subPool1 != null) {
 							if (subPool1.isEmpty()) {
-								
+
 								for (int k = 0; k < tag.getCharacters().size(); k++) {
 									if (tag.getCharacters().get(k) != null)
 										((CharacterHash) subPool1).put(tag.getCharacters().get(k));
@@ -340,7 +340,7 @@ public abstract class LegendsPool {
 				pool1.remove(pool2.get(siteID));
 			}
 		} else {
-			StreamRedirector.println("events","undefined operation at legends reroll: " + operation);
+			StreamRedirector.println("events", "undefined operation at legends reroll: " + operation);
 		}
 
 	}

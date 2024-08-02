@@ -10,23 +10,21 @@ public class ResponseLockCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "response lock";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if (UserInfoUtilities.isOwner(msg)) {
+		if (UserInfoUtilities.isPrivilegedOwner(msg)) {
 			int x = Integer.parseInt(arguments.replaceAll("\\D", ""));
-			AutoRespondContext.getAutoRespond().setLockedDataEndIndex(x);
-			AutoRespondContext.getAutoRespond().writeData(msg.getChannel());
+			AutoRespondContext.getAutoRespond(msg).setLockedDataEndIndex(x);
+			AutoRespondContext.getAutoRespond(msg).writeData(msg.getChannel());
 		}
 		return true;
 	}
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

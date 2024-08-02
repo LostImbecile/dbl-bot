@@ -1,10 +1,14 @@
 package com.github.egubot.facades;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javacord.api.entity.message.Message;
+
 import com.github.egubot.build.LegendsDatabase;
+import com.github.egubot.build.RollTemplates;
 import com.github.egubot.features.legends.LegendsRoll;
 import com.github.egubot.features.legends.LegendsSearch;
 import com.github.egubot.interfaces.Shutdownable;
@@ -21,9 +25,6 @@ public class LegendsCommandsContext implements Shutdownable {
 	private static boolean backupWebsiteFlag = ConfigManager.getBooleanProperty("Backup_Website_Flag");
 	private static String wheelChannelID = KeyManager.getID("Wheel_Channel_ID");
 
-	private static LegendsTemplatesContext templates = null;
-	private static LegendsRoll legendsRoll = null;
-	private static LegendsSearch legendsSearch = null;
 	private static boolean isLegendsMode = Shared.isDbLegendsMode();
 	private static boolean isAnimated = !Shared.isTestMode();
 
@@ -35,10 +36,10 @@ public class LegendsCommandsContext implements Shutdownable {
 			// Fetches data from the legends website and initialises
 			// classes that are based on it, or doesn't if that fails
 			try {
-				StreamRedirector.println("info","\nFetching characters from dblegends.net...");
-				
+				StreamRedirector.println("info", "\nFetching characters from dblegends.net...");
+
 				LegendsDatabase.initialise();
-				
+
 				backupLegendsWebsite();
 			} catch (Exception e) {
 				logger.warn("Failed to build character database. Relevant commands will be inactive.");
@@ -52,12 +53,7 @@ public class LegendsCommandsContext implements Shutdownable {
 				} catch (IOException e) {
 					isLegendsMode = false;
 					logger.error("Failed to initialise roll templates.", e);
-					return;
 				}
-
-				legendsRoll = new LegendsRoll(LegendsTemplatesContext.getRollTemplates());
-
-				legendsSearch = new LegendsSearch(LegendsTemplatesContext.getRollTemplates());
 			}
 		}
 	}
@@ -66,11 +62,11 @@ public class LegendsCommandsContext implements Shutdownable {
 		if (LegendsDatabase.isDataFetchSuccessfull()) {
 
 			if (backupWebsiteFlag) {
-				StreamRedirector.println("info","Character database was successfully built!");
+				StreamRedirector.println("info", "Character database was successfully built!");
 				// Upload current website HTML as backup
 				saveLegendsWebsiteBackup();
 			} else {
-				StreamRedirector.println("info","Character database was successfully built!");
+				StreamRedirector.println("info", "Character database was successfully built!");
 			}
 
 		} else {
@@ -105,8 +101,7 @@ public class LegendsCommandsContext implements Shutdownable {
 
 	@Override
 	public void shutdown() {
-		if (templates != null)
-			templates.shutdown();
+		LegendsTemplatesContext.shutdownStatic();
 	}
 
 	@Override
@@ -122,16 +117,20 @@ public class LegendsCommandsContext implements Shutdownable {
 		return wheelChannelID;
 	}
 
-	public static LegendsTemplatesContext getTemplates() {
-		return templates;
+	public static LegendsRoll getLegendsRoll(Message msg) {
+		RollTemplates templates = LegendsTemplatesContext.getTemplates(msg);
+		return templates == null ? new LegendsRoll(getDefaultTemplates())
+				: new LegendsRoll(templates.getRollTemplates());
 	}
 
-	public static LegendsRoll getLegendsRoll() {
-		return legendsRoll;
+	public static List<String> getDefaultTemplates() {
+		return LegendsTemplatesContext.getDefaultRollTemplates();
 	}
 
-	public static LegendsSearch getLegendsSearch() {
-		return legendsSearch;
+	public static LegendsSearch getLegendsSearch(Message msg) {
+		RollTemplates templates = LegendsTemplatesContext.getTemplates(msg);
+		return templates == null ? new LegendsSearch(getDefaultTemplates())
+				: new LegendsSearch(templates.getRollTemplates());
 	}
 
 	public static boolean isLegendsMode() {
@@ -141,7 +140,7 @@ public class LegendsCommandsContext implements Shutdownable {
 	public static boolean isAnimated() {
 		return isAnimated;
 	}
-	
+
 	public static void toggleIsAnimated() {
 		isAnimated = !isAnimated;
 	}

@@ -16,7 +16,8 @@ public class ResponseCreateCommand implements Command {
 	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!arguments.contains("sleep"))
-			AutoRespondContext.getAutoRespond().writeResponse(arguments, msg, UserInfoUtilities.isOwner(msg));
+			AutoRespondContext.getAutoRespond(msg).writeResponse(arguments, msg,
+					UserInfoUtilities.isPrivilegedOwner(msg));
 		else
 			msg.getChannel().sendMessage("nah");
 		return true;

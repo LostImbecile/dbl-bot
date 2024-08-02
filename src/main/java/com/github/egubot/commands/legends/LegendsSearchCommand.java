@@ -18,7 +18,7 @@ public class LegendsSearchCommand implements Command{
 			return false;
 		
 		try {
-			LegendsCommandsContext.getLegendsSearch().search(arguments, msg.getChannel());
+			LegendsCommandsContext.getLegendsSearch(msg).search(arguments, msg.getChannel());
 		} catch (Exception e) {
 			msg.getChannel().sendMessage("Filter couldn't be parsed <:huh:1184466187938185286>");
 			logger.error("Legends commands error", e);

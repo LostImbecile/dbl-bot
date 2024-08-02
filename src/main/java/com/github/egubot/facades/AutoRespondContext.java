@@ -1,26 +1,29 @@
 package com.github.egubot.facades;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.AutoRespond;
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.interfaces.Shutdownable;
 
 public class AutoRespondContext implements Shutdownable {
-	private static AutoRespond autoRespond = null;
+	private static Map<Long, AutoRespond> autoRespondMap = new HashMap<>();
 
 	private AutoRespondContext() {
 	}
 
-	public static void initialise() throws IOException {
-		autoRespond = new AutoRespond();
+	public static void shutdownStatic() {
+		for (AutoRespond autoRespond : autoRespondMap.values()) {
+			if (autoRespond != null) {
+				autoRespond.shutdown();
+			}
+		}
 	}
 
-	public static void shutdownStatic() {
-		if (autoRespond != null)
-			autoRespond.shutdown();
-	}
 	@Override
 	public void shutdown() {
 		shutdownStatic();
@@ -32,11 +35,23 @@ public class AutoRespondContext implements Shutdownable {
 	}
 
 	public static boolean respond(String msgText, Message msg) {
-		return autoRespond.respond(msgText, msg);
+		AutoRespond autoRespond = getAutoRespond(msg);
+		return autoRespond != null && autoRespond.respond(msgText, msg);
 	}
 
-	public static AutoRespond getAutoRespond() {
-		return autoRespond;
+	public static AutoRespond getAutoRespond(Message msg) {
+		long serverID = ServerInfoUtilities.getServerID(msg);
+		if (serverID == -1) {
+			return null;
+		}
+		return autoRespondMap.computeIfAbsent(serverID, k -> {
+			try {
+				return new AutoRespond(serverID);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return null;
+		});
 	}
-	
+
 }

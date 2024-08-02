@@ -21,8 +21,8 @@ public class LegendsTemplateLock implements Command {
 		
 		if (UserInfoUtilities.isOwner(msg)) {
 			int x = Integer.parseInt(arguments.replaceAll("\\D", ""));
-			LegendsTemplatesContext.getTemplates().setLockedDataEndIndex(x);
-			LegendsTemplatesContext.getTemplates().writeData(msg.getChannel());
+			LegendsTemplatesContext.getTemplates(msg).setLockedDataEndIndex(x);
+			LegendsTemplatesContext.getTemplates(msg).writeData(msg.getChannel());
 		}
 		return true;
 	}

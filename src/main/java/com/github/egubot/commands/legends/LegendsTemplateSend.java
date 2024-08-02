@@ -18,7 +18,7 @@ public class LegendsTemplateSend implements Command {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;
 		
-		LegendsTemplatesContext.getTemplates().sendData(msg.getChannel());
+		LegendsTemplatesContext.getTemplates(msg).sendData(msg.getChannel());
 		return true;
 	}
 

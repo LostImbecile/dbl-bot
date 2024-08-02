@@ -83,7 +83,7 @@ public class FileUtilities {
 			return null;
 		}
 	}
-
+	
 	public static String readFile(String fileName) {
 		return readInputStream(getFileInputStream(fileName, false), "\n");
 	}

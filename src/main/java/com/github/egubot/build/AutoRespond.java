@@ -36,6 +36,10 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 		super(idKey, resourcePath, "Autorespond", true);
 	}
 
+	public AutoRespond(long serverID) throws IOException {
+		super(idKey, resourcePath, "Autorespond", serverID, false);
+	}
+
 	public boolean respond(String msgText, Message msg) {
 		if (responses == null)
 			return false;

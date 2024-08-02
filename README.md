@@ -13,7 +13,7 @@ Some of the classes are implementation specific, you might want to change some a
 You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
 but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
-This bot was made for use on single servers and stores its data on discord or locally. It isn't yet fully made to handle cases where you're running it with multiple servers (storage is sometimes shared), to keep things simple.
+This bot can store its data on discord or locally. Most of it is server-specific or channel-specific when needed.
 
 The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart, the main class is "Run.java".
  
@@ -49,6 +49,7 @@ Automatic Responses:
  `[Types: contain, equal, match]`
 - b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> *(reaction)...
 - b-response remove (message)
+- b-reponse edit (message) >> \*(response:newResponse) >>\*(attr:attr=value) >> \*(blacklist/whitelist:channelTag,userTag) >> \*(reactions:reaction) `[Commas for separation]`
 
 Translate:
 - b-translate toggle `[Translates all non-eng messages]`
