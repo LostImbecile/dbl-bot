@@ -67,6 +67,10 @@ public class FileUtilities {
 
 	private static InputStream getNewFile(File file) {
 		try {
+			File parentDir = file.getParentFile();
+			if (!parentDir.exists() && !parentDir.mkdirs()) {
+				throw new IOException("Failed to create parent directory.");
+			}
 			if (!file.createNewFile()) {
 				if (file.exists())
 					return new FileInputStream(file);
@@ -79,7 +83,7 @@ public class FileUtilities {
 			return null;
 		}
 	}
-	
+
 	public static String readFile(String fileName) {
 		return readInputStream(getFileInputStream(fileName, false), "\n");
 	}
