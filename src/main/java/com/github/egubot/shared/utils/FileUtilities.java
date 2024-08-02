@@ -68,7 +68,7 @@ public class FileUtilities {
 	private static InputStream getNewFile(File file) {
 		try {
 			File parentDir = file.getParentFile();
-			if (!parentDir.exists() && !parentDir.mkdirs()) {
+			if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
 				throw new IOException("Failed to create parent directory.");
 			}
 			if (!file.createNewFile()) {
