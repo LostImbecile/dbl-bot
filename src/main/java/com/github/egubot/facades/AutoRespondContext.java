@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.AutoRespond;
@@ -11,6 +13,7 @@ import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.interfaces.Shutdownable;
 
 public class AutoRespondContext implements Shutdownable {
+	private static final Logger logger = LogManager.getLogger(AutoRespondContext.class.getName());
 	private static Map<Long, AutoRespond> autoRespondMap = new HashMap<>();
 
 	private AutoRespondContext() {
@@ -48,7 +51,7 @@ public class AutoRespondContext implements Shutdownable {
 			try {
 				return new AutoRespond(serverID);
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e);
 			}
 			return null;
 		});

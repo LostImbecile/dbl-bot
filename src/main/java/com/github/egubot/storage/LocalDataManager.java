@@ -19,21 +19,23 @@ import com.github.egubot.shared.utils.FileUtilities;
 
 public class LocalDataManager implements DataManager {
 	private static final Logger logger = LogManager.getLogger(LocalDataManager.class.getName());
-	private List<String> data = Collections.synchronizedList(new ArrayList<String>(100));
+	private List<String> data = Collections.synchronizedList(new ArrayList<String>());
+	public static final String STORAGE_FOLDER = "Storage";
+
 	private int lockedDataEndIndex = 0;
 	private String dataName;
 	private String fileName;
 
 	public LocalDataManager(String dataName) {
 		this.dataName = dataName;
-		this.fileName = "Storage" + File.separator + dataName.replace(" ", "_") + ".txt";
+		this.fileName = STORAGE_FOLDER + File.separator + dataName.replace(" ", "_") + ".txt";
 	}
 
 	@Override
 	public void initialise(boolean verbose) {
 		readData(null);
 		if (verbose)
-			StreamRedirector.println("info","\n" + dataName + " data successfully loaded!\nDate of last update: "
+			StreamRedirector.println("info", "\n" + dataName + " data successfully loaded!\nDate of last update: "
 					+ FileUtilities.getFileLastModified(fileName));
 	}
 

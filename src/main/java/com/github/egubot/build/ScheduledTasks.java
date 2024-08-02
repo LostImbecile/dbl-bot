@@ -33,7 +33,7 @@ import com.google.gson.JsonSyntaxException;
 
 public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects, TimerUpdateListener {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasks.class.getName());
-	private static String resourcePath = "Timers.txt";
+	public final static String RESOURCE_PATH = "Timers.txt";
 	private static String idKey = "Timers_Message_ID";
 	private TimerHandler timerHandler;
 	private List<TimerObject> timers;
@@ -42,15 +42,13 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	private static final Pattern datePattern = Pattern.compile("\\d{1,2}-\\d{1,2}-\\d{4},\\s*\\d{1,2}:\\d{2}");
 
 	public ScheduledTasks() throws IOException {
-		super(idKey, resourcePath, "Timers", true);
+		super(idKey, RESOURCE_PATH, "Timers", true);
 		initializeTimerHandler();
-		timerHandler.addListener(this);
 	}
 
 	public ScheduledTasks(long serverID) throws IOException {
-		super(idKey, resourcePath, "Timers", serverID, false);
+		super(idKey, RESOURCE_PATH, "Timers", serverID, false);
 		initializeTimerHandler();
-		timerHandler.addListener(this);
 	}
 
 	private void initializeTimerHandler() {
@@ -58,6 +56,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		this.timerHandler = new TimerHandler(timers);
 		updateDataFromObjects(); // if some fail to register they're removed right away
 		this.timerHandler.start();
+		timerHandler.addListener(this);
 	}
 
 	public boolean schedule(Message msg, String msgText, boolean isRecurring) {

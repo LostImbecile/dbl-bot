@@ -12,6 +12,7 @@ public class StorageFacadesHandler implements Shutdownable {
 
 	public static void initialise() {
 		LegendsCommandsContext.initialise();
+		ScheduledTasksContext.initialise();
 	}
 
 	public static void shutdownStatic() {
