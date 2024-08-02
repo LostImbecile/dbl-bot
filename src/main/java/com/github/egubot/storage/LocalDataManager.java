@@ -1,6 +1,7 @@
 package com.github.egubot.storage;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class LocalDataManager implements DataManager {
 
 	public LocalDataManager(String dataName) {
 		this.dataName = dataName;
-		this.fileName = dataName.replace(" ", "_") + ".txt";
+		this.fileName = "Storage" + File.separator + dataName.replace(" ", "_") + ".txt";
 	}
 
 	@Override
