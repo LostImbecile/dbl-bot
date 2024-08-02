@@ -26,7 +26,7 @@ import com.github.egubot.shared.Shared;
 
 public class TimerHandler {
 	private static final Logger logger = LogManager.getLogger(TimerHandler.class.getName());
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
+	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
 	private static final Map<String, DiscordTimerTask> tasks = new HashMap<>();
 	private List<TimerObject> timers;
 	private final Map<TimerObject, ScheduledFuture<?>> scheduledFutures = new HashMap<>();

@@ -51,7 +51,7 @@ public class ScheduledTasksContext implements Shutdownable {
 				});
 			}
 			if(!timerList.isEmpty()) {
-				StreamRedirector.println("info", "\nLoaded and initialised " + timerList.size() + " timer(s).");
+				StreamRedirector.println("info", "\nLoaded and initialised timers for " + timerList.size() + " server(s).");
 			}
 		}
 	}
