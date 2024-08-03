@@ -146,11 +146,12 @@ public class SoundPlayback {
 		embed.setAuthor(server.getName(), null, server.getIcon().orElse(null));
 		embed.setColor(Color.RED);
 		StringBuilder description = new StringBuilder(50);
+		description.append("**");
 		for (Entry<String, Long> entry : map.entrySet()) {
 			description.append(convertTrackInfoToText(entry));
 			description.append("\n");
 		}
-		embed.setDescription(description.toString());
+		embed.setDescription(description.toString().replaceFirst("\n", "**\n"));
 		msg.getChannel().sendMessage(embed);
 	}
 

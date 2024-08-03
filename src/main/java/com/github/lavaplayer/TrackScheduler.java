@@ -106,15 +106,17 @@ public class TrackScheduler extends AudioEventAdapter {
 			List<AudioTrack> tracks = list.getTracks();
 			Map<String, Long> trackInfo = new LinkedHashMap<>();
 			int i = getCurrentTrackIndex(serverID);
-			for (i = i < 0 ? 0 : i; i < tracks.size() && i < i + 10; i++) {
+			i = i < 0 ? 0 : i;
+			int max = Math.min(i + 10, tracks.size());
+			for (; i < max; i++) {
 				AudioTrack audioTrack = tracks.get(i);
 				if (audioTrack.getSourceManager() instanceof YoutubeAudioSourceManager) {
 					YoutubeAudioTrack ytTrack = (YoutubeAudioTrack) audioTrack;
 					String name = ytTrack.getInfo().title;
 					String url = ytTrack.getInfo().uri;
-					trackInfo.put("(" + i + 1 + ") [" + name + "](" + url + ")", audioTrack.getDuration());
+					trackInfo.put((i + 1) + ". [" + name + "](" + url + ")", audioTrack.getDuration());
 				} else
-					trackInfo.put("(" + i + 1 + ") " + audioTrack.getIdentifier(), audioTrack.getDuration());
+					trackInfo.put((i + 1) + ". " + audioTrack.getIdentifier(), audioTrack.getDuration());
 			}
 
 			return trackInfo;

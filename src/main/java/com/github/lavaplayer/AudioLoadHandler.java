@@ -23,14 +23,20 @@ public class AudioLoadHandler implements AudioLoadResultHandler {
 	@Override
 	public void trackLoaded(AudioTrack track) {
 		TrackScheduler.queue(track, serverID);
-		logger.debug("Queued track {}", track.getInfo().uri);
+		String title = track.getInfo().title;
+		if(title.equalsIgnoreCase("unknown title")) {
+			title = track.getInfo().identifier;
+		}
+		msg.getChannel().sendMessage("Queued: `" + title + "`");
+		logger.debug("Queued track {}", title);
 	}
 
 	@Override
 	public void playlistLoaded(AudioPlaylist playlist) {
 		TrackScheduler.queue(playlist, serverID);
-
-		logger.debug("Queued playlist {} ", playlist.getName());
+		String title = playlist.getName();
+		msg.getChannel().sendMessage("Queued: `" + title + "`");
+		logger.debug("Queued playlist {} ", title);
 	}
 
 	@Override
