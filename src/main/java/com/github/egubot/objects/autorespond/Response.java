@@ -126,12 +126,12 @@ public class Response implements Comparable<Object> {
 			}
 			return true;
 		}
-		
+
 		return false;
 	}
 
 	public static boolean isInvocEqual(String st, String st2) {
-		return st.matches(st2) || st2.matches(st) || st.equals(st2);
+		return st.matches("(?i)" + st2) || st2.matches("(?i)" + st) || st.equalsIgnoreCase(st2);
 	}
 
 	public String getMatchType() {
@@ -177,7 +177,7 @@ public class Response implements Comparable<Object> {
 	public String getAuthor() {
 		return author;
 	}
-	
+
 	public String getAuthorID() {
 		return author.split("-")[0];
 	}
