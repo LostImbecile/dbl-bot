@@ -130,8 +130,6 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 
 	private void getOnlineManager(boolean initialise) throws IOException {
 		String name = dataName;
-		if (uniqueID > 0)
-			name = uniqueID + "_" + dataName;
 		if (localInput == null)
 			manager = new OnlineDataManager(storageKey, resourcePath, name);
 		else

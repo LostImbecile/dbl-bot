@@ -24,11 +24,13 @@ public class LocalDataManager implements DataManager {
 
 	private int lockedDataEndIndex = 0;
 	private String dataName;
+	private String filePath;
 	private String fileName;
 
 	public LocalDataManager(String dataName) {
 		this.dataName = dataName;
-		this.fileName = STORAGE_FOLDER + File.separator + dataName.replace(" ", "_") + ".txt";
+		this.filePath = STORAGE_FOLDER + File.separator +  dataName.replace(" ", "_") + ".txt";
+		this.fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
 	}
 
 	@Override
@@ -36,12 +38,12 @@ public class LocalDataManager implements DataManager {
 		readData(null);
 		if (verbose)
 			StreamRedirector.println("info", "\n" + dataName + " data successfully loaded!\nDate of last update: "
-					+ FileUtilities.getFileLastModified(fileName));
+					+ FileUtilities.getFileLastModified(filePath));
 	}
 
 	public void writeData(String data) {
 		try {
-			FileUtilities.writeToFile(data, fileName);
+			FileUtilities.writeToFile(data, filePath);
 		} catch (Exception e1) {
 			logger.error("Failed to write and upload data.", e1);
 		}
@@ -50,7 +52,7 @@ public class LocalDataManager implements DataManager {
 	@Override
 	public void writeData(Messageable e) {
 		try {
-			FileUtilities.writeToFile(getData(), fileName);
+			FileUtilities.writeToFile(getData(), filePath);
 			if (e != null)
 				e.sendMessage("Updated <:drink:1184466286944735272>");
 		} catch (Exception e1) {
@@ -99,7 +101,7 @@ public class LocalDataManager implements DataManager {
 	}
 
 	private InputStream getInputStream() {
-		return FileUtilities.getFileInputStream(fileName, true);
+		return FileUtilities.getFileInputStream(filePath, true);
 	}
 
 	public int getLockedDataEndIndex() {
