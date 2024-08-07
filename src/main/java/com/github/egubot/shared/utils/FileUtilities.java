@@ -6,11 +6,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -90,7 +90,7 @@ public class FileUtilities {
 
 	public static String readInputStream(InputStream is) {
 		StringBuilder result = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+		try (BufferedReader reader = getBufferedReader(is)) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				result.append(line);
@@ -129,7 +129,7 @@ public class FileUtilities {
 	}
 
 	public static void writeToFile(String txt, String fileName) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+		try (BufferedWriter writer = new BufferedWriter(getFileWriter(fileName))) {
 			writer.write(txt);
 		} catch (IOException e) {
 			logger.error("Failed to write string to file.", e);
@@ -137,11 +137,15 @@ public class FileUtilities {
 	}
 
 	public static void writeToFile(List<String> list, String fileName) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+		try (BufferedWriter writer = new BufferedWriter(getFileWriter(fileName))) {
 			writer.write(ConvertObjects.listToText(list, "\n"));
 		} catch (IOException e) {
 			logger.error("Failed to write string to file.", e);
 		}
+	}
+
+	public static OutputStreamWriter getFileWriter(String fileName) throws IOException {
+		return new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8);
 	}
 
 	public static String getFileLastModified(String fileName) {
