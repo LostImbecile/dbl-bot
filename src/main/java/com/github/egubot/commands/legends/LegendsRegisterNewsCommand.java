@@ -13,6 +13,9 @@ public class LegendsRegisterNewsCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
+		if (!arguments.contains("<#")) {
+			arguments += " <#" + msg.getChannel().getIdAsString() + ">";
+		}
 		LegendsNewsContext.registerServer(msg, arguments);
 		return true;
 	}

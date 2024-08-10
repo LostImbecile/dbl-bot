@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.TimerTask;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 
@@ -19,6 +21,7 @@ import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.LocalDataManager;
 
 public class LegendsNewsContext implements Shutdownable {
+	private static final Logger logger = LogManager.getLogger(LegendsNewsContext.class.getName());
 	private static TimedAction newsTimer;
 	private static NewsFeedManager<LegendsNewsPiece> newsManager;
 	private static LegendsNews registeredServers;
@@ -48,20 +51,25 @@ public class LegendsNewsContext implements Shutdownable {
 
 				@Override
 				public void run() {
-					List<LegendsNewsPiece> pieces = newsManager.getNewArticles(3);
-					if (!pieces.isEmpty()) {
-						sendNews(pieces);
+					if (!registeredServers.getData().isEmpty()) {
+						logger.debug("Fetching Legends News");
+						List<LegendsNewsPiece> pieces = newsManager.getNewArticles(3);
+						if (!pieces.isEmpty()) {
+							sendNews(pieces);
+						}
 					}
 				}
 			};
 			newsTimer.startRecurringTimer(task, false, false);
-			
-			task.run();
+
+			new Thread(task).start();
 		}
+
 	}
 
 	protected static void sendNews(List<LegendsNewsPiece> pieces) {
 		List<String> servers = registeredServers.getData();
+		logger.debug("Sending {} Legends News Pieces for {} Servers", pieces.size(), servers.size());
 		for (String server : servers) {
 			List<Messageable> channels = LegendsNews.getChannels(server);
 			for (Messageable channel : channels) {
@@ -75,6 +83,7 @@ public class LegendsNewsContext implements Shutdownable {
 
 	public static void shutdownStatic() {
 		newsTimer.terminateTimer();
+		registeredServers.shutdown();
 	}
 
 	@Override

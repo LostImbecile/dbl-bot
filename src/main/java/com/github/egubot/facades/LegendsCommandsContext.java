@@ -104,11 +104,15 @@ public class LegendsCommandsContext implements Shutdownable {
 			logger.error("Failed to save website backup", e);
 		}
 	}
+	
+	public static void shutdownStatic() {
+		LegendsTemplatesContext.shutdownStatic();
+		LegendsNewsContext.shutdownStatic();
+	}
 
 	@Override
 	public void shutdown() {
-		LegendsTemplatesContext.shutdownStatic();
-		LegendsNewsContext.shutdownStatic();
+		shutdownStatic();
 	}
 
 	@Override
