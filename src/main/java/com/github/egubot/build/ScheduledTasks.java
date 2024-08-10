@@ -39,6 +39,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 	private static final Pattern delayPattern = Pattern.compile("(?:\\d+[smhdwM]){1,6}");
 	private static final Pattern datePattern = Pattern.compile("\\d{1,2}-\\d{1,2}-\\d{4},\\s*\\d{1,2}:\\d{2}");
+	private static final Pattern channelPattern = Pattern.compile("<#(\\d+)>");
 
 	public ScheduledTasks() throws IOException {
 		super(idKey, RESOURCE_PATH, "Timers", true);
@@ -186,7 +187,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 		// Extract channels, if present
 		List<Long> channels = new ArrayList<>();
-		Pattern channelPattern = Pattern.compile("<#(\\d+)>");
 		if (parts.length > 2) {
 			Matcher channelMatcher = channelPattern.matcher(parts[2]);
 			while (channelMatcher.find()) {
