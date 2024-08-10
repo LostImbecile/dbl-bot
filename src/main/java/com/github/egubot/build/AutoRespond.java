@@ -10,6 +10,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.Messageable;
 
+import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.UpdatableObjects;
 import com.github.egubot.logging.StreamRedirector;
@@ -104,8 +105,8 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 		Message reference;
 		String replyMsg;
 		response.incrementUsage();
-		replyMsg = parseResponseMsg(response.getResponseMessage());
-
+		replyMsg = getProcessedResponse(msg, response);
+				
 		if (msg.getMessageReference().isPresent()) {
 			reference = msg.getMessageReference().get().getMessage().get();
 			if (isReplyToReference(response, reference)) {
@@ -134,6 +135,15 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			writeData(null);
 		} catch (Exception e1) {
 		}
+	}
+
+	private String getProcessedResponse(Message msg, Response response) {
+		String replyMsg;
+		replyMsg = parseResponseMsg(response.getResponseMessage());
+		replyMsg = replyMsg.replace("${user}", msg.getAuthor().getDisplayName());
+		replyMsg = replyMsg.replace("${server}", ServerInfoUtilities.getServer(msg).getName());
+		replyMsg = replyMsg.replace("${usage}", response.getUsage() + "");
+		return replyMsg;
 	}
 
 	private boolean isReplyToReference(Response response, Message msg) {
