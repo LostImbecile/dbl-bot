@@ -1,5 +1,6 @@
 package com.github.egubot.facades;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import com.github.egubot.features.legends.LegendsSearch;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.managers.KeyManager;
+import com.github.egubot.managers.NewsFeedManager;
+import com.github.egubot.objects.legends.LegendsNewsPiece;
 import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.utils.ConvertObjects;
 import com.github.egubot.shared.utils.FileUtilities;
@@ -55,7 +58,10 @@ public class LegendsCommandsContext implements Shutdownable {
 					logger.error("Failed to initialise roll templates.", e);
 				}
 			}
+
 		}
+
+		LegendsNewsContext.initialise();
 	}
 
 	private static void backupLegendsWebsite() throws IOException {
@@ -76,7 +82,7 @@ public class LegendsCommandsContext implements Shutdownable {
 	}
 
 	private static void getLegendsWebsiteBackup() throws IOException {
-		if (FileUtilities.isFileExist("Website_Backup.txt")) {
+		if (FileUtilities.isFileExist(LocalDataManager.STORAGE_FOLDER + File.separator + "Website_Backup.txt")) {
 			LocalDataManager backup = new LocalDataManager("Website Backup");
 			backup.initialise(false);
 			LegendsDatabase.initialise(ConvertObjects.listToText(backup.getData()));
@@ -102,6 +108,7 @@ public class LegendsCommandsContext implements Shutdownable {
 	@Override
 	public void shutdown() {
 		LegendsTemplatesContext.shutdownStatic();
+		LegendsNewsContext.shutdownStatic();
 	}
 
 	@Override
@@ -147,5 +154,9 @@ public class LegendsCommandsContext implements Shutdownable {
 
 	public static void setAnimated(boolean isAnimated) {
 		LegendsCommandsContext.isAnimated = isAnimated;
+	}
+
+	public static NewsFeedManager<LegendsNewsPiece> getNewsManager() {
+		return LegendsNewsContext.getNewsManager();
 	}
 }

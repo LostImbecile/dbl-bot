@@ -26,7 +26,7 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 	private boolean isOnlineCapable = false;
 	private DataManager manager = null;
 
-	private TimedAction uploadTimer = null;
+	private static TimedAction uploadTimer = new TimedAction(10L * MINUTE, null, null);
 	private String storageKey;
 	private String resourcePath;
 	private String dataName;
@@ -53,7 +53,6 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		this.dataName = dataName;
 		this.verbose = verbose;
 		this.isOnlineCapable = true;
-		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
 		toggle();
 	}
 
@@ -65,7 +64,6 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		this.dataName = dataName;
 		this.verbose = verbose;
 		this.isOnlineCapable = true;
-		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
 		toggle();
 	}
 
@@ -78,7 +76,6 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		this.verbose = verbose;
 		this.uniqueID = uniqueID;
 		this.isOnlineCapable = true;
-		this.uploadTimer = new TimedAction(10L * MINUTE, null, null);
 		toggle();
 	}
 

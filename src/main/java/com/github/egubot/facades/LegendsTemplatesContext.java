@@ -1,6 +1,7 @@
 package com.github.egubot.facades;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class LegendsTemplatesContext implements Shutdownable {
 		RollTemplates templates = getTemplates(msg);
 		return templates == null ? null : templates.getRollTemplates();
 	}
-	
+
 	public static List<String> getDefaultRollTemplates() {
 		RollTemplates templates = getDefaultTemplates();
 		return templates == null ? null : templates.getRollTemplates();
@@ -38,9 +39,7 @@ public class LegendsTemplatesContext implements Shutdownable {
 
 	public static void shutdownStatic() {
 		for (RollTemplates templates : templatesMap.values()) {
-			if (templates != null) {
-				templates.shutdown();
-			}
+			templates.shutdown();
 		}
 	}
 
@@ -61,7 +60,9 @@ public class LegendsTemplatesContext implements Shutdownable {
 		}
 		return templatesMap.computeIfAbsent(serverID, k -> {
 			try {
-				return new RollTemplates(serverID);
+				RollTemplates templates = new RollTemplates(serverID);
+				templates.setData(new ArrayList<>(getDefaultRollTemplates()));
+				return templates;
 			} catch (IOException e) {
 				logger.error(e);
 			}

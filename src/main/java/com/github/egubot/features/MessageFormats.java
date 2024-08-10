@@ -14,6 +14,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.features.legends.LegendsSummonRates;
 import com.github.egubot.objects.legends.Characters;
+import com.github.egubot.objects.legends.LegendsNewsPiece;
 import com.github.egubot.objects.legends.SummonCharacter;
 import com.github.egubot.objects.legends.SummonResults;
 
@@ -72,6 +73,11 @@ public class MessageFormats {
 
 		msg.edit("Finished <a:saikyo:792521951100796958><a:da:792522031601287218>", embeds);
 
+	}
+	
+	public static EmbedBuilder buildLegendsNewsEmbed(LegendsNewsPiece piece) {
+		return new EmbedBuilder().setAuthor(piece.getTitle(), piece.getUrl(), "").setImage(piece.getBannerUrl())
+				.setColor(Color.RED).setFooter(piece.getStartTime() + " ～ " + piece.getEndTime());
 	}
 
 	public static EmbedBuilder createCharacterEmbed(Characters unit) {
