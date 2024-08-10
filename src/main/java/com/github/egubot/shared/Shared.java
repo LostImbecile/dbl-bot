@@ -1,5 +1,6 @@
 package com.github.egubot.shared;
 
+import java.time.ZoneId;
 import java.util.Scanner;
 
 import com.github.egubot.managers.ShutdownManager;
@@ -60,6 +61,11 @@ public class Shared {
 		return timeZone;
 	}
 
+	public static ZoneId getZoneID() {
+		if(getTimeZone() == null)
+			setTimeZone("Europe/London");
+		return ZoneId.of(Shared.getTimeZone());
+	}
 	public static void setTimeZone(String timeZone) {
 		Shared.timeZone = timeZone;
 	}

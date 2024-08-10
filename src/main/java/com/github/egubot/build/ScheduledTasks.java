@@ -3,7 +3,6 @@ package com.github.egubot.build;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -33,7 +32,7 @@ import com.google.gson.JsonSyntaxException;
 
 public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects, TimerUpdateListener {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasks.class.getName());
-	public final static String RESOURCE_PATH = "Timers.txt";
+	public static final String RESOURCE_PATH = "Timers.txt";
 	private static String idKey = "Timers_Message_ID";
 	private TimerHandler timerHandler;
 	private List<TimerObject> timers;
@@ -166,6 +165,11 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		String startDate = null;
 		String task = taskAndArgs.split("\\s+")[0];
 		String taskArguments = taskAndArgs.substring(task.length()).trim();
+		
+		if(TimerHandler.getTasks().get(task) == null) {
+			msg.getChannel().sendMessage("No such task");
+			return null;
+		}
 
 		// Check for delay and start date in the remaining part
 		for (String part : before) {
@@ -219,14 +223,14 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 		DateTimeFormatter outputFormatter = TimerObject.timeFormatter;
 		// Determine the next execution time
-		ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+		ZonedDateTime now = ZonedDateTime.now(Shared.getZoneID());
 		ZonedDateTime nextExecution = now;
 
 		if (startDate != null) {
 			DateTimeFormatter dateFormatter = TimerObject.dateFormatter;
 			try {
 				LocalDateTime dateTime = LocalDateTime.parse(startDate, dateFormatter);
-				nextExecution = dateTime.atZone(ZoneId.of(Shared.getTimeZone()));
+				nextExecution = dateTime.atZone(Shared.getZoneID());
 				timer.setStartDate(nextExecution.format(outputFormatter));
 			} catch (DateTimeParseException e) {
 				if (msg != null)

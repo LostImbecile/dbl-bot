@@ -18,7 +18,7 @@ public class DateUtils {
 
 	public static ZoneId getZoneID() {
 		if (Shared.getTimeZone() != null)
-			return ZoneId.of(Shared.getTimeZone());
+			return Shared.getZoneID();
 		return ZoneId.of("Europe/London");
 	}
 

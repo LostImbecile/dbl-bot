@@ -283,7 +283,7 @@ public class TimerObject {
 			exitTime = formatTimeString(exitDateTime);
 		}
 
-		ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+		ZonedDateTime now = ZonedDateTime.now(Shared.getZoneID());
 		boolean isCurrentlySummerTime = now.getZone().getRules().isDaylightSavings(now.toInstant());
 		summerTime = isCurrentlySummerTime;
 	}
@@ -305,7 +305,7 @@ public class TimerObject {
 
 	private ZonedDateTime parseTimeStringWithTimeZone(String timeString) {
 		LocalDateTime localDateTime = parseTimeString(timeString);
-		return localDateTime.atZone(ZoneId.of(Shared.getTimeZone()));
+		return localDateTime.atZone(Shared.getZoneID());
 	}
 
 	private LocalDateTime parseTimeString(String timeString) {

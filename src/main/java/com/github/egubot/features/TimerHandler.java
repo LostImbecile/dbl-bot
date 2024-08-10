@@ -1,7 +1,6 @@
 package com.github.egubot.features;
 
 import java.time.Duration;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -75,7 +74,7 @@ public class TimerHandler {
 	}
 
 	public static void registerTask(DiscordTimerTask task) {
-		tasks.put(task.getName(), task);
+		tasks.put(task.getName().replace(" ", "_"), task);
 	}
 
 	public void removeTimer(TimerObject timer) {
@@ -185,7 +184,7 @@ public class TimerHandler {
 	}
 
 	public static ZonedDateTime getNow() {
-		return ZonedDateTime.now(ZoneId.of(Shared.getTimeZone()));
+		return ZonedDateTime.now(Shared.getZoneID());
 	}
 
 	private void handleTimerExecution(TimerObject timer) {
@@ -285,5 +284,9 @@ public class TimerHandler {
 		for (TimerUpdateListener listener : listeners) {
 			listener.onTimerUpdated();
 		}
+	}
+
+	public static Map<String, DiscordTimerTask> getTasks() {
+		return tasks;
 	}
 }
