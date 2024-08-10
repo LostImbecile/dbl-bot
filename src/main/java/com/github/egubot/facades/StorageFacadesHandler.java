@@ -18,7 +18,7 @@ public class StorageFacadesHandler implements Shutdownable {
 	public static void shutdownStatic() {
 		try {
 			AutoRespondContext.shutdownStatic();
-			LegendsTemplatesContext.shutdownStatic();
+			LegendsCommandsContext.shutdownStatic();
 			ScheduledTasksContext.shutdownStatic();
 		} catch (Exception e) {
 			logger.error("Failed to shut storage classes down.", e);
