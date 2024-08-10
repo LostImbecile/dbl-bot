@@ -41,6 +41,7 @@ public class LegendsTemplatesContext implements Shutdownable {
 		for (RollTemplates templates : templatesMap.values()) {
 			templates.shutdown();
 		}
+		defaultTemplates.shutdown();
 	}
 
 	@Override
