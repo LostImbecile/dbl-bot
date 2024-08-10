@@ -53,7 +53,7 @@ public class LegendsNewsContext implements Shutdownable {
 				public void run() {
 					if (!registeredServers.getData().isEmpty()) {
 						logger.debug("Fetching Legends News");
-						List<LegendsNewsPiece> pieces = newsManager.getNewArticles(3);
+						List<LegendsNewsPiece> pieces = newsManager.getNewArticles(2);
 						if (!pieces.isEmpty()) {
 							sendNews(pieces);
 						}
