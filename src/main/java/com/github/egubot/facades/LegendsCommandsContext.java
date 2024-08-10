@@ -59,9 +59,10 @@ public class LegendsCommandsContext implements Shutdownable {
 				}
 			}
 
+			LegendsNewsContext.initialise();
 		}
 
-		LegendsNewsContext.initialise();
+		
 	}
 
 	private static void backupLegendsWebsite() throws IOException {

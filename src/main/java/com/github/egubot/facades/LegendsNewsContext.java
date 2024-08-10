@@ -82,8 +82,10 @@ public class LegendsNewsContext implements Shutdownable {
 	}
 
 	public static void shutdownStatic() {
-		newsTimer.terminateTimer();
-		registeredServers.shutdown();
+		if (newsTimer != null)
+			newsTimer.terminateTimer();
+		if (registeredServers != null)
+			registeredServers.shutdown();
 	}
 
 	@Override
