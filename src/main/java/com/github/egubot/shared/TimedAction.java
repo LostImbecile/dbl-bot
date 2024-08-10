@@ -20,6 +20,10 @@ public class TimedAction {
 	private Instant otherTimeFormat;
 	private TimerTask singeTimerTask;
 	private TimerTask recurringTimerTask;
+	
+	public TimedAction(long length) {
+		this(length, null, null);
+	}
 
 	public TimedAction(long length, Date startTime, Instant otherTimeFormat) {
 		this.length = length;
