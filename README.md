@@ -4,11 +4,13 @@ Discord bot I've made for a specific server. Its features mostly have to do with
 
 Public so server members can look at it or add to it.
 
-Uses [Javacord](https://github.com/Javacord/Javacord).
+Uses [Javacord](https://github.com/Javacord/Javacord) with [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html). Works on Windows and Linux.
+
+Get your bot token from [here](https://discord.com/developers/applications).
 
 Notes:
 ---------------------------------
-Some of the classes are implementation specific, you might want to change some as needed, the rest should work as is, but you should modify their messages, clear them up, completely remove or add more to them.
+Some of the classes are implementation specific, you might want to change some as needed, the rest should work as is, but you should modify their messages, clear them up, completely remove or add more to them. You can also change the thread counts if I/O locks them frequently.
 
 You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
 but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
@@ -20,7 +22,13 @@ The bot comes with a GUI, you can run it as CMD only if you change it in setting
 Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as javacord is switching 
 to java 11 soon.
 
-Also works on Linux (tested), but resource locations behave differently, isn't a problem however.
+Some API keys used (Optional):
+[`OpenAI`](https://beta.openai.com/account/api-keys)
+[`Groq`](https://console.groq.com/keys)
+[`Youtube`](https://console.developers.google.com/apis/credentials)
+[`Azure Translate`](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/)
+[`Weather`](https://www.weatherapi.com/)
+
 
 Bot commands:
 ---------------------------------
@@ -43,6 +51,11 @@ DBLegends Character Search:
 
 DBLegends Summon Rate:
 - b-summon (banner_url)
+
+DBLegends News
+- b-news register \*(channel tags) \*(user or role tags)
+- b-news remove
+- b-news update \*(channel tags) \*(user or role tags)
 
 Automatic Responses:
 
