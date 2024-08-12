@@ -17,6 +17,11 @@ DBLegends Character Search:
 DBLegends Summon Rate:
 - b-summon (banner_url)
 
+DBLegends News
+- b-news register \*(channel tags) \*(user or role tags)
+- b-news remove
+- b-news update \*(channel tags) \*(user or role tags)
+
 Automatic Responses:
 
  `[Types: contain, equal, match]`
@@ -73,8 +78,9 @@ Timers: `[Tasks: weather, parrot, verse]`
 Bot Control (Owner):
 - terminate
 - refresh
+- parrot (msg)
+- ping
+- toggle bot read mode `[Toggles reading bot message]`
 - b-message edit (messageId) (message)
 - b-message delete (messageId)
-- parrot (msg)
 - b-toggle manager `[Toggles storage]`
-- toggle bot read mode `[Toggles reading bot message]`

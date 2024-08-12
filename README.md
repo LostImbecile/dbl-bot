@@ -15,7 +15,7 @@ Some of the classes are implementation specific, you might want to change some a
 You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
 but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
 
-This bot can store its data on discord or locally. Most of it is server-specific or channel-specific when needed.
+This bot can store its data on discord or locally. Most of it is server-specific or channel-specific when needed. Prefix can be changed in config.properties.
 
 The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart, the main class is "Run.java".
  
@@ -29,10 +29,8 @@ Some API keys used (Optional):
 [`Azure Translate`](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/)
 [`Weather`](https://www.weatherapi.com/)
 
-
 Bot commands:
 ---------------------------------
-
 *Everything is case insensitive. Invocation has to be at the beginning of your message, not read otherwise.*
 
 *Round Brackets indicate operand, stars mean optional, square brackets for comments, everything else needs to be there.*
@@ -113,11 +111,12 @@ Timers: `[Tasks: weather, parrot, verse]`
 Bot Control (Owner):
 - terminate
 - refresh
+- parrot (msg)
+- ping
+- toggle bot read mode `[Toggles reading bot message]`
 - b-message edit (messageId) (message)
 - b-message delete (messageId)
-- parrot (msg)
 - b-toggle manager `[Toggles storage]`
-- toggle bot read mode `[Toggles reading bot message]`
 
 ### Active
 **1) b-roll(n) (filters)** 
