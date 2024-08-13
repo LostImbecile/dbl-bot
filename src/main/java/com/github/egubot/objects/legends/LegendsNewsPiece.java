@@ -8,6 +8,7 @@ public class LegendsNewsPiece {
 	private String bannerUrl;
 	private String startTime;
 	private String endTime;
+	private String description = null;
 
 	public LegendsNewsPiece() {
 	}
@@ -77,6 +78,14 @@ public class LegendsNewsPiece {
 	public String toString() {
 		return "NewsPiece [\nid=" + id + "\ntitle=" + title + "\nurl=" + url + "\nbannerUrl=" + bannerUrl
 				+ "\nstartTime=" + startTime + "\nendTime=" + endTime + "\n]";
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

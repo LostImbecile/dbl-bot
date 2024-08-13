@@ -5,18 +5,15 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.facades.LegendsNewsContext;
 import com.github.egubot.interfaces.Command;
 
-public class LegendsRegisterNewsCommand implements Command {
+public class LegendsRemoveMaintenanceCommand implements Command {
 	@Override
 	public String getName() {
-		return "news register";
+		return "maintenance remove";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (!arguments.contains("<#")) {
-			arguments += " <#" + msg.getChannel().getIdAsString() + ">";
-		}
-		LegendsNewsContext.registerNewsServer(msg, arguments);
+		LegendsNewsContext.removeMaintenanceServer(msg);
 		return true;
 	}
 

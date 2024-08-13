@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 
+import com.github.egubot.build.LegendsMaintenance;
 import com.github.egubot.build.LegendsNews;
 import com.github.egubot.features.MessageFormats;
 import com.github.egubot.features.legends.LegendsNewsScraper;
@@ -17,6 +18,7 @@ import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.managers.NewsFeedManager;
 import com.github.egubot.objects.legends.LegendsNewsPiece;
 import com.github.egubot.shared.TimedAction;
+import com.github.egubot.shared.utils.MessageUtils;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.LocalDataManager;
 
@@ -24,7 +26,8 @@ public class LegendsNewsContext implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(LegendsNewsContext.class.getName());
 	private static TimedAction newsTimer;
 	private static NewsFeedManager<LegendsNewsPiece> newsManager;
-	private static LegendsNews registeredServers;
+	private static LegendsNews registeredNewsServers;
+	private static LegendsMaintenance registeredMaintenanceServers;
 	private static final String CACHE_FILE = LocalDataManager.STORAGE_FOLDER + File.separator
 			+ "legends_news_cache.json";
 	private static final int NEWS_REFRESH_INTERVAL = ConfigManager.getIntProperty("News_Refresh_Interval_Hour");
@@ -32,9 +35,12 @@ public class LegendsNewsContext implements Shutdownable {
 
 	public static void initialise() {
 		try {
-			registeredServers = new LegendsNews();
+			registeredNewsServers = new LegendsNews();
+			registeredMaintenanceServers = new LegendsMaintenance();
 		} catch (Exception e) {
-			registeredServers = null;
+			registeredNewsServers = null;
+			registeredMaintenanceServers = null;
+			logger.error("Failed to initialise Legends News Context", e);
 			return;
 		}
 		NewsScraper<LegendsNewsPiece> scraper = new LegendsNewsScraper();
@@ -51,7 +57,7 @@ public class LegendsNewsContext implements Shutdownable {
 
 				@Override
 				public void run() {
-					if (!registeredServers.getData().isEmpty()) {
+					if (!registeredNewsServers.getData().isEmpty()) {
 						logger.debug("Fetching Legends News");
 						List<LegendsNewsPiece> pieces = newsManager.getNewArticles(2);
 						if (!pieces.isEmpty()) {
@@ -68,13 +74,35 @@ public class LegendsNewsContext implements Shutdownable {
 	}
 
 	protected static void sendNews(List<LegendsNewsPiece> pieces) {
-		List<String> servers = registeredServers.getData();
-		logger.debug("Sending {} Legends News Pieces for {} Servers", pieces.size(), servers.size());
-		for (String server : servers) {
-			List<Messageable> channels = LegendsNews.getChannels(server);
+		List<String> newsServers = registeredNewsServers.getData();
+		LegendsNewsPiece maintenance = null;
+		for (LegendsNewsPiece piece : pieces) {
+			if (piece.getDescription() != null) {
+				maintenance = piece;
+				pieces.remove(piece);
+				break;
+			}
+		}
+
+		logger.debug("Sending {} Legends News Pieces for {} Servers", pieces.size(), newsServers.size());
+		for (String server : newsServers) {
+			List<Messageable> channels = MessageUtils.getChannels(server);
 			for (Messageable channel : channels) {
 				for (LegendsNewsPiece piece : pieces) {
-					channel.sendMessage(LegendsNews.getPings(server), MessageFormats.buildLegendsNewsEmbed(piece));
+					channel.sendMessage(MessageUtils.getPings(server), MessageFormats.buildLegendsNewsEmbed(piece));
+				}
+			}
+		}
+
+		if (maintenance != null) {
+			List<String> maintenanceServers = registeredMaintenanceServers.getData();
+			logger.debug("Sending Legends Maintenance Notice for {}", maintenanceServers.size());
+
+			for (String server : maintenanceServers) {
+				List<Messageable> channels = MessageUtils.getChannels(server);
+				for (Messageable channel : channels) {
+					channel.sendMessage(MessageUtils.getPings(server),
+							MessageFormats.buildLegendsNewsEmbed(maintenance));
 				}
 			}
 		}
@@ -84,8 +112,8 @@ public class LegendsNewsContext implements Shutdownable {
 	public static void shutdownStatic() {
 		if (newsTimer != null)
 			newsTimer.terminateTimer();
-		if (registeredServers != null)
-			registeredServers.shutdown();
+		if (registeredNewsServers != null)
+			registeredNewsServers.shutdown();
 	}
 
 	@Override
@@ -102,19 +130,34 @@ public class LegendsNewsContext implements Shutdownable {
 		return newsManager;
 	}
 
-	public static void registerServer(Message msg, String args) {
-		if (registeredServers != null)
-			registeredServers.registerServer(msg, args);
+	public static void registerNewsServer(Message msg, String args) {
+		if (registeredNewsServers != null)
+			registeredNewsServers.registerServer(msg, args);
 	}
 
-	public static void removeServer(Message msg) {
-		if (registeredServers != null)
-			registeredServers.removeServer(msg);
+	public static void removeNewsServer(Message msg) {
+		if (registeredNewsServers != null)
+			registeredNewsServers.removeServer(msg);
 	}
 
-	public static void updateServer(Message msg, String args) {
-		if (registeredServers != null)
-			registeredServers.update(msg, args);
+	public static void updateNewsServer(Message msg, String args) {
+		if (registeredNewsServers != null)
+			registeredNewsServers.update(msg, args);
+	}
+
+	public static void registerMaintenanceServer(Message msg, String args) {
+		if (registeredMaintenanceServers != null)
+			registeredMaintenanceServers.registerServer(msg, args);
+	}
+
+	public static void removeMaintenanceServer(Message msg) {
+		if (registeredMaintenanceServers != null)
+			registeredMaintenanceServers.removeServer(msg);
+	}
+
+	public static void updateMaintenanceServer(Message msg, String args) {
+		if (registeredMaintenanceServers != null)
+			registeredMaintenanceServers.update(msg, args);
 	}
 
 }

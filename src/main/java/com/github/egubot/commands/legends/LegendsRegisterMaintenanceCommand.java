@@ -5,10 +5,10 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.facades.LegendsNewsContext;
 import com.github.egubot.interfaces.Command;
 
-public class LegendsRegisterNewsCommand implements Command {
+public class LegendsRegisterMaintenanceCommand implements Command {
 	@Override
 	public String getName() {
-		return "news register";
+		return "maintenance register";
 	}
 
 	@Override
@@ -16,7 +16,7 @@ public class LegendsRegisterNewsCommand implements Command {
 		if (!arguments.contains("<#")) {
 			arguments += " <#" + msg.getChannel().getIdAsString() + ">";
 		}
-		LegendsNewsContext.registerNewsServer(msg, arguments);
+		LegendsNewsContext.registerMaintenanceServer(msg, arguments);
 		return true;
 	}
 

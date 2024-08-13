@@ -1,22 +1,23 @@
 package com.github.egubot.commands.legends;
 
+
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.LegendsNewsContext;
 import com.github.egubot.interfaces.Command;
 
-public class LegendsRegisterNewsCommand implements Command {
+public class LegendsUpdateMaintenanceCommand implements Command {
 	@Override
 	public String getName() {
-		return "news register";
+		return "maintenance update";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (!arguments.contains("<#")) {
+		if(!arguments.contains("<#")) {
 			arguments += " <#" + msg.getChannel().getIdAsString() + ">";
 		}
-		LegendsNewsContext.registerNewsServer(msg, arguments);
+		LegendsNewsContext.updateMaintenanceServer(msg, arguments);
 		return true;
 	}
 

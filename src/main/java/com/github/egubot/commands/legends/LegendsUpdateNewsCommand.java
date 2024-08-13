@@ -17,7 +17,7 @@ public class LegendsUpdateNewsCommand implements Command {
 		if(!arguments.contains("<#")) {
 			arguments += " <#" + msg.getChannel().getIdAsString() + ">";
 		}
-		LegendsNewsContext.updateServer(msg, arguments);
+		LegendsNewsContext.updateNewsServer(msg, arguments);
 		return true;
 	}
 

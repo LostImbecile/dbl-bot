@@ -77,7 +77,7 @@ public class MessageFormats {
 	
 	public static EmbedBuilder buildLegendsNewsEmbed(LegendsNewsPiece piece) {
 		return new EmbedBuilder().setAuthor(piece.getTitle(), piece.getUrl(), "").setImage(piece.getBannerUrl())
-				.setColor(Color.RED).setFooter(piece.getStartTime() + " ～ " + piece.getEndTime());
+				.setColor(Color.RED).setFooter(piece.getStartTime() + " ～ " + piece.getEndTime()).setDescription(piece.getDescription());
 	}
 
 	public static EmbedBuilder createCharacterEmbed(Characters unit) {

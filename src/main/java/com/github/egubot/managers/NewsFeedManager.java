@@ -37,8 +37,13 @@ public class NewsFeedManager<T> {
 		for (T article : scrapedArticles) {
 			if (article != null && !cachedArticles.contains(article)) {
 				newArticles.add(0, article);
-				cachedArticles.add(article);
+
 			}
+		}
+
+		// For news to stay in order and be trimmed correctly
+		for (T article : newArticles) {
+			cachedArticles.add(0, article);
 		}
 
 		// Trim cache to MAX_ARTICLES

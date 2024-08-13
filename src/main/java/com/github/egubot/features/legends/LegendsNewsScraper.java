@@ -1,4 +1,4 @@
-package com.github.egubot.features.legends;
+	package com.github.egubot.features.legends;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,6 +75,14 @@ public class LegendsNewsScraper implements NewsScraper<LegendsNewsPiece> {
 		
 		article.setStartTime(formatter.format(startTime));
 		article.setEndTime(formatter.format(endTime));
+		
+		if(article.getTitle().toLowerCase().contains("maintenance")) {
+			try {
+				String details = LegendsMaintenanceParser.getMaintenanceDetails(article.getUrl());
+				article.setDescription(details);
+			} catch (IOException e) {
+			}
+		}
 		return article;
 	}
 

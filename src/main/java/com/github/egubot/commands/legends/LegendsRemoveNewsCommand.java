@@ -13,7 +13,7 @@ public class LegendsRemoveNewsCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		LegendsNewsContext.removeServer(msg);
+		LegendsNewsContext.removeNewsServer(msg);
 		return true;
 	}
 
