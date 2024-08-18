@@ -98,7 +98,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 			if (lowCaseTxt.contains("https://x.com")) {
 				msg.delete();
-				msg.getChannel().sendMessage("<@" + msg.getAuthor().getId() + ">: "
+				msg.getChannel().sendMessage(msg.getAuthor().getDisplayName() + ": "
 						+ msgText.replace("https://x.com", "https://fixupx.com"));
 				return;
 			}
