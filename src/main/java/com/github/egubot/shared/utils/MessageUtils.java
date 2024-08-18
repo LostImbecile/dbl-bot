@@ -14,7 +14,7 @@ public class MessageUtils {
 	}
 
 	public static List<Messageable> getChannels(String st) {
-		List<Messageable> list = new ArrayList<>();
+		List<Messageable> list = new ArrayList<>(1);
 		Matcher matcher = LegendsNews.channelPattern.matcher(st);
 		while (matcher.find()) {
 			long channelID = Long.parseLong(matcher.group(1));

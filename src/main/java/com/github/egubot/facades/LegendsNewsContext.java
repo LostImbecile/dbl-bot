@@ -1,6 +1,7 @@
 package com.github.egubot.facades;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -8,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsMaintenance;
 import com.github.egubot.build.LegendsNews;
@@ -59,7 +61,7 @@ public class LegendsNewsContext implements Shutdownable {
 				public void run() {
 					if (!registeredNewsServers.getData().isEmpty()) {
 						logger.debug("Fetching Legends News");
-						List<LegendsNewsPiece> pieces = newsManager.getNewArticles(2);
+						List<LegendsNewsPiece> pieces = newsManager.getNewArticles(3);
 						if (!pieces.isEmpty()) {
 							sendNews(pieces);
 						}
@@ -85,11 +87,20 @@ public class LegendsNewsContext implements Shutdownable {
 		}
 
 		logger.debug("Sending {} Legends News Pieces for {} Servers", pieces.size(), newsServers.size());
+		List<EmbedBuilder> newsEmbeds = new ArrayList<>();
+		for (LegendsNewsPiece piece : pieces) {
+			newsEmbeds.add(MessageFormats.buildLegendsNewsEmbed(piece));
+		}
 		for (String server : newsServers) {
 			List<Messageable> channels = MessageUtils.getChannels(server);
+			String pings = MessageUtils.getPings(server);
 			for (Messageable channel : channels) {
-				for (LegendsNewsPiece piece : pieces) {
-					channel.sendMessage(MessageUtils.getPings(server), MessageFormats.buildLegendsNewsEmbed(piece));
+				for (int i = 0; i < newsEmbeds.size(); i++) {
+					EmbedBuilder embed = newsEmbeds.get(i);
+					if (i == 0)
+						channel.sendMessage(pings, embed);
+					else
+						channel.sendMessage(embed);
 				}
 			}
 		}
@@ -98,11 +109,12 @@ public class LegendsNewsContext implements Shutdownable {
 			List<String> maintenanceServers = registeredMaintenanceServers.getData();
 			logger.debug("Sending Legends Maintenance Notice for {}", maintenanceServers.size());
 
+			EmbedBuilder maintenanceEmbed = MessageFormats.buildLegendsNewsEmbed(maintenance);
 			for (String server : maintenanceServers) {
 				List<Messageable> channels = MessageUtils.getChannels(server);
+				String pings = MessageUtils.getPings(server);
 				for (Messageable channel : channels) {
-					channel.sendMessage(MessageUtils.getPings(server),
-							MessageFormats.buildLegendsNewsEmbed(maintenance));
+					channel.sendMessage(pings, maintenanceEmbed);
 				}
 			}
 		}

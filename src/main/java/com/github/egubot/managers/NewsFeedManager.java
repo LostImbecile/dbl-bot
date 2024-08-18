@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class NewsFeedManager<T> {
-	private static final int MAX_ARTICLES = 20;
+	private int maxArticles = 30;
 	private final String cacheFile;
 	private List<T> cachedArticles;
 	private final NewsScraper<T> scraper;
@@ -21,9 +21,17 @@ public class NewsFeedManager<T> {
 		this.cacheFile = cacheFile;
 		loadCache();
 	}
+	
+	public NewsFeedManager(NewsScraper<T> scraper, Class<T[]> articleArrayClass, String cacheFile, int maxArticles) {
+		this.scraper = scraper;
+		this.articleArrayClass = articleArrayClass;
+		this.cacheFile = cacheFile;
+		this.maxArticles = maxArticles;
+		loadCache();
+	}
 
 	public List<T> getNewArticles(int pagesToScrape) {
-		return getNewArticles(pagesToScrape, MAX_ARTICLES);
+		return getNewArticles(pagesToScrape, maxArticles);
 	}
 
 	public List<T> getNewArticles(int pagesToScrape, int max) {
@@ -47,8 +55,8 @@ public class NewsFeedManager<T> {
 		}
 
 		// Trim cache to MAX_ARTICLES
-		if (cachedArticles.size() > MAX_ARTICLES) {
-			cachedArticles = cachedArticles.subList(0, MAX_ARTICLES);
+		if (cachedArticles.size() > maxArticles) {
+			cachedArticles = cachedArticles.subList(0, maxArticles);
 		}
 
 		saveCache();
