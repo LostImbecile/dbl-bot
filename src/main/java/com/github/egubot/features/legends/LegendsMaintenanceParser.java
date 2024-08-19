@@ -36,6 +36,7 @@ public class LegendsMaintenanceParser {
 		Pattern dateTimePattern = Pattern.compile("(\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2})");
 
 		String generalMaintenanceStart = null;
+		boolean hasSeenStartAndEndDates = false;
 
 		for (int i = 0; i < children.size(); i++) {
 			Element child = children.get(i);
@@ -47,11 +48,6 @@ public class LegendsMaintenanceParser {
 				if (matcher.find()) {
 					String startTime = matcher.group(1);
 					String discordStartTimestamp = convertToDiscordTimestamp(startTime);
-
-					if (generalMaintenanceStart == null) {
-						generalMaintenanceStart = discordStartTimestamp;
-						continue;
-					}
 
 					// Look for the end time in the next elements
 					String endTime = null;
@@ -71,6 +67,10 @@ public class LegendsMaintenanceParser {
 						String discordEndTimestamp = convertToDiscordTimestamp(endTime);
 						maintenanceInfos
 								.add(new MaintenanceInfo(currentTopic, discordStartTimestamp, discordEndTimestamp));
+						hasSeenStartAndEndDates = true; // Flag that we've seen a start and end date pair
+					} else if (generalMaintenanceStart == null && !hasSeenStartAndEndDates) {
+						// Only set generalMaintenanceStart if we haven't seen a start/end pair yet
+						generalMaintenanceStart = discordStartTimestamp;
 					}
 				}
 			}
@@ -78,7 +78,9 @@ public class LegendsMaintenanceParser {
 
 		// Print the formatted results
 		StringBuilder result = new StringBuilder();
-		result.append("**General Maintenance Start:**\n ").append(generalMaintenanceStart).append("\n\n");
+		if (generalMaintenanceStart != null) {
+			result.append("**General Maintenance Start:**\n ").append(generalMaintenanceStart).append("\n\n");
+		}
 
 		Map<String, String> groupedTopics = new HashMap<>();
 		for (MaintenanceInfo info : maintenanceInfos) {
@@ -90,7 +92,7 @@ public class LegendsMaintenanceParser {
 				groupedTopics.put(key, info.topic);
 			}
 		}
-		
+
 		for (Map.Entry<String, String> entry : groupedTopics.entrySet()) {
 			result.append("**").append(entry.getValue()).append(":**\n ");
 			result.append(entry.getKey()).append("\n\n");
@@ -105,7 +107,7 @@ public class LegendsMaintenanceParser {
 		String endTime;
 
 		MaintenanceInfo(String topic, String startTime, String endTime) {
-			this.topic = topic;
+			this.topic = topic.replace(":", "").strip();
 			this.startTime = startTime;
 			this.endTime = endTime;
 		}
@@ -121,6 +123,6 @@ public class LegendsMaintenanceParser {
 	}
 
 	public static void main(String[] args) throws IOException {
-		System.out.println(LegendsMaintenanceParser.getMaintenanceDetails("https://dblegends.net/news/4016"));
+		System.out.println(LegendsMaintenanceParser.getMaintenanceDetails("https://dblegends.net/news/4017"));
 	}
 }
