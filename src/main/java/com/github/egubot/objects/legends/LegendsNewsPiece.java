@@ -1,5 +1,6 @@
 package com.github.egubot.objects.legends;
 
+import java.util.Objects;
 
 public class LegendsNewsPiece {
 	private long id;
@@ -24,7 +25,6 @@ public class LegendsNewsPiece {
 	public String getUrl() {
 		return url;
 	}
-
 
 	public void setId(long id) {
 		this.id = id;
@@ -61,19 +61,19 @@ public class LegendsNewsPiece {
 	public void setEndTime(String endTime) {
 		this.endTime = endTime;
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return Long.valueOf(id).hashCode();
+		return Objects.hash(Long.valueOf(id), startTime);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof LegendsNewsPiece o)
-			return getId() == o.getId();
+		if (obj instanceof LegendsNewsPiece o)
+			return getId() == o.getId() && o.startTime.equals(startTime);
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "NewsPiece [\nid=" + id + "\ntitle=" + title + "\nurl=" + url + "\nbannerUrl=" + bannerUrl

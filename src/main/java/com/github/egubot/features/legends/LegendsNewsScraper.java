@@ -55,21 +55,21 @@ public class LegendsNewsScraper implements NewsScraper<LegendsNewsPiece> {
 		}
 
 		// Extract title
-		article.setTitle(item.select("h2").text());
+		article.setTitle(item.select("h2").text().strip());
 
 		// Extract URL
 		article.setUrl(href);
 
 		// Extract banner URL
-		article.setBannerUrl(item.select("img").attr("src"));
+		article.setBannerUrl(item.select("img").attr("src").strip());
 
 		// Extract time range
-		String timeText = item.select("p").text();
+		String timeText = item.select("p").text().strip();
 		String[] times = timeText.replace("Start Time: ", "").replace("End Time: ", "").split(" ～ ");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss (z)");
 		
-		ZonedDateTime startTime = ZonedDateTime.parse(times[0], formatter);
-		ZonedDateTime endTime = ZonedDateTime.parse(times[1], formatter);
+		ZonedDateTime startTime = ZonedDateTime.parse(times[0].strip(), formatter);
+		ZonedDateTime endTime = ZonedDateTime.parse(times[1].strip(), formatter);
 		startTime =  startTime.withZoneSameInstant(Shared.getZoneID());
 		endTime = endTime.withZoneSameInstant(Shared.getZoneID());
 		
