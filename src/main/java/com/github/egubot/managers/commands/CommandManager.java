@@ -30,7 +30,7 @@ public class CommandManager {
 		return processContent(msg, text);
 	}
 
-	private static boolean processContent(Message msg, String text) throws Exception {
+	public static boolean processContent(Message msg, String text) throws Exception {
 		int prefixIndex = prefixExtractor.findPrefix(text);
 
 		if (prefixIndex > 0) {
