@@ -62,6 +62,11 @@ Automatic Responses:
 - b-response remove (message)
 - b-reponse edit (message) >> \*(response:newResponse) >>\*(attr:attr=value) >> \*(blacklist/whitelist:channelTag,userTag) >> \*(reactions:reaction) `[Commas for separation]`
 
+Automatic Delete:
+- b-delete msg >> (msg)
+- b-delete user >> (user tag)
+- b-delete remove (msg or user tag)
+
 Translate:
 - b-translate toggle `[Translates all non-eng messages]`
 - b-translate set (to)/(from-to) `[Shortened form; en, fr]`
@@ -79,6 +84,7 @@ Music Player:
 - b-skip *(amount)
 - b-info `[The playlist's]`
 - b-now `[Playing now]`
+- b-buffer (big\small)
 
 WebDriver:
 - b-insult (person name) >> (reason)
@@ -87,14 +93,18 @@ WebDriver:
 - b-convert *(gif/vid) `[Type of your attachment]`
 
 OpenAI Model:
-- gpt toggle `[it's off by default]`
+- gpt toggle
 - gpt (message)
 - gpt channel toggle
 - gpt clear
 - gpt tokens
+- gpt change model (model) `[owner]`
 
 Groq Model:
 - same as gpt but "aa"
+
+Ollama Model:
+- same but "qq"
 
 Custom AI:
 - ai (message)
