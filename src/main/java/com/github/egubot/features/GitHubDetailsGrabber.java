@@ -18,10 +18,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class GitHubDetailsGrabber {
-	private static final Pattern GITHUB_FILE_PATTERN = Pattern
-			.compile("https://github\\.com/[^/]+/[^/]+/blob/[^/]+/[^/]+");
+	private static final Pattern GITHUB_FILE_PATTERN = Pattern.compile("https://github\\.com/[^/]+/[^/]+/blob/.*");
 	private static final Pattern GITHUB_REPO_PATTERN = Pattern.compile("https://github\\.com/[^/]+/[^/]+");
-	private static final Pattern GITHUB_OWNER_REPO_PATTERN = Pattern.compile("https://github\\.com/([^/]+)/([^/]+)");
+	private static final Pattern GITHUB_OWNER_REPO_PATTERN = Pattern.compile("https://github\\.com/([^/]+)/([^/]+).*");
 
 	private static final String token = KeyManager.getToken("GitHub_Access_Token"); // optional
 
@@ -191,8 +190,7 @@ public class GitHubDetailsGrabber {
 
 	public static String getFileNameFromUrl(String url) {
 		if (url.contains("blob") || url.contains("tree")) {
-			String[] parts = url.split("/");
-			return parts[parts.length - 1];
+			return url.lastIndexOf("/") > 0 ? url.substring(url.lastIndexOf("/") + 1) : null;
 		} else {
 			return null;
 		}
@@ -200,7 +198,7 @@ public class GitHubDetailsGrabber {
 
 	public static void main(String[] args) {
 		System.out.println(getFileNameFromUrl("https://github.com/Lostlmbecile/dbl-bot/blob/master/README.md"));
-		System.out.println(getGitHubFileOrReadmeContents("https://github.com/Lostlmbecile/dbl-bot"));
-		System.out.println(getGitHubFileStructure("https://github.com/Lostlmbecile/dbl-bot/blob/master/README.md"));
+		System.out.println(getGitHubFileOrReadmeContents(
+				"https://github.com/Lostlmbecile/dbl-bot/blob/master/src/main/java/com/github/egubot/features/legends/LegendsPool.java"));
 	}
 }
