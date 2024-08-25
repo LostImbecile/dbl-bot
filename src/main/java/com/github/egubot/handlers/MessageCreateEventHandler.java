@@ -27,6 +27,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
 
 	private static boolean readBotMessages = false;
+	private static boolean readOwnMessages = false;
 
 	public static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 	private static ShutdownManager shutdownManager = Shared.getShutdown();
@@ -59,7 +60,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			String lowCaseTxt = msgText.toLowerCase();
 
 			// Ignore bots unless changed
-			if (!msg.getAuthor().isRegularUser() && !readBotMessages) {
+			if ((!msg.getAuthor().isRegularUser() && !readBotMessages)
+					|| (msg.getAuthor().isYourself() && !readOwnMessages)) {
 				return;
 			}
 
@@ -91,8 +93,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (AIContext.getGroq().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
-			
-			if(AIContext.getOllama().respondIfChannelActive(msg, msgText)) {
+
+			if (AIContext.getOllama().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 
@@ -134,6 +136,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	public static void toggleBotReadMode() {
 		readBotMessages = !readBotMessages;
+	}
+
+	public static void toggleOwnReadMode() {
+		readOwnMessages = !readOwnMessages;
 	}
 
 	private String replaceAttachmentText(Message msg, String msgText) {
