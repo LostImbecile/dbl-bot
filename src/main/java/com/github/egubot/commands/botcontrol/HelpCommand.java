@@ -14,7 +14,7 @@ public class HelpCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		msg.getChannel().sendMessage(FileUtilities.getFileInputStream("commands", false), "commands.txt");
+		msg.getChannel().sendMessage(FileUtilities.getFileInputStream("commands", false), "commands.md");
 		return true;
 	}
 

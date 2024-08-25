@@ -62,6 +62,10 @@ WebDriver:
 - b-grab mp3 (youtube link)
 - b-convert *(gif/vid) `[Type of your attachment]`
 
+Github:
+- b-github (file or repo link) `[returns the raw file or readme]`
+- b-github list (file or repo link) `[returns the file structure, subject to rate limits]`
+
 OpenAI Model:
 - gpt toggle
 - gpt (message)
