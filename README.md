@@ -76,6 +76,9 @@ Translate:
 Weather:
 - b-weather (city) *detailed
 
+Automatic Embed Fix For Popular Sites:
+- b-fixembed toggle `[on by default]`
+
 Music Player:
 - b-play (link)/(ytsearch: keyword)
 - b-cancel
@@ -105,10 +108,6 @@ Groq Model:
 
 Ollama Model:
 - same but "qq"
-
-Custom AI:
-- ai (message)
-- ai terminate/activate
 
 Timers: `[Tasks: weather, parrot, verse]`
 - b-timer \*every \*(0M0w0d0h0m0s) \*(2024-7-13, 20:00) "(task) \*(arguments)" \*(send on miss/terminate on miss) \*(channels)
@@ -282,35 +281,3 @@ b-search 21
 - Includes chance to get the character to red 2.
 - Includes one rotation, three rotations, and 80% chance worth of rotations.
 - Get the banner url from <https://dblegends.net/>.
-
----------------------------------
-### TBA 2029:
-
-**17) b-tag create (name) (characters)**
-- Creates a new tag that has the characters specified.
-- You don't need to specify characters on creation.
-- Tag name must be unique and devoid of spaces.
-- Tag name must be something that won't be added in the future, 
-or the tag will be ignored when it does.
-- For characters, paste their dblegends.net link or site ID.
-
-Example:
-
-b-tag create cancer_units <https://dblegends.net/character.php?id=238> 191 491
-
-Creates a tag called cancer_units that contains characters with the above site IDs.
-
-**18) b-tag remove (name)**
-- Removes custom tags, default ones can't be removed.
-
-**19) b-tag update (name) (characters)**
-- Adds or removes characters from a custom tag.
-- Default tags can't be modified.
-- Prefix the name with + or -.
-
----------------------------------
-### Inactive:
-**20) ai**
-- Personal GPT2 AI, generates text randomly when called.
-- Has to be running on my end, which is almost never.
-- Pretty shit, can be racist and an arsehole as well.

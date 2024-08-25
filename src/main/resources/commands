@@ -29,6 +29,11 @@ Automatic Responses:
 - b-response remove (message)
 - b-reponse edit (message) >> \*(response:newResponse) >>\*(attr:attr=value) >> \*(blacklist/whitelist:channelTag,userTag) >> \*(reactions:reaction) `[Commas for separation]`
 
+Automatic Delete:
+- b-delete msg >> (msg)
+- b-delete user >> (user tag)
+- b-delete remove (msg or user tag)
+
 Translate:
 - b-translate toggle `[Translates all non-eng messages]`
 - b-translate set (to)/(from-to) `[Shortened form; en, fr]`
@@ -38,6 +43,9 @@ Translate:
 Weather:
 - b-weather (city) *detailed
 
+Automatic Embed Fix For Popular Sites:
+- b-fixembed toggle `[on by default]`
+
 Music Player:
 - b-play (link)/(ytsearch: keyword)
 - b-cancel
@@ -46,6 +54,7 @@ Music Player:
 - b-skip *(amount)
 - b-info `[The playlist's]`
 - b-now `[Playing now]`
+- b-buffer (big\small)
 
 WebDriver:
 - b-insult (person name) >> (reason)
@@ -54,18 +63,18 @@ WebDriver:
 - b-convert *(gif/vid) `[Type of your attachment]`
 
 OpenAI Model:
-- gpt toggle `[it's off by default]`
+- gpt toggle
 - gpt (message)
 - gpt channel toggle
 - gpt clear
 - gpt tokens
+- gpt change model (model) `[owner]`
 
 Groq Model:
 - same as gpt but "aa"
 
-Custom AI:
-- ai (message)
-- ai terminate/activate
+Ollama Model:
+- same but "qq"
 
 Timers: `[Tasks: weather, parrot, verse]`
 - b-timer \*every \*(0M0w0d0h0m0s) \*(2024-7-13, 20:00) "(task) \*(arguments)" \*(send on miss/terminate on miss) \*(channels)

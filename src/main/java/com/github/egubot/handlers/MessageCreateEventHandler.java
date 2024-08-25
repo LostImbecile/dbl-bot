@@ -14,6 +14,7 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.facades.AutoRespondContext;
 import com.github.egubot.facades.StorageFacadesHandler;
+import com.github.egubot.features.FixPopularSiteEmbeds;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.managers.ShutdownManager;
 import com.github.egubot.managers.commands.CommandManager;
@@ -95,10 +96,7 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 				return;
 			}
 
-			if (lowCaseTxt.contains("https://x.com")) {
-				msg.delete();
-				msg.getChannel().sendMessage(msg.getAuthor().getDisplayName() + ": "
-						+ msgText.replace("https://x.com", "https://fixupx.com"));
+			if (FixPopularSiteEmbeds.fixEmbed(msg, msgText)) {
 				return;
 			}
 
