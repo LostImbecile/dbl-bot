@@ -72,7 +72,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	private void clickOnAudioDownload() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#audio .btn"))).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#audio tbody:nth-child(2) .btn"))).click();
 	}
 
 	private void sendURL(String link) {
@@ -96,7 +96,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	private void clickOnVideoDownload() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#mp4 tr:nth-child(1) .btn"))).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#mp4 tbody:nth-child(2) > tr:nth-child(1) .btn"))).click();
 	}
 
 	private void waitForPageChange() {
@@ -106,7 +106,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	public static void main(String[] args) {
 		try (GrabYoutubeVideo a = new GrabYoutubeVideo()) {
-			System.out.println(a.getAudio("https://www.youtube.com/watch?v=3tE3UzwloJU"));
+			System.out.println(a.getVideo("https://www.youtube.com/watch?v=3tE3UzwloJU")[0]);
 		}
 
 	}
