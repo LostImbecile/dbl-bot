@@ -1,8 +1,12 @@
 package com.github.egubot.shared.utils;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 
 public class ConvertObjects {
 	private ConvertObjects() {
@@ -36,5 +40,9 @@ public class ConvertObjects {
 		} else {
 			return String.format("%ds", remainingSeconds);
 		}
+	}
+
+	public static InputStream stringToInputStream(String str) {
+		return str == null ? null : IOUtils.toInputStream(str, StandardCharsets.UTF_8);
 	}
 }
