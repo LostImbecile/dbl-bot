@@ -14,7 +14,7 @@ public class GroqGetTokensCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getLlama3().getLastTokens(msg) + "\"```");
+		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getGroq().getLastTokens(msg) + "\"```");
 		return true;
 	}
 

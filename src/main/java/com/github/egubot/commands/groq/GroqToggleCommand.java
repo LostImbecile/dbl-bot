@@ -14,7 +14,7 @@ public class GroqToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		AIContext.getLlama3().toggle();
+		AIContext.getGroq().toggle();
 		return true;
 	}
 

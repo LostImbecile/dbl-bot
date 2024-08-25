@@ -84,11 +84,15 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			if (CommandManager.processMessage(msg))
 				return;
 
-			if (AIContext.getGpt3().respondIfChannelActive(msg, msgText)) {
+			if (AIContext.getChatGPT().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 
-			if (AIContext.getLlama3().respondIfChannelActive(msg, msgText)) {
+			if (AIContext.getGroq().respondIfChannelActive(msg, msgText)) {
+				return;
+			}
+			
+			if(AIContext.getOllama().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 

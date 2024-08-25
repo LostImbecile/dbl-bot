@@ -9,13 +9,12 @@ public class ChatgptConversationClearCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "gpt clear";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		AIContext.getGpt3().clearConversation(msg);
+		AIContext.getChatGPT().clearConversation(msg);
 		msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
 		return true;
 	}

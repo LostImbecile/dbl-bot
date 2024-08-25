@@ -14,7 +14,7 @@ public class GroqChannelToggleCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		AIContext.getLlama3().toggleChannel(msg);
+		AIContext.getGroq().toggleChannel(msg);
 		return true;
 	}
 

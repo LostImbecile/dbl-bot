@@ -14,10 +14,10 @@ public class ChatgptResponseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(!AIContext.getGpt3().isAIOn())
+		if(!AIContext.getChatGPT().isAIOn())
 			return false;
 		
-		AIContext.getGpt3().respond(msg, arguments);
+		AIContext.getChatGPT().respond(msg, arguments);
 		return true;
 	}
 

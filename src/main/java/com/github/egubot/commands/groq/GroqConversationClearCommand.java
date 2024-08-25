@@ -14,7 +14,7 @@ public class GroqConversationClearCommand implements Command{
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		AIContext.getLlama3().clearConversation(msg);
+		AIContext.getGroq().clearConversation(msg);
 		msg.getChannel().sendMessage("Conversation cleared :thumbsup:");
 		return true;
 	}

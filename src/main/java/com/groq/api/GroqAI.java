@@ -11,10 +11,10 @@ public class GroqAI extends AIModel{
 	static final String GROQ_API_KEY = KeyManager.getToken("Groq_API_Key");
 
 	public GroqAI() {
-		super(getModel(), GROQ_API_KEY, GROQ_URL, "1.2", 8196);
+		super(getConfigModel(), GROQ_API_KEY, GROQ_URL, "1.2", 8196);
 	}
 	
-	public static String getModel() {
+	public static String getConfigModel() {
 		String model = ConfigManager.getProperty("Groq_Model");
 		if (model == null || model.isBlank()) {
 			model = "llama3-8b-8192";

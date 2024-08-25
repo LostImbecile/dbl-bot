@@ -10,10 +10,10 @@ public class ChatGPT extends AIModel{
 	static final String API_KEY = KeyManager.getToken("ChatGPT_API_Key");
 
 	public ChatGPT(){
-		super(getModel(), API_KEY, GPT_URL, 4096);
+		super(getConfigModel(), API_KEY, GPT_URL, 4096);
 	}
 	
-	public static String getModel() {
+	public static String getConfigModel() {
 		String model = ConfigManager.getProperty("ChatGPT_Model");
 		if (model == null || model.isBlank()) {
 			model = "gpt-4o-mini";

@@ -1,20 +1,21 @@
-package com.github.egubot.commands.groq;
+package com.github.egubot.commands.ollama;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class GroqResponseCommand implements Command {
+public class OllamaGetTokensCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "aa";
+		return "qq tokens";
 	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		return AIContext.getGroq().respond(msg, arguments);
+		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getOllama().getLastTokens(msg) + "\"```");
+		return true;
 	}
 
 	@Override

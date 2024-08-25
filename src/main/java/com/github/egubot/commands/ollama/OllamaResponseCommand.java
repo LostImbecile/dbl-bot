@@ -1,21 +1,20 @@
-package com.github.egubot.commands.chatgpt;
+package com.github.egubot.commands.ollama;
 
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.AIContext;
 import com.github.egubot.interfaces.Command;
 
-public class ChatgptChannelToggleCommand implements Command {
+public class OllamaResponseCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "gpt channel toggle";
+		return "qq";
 	}
 
 	@Override
-	public boolean execute(Message msg, String arguments) {
-		AIContext.getChatGPT().toggleChannel(msg);
-		return true;
+	public boolean execute(Message msg, String arguments) throws Exception {
+		return AIContext.getOllama().respond(msg, arguments);
 	}
 
 	@Override

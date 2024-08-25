@@ -14,7 +14,7 @@ public class ChatgptGetTokensCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getGpt3().getLastTokens(msg) + "\"```");
+		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getChatGPT().getLastTokens(msg) + "\"```");
 		return true;
 	}
 

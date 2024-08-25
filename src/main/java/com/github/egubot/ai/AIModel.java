@@ -102,7 +102,7 @@ public class AIModel implements Shutdownable {
 		return postRequest;
 	}
 
-	public static APIResponse parseResponse(HttpResponse response) throws IOException {
+	public APIResponse parseResponse(HttpResponse response) throws IOException {
 		String responseBody = EntityUtils.toString(response.getEntity());
 
 		Gson gson = new Gson();
@@ -136,7 +136,7 @@ public class AIModel implements Shutdownable {
 		return body.toString();
 	}
 
-	public static String reformatInput(String txt, String author) {
+	public String reformatInput(String txt, String author) {
 		txt = JSONUtilities.jsonify(txt);
 		author = JSONUtilities.jsonify(author);
 
@@ -182,5 +182,13 @@ public class AIModel implements Shutdownable {
 	@Override
 	public int getShutdownPriority() {
 		return 0;
+	}
+
+	public String getModelName() {
+		return model;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
 	}
 }
