@@ -44,9 +44,9 @@ public class FixPopularSiteEmbeds {
 		if (!isServerDisabled(msg) && msgText.contains("https://")) {
 			boolean foundReplaceableLink = false;
 			String newText = null;
-			if (msgText.contains("x.com")) {
+			if (msgText.contains("https://x.com")) {
 				foundReplaceableLink = true;
-				newText = msgText.replace("https://x.com", "fixupx.com");
+				newText = msgText.replace("https://x.com", "https://fixupx.com");
 			} else if (msgText.contains("www.instagram.com")) {
 				foundReplaceableLink = true;
 				newText = msgText.replace("www.instagram.com", "www.ddinstagram.com");
