@@ -6,22 +6,33 @@ import java.util.Set;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.info.ServerInfoUtilities;
+import com.github.egubot.storage.LocalDataManager;
 
 public class FixPopularSiteEmbeds {
-
+	private static final LocalDataManager dataManager = new LocalDataManager("embed_fix_disabled_servers.txt");
 	private static final Set<Long> disabledServers = new HashSet<>();
 
-	private FixPopularSiteEmbeds() {
+	static {
+		dataManager.initialise(true);
+		for (String s : dataManager.getData()) {
+			try {
+				disabledServers.add(Long.parseLong(s));
+			} catch (Exception e) {
+			}
+		}
 	}
-
 	public static void disableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
 		disabledServers.add(serverID);
+		dataManager.getData().remove(serverID + "");
+		dataManager.writeDataToFile(null);
 	}
 
 	public static void enableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
 		disabledServers.remove(serverID);
+		dataManager.getData().add(serverID + "");
+		dataManager.writeDataToFile(null);
 	}
 
 	public static boolean isServerDisabled(Message msg) {
