@@ -6,14 +6,14 @@ import com.github.egubot.storage.ConfigManager;
 
 import java.io.IOException;
 
-public class GroqAI extends AIModel{
+public class GroqAI extends AIModel {
 	private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 	static final String GROQ_API_KEY = KeyManager.getToken("Groq_API_Key");
 
 	public GroqAI() {
 		super(getConfigModel(), GROQ_API_KEY, GROQ_URL, "1.2", 8196);
 	}
-	
+
 	public static String getConfigModel() {
 		String model = ConfigManager.getProperty("Groq_Model");
 		if (model == null || model.isBlank()) {
@@ -21,6 +21,12 @@ public class GroqAI extends AIModel{
 			ConfigManager.setProperty("Groq_Model", model);
 		}
 		return model;
+	}
+
+	@Override
+	public void setModel(String model) {
+		ConfigManager.setProperty("Groq_Model", model);
+		this.model = model;
 	}
 
 	public static void main(String[] args) throws IOException {

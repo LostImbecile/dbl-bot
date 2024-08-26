@@ -17,7 +17,7 @@ public class OllamaAI extends AIModel {
 	public static String getConfigModel() {
 		String model = ConfigManager.getProperty("Ollama_Model");
 		if (model == null || model.isBlank()) {
-			model = "gemma2:2b"; 
+			model = "gemma2:2b";
 			ConfigManager.setProperty("Ollama_Model", model);
 		}
 		return model;
@@ -41,7 +41,14 @@ public class OllamaAI extends AIModel {
 		return body.toString();
 	}
 
+	@Override
+	public void setModel(String model) {
+		ConfigManager.setProperty("Ollama_Model", model);
+		this.model = model;
+	}
+
 	public static void main(String[] args) throws IOException {
-		System.out.println(new OllamaAI().sendRequest("write two paragraphs on any topic", "placeholder", null).getResponse());
+		System.out.println(
+				new OllamaAI().sendRequest("write two paragraphs on any topic", "placeholder", null).getResponse());
 	}
 }
