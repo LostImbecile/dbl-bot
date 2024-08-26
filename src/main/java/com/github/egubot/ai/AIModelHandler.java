@@ -26,7 +26,7 @@ public class AIModelHandler {
         this.model = model;
         Shared.getShutdown().registerShutdownable(model);
         if (!testModel()) {
-            logger.error("Model test failed. Model is not functional.");
+            logger.error("Model test failed. Model {} is not functional.", model.getModelName());
             isAIOn = false;
         }
     }
