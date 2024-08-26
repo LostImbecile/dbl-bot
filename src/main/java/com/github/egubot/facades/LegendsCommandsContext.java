@@ -99,7 +99,7 @@ public class LegendsCommandsContext implements Shutdownable {
 	public static void saveLegendsWebsiteBackup() {
 		try {
 			LocalDataManager backup = new LocalDataManager("Website Backup");
-			backup.writeData(FileUtilities.readURL(LegendsDatabase.WEBSITE_URL));
+			backup.writeDataToFile(FileUtilities.readURL(LegendsDatabase.WEBSITE_URL));
 
 		} catch (Exception e) {
 			logger.error("Failed to save website backup", e);

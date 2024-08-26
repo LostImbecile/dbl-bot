@@ -41,7 +41,7 @@ public class LocalDataManager implements DataManager {
 					+ FileUtilities.getFileLastModified(filePath));
 	}
 
-	public void writeData(String data) {
+	public void writeDataToFile(String data) {
 		try {
 			FileUtilities.writeToFile(data, filePath);
 		} catch (Exception e1) {
