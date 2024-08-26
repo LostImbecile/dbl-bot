@@ -35,7 +35,7 @@ public class FixPopularSiteEmbeds {
 			String newText = null;
 			if (msgText.contains("x.com")) {
 				foundReplaceableLink = true;
-				newText = msgText.replace("x.com", "fixupx.com");
+				newText = msgText.replace("https://x.com", "fixupx.com");
 			} else if (msgText.contains("www.instagram.com")) {
 				foundReplaceableLink = true;
 				newText = msgText.replace("www.instagram.com", "www.ddinstagram.com");
