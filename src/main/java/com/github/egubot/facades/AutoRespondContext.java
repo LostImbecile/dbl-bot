@@ -1,8 +1,8 @@
 package com.github.egubot.facades;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,13 +14,18 @@ import com.github.egubot.interfaces.Shutdownable;
 
 public class AutoRespondContext implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(AutoRespondContext.class.getName());
-	private static Map<Long, AutoRespond> autoRespondMap = new HashMap<>();
+	private static Map<Long, AutoRespond> autoRespondMap = new ConcurrentHashMap<>();
 
 	private AutoRespondContext() {
 	}
 
 	public static void shutdownStatic() {
-		for (AutoRespond autoRespond : autoRespondMap.values()) {
+		Map<Long, AutoRespond> map = autoRespondMap;
+		autoRespondMap = null;
+		if (map == null)
+			return;
+
+		for (AutoRespond autoRespond : map.values()) {
 			if (autoRespond != null) {
 				autoRespond.shutdown();
 			}

@@ -1,9 +1,9 @@
 package com.github.egubot.facades;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +19,7 @@ import com.github.egubot.storage.LocalDataManager;
 
 public class ScheduledTasksContext implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasksContext.class.getName());
-	private static Map<Long, ScheduledTasks> scheduledTasksMap = new HashMap<>();
+	private static Map<Long, ScheduledTasks> scheduledTasksMap = new ConcurrentHashMap<>();
 
 	private ScheduledTasksContext() {
 	}
@@ -50,14 +50,20 @@ public class ScheduledTasksContext implements Shutdownable {
 					return null;
 				});
 			}
-			if(!timerList.isEmpty()) {
-				StreamRedirector.println("info", "\nLoaded and initialised timers for " + timerList.size() + " server(s).");
+			if (!timerList.isEmpty()) {
+				StreamRedirector.println("info",
+						"\nLoaded and initialised timers for " + timerList.size() + " server(s).");
 			}
 		}
 	}
 
 	public static void shutdownStatic() {
-		for (ScheduledTasks scheduledTasks : scheduledTasksMap.values()) {
+		Map<Long, ScheduledTasks> map = scheduledTasksMap;
+		scheduledTasksMap = null;
+		if (map == null)
+			return;
+
+		for (ScheduledTasks scheduledTasks : map.values()) {
 			if (scheduledTasks != null) {
 				scheduledTasks.shutdown();
 			}

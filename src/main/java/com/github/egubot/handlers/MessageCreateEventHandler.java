@@ -42,8 +42,8 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	public static synchronized void initialise() {
 		if (!isInitialised) {
-			StorageFacadesHandler.initialise();
 			DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
+			StorageFacadesHandler.initialise();
 			isInitialised = true;
 		}
 	}

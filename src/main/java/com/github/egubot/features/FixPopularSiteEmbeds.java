@@ -1,7 +1,7 @@
 package com.github.egubot.features;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.javacord.api.entity.message.Message;
 
@@ -9,8 +9,8 @@ import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.storage.LocalDataManager;
 
 public class FixPopularSiteEmbeds {
-	private static final LocalDataManager dataManager = new LocalDataManager("embed_fix_disabled_servers.txt");
-	private static final Set<Long> disabledServers = new HashSet<>();
+	private static final LocalDataManager dataManager = new LocalDataManager("Embed Fix Disabled Servers");
+	private static final Set<Long> disabledServers = ConcurrentHashMap.newKeySet();
 
 	static {
 		dataManager.initialise(true);
@@ -21,6 +21,7 @@ public class FixPopularSiteEmbeds {
 			}
 		}
 	}
+
 	public static void disableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
 		disabledServers.add(serverID);

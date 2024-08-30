@@ -2,9 +2,9 @@ package com.github.egubot.facades;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +16,7 @@ import com.github.egubot.interfaces.Shutdownable;
 
 public class LegendsTemplatesContext implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(LegendsTemplatesContext.class.getName());
-	private static Map<Long, RollTemplates> templatesMap = new HashMap<>();
+	private static Map<Long, RollTemplates> templatesMap = new ConcurrentHashMap<>();
 	private static RollTemplates defaultTemplates;
 
 	public static void initialise() throws IOException {
@@ -38,7 +38,11 @@ public class LegendsTemplatesContext implements Shutdownable {
 	}
 
 	public static void shutdownStatic() {
-		for (RollTemplates templates : templatesMap.values()) {
+		Map<Long, RollTemplates> map = templatesMap;
+		templatesMap = null;
+		if (map == null)
+			return;
+		for (RollTemplates templates : map.values()) {
 			templates.shutdown();
 		}
 		defaultTemplates.shutdown();
