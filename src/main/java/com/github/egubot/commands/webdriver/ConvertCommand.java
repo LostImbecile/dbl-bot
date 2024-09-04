@@ -14,7 +14,9 @@ public class ConvertCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		WebDriverFacade.checkEzgifCommands(msg, arguments.contains("gif"), arguments.contains("vid"));
+		boolean isGif = arguments.startsWith("gif") || arguments.startsWith("to vid")
+				|| !(arguments.startsWith("vid") || arguments.startsWith("to gif"));
+		WebDriverFacade.checkEzgifCommands(msg, isGif);
 		return true;
 	}
 
