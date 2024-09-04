@@ -84,7 +84,7 @@ public class AIModel implements Shutdownable {
 		StringEntity entity = new StringEntity(body, "UTF-8");
 		postRequest.setEntity(entity);
 
-		HttpResponse response = httpClient.execute(postRequest);
+		HttpResponse response = getHttpClient().execute(postRequest);
 
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 200) {
@@ -173,7 +173,7 @@ public class AIModel implements Shutdownable {
 	@Override
 	public void shutdown() {
 		try {
-			httpClient.close();
+			getHttpClient().close();
 		} catch (IOException e) {
 			logger.error(e);
 		}
@@ -190,5 +190,9 @@ public class AIModel implements Shutdownable {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public CloseableHttpClient getHttpClient() {
+		return httpClient;
 	}
 }

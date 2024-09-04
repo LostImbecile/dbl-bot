@@ -112,6 +112,7 @@ OpenAI Model:
 
 Groq Model:
 - same as gpt but "aa"
+- b-vision (text prompt) (reply to the message)/(embed)
 
 Ollama Model:
 - same but "qq"
