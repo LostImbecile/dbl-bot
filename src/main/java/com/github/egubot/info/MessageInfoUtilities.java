@@ -15,30 +15,48 @@ public class MessageInfoUtilities {
 	}
 
 	public static CompletableFuture<Optional<List<String>>> getReferencedMessageLinks(Message msg) {
+		return getReferencedMessageLinks(msg, false, false);
+	}
+	
+	public static CompletableFuture<List<String>> getMessageLinks(Message msg) {
+		return getMessageLinks(msg, false, false);
+	}
+	
+	public static CompletableFuture<Optional<List<String>>> getReferencedMessageLinks(Message msg, boolean ignoreVideo) {
+		return getReferencedMessageLinks(msg, ignoreVideo, false);
+	}
+	
+	public static CompletableFuture<List<String>> getMessageLinks(Message msg, boolean ignoreVideo) {
+		return getMessageLinks(msg, ignoreVideo, false);
+	}
+	
+	public static CompletableFuture<Optional<List<String>>> getReferencedMessageLinks(Message msg, boolean ignoreVideo,
+			boolean ignoreImage) {
 		return CompletableFuture.supplyAsync(() -> {
 			Optional<Message> referencedMessage = msg.getReferencedMessage();
 			if (referencedMessage.isPresent()) {
-				return Optional.of(getLinksFromMessage(referencedMessage.get()));
+				return Optional.of(getLinksFromMessage(referencedMessage.get(), ignoreVideo, ignoreImage));
 			} else {
 				return Optional.empty();
 			}
 		});
 	}
 
-	public static CompletableFuture<List<String>> getMessageLinks(Message msg) {
+	public static CompletableFuture<List<String>> getMessageLinks(Message msg, boolean ignoreVideo,
+			boolean ignoreImage) {
 		return CompletableFuture.supplyAsync(() -> {
 			List<Embed> embeds = msg.getEmbeds();
 			List<MessageAttachment> attachments = msg.getAttachments();
 
 			if (!embeds.isEmpty() || !attachments.isEmpty()) {
-				return getLinksFromMessage(msg);
+				return getLinksFromMessage(msg, ignoreVideo, ignoreImage);
 			} else {
 				try {
 					TimeUnit.MILLISECONDS.sleep(1000);
 					embeds = msg.getEmbeds();
 					attachments = msg.getAttachments();
 					if (!embeds.isEmpty() || !attachments.isEmpty()) {
-						return getLinksFromMessage(msg);
+						return getLinksFromMessage(msg, ignoreVideo, ignoreImage);
 					}
 				} catch (InterruptedException e) {
 				}
@@ -48,19 +66,22 @@ public class MessageInfoUtilities {
 		});
 	}
 
-	private static List<String> getLinksFromMessage(Message message) {
+	private static List<String> getLinksFromMessage(Message message, boolean ignoreVideo, boolean ignoreImage) {
 		List<Embed> embeds = message.getEmbeds();
 		List<MessageAttachment> attachments = message.getAttachments();
 		List<String> links = new ArrayList<>();
+		
+		if(ignoreImage && ignoreVideo)
+			return links;
 
 		for (Embed embed : embeds) {
-			if (embed.getVideo().isPresent()) {
+			if (!ignoreVideo && embed.getVideo().isPresent()) {
 				links.add(embed.getVideo().get().getUrl().toString());
 			}
-			if (embed.getImage().isPresent()) {
+			if (!ignoreImage && embed.getImage().isPresent()) {
 				links.add(embed.getImage().get().getUrl().toString());
 			}
-			if (embed.getThumbnail().isPresent()) {
+			if (!ignoreImage && embed.getThumbnail().isPresent()) {
 				links.add(embed.getThumbnail().get().getUrl().toString());
 			}
 		}
