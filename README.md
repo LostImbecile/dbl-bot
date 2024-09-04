@@ -36,7 +36,7 @@ Bot commands:
 *Round Brackets indicate operand, stars mean optional, square brackets for comments, everything else needs to be there.*
 
 DBLegends Random Roll:
-- b-roll(n) *(filters)
+- b-roll(n) \*(filters)
 - b-template create (name) (filters)
 - b-template remove (name)
 - b-template send
@@ -58,7 +58,7 @@ DBLegends News
 Automatic Responses:
 
  `[Types: contain, equal, match]`
-- b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> *(reaction)...
+- b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> \*(reaction)...
 - b-response remove (message)
 - b-reponse edit (message) >> \*(response:newResponse) >>\*(attr:attr=value) >> \*(blacklist/whitelist:channelTag,userTag) >> \*(reactions:reaction) `[Commas for separation]`
 
@@ -79,12 +79,15 @@ Weather:
 Automatic Embed Fix For Popular Sites:
 - b-fixembed toggle `[on by default]`
 
+Get Media URLs from Message:
+- b-dl (reply to the message)/(embed)
+
 Music Player:
 - b-play (link)/(ytsearch: keyword)
 - b-cancel
 - b-pause
 - b-resume
-- b-skip *(amount)
+- b-skip \*(amount)
 - b-info `[The playlist's]`
 - b-now `[Playing now]`
 - b-buffer (big\small)
@@ -93,7 +96,7 @@ WebDriver:
 - b-insult (person name) >> (reason)
 - b-grab (youtube link)
 - b-grab mp3 (youtube link)
-- b-convert *(gif/vid) `[Type of your attachment]`
+- b-convert \*(to vid/to gif) or \*(gif/vid) `[Type of your attachment]`
 
 Github:
 - b-github (file or repo link) `[returns the raw file or readme]`

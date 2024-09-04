@@ -25,48 +25,50 @@ public class MessageInfoUtilities {
 		});
 	}
 
-	 public static CompletableFuture<List<String>> getMessageLinks(Message msg) {
-	        return CompletableFuture.supplyAsync(() -> {
-	            List<Embed> embeds = msg.getEmbeds();
-	            List<MessageAttachment> attachments = msg.getAttachments();
+	public static CompletableFuture<List<String>> getMessageLinks(Message msg) {
+		return CompletableFuture.supplyAsync(() -> {
+			List<Embed> embeds = msg.getEmbeds();
+			List<MessageAttachment> attachments = msg.getAttachments();
 
-	            if (!embeds.isEmpty() || !attachments.isEmpty()) {
-	                return getLinksFromMessage(msg);
-	            } else {
-	                try {
-	                    TimeUnit.MILLISECONDS.sleep(1000); 
-	                    embeds = msg.getEmbeds();
-	                    attachments = msg.getAttachments();
-	                    if (!embeds.isEmpty() || !attachments.isEmpty()) {
-	                        return getLinksFromMessage(msg);
-	                    }
-	                } catch (InterruptedException e) {
-	                }
+			if (!embeds.isEmpty() || !attachments.isEmpty()) {
+				return getLinksFromMessage(msg);
+			} else {
+				try {
+					TimeUnit.MILLISECONDS.sleep(1000);
+					embeds = msg.getEmbeds();
+					attachments = msg.getAttachments();
+					if (!embeds.isEmpty() || !attachments.isEmpty()) {
+						return getLinksFromMessage(msg);
+					}
+				} catch (InterruptedException e) {
+				}
 
-	                return new ArrayList<>();
-	            }
-	        });
-	    }
+				return new ArrayList<>();
+			}
+		});
+	}
 
 	private static List<String> getLinksFromMessage(Message message) {
 		List<Embed> embeds = message.getEmbeds();
 		List<MessageAttachment> attachments = message.getAttachments();
+		List<String> links = new ArrayList<>();
 
-		if (!embeds.isEmpty()) {
-			return embeds.stream().map(embed -> {
-				if (embed.getVideo().isPresent()) {
-					return embed.getVideo().get().getUrl().toString();
-				} else if (embed.getImage().isPresent()) {
-					return embed.getImage().get().getUrl().toString();
-				} else if (embed.getThumbnail().isPresent()) {
-					return embed.getThumbnail().get().getUrl().toString();
-				} else
-					return "";
-			}).toList();
-		} else if (!attachments.isEmpty()) {
-			return attachments.stream().map(MessageAttachment::getUrl).map(Object::toString).toList();
-		} else {
-			return List.of();
+		for (Embed embed : embeds) {
+			if (embed.getVideo().isPresent()) {
+				links.add(embed.getVideo().get().getUrl().toString());
+			}
+			if (embed.getImage().isPresent()) {
+				links.add(embed.getImage().get().getUrl().toString());
+			}
+			if (embed.getThumbnail().isPresent()) {
+				links.add(embed.getThumbnail().get().getUrl().toString());
+			}
 		}
+
+		if (!attachments.isEmpty()) {
+			links.addAll(attachments.stream().map(MessageAttachment::getUrl).map(Object::toString).toList());
+		}
+
+		return links;
 	}
 }
