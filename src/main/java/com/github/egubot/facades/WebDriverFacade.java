@@ -12,6 +12,7 @@ import org.javacord.api.entity.message.embed.Embed;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.webautomation.InsultGenerator;
+import com.github.egubot.features.TenorLinkFetcher;
 import com.github.egubot.webautomation.Ezgif;
 import com.github.egubot.webautomation.GrabYoutubeVideo;
 
@@ -23,7 +24,7 @@ public class WebDriverFacade {
 
 	private WebDriverFacade() {
 	}
-	
+
 	public static void checkInsultCommands(Message msg, String text) {
 		String[] options = text.split(">>");
 		if (options.length < 2) {
@@ -128,15 +129,21 @@ public class WebDriverFacade {
 			return;
 		}
 
+		if (link.contains("tenor")) {
+			String[] results = TenorLinkFetcher.fetchMediaUrls(link);
+			if(isKnownVid || link.contains(".mp4"))
+				msg.reply(results[0]);
+			else
+				msg.reply(results[1]);
+			return;
+		}
+
 		msg.getChannel().sendMessage("Processing. Will take up to 2 minutes.");
 		try (Ezgif a = new Ezgif()) {
-			if (!isKnownVid && (isKnownGif || !link.contains(".gif")) && !link.contains("tenor")) {
+			if (!isKnownVid && (isKnownGif || !link.contains(".gif"))) {
 				msg.reply("Be sure to download it locally before expiry.\n" + a.videoToGif(link));
 			} else {
-				if (link.contains("tenor") && link.contains(".mp4"))
-					msg.reply(link);
-				else
-					msg.reply("Be sure to download it before expiry.\n" + a.gifToVideo(link));
+				msg.reply("Be sure to download it before expiry.\n" + a.gifToVideo(link));
 			}
 		} catch (Exception e) {
 			logger.error("Failed to get response from ezgif AI.", e);
