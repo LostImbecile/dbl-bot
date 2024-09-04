@@ -18,7 +18,7 @@ import com.github.egubot.webautomation.GrabYoutubeVideo;
 
 public class WebDriverFacade {
 	private static final Logger logger = LogManager.getLogger(WebDriverFacade.class.getName());
-	private static final Pattern IMAGE_PATTERN = Pattern.compile("\\.(?:jpg|jpeg|png|mp3|ogg|wav)+",
+	private static final Pattern UNSUPPORTED_MEDIA_PATTERN = Pattern.compile("\\.(?:jpg|jpeg|png|mp3|ogg|wav|webp)+",
 			Pattern.CASE_INSENSITIVE);
 	private static final String YOUTUBE_ICON = "https://cdn-icons-png.flaticon.com/256/1384/1384060.png";
 
@@ -112,12 +112,19 @@ public class WebDriverFacade {
 	}
 
 	private static void convertLink(Message msg, boolean isGif, List<String> links) {
-		String link = links.get(0);
+		String link = null;
+		
+		for (String potentialLink : links) {
+		  Matcher matcher = UNSUPPORTED_MEDIA_PATTERN.matcher(potentialLink);
+		  if (!potentialLink.isBlank() && potentialLink.contains("https") && !matcher.find()) {
+		    link = potentialLink;
+		    break;
+		  }
+		}
 
-		Matcher matcher = IMAGE_PATTERN.matcher(link);
-		if (link.isBlank() || !link.contains("https") || matcher.find()) {
-			msg.getChannel().sendMessage("Not a video or gif");
-			return;
+		if (link == null) {
+		  msg.getChannel().sendMessage("Not a video or gif");
+		  return;
 		}
 
 		if (link.contains("tenor.com")) {
@@ -135,7 +142,7 @@ public class WebDriverFacade {
 
 		msg.getChannel().sendMessage("Processing. Will take up to 2 minutes.");
 		try (Ezgif a = new Ezgif()) {
-			if (isGif) {
+			if (!isGif) {
 				msg.reply("Be sure to download it locally before expiry.\n" + a.videoToGif(link));
 			} else {
 				msg.reply("Be sure to download it before expiry.\n" + a.gifToVideo(link));
