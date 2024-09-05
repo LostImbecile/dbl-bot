@@ -390,7 +390,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 
 	public void setDisabled(boolean b) {
 		autoRespondData.setDisabled(b);
-		updateDataFromObjects();
+		writeData(null);
 	}
 
 }
