@@ -52,9 +52,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	}
 
 	private void initializeTimerHandler() {
-		updateObjects();
 		this.timerHandler = new TimerHandler(timers);
-		updateDataFromObjects(); // if some fail to register they're removed right away
 		this.timerHandler.start();
 		timerHandler.addListener(this);
 	}
@@ -137,7 +135,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			timer = getTimer(timer);
 			if (timer != null) {
 				timer.setActivatedFlag(!timer.isActivatedFlag());
-				updateDataFromObjects();
 				writeData(msg.getChannel());
 				return true;
 			} else {
@@ -201,6 +198,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		TimerObject timer = new TimerObject();
 		if (delay != null) {
 			timer.setDelay(delay);
+			timer.setMissTolerance("5s");
 		}
 
 		// Validation
@@ -256,7 +254,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 			timer.setTerminateOnMiss(true);
 		} else if (stripped.contains("sendonmiss")) {
 			timer.setSendOnMiss(true);
-		} else if (isRecurring && !stripped.contains("continueonmiss")) {
+		} else if (!stripped.contains("continueonmiss")) {
 			timer.setSendOnMiss(true);
 		}
 
@@ -266,8 +264,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	@Override
 	public void shutdown() {
 		timerHandler.stop();
-		updateDataFromObjects();
-		writeData(null);
 		super.shutdown();
 	}
 
@@ -299,13 +295,11 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	public void registerTimer(TimerObject timer) {
 		timers.add(timer);
 		timerHandler.registerTimer(timer);
-		updateDataFromObjects();
 	}
 
 	public void removeTimer(TimerObject timer) {
 		timers.remove(timer);
 		timerHandler.removeTimer(timer);
-		updateDataFromObjects();
 	}
 
 	public static void registerTask(DiscordTimerTask task) {
@@ -336,7 +330,6 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 	@Override
 	public void onTimerUpdated() {
-		updateDataFromObjects();
 		writeData(null);
 	}
 
