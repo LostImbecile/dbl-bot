@@ -42,7 +42,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 	}
 
 	public boolean respond(String msgText, Message msg) {
-		if (responses == null)
+		if (responses == null || isDisabled())
 			return false;
 
 		List<String> reactions;
@@ -106,7 +106,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 		String replyMsg;
 		response.incrementUsage();
 		replyMsg = getProcessedResponse(msg, response);
-				
+
 		if (msg.getMessageReference().isPresent()) {
 			reference = msg.getMessageReference().get().getMessage().get();
 			if (isReplyToReference(response, reference)) {
@@ -382,6 +382,15 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			return new Response(matchType, responseType, invocMsg, responseMsg, reactions, JSONUtilities.generateId());
 		} else
 			return null;
+	}
+
+	public boolean isDisabled() {
+		return autoRespondData.isDisabled();
+	}
+
+	public void setDisabled(boolean b) {
+		autoRespondData.setDisabled(b);
+		updateDataFromObjects();
 	}
 
 }

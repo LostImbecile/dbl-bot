@@ -12,6 +12,8 @@ public class ResponseList {
 	private int lockedDataIndex;
 	@SerializedName("responses")
 	private List<Response> responses;
+	@SerializedName("disabled")
+	private boolean disabled;
 
 	public ResponseList() {
 		this.responses = new ArrayList<>(100);
@@ -39,5 +41,13 @@ public class ResponseList {
 
 	public void setCount(int count) {
 		this.count = count;
+	}
+
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
 	}
 }

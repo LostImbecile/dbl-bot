@@ -61,6 +61,7 @@ Automatic Responses:
 - b-response create (type) >> (msg) >> (response) or (op1 ?? op2 ?? op3 ...) >> \*(reaction) >> \*(reaction)...
 - b-response remove (message)
 - b-reponse edit (message) >> \*(response:newResponse) >>\*(attr:attr=value) >> \*(blacklist/whitelist:channelTag,userTag) >> \*(reactions:reaction) `[Commas for separation]`
+- b-response toggle `[toggle automatic responses/deletions]`
 
 Automatic Delete:
 - b-delete msg >> (msg)
