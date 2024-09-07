@@ -130,6 +130,7 @@ Timers: `[Tasks: weather, parrot, verse]`
 Bot Control (Owner):
 - terminate
 - refresh
+- restart
 - parrot (msg)
 - ping
 - toggle bot read mode `[Toggles reading bot message]`
