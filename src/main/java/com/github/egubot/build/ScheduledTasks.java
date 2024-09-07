@@ -263,7 +263,8 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 
 	@Override
 	public void shutdown() {
-		timerHandler.stop();
+		stopTimers();
+		writeData(null);
 		super.shutdown();
 	}
 
