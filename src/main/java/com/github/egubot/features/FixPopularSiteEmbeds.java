@@ -41,30 +41,43 @@ public class FixPopularSiteEmbeds {
 		return disabledServers.contains(serverID);
 	}
 
-	public static boolean fixEmbed(Message msg, String msgText) {
-		if (!isServerDisabled(msg) && msgText.contains("https://")) {
-			boolean foundReplaceableLink = false;
-			String newText = null;
-			if (msgText.contains("https://x.com")) {
-				foundReplaceableLink = true;
-				newText = msgText.replace("https://x.com", "https://fixupx.com");
-			} else if (msgText.contains("www.instagram.com")) {
-				foundReplaceableLink = true;
-				newText = msgText.replace("www.instagram.com", "www.ddinstagram.com");
-			} else if (msgText.contains("www.tiktok.com")) {
-				foundReplaceableLink = true;
-				newText = msgText.replace("www.tiktok.com", "www.tnktok.com");
-			} else if (msgText.contains("reddit.com")) {
-				foundReplaceableLink = true;
-				newText = msgText.replace("reddit.com", "rxddit.com");
-			}
-
-			if (foundReplaceableLink) {
-				msg.delete();
-				msg.getChannel().sendMessage(msg.getAuthor().getDisplayName() + ": " + newText);
-			}
-			return true;
+	public static boolean fixEmbed(Message msg, String msgText, boolean checkServer, boolean reply, boolean deleteMsg) {
+		if ((checkServer && isServerDisabled(msg)) || !msgText.contains("https://")) {
+			return false;
 		}
-		return false;
+
+		boolean foundReplaceableLink = false;
+		String newText = null;
+
+		if (msgText.contains("https://x.com")) {
+			foundReplaceableLink = true;
+			newText = msgText.replace("https://x.com", "https://fixupx.com");
+		} else if (msgText.contains("www.instagram.com")) {
+			foundReplaceableLink = true;
+			newText = msgText.replace("www.instagram.com", "www.ddinstagram.com");
+		} else if (msgText.contains("www.tiktok.com")) {
+			foundReplaceableLink = true;
+			newText = msgText.replace("www.tiktok.com", "www.tnktok.com");
+		} else if (msgText.contains("reddit.com")) {
+			foundReplaceableLink = true;
+			newText = msgText.replace("reddit.com", "rxddit.com");
+		}
+
+		if (foundReplaceableLink) {
+			String text = msg.getAuthor().getDisplayName() + ": " + newText;
+			if (deleteMsg)
+				msg.delete();
+			
+			if (reply)
+				msg.getReferencedMessage().ifPresentOrElse(t -> t.reply(text),
+						() -> msg.getChannel().sendMessage(text));
+			else
+				msg.getChannel().sendMessage(text);
+		}
+		return true;
+	}
+
+	public static boolean fixEmbed(Message msg, String msgText) {
+		return fixEmbed(msg, msgText, true, true, true);
 	}
 }

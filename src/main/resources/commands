@@ -46,6 +46,7 @@ Weather:
 
 Automatic Embed Fix For Popular Sites:
 - b-fixembed toggle `[on by default]`
+- b-fix (link)/(reply to the message)
 
 Get Media URLs from Message:
 - b-dl (reply to the message)/(embed)
