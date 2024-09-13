@@ -1,4 +1,4 @@
-package com.github.egubot.features;
+package com.github.lavaplayer;
 
 import java.awt.Color;
 import java.util.Map;
@@ -21,9 +21,6 @@ import com.github.egubot.main.Bot;
 import com.github.egubot.shared.utils.ConvertObjects;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.webautomation.GetYoutubeVideoInfo;
-import com.github.lavaplayer.AudioLoadHandler;
-import com.github.lavaplayer.LavaplayerAudioSource;
-import com.github.lavaplayer.TrackScheduler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;

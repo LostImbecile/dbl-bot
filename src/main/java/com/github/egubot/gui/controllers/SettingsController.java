@@ -3,10 +3,10 @@ package com.github.egubot.gui.controllers;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.github.egubot.features.SoundPlayback;
 import com.github.egubot.main.Bot;
 import com.github.egubot.storage.ConfigManager;
 import com.github.egubot.storage.DataManagerSwitcher;
+import com.github.lavaplayer.SoundPlayback;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

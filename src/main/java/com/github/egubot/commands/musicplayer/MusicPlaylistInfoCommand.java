@@ -2,8 +2,8 @@ package com.github.egubot.commands.musicplayer;
 
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.features.SoundPlayback;
 import com.github.egubot.interfaces.Command;
+import com.github.lavaplayer.SoundPlayback;
 
 public class MusicPlaylistInfoCommand implements Command {
 
