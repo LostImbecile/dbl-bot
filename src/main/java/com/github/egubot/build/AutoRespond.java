@@ -334,12 +334,12 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 			Gson gson = new Gson();
 			String jsonData = ConvertObjects.listToText(getData());
 			autoRespondData = gson.fromJson(jsonData, ResponseList.class);
-			autoRespondData.setCount(autoRespondData.getResponses().size());
-			setLockedDataEndIndex(autoRespondData.getLockedDataIndex());
+			if (autoRespondData != null) {
+				autoRespondData.setCount(autoRespondData.getResponses().size());
+				setLockedDataEndIndex(autoRespondData.getLockedDataIndex());
+			}
 		} catch (JsonSyntaxException e) {
 			logger.error("Syntax Error updating objects", e);
-		} catch (NullPointerException e) {
-			logger.error("Null pointer updating objects", e);
 		}
 		if (autoRespondData == null)
 			autoRespondData = new ResponseList();
