@@ -1,0 +1,4 @@
+.split-pane > .split-pane-divider {
+    -fx-padding: 1; /* Makes the divider as thin as possible */
+    -fx-background-color: black; /* Changes the color to black */
+}

@@ -4,19 +4,17 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.message.Message;
 
-import com.github.egubot.features.SendMessagesFromConsole;
 import com.github.egubot.info.ServerInfoUtilities;
-import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
-import com.github.egubot.managers.KeyManager;
+import com.github.egubot.managers.EmojiManager;
+import com.github.egubot.managers.SendMessageChannelManager;
 import com.github.egubot.objects.Abbreviations;
-import com.github.egubot.shared.Shared;
-
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -77,23 +75,25 @@ public class SendMessagesController {
 	}
 
 	public void updateChannel(String channelID) {
-		if (channelID.length() >= 17) {
-			Bot.getApi().getTextChannelById(channelID).ifPresentOrElse(textChannel -> {
-				channel = Bot.getApi().getServerTextChannelById(channelID).get();
-				String name = getChannelName();
-				channelNameLabel.setText(name);
+
+		Bot.getApi().getTextChannelById(channelID).ifPresent(textChannel -> {
+			channel = Bot.getApi().getServerTextChannelById(channelID).get();
+			String name = getChannelName(channel);
+			if (channelMap.get(name) == null) {
 				channelMap.put(name, channel);
 				channelList.getItems().add(0, name);
 				channelList.getSelectionModel().selectFirst();
 
-			}, () -> channelIDTextField.clear());
+				SendMessageChannelManager.addChannel(channel.getId());
+			} else {
+				channelList.getSelectionModel().select(name);
+			}
+		});
 
-		} else {
-			channelIDTextField.clear();
-		}
+		channelIDTextField.clear();
 	}
 
-	public String getChannelName() {
+	public static String getChannelName(ServerTextChannel channel) {
 		return ServerInfoUtilities.getServer(channel).getName() + " -> " + channel.getName();
 	}
 
@@ -105,10 +105,13 @@ public class SendMessagesController {
 	@FXML
 	void textAreaOnKeyPressed(KeyEvent event) {
 		if (event.getCode() == KeyCode.ENTER) {
+			event.consume();
 			if (event.isShiftDown()) {
-				textArea.appendText("\n");
+				int caretPosition = textArea.getCaretPosition();
+				textArea.insertText(caretPosition, "\n");
 			} else {
-				event.consume();
+				int caretPosition = textArea.getCaretPosition();
+				textArea.deleteText(caretPosition - 1, caretPosition);
 				submitMessage();
 			}
 		}
@@ -134,7 +137,7 @@ public class SendMessagesController {
 				msg.reply(message);
 				break;
 			case "react":
-				msg.addReaction(emojis.replaceReactionIds(message));
+				msg.addReaction(emojis.replaceReactionIds(Abbreviations.getReactionId(message)));
 				break;
 			case "edit":
 				msg.edit(message);
@@ -142,6 +145,7 @@ public class SendMessagesController {
 			default:
 
 			}
+			messageTypeCombo.getSelectionModel().select("normal");
 		} catch (Exception e) {
 			textArea.setText("Failed.");
 		}
@@ -154,55 +158,47 @@ public class SendMessagesController {
 
 	@FXML
 	void initialize() {
-		assert channelIDTextField != null
-				: "fx:id=\"channelIDTextField\" was not injected: check your FXML file 'SendMessages.fxml'.";
-		assert channelList != null
-				: "fx:id=\"channelList\" was not injected: check your FXML file 'SendMessages.fxml'.";
-		assert channelNameLabel != null
-				: "fx:id=\"channelNameLabel\" was not injected: check your FXML file 'SendMessages.fxml'.";
-		assert emojiList != null : "fx:id=\"emojiList\" was not injected: check your FXML file 'SendMessages.fxml'.";
-		assert messageIDTextField != null
-				: "fx:id=\"reactIDTextField\" was not injected: check your FXML file 'SendMessages.fxml'.";
-		assert messageTypeCombo != null
-				: "fx:id=\"replyReactSelect\" was not injected: check your FXML file 'SendMessages.fxml'.";
-		assert textArea != null : "fx:id=\"textArea\" was not injected: check your FXML file 'SendMessages.fxml'.";
-
 		messageTypeCombo.getItems().addAll("normal", "reply", "react", "edit", "delete");
 		messageTypeCombo.getSelectionModel().select(0);
 
 		channelList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null) {
 				channel = channelMap.get(newValue);
+				channelNameLabel.setText(newValue);
 			}
 			Platform.runLater(() -> textArea.requestFocus());
 		});
 
-		emojis = SendMessagesFromConsole.getEmojis();
+		emojis = EmojiManager.getAllEmojis();
 
 		emojiList.getItems().addAll(emojis.getAbbreviationMap().keySet());
 
 		emojiList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null) {
-				textArea.appendText(emojis.getAbbreviationId(newValue));
+				textArea.appendText(emojis.get(newValue));
 				Platform.runLater(() -> emojiList.getSelectionModel().clearSelection());
 				Platform.runLater(() -> textArea.requestFocus());
 			}
 		});
-
 	}
 
 	public void initialiseDefaultChannel() {
-		String defaultChannelID = KeyManager.getID("Default_Message_Channel_ID");
-		if (!Bot.getApi().getTextChannelById(defaultChannelID).isPresent()) {
-			StreamRedirector.println("prompt", "No default starting channel was set, enter a channel ID below:");
-			KeyManager.updateKeys("Default_Message_Channel_ID", Shared.getSystemInput().nextLine(),
-					KeyManager.idsFileName);
-			defaultChannelID = KeyManager.getID("Default_Message_Channel_ID");
+		Set<Long> channels = SendMessageChannelManager.getAllChannels();
+
+		if (!channels.isEmpty()) {
+			// Load channels for the servers
+			for (Long channelID : channels) {
+				Bot.getApi().getServerTextChannelById(channelID).ifPresentOrElse(temp -> {
+					String channelName = getChannelName(temp);
+					channelMap.put(channelName, temp);
+					channelList.getItems().add(channelName);
+				}, () -> SendMessageChannelManager.removeChannel(channelID));
+			}
+
 		}
 
-		try {
-			updateChannel(defaultChannelID);
-		} catch (Exception e) {
+		if (!channelList.getItems().isEmpty()) {
+			channelList.getSelectionModel().selectFirst();
 		}
 	}
 

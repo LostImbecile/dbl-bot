@@ -10,16 +10,20 @@ public class Abbreviations {
         abbreviationMap = new HashMap<>();
     }
 
-    public void addAbbreviation(String name, String id) {
+    public void put(String name, String id) {
         abbreviationMap.put(name, id);
     }
+    
+	public void remove(String abbreviation) {
+		abbreviationMap.remove(abbreviation);
+	}
 
-    public String getAbbreviationId(String name) {
+    public String get(String name) {
         return abbreviationMap.get(name);
     }
 
 	public static String getReactionId(String id) {
-		if (id.matches("<.*>"))
+		if (id.matches(".*<.*>.*"))
 			return id.replaceAll("[<>]", "").replace("<a", "").replaceFirst(":", "");
 		
 		return id;

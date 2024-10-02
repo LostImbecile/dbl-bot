@@ -9,12 +9,13 @@ import org.javacord.api.entity.channel.TextChannel;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.main.Bot;
 import com.github.egubot.main.Main;
+import com.github.egubot.managers.EmojiManager;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.shared.Shared;
 
 public class SendMessagesFromConsole {
-	private static Abbreviations emojis = getEmojis();
+	private static Abbreviations emojis = EmojiManager.getAllEmojis();
 
 	private SendMessagesFromConsole() {
 
@@ -140,35 +141,4 @@ public class SendMessagesFromConsole {
 		}
 	}
 
-	/*
-	 * You should probably make a shared class that reads a file with
-	 * all your abbreviations so it's easy to add and get them.
-	 * Or you can have them stored online as with the other classes
-	 * allowing you to add and remove them from there, which is easier
-	 * since you won't have to copy anything.
-	 * 
-	 * I don't care enough to do that myself however.
-	 */
-	public static Abbreviations getEmojis() {
-		Abbreviations emojis = new Abbreviations();
-
-		emojis.addAbbreviation("shinsmug", "<:ShinSmug:792523496726331434>");
-		emojis.addAbbreviation("friezasmug", "<:FriezaSmug:789862857206530098>");
-		emojis.addAbbreviation("gokuhuh", "<:huh:1184466187938185286>");
-		emojis.addAbbreviation("nohoney", "<:nohoney:879731892818174012>");
-		emojis.addAbbreviation(":sad:", "<:sad:1020780174901522442>");
-		emojis.addAbbreviation("pecansmug", "<:PikkonSmug:789966590649040946>");
-		emojis.addAbbreviation("thisguy", "<:thisguy:955513164315918336>");
-		emojis.addAbbreviation("pepelaugh", "<:pepelaughpoint:819703838533353482>");
-		emojis.addAbbreviation("yeshoney", "<:yeshoney:797101097273131069>");
-		emojis.addAbbreviation("turles", "<:Orenokachida:797720523127259166>");
-		emojis.addAbbreviation("orang", "<:orang:1020780129129091232>");
-		emojis.addAbbreviation("pepehm", "<:pepehime_orihime:1040386873840906290>");
-		emojis.addAbbreviation("cooler1", "<a:saikyo:792521951100796958>");
-		emojis.addAbbreviation("cooler2", "<a:da:792522031601287218>");
-		emojis.addAbbreviation("IE", "<:InternetE:792524260454432768>");
-		emojis.addAbbreviation("joea", "<:joea:1144008494568194099>");
-
-		return emojis;
-	}
 }
