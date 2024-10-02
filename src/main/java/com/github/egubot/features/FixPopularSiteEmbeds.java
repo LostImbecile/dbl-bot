@@ -24,16 +24,20 @@ public class FixPopularSiteEmbeds {
 
 	public static void disableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
-		disabledServers.add(serverID);
-		dataManager.getData().remove(serverID + "");
-		dataManager.writeDataToFile(null);
+		if (disabledServers.contains(serverID)) {
+			disabledServers.add(serverID);
+			dataManager.getData().remove(serverID + "");
+			dataManager.writeData(null);
+		}
 	}
 
 	public static void enableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
-		disabledServers.remove(serverID);
-		dataManager.getData().add(serverID + "");
-		dataManager.writeDataToFile(null);
+		if (!disabledServers.contains(serverID)) {
+			disabledServers.remove(serverID);
+			dataManager.getData().add(serverID + "");
+			dataManager.writeData(null);
+		}
 	}
 
 	public static boolean isServerDisabled(Message msg) {
