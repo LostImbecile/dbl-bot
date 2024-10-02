@@ -58,8 +58,10 @@ public class Main {
 		initialiseStatus();
 
 		if (Shared.getStatus().isOnline()) {
-			StreamRedirector.println("An instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
-			StreamRedirector.printlnOnce("prompt", "An instance is already online. If that isn't the case, type \"ignore\" below.");
+			StreamRedirector
+					.println("An instance is already online.\n\nIf that isn't the case, type \"ignore\" below.");
+			StreamRedirector.printlnOnce("prompt",
+					"An instance is already online. If that isn't the case, type \"ignore\" below.");
 
 			String st = Shared.getSystemInput().nextLine();
 			if (st.strip().equalsIgnoreCase("ignore")) {
@@ -94,7 +96,7 @@ public class Main {
 					.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login().join());
 		} catch (Exception e1) {
 			logger.error("Invalid token. Exiting.");
-			KeyManager.updateKeys("Discord_API_Key", "-1", KeyManager.tokensFileName);
+			KeyManager.updateKeys("Discord_API_Key", KeyManager.getToken("Discord_API_Key"), KeyManager.tokensFileName);
 			Shared.getShutdown().initiateShutdown(1);
 		}
 	}
