@@ -110,6 +110,7 @@ public class Main {
 
 	private static void printBotInviteLink() {
 		StreamRedirector.println("", "You can invite the bot by using the following url:\n" + Bot.getInvite());
+		StreamRedirector.println("info", "(" + Bot.getApi().getServers().size() + ") servers loaded.");
 	}
 
 	private static String checkArguments(String[] args) {
