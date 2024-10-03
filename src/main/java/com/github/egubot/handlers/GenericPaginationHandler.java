@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class GenericInteractionHandler<T> implements MessageComponentCreateListener {
+public class GenericPaginationHandler<T> implements MessageComponentCreateListener {
 
 	private final DiscordApi api;
 	private final List<T> items;
@@ -31,7 +31,7 @@ public class GenericInteractionHandler<T> implements MessageComponentCreateListe
 	private final String prevButtonId;
 	private final String nextButtonId;
 
-	public GenericInteractionHandler(DiscordApi api, List<T> items, Function<T, EmbedBuilder> embedCreator,
+	public GenericPaginationHandler(DiscordApi api, List<T> items, Function<T, EmbedBuilder> embedCreator,
 			BiFunction<Integer, Integer, String> footerCreator, int itemsPerPage, long timeoutMinutes) {
 		this.api = api;
 		this.items = items;
@@ -48,10 +48,11 @@ public class GenericInteractionHandler<T> implements MessageComponentCreateListe
 		originalMessage.append(getContentString()).setEmbeds(createEmbeds()).addComponents(
 				ActionRow.of(Button.secondary(prevButtonId, "Previous"), Button.secondary(nextButtonId, "Next")));
 
-		originalMessage.send(e).thenAcceptAsync(t -> api.addMessageComponentCreateListener(this)
-				.removeAfter(timeoutMinutes, TimeUnit.MINUTES).addRemoveHandler(() -> {
-					t.edit("Page navigation timed out.");
-				}));
+		originalMessage.send(e).thenAcceptAsync(t -> {
+			this.message = t;
+			api.addMessageComponentCreateListener(this).removeAfter(timeoutMinutes, TimeUnit.MINUTES)
+					.addRemoveHandler(() -> t.edit("Page navigation timed out."));
+		});
 	}
 
 	private String getContentString() {
@@ -82,6 +83,10 @@ public class GenericInteractionHandler<T> implements MessageComponentCreateListe
 	public void onComponentCreate(MessageComponentCreateEvent event) {
 		MessageComponentInteraction interaction = event.getMessageComponentInteraction();
 		String customId = interaction.getCustomId();
+
+		if (!interaction.getMessage().equals(message)) {
+			return; // Ignore interactions from other messages
+		}
 
 		if (customId.equals(prevButtonId)) {
 			if (currentPage > 1) {

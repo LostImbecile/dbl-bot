@@ -18,7 +18,7 @@ import org.jsoup.select.Elements;
 
 import com.github.egubot.build.LegendsDatabase;
 import com.github.egubot.features.MessageFormats;
-import com.github.egubot.handlers.GenericInteractionHandler;
+import com.github.egubot.handlers.GenericPaginationHandler;
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.legends.Characters;
 
@@ -69,7 +69,7 @@ public class LegendsKitSearch {
 			return;
 		}
 
-		GenericInteractionHandler<SearchResult> handler = new GenericInteractionHandler<>(Bot.getApi(), searchResults,
+		GenericPaginationHandler<SearchResult> handler = new GenericPaginationHandler<>(Bot.getApi(), searchResults,
 				this::createCustomEmbed,
 				(currentPage, totalPages) -> String.format("Page %d of %d", currentPage, totalPages), 10, 15);
 
