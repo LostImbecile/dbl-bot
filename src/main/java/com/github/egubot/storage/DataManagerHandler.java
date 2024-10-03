@@ -39,6 +39,10 @@ public class DataManagerHandler implements DataManager, Shutdownable, UpdatableO
 		updateObjects();
 	}
 
+	public DataManagerHandler(String resourcePath, String dataName, long uniqueID, boolean verbose) throws IOException {
+		this.setManager(new DataManagerSwitcher( resourcePath, dataName, uniqueID, verbose) );
+	}
+
 	@Override
 	public List<String> getData() {
 		return manager.getData();

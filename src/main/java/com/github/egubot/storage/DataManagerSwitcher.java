@@ -43,7 +43,19 @@ public class DataManagerSwitcher implements DataManager, Shutdownable, Toggleabl
 		this.dataName = dataName;
 		this.isOnlineCapable = false;
 		toggle();
+		
 	}
+	
+	public DataManagerSwitcher(String resourcePath, String dataName, long uniqueID, boolean verbose) throws IOException {
+		this();
+		this.resourcePath = resourcePath;
+		this.dataName = dataName;
+		this.uniqueID = uniqueID;
+		this.verbose = verbose;
+		this.isOnlineCapable = false;
+		toggle();
+	}
+
 
 	public DataManagerSwitcher(String storageKey, String resourcePath, String dataName, boolean verbose)
 			throws IOException {
