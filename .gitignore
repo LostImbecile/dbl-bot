@@ -17,3 +17,4 @@ config.properties
 /bot/
 /.factorypath
 /Storage/
+/src/main/java/com/github/egubot/commands/TestCommand.java
