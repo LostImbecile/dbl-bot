@@ -11,7 +11,6 @@ public class LegendsKitSearchCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "search kit";
 	}
 
@@ -19,9 +18,9 @@ public class LegendsKitSearchCommand implements Command {
 	public boolean execute(Message msg, String arguments) throws Exception {
 		try {
 			if (!arguments.isBlank()) {
-				msg.getChannel().sendMessage("Searching; Could take up to 10 minutes.");
+				msg.getChannel().sendMessage("Searching; Could take up to 5 minutes.");
 				new LegendsKitSearch(arguments, msg.getChannel());
-			}else {
+			} else {
 				msg.getChannel().sendMessage("Type your keywords or sentences, comma separated.");
 			}
 		} catch (IOException e) {
@@ -32,7 +31,6 @@ public class LegendsKitSearchCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
