@@ -43,7 +43,8 @@ DBLegends Random Roll:
 - b-toggle roll animation
 
 DBLegends Character Search:
-- b-search \*(name) *(filters)
+- b-search \*(name) \*(filters)
+- b-search kit \*(keywords, comma separated)
 - b-character send
 - b-tag send
 
