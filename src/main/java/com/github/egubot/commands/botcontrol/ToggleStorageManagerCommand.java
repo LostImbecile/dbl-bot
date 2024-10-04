@@ -4,7 +4,7 @@ import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
-import com.github.egubot.storage.DataManagerSwitcher;
+import com.github.egubot.storage.DataManagerHandler;
 
 public class ToggleStorageManagerCommand implements Command {
 
@@ -16,7 +16,8 @@ public class ToggleStorageManagerCommand implements Command {
 	@Override
 	public boolean execute(Message msg, String arguments) {
 		if(UserInfoUtilities.isOwner(msg)) {
-			DataManagerSwitcher.setOnline(!DataManagerSwitcher.isOnline());
+			DataManagerHandler.toggleSQLite();
+			DataManagerHandler.switchAllManagers();
 		}
 		return true;
 	}

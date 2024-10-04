@@ -25,20 +25,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 public class AutoRespond extends DataManagerHandler implements UpdatableObjects {
-
-	private static String resourcePath = "Autorespond.txt";
-	private static String idKey = "Responses_Message_ID";
 	private ResponseList autoRespondData;
 	private List<Response> responses;
 
 	private Random rng = new Random();
 
 	public AutoRespond() throws IOException {
-		super(idKey, resourcePath, "Autorespond", true);
+		super("Autorespond", true);
 	}
 
-	public AutoRespond(long serverID) throws IOException {
-		super(idKey, resourcePath, "Autorespond", serverID, false);
+	public AutoRespond(long serverID) {
+		super("Autorespond", serverID, true);
 	}
 
 	public boolean respond(String msgText, Message msg) {

@@ -1,6 +1,5 @@
 package com.github.egubot.build;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.javacord.api.entity.message.Messageable;
@@ -9,15 +8,13 @@ import com.github.egubot.objects.legends.Tags;
 import com.github.egubot.storage.DataManagerHandler;
 
 public class RollTemplates extends DataManagerHandler {
-	private static String idKey = "Templates_Message_ID";
-	private static String resourcePath = "Filter_Templates.txt";
 
-	public RollTemplates() throws IOException {
-		super(idKey, resourcePath, "Filter Templates", true);
+	public RollTemplates() {
+		super("Filter Templates", true);
 	}
 
-	public RollTemplates(long serverID) throws IOException {
-		super(idKey, resourcePath, "Filter Templates", serverID, false);
+	public RollTemplates(long serverID) {
+		super("Filter Templates", serverID, false);
 	}
 
 	public void removeTemplate(String msgText, Messageable e, boolean isOwner) {

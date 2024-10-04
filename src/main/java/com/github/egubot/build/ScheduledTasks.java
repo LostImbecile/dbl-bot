@@ -1,6 +1,5 @@
 package com.github.egubot.build;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -32,8 +31,6 @@ import com.google.gson.JsonSyntaxException;
 
 public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects, TimerUpdateListener {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasks.class.getName());
-	public static final String RESOURCE_PATH = "Timers.txt";
-	private static String idKey = "Timers_Message_ID";
 	private TimerHandler timerHandler;
 	private List<TimerObject> timers;
 
@@ -41,13 +38,13 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	private static final Pattern datePattern = Pattern.compile("\\d{1,2}-\\d{1,2}-\\d{4},\\s*\\d{1,2}:\\d{2}");
 	private static final Pattern channelPattern = Pattern.compile("<#(\\d+)>");
 
-	public ScheduledTasks() throws IOException {
-		super(idKey, RESOURCE_PATH, "Timers", true);
+	public ScheduledTasks() {
+		super("Timers", true);
 		initializeTimerHandler();
 	}
 
-	public ScheduledTasks(long serverID) throws IOException {
-		super(idKey, RESOURCE_PATH, "Timers", serverID, false);
+	public ScheduledTasks(long serverID) {
+		super("Timers", serverID, true);
 		initializeTimerHandler();
 	}
 
@@ -163,8 +160,8 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		String startDate = null;
 		String task = taskAndArgs.split("\\s+")[0];
 		String taskArguments = taskAndArgs.substring(task.length()).trim();
-		
-		if(TimerHandler.getTasks().get(task) == null) {
+
+		if (TimerHandler.getTasks().get(task) == null) {
 			msg.getChannel().sendMessage("No such task");
 			return null;
 		}
@@ -172,14 +169,14 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 		// Check for delay and start date in the remaining part
 		for (String part : before) {
 			Matcher delayMatcher = delayPattern.matcher(part);
-            Matcher dateMatcher = datePattern.matcher(part);
+			Matcher dateMatcher = datePattern.matcher(part);
 
-            if (delayMatcher.matches()) {
-                delay = part;
-            } else if (dateMatcher.matches()) {
+			if (delayMatcher.matches()) {
+				delay = part;
+			} else if (dateMatcher.matches()) {
 				startDate = part;
-            }
-            
+			}
+
 		}
 
 		// Extract channels, if present

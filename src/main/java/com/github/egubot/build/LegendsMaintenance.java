@@ -1,6 +1,5 @@
 package com.github.egubot.build;
 
-import java.io.IOException;
 import java.util.List;
 import org.javacord.api.entity.message.Message;
 import com.github.egubot.info.ServerInfoUtilities;
@@ -8,8 +7,8 @@ import com.github.egubot.storage.DataManagerHandler;
 
 public class LegendsMaintenance extends DataManagerHandler {
 
-	public LegendsMaintenance() throws IOException {
-		super("Legends Maintenance");
+	public LegendsMaintenance()  {
+		super("Legends Maintenance", false);
 	}
 
 	public void registerServer(Message msg, String args) {

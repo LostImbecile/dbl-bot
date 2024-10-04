@@ -69,7 +69,7 @@ public class BotInfoController {
 	private Button restartButton;
 
 	@FXML
-	void restart(ActionEvent event) throws IOException {
+	void restart(ActionEvent event) {
 		Restart.restart();
 	}
 

@@ -1,6 +1,5 @@
 package com.github.egubot.build;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -13,8 +12,8 @@ public class LegendsNews extends DataManagerHandler {
 	public static final Pattern channelPattern = Pattern.compile("<#(\\d+)>");
 	public static final Pattern pingPattern = Pattern.compile("(<@&?\\d+>)");
 
-	public LegendsNews() throws IOException {
-		super("Legends News");
+	public LegendsNews(){
+		super("Legends News", false);
 	}
 
 	public void registerServer(Message msg, String args) {

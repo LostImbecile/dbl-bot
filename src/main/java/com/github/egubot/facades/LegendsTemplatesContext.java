@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.build.RollTemplates;
@@ -15,7 +13,6 @@ import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.interfaces.Shutdownable;
 
 public class LegendsTemplatesContext implements Shutdownable {
-	private static final Logger logger = LogManager.getLogger(LegendsTemplatesContext.class.getName());
 	private static Map<Long, RollTemplates> templatesMap = new ConcurrentHashMap<>();
 	private static RollTemplates defaultTemplates;
 
@@ -65,14 +62,9 @@ public class LegendsTemplatesContext implements Shutdownable {
 			return null;
 		}
 		return templatesMap.computeIfAbsent(serverID, k -> {
-			try {
-				RollTemplates templates = new RollTemplates(serverID);
-				templates.setData(new ArrayList<>(getDefaultRollTemplates()));
-				return templates;
-			} catch (IOException e) {
-				logger.error(e);
-			}
-			return null;
+			RollTemplates templates = new RollTemplates(serverID);
+			templates.setData(new ArrayList<>(getDefaultRollTemplates()));
+			return templates;
 		});
 	}
 }

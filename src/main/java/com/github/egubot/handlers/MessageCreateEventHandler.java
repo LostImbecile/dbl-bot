@@ -20,8 +20,6 @@ import com.github.egubot.managers.ShutdownManager;
 import com.github.egubot.managers.commands.CommandManager;
 import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.utils.FileUtilities;
-import com.github.egubot.storage.ConfigManager;
-import com.github.egubot.storage.DataManagerSwitcher;
 
 public class MessageCreateEventHandler implements MessageCreateListener, Shutdownable {
 	private static final Logger logger = LogManager.getLogger(MessageCreateEventHandler.class.getName());
@@ -42,7 +40,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 
 	public static synchronized void initialise() {
 		if (!isInitialised) {
-			DataManagerSwitcher.setOnline(ConfigManager.getBooleanProperty("Is_Storage_Online"));
 			StorageFacadesHandler.initialise();
 			isInitialised = true;
 		}

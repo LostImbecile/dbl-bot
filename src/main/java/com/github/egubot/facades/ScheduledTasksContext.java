@@ -14,8 +14,8 @@ import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.shared.utils.FileIndexer;
-import com.github.egubot.storage.DataManagerSwitcher;
-import com.github.egubot.storage.LocalDataManager;
+import com.github.egubot.storage.BaseDataManager;
+import com.github.egubot.storage.DataManagerHandler;
 
 public class ScheduledTasksContext implements Shutdownable {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasksContext.class.getName());
@@ -25,35 +25,28 @@ public class ScheduledTasksContext implements Shutdownable {
 	}
 
 	public static void initialise() {
-		if (!DataManagerSwitcher.isOnline()) {
-			FileIndexer indexer;
+		FileIndexer indexer;
+		try {
+			indexer = new FileIndexer(BaseDataManager.STORAGE_FOLDER);
+		} catch (IOException e) {
+			logger.error("Failed to create indexer.", e);
+			return;
+		}
+		String timersFileName = "Timers" + (DataManagerHandler.isSQLite() ? ".db" : ".txt");
+		List<String> timerList = indexer.getDirectoriesContainingFile(timersFileName);
+		for (String timer : timerList) {
+			long serverID;
 			try {
-				indexer = new FileIndexer(LocalDataManager.STORAGE_FOLDER);
-			} catch (IOException e) {
-				logger.error("Failed to create indexer.", e);
-				return;
+				serverID = Long.parseLong(timer);
+			} catch (Exception e) {
+				continue;
 			}
-			List<String> timerList = indexer.getDirectoriesContainingFile(ScheduledTasks.RESOURCE_PATH);
-			for (String timer : timerList) {
-				long serverID;
-				try {
-					serverID = Long.parseLong(timer);
-				} catch (Exception e) {
-					continue;
-				}
-				scheduledTasksMap.computeIfAbsent(serverID, k -> {
-					try {
-						return new ScheduledTasks(serverID);
-					} catch (IOException e) {
-						logger.error(e);
-					}
-					return null;
-				});
-			}
-			if (!timerList.isEmpty()) {
-				StreamRedirector.println("info",
-						"\nLoaded and initialised timers for " + timerList.size() + " server(s).");
-			}
+			scheduledTasksMap.computeIfAbsent(serverID, k -> {
+				return new ScheduledTasks(serverID);
+			});
+		}
+		if (!timerList.isEmpty()) {
+			StreamRedirector.println("info", "\nLoaded and initialised timers for " + timerList.size() + " server(s).");
 		}
 	}
 
@@ -86,12 +79,7 @@ public class ScheduledTasksContext implements Shutdownable {
 			return null;
 		}
 		return scheduledTasksMap.computeIfAbsent(serverID, k -> {
-			try {
-				return new ScheduledTasks(serverID);
-			} catch (IOException e) {
-				logger.error(e);
-			}
-			return null;
+			return new ScheduledTasks(serverID);
 		});
 	}
 

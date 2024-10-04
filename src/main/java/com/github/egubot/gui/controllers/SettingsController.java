@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 import com.github.egubot.main.Bot;
 import com.github.egubot.storage.ConfigManager;
-import com.github.egubot.storage.DataManagerSwitcher;
+import com.github.egubot.storage.DataManagerHandler;
 import com.github.lavaplayer.SoundPlayback;
 
 import javafx.event.ActionEvent;
@@ -66,7 +66,7 @@ public class SettingsController {
 	@FXML
 	void playerBufferChange(ActionEvent event) {
 		int bufferSize = Integer.parseInt(bufferSizeText.getText());
-		
+
 		ConfigManager.setIntProperty("Player_Buffer_Size_MS", bufferSize);
 		SoundPlayback.updateBufferDuration(bufferSize);
 	}
@@ -82,12 +82,12 @@ public class SettingsController {
 
 		switch (selected) {
 		case "Local":
-			DataManagerSwitcher.setOnline(false);
+			DataManagerHandler.setSQLite(false);
+			DataManagerHandler.switchAllManagers();
 			break;
-		case "Database":
-			break;
-		case "Online":
-			DataManagerSwitcher.setOnline(true);
+		case "SQLite":
+			DataManagerHandler.setSQLite(true);
+			DataManagerHandler.switchAllManagers();
 			break;
 		default:
 		}
@@ -95,21 +95,12 @@ public class SettingsController {
 
 	@FXML
 	void initialize() {
-		assert bufferSizeText != null
-				: "fx:id=\"bufferSizeText\" was not injected: check your FXML file 'Settings.fxml'.";
-		assert chromeProfileNameText != null
-				: "fx:id=\"chromeProfileNameText\" was not injected: check your FXML file 'Settings.fxml'.";
-		assert chromeUserDataText != null
-				: "fx:id=\"chromeUserDataText\" was not injected: check your FXML file 'Settings.fxml'.";
-		assert cmdToggleButton != null
-				: "fx:id=\"cmdToggleButton\" was not injected: check your FXML file 'Settings.fxml'.";
-		assert dblegendsToggleButton != null
-				: "fx:id=\"dblegendsToggleButton\" was not injected: check your FXML file 'Settings.fxml'.";
-		assert prefixText != null : "fx:id=\"prefixText\" was not injected: check your FXML file 'Settings.fxml'.";
-		assert storageCBox != null : "fx:id=\"storageCBox\" was not injected: check your FXML file 'Settings.fxml'.";
+		storageCBox.getItems().addAll("Local", "SQLite");
 
-		storageCBox.getItems().addAll("Local", "Database (Not Implemented)", "Online");
-		storageCBox.getSelectionModel().select(0);
+		if (DataManagerHandler.isSQLite())
+			storageCBox.getSelectionModel().select(1);
+		else
+			storageCBox.getSelectionModel().select(0);
 
 		initialisePrefixField();
 		initialiseBufferField();
@@ -148,7 +139,7 @@ public class SettingsController {
 			ConfigManager.setIntProperty("Player_Buffer_Size_MS", bufferSize);
 		}
 		bufferSizeText.setText(bufferSize + "");
-		
+
 		bufferSizeText.focusedProperty().addListener((o, oldValue, newValue) -> {
 			if (Boolean.TRUE.equals(oldValue)) {
 				playerBufferChange(null);
