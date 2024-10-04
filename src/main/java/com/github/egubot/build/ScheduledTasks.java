@@ -1,5 +1,6 @@
 package com.github.egubot.build;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -44,7 +45,7 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	}
 
 	public ScheduledTasks(long serverID) {
-		super("Timers", serverID, true);
+		super(serverID + File.separator + "Timers", true);
 		initializeTimerHandler();
 	}
 

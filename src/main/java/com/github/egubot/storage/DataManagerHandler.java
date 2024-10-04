@@ -1,6 +1,5 @@
 package com.github.egubot.storage;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +26,8 @@ public class DataManagerHandler implements Shutdownable, UpdatableObjects {
 		initialiseDataManager();
 	}
 
-	public DataManagerHandler(String dataName, long serverID, boolean useSQLite) {
-		this(serverID + File.separator + dataName, useSQLite);
-	}
-
 	private void initialiseDataManager() {
-		if (isSQLite) {
+		if (isSQLite && useSQLite) {
 			try {
 				dataManager = new SQLiteDataManager(dataName);
 			} catch (IOException e) {

@@ -1,5 +1,6 @@
 package com.github.egubot.build;
 
+import java.io.File;
 import java.util.List;
 
 import org.javacord.api.entity.message.Messageable;
@@ -10,11 +11,11 @@ import com.github.egubot.storage.DataManagerHandler;
 public class RollTemplates extends DataManagerHandler {
 
 	public RollTemplates() {
-		super("Filter Templates", true);
+		super("Filter Templates", false);
 	}
 
 	public RollTemplates(long serverID) {
-		super("Filter Templates", serverID, false);
+		super(serverID + File.separator + "Filter Templates", true);
 	}
 
 	public void removeTemplate(String msgText, Messageable e, boolean isOwner) {

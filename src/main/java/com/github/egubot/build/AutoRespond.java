@@ -1,5 +1,6 @@
 package com.github.egubot.build;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +36,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 	}
 
 	public AutoRespond(long serverID) {
-		super("Autorespond", serverID, true);
+		super(serverID + File.separator + "Autorespond", true);
 	}
 
 	public boolean respond(String msgText, Message msg) {
