@@ -10,7 +10,7 @@ import com.openai.chatgpt.ChatGPT;
 public class AIContext{
 	private static final AIModelHandler groqText =  new AIModelHandler(new GroqAI());
 	private static final AIModelHandler chatGPT =  new AIModelHandler(new ChatGPT());
-	private static final AIModelHandler ollama =  new AIModelHandler(new OllamaAI());
+	private static final AIModelHandler ollama =  new AIModelHandler(new OllamaAI(), false);
 	private static final AIModel groqVision =  new GroqLLavaAI();
 	
 	private AIContext() {	

@@ -21,6 +21,7 @@ public class AIModelHandler {
 
     private boolean isAIOn = true;
     private AIModel model = null;
+    private boolean testValid = true;
 
     public AIModelHandler(AIModel model) {
         this.model = model;
@@ -30,8 +31,16 @@ public class AIModelHandler {
             isAIOn = false;
         }
     }
+    
+    public AIModelHandler(AIModel model, boolean testValid) {
+    	this.testValid = testValid;
+		this.model = model;
+		Shared.getShutdown().registerShutdownable(model);
+    }
 
     public boolean testModel() {
+    	if(!testValid)
+    		return true;
         try {
             String testInput = "Hello, how are you?";
             String testName = "Test User";
