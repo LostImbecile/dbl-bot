@@ -15,9 +15,13 @@ public class ToggleStorageManagerCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
-		if(UserInfoUtilities.isOwner(msg)) {
+		if (UserInfoUtilities.isOwner(msg)) {
 			DataManagerHandler.toggleSQLite();
-			DataManagerHandler.switchAllManagers();
+			if (!DataManagerHandler.switchAllManagers()) {
+				DataManagerHandler.toggleSQLite();
+				msg.getChannel().sendMessage("Failed.");
+			} else
+				msg.getChannel().sendMessage("Success.");
 		}
 		return true;
 	}

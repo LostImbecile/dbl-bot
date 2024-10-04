@@ -83,11 +83,14 @@ public class SettingsController {
 		switch (selected) {
 		case "Local":
 			DataManagerHandler.setSQLite(false);
-			DataManagerHandler.switchAllManagers();
+			if (!DataManagerHandler.switchAllManagers())
+				storageCBox.getSelectionModel().select(1);
 			break;
 		case "SQLite":
 			DataManagerHandler.setSQLite(true);
 			DataManagerHandler.switchAllManagers();
+			if (!DataManagerHandler.switchAllManagers())
+				storageCBox.getSelectionModel().select(0);
 			break;
 		default:
 		}

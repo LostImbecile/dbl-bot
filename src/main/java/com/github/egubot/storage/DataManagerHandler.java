@@ -86,9 +86,9 @@ public class DataManagerHandler implements Shutdownable, UpdatableObjects {
 		dataManager.setData(data);
 	}
 
-	public static void switchAllManagers() {
-		boolean newIsSQLite = !isSQLite;
+	public static boolean switchAllManagers() {
 		List<DataManagerHandler> successfulSwitches = new ArrayList<>();
+		List<BaseDataManager> oldManagers = new ArrayList<>();
 
 		for (DataManagerHandler handler : instances) {
 			if (handler.useSQLite) {
@@ -96,20 +96,20 @@ public class DataManagerHandler implements Shutdownable, UpdatableObjects {
 				try {
 					handler.switchDataManager();
 					successfulSwitches.add(handler);
+					oldManagers.add(oldManager);
 				} catch (Exception e) {
 					logger.error("Failed to switch manager for {}", handler.dataName, e);
-					// Rollback successful switches
-					for (DataManagerHandler successfulHandler : successfulSwitches) {
-						successfulHandler.dataManager = oldManager;
+					for (int i = 0; i < successfulSwitches.size(); i++) {
+						successfulSwitches.get(i).dataManager = oldManagers.get(i);
 					}
-					return; // Exit without changing global isSQLite
+					return false; // Exit without changing global isSQLite
 				}
 			}
 		}
 
 		// If all switches were successful, update the global setting
-		isSQLite = newIsSQLite;
 		ConfigManager.setBooleanProperty("Is_Storage_Local", !isSQLite);
+		return true;
 	}
 
 	public int getLockedDataEndIndex() {
