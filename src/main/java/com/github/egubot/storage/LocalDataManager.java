@@ -28,7 +28,7 @@ public class LocalDataManager extends BaseDataManager {
 
 	@Override
 	public void initialise(boolean verbose) {
-		readData(null);
+		readData();
 		if (verbose)
 			StreamRedirector.println("info", "\n" + dataName + " data successfully loaded!\nDate of last update: "
 					+ FileUtilities.getFileLastModified(filePath));
@@ -85,7 +85,7 @@ public class LocalDataManager extends BaseDataManager {
 	}
 
 	@Override
-	public void readData(Messageable e) {
+	public void readData() {
 		try (BufferedReader br = FileUtilities.getBufferedReader(getInputStream())) {
 			String st;
 

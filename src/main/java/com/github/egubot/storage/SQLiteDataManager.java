@@ -38,9 +38,9 @@ public class SQLiteDataManager extends BaseDataManager {
 
     @Override
     public void initialise(boolean verbose) throws IOException {
-        readData(null);
+        readData();
         if (verbose) {
-            System.out.println(dataName + " data successfully loaded from SQLite!");
+            System.out.println(dataName + " data successfully loaded!");
         }
     }
 
@@ -54,18 +54,18 @@ public class SQLiteDataManager extends BaseDataManager {
                 pstmt.executeUpdate();
             }
             if (e != null) {
-                e.sendMessage("Data updated in SQLite database.");
+                e.sendMessage("Updated <:drink:1184466286944735272>");
             }
         } catch (SQLException ex) {
             if (e != null) {
-                e.sendMessage("Failed to update data in SQLite database.");
+                e.sendMessage("Couldn't update <:sad:1020780174901522442>");
             }
             ex.printStackTrace();
         }
     }
 
     @Override
-    public void readData(Messageable e) {
+    public void readData() {
         try {
             String sql = "SELECT content FROM data WHERE id = 1";
             try (Statement stmt = conn.createStatement();
@@ -77,13 +77,7 @@ public class SQLiteDataManager extends BaseDataManager {
                     data = new ArrayList<>();
                 }
             }
-            if (e != null) {
-                e.sendMessage("Data read from SQLite database.");
-            }
         } catch (SQLException ex) {
-            if (e != null) {
-                e.sendMessage("Failed to read data from SQLite database.");
-            }
             ex.printStackTrace();
         }
     }

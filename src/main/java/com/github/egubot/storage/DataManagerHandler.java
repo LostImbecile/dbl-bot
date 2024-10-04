@@ -134,8 +134,8 @@ public class DataManagerHandler implements Shutdownable, UpdatableObjects {
 		dataManager.writeData(e);
 	}
 
-	public void readData(Messageable e) {
-		dataManager.readData(e);
+	public void readData() {
+		dataManager.readData();
 		updateObjects();
 	}
 

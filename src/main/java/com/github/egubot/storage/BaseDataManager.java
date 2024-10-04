@@ -24,7 +24,7 @@ public abstract class BaseDataManager {
 
     public abstract void initialise(boolean verbose) throws IOException;
     public abstract void writeData(Messageable e);
-    public abstract void readData(Messageable e);
+    public abstract void readData();
     public abstract void sendData(Messageable e);
     
     public abstract <T> void writeJSON(String key, T object);
