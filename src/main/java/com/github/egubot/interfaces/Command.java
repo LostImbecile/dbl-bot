@@ -6,10 +6,12 @@ import org.javacord.api.entity.message.Message;
 
 public interface Command {
 	public static final Logger logger = LogManager.getLogger(Command.class.getName());
-	
+
 	public String getName();
-	
+
 	public boolean execute(Message msg, String arguments) throws Exception;
-	
-	public boolean isStartsWithPrefix();
+
+	public default boolean isStartsWithPrefix() {
+		return true;
+	}
 }
