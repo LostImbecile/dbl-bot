@@ -56,12 +56,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			String msgText = msg.getContent();
 			String lowCaseTxt = msgText.toLowerCase();
 
-			// Ignore bots unless changed
-			if ((!msg.getAuthor().isRegularUser() && !readBotMessages)
-					|| (msg.getAuthor().isYourself() && !readOwnMessages)) {
-				return;
-			}
-
 			try {
 				if (isTestActive) {
 					Class<?> testClass = Class.forName("com.github.egubot.features.Test");
@@ -70,6 +64,12 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 					checkMethod.invoke(null, e, msg, msgText);
 				}
 			} catch (Exception e1) {
+			}
+
+			// Ignore bots unless changed
+			if ((!msg.getAuthor().isRegularUser() && !readBotMessages)
+					|| (msg.getAuthor().isYourself() && !readOwnMessages)) {
+				return;
 			}
 
 			// Replaces the sentence below with the contents of the attachment
