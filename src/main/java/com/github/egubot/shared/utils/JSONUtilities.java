@@ -11,7 +11,7 @@ import java.util.Random;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 public class JSONUtilities {
@@ -19,10 +19,14 @@ public class JSONUtilities {
 
 	public static String prettify(String jsonText) {
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		
-		JsonObject jsonObject = JsonParser.parseString(jsonText).getAsJsonObject();
-		
-		return gson.toJson(jsonObject);
+
+		JsonElement je = JsonParser.parseString(jsonText);
+		if (je.isJsonObject()) {
+			return gson.toJson(je.getAsJsonObject());
+		} else if (je.isJsonArray()) {
+			return gson.toJson(je.getAsJsonArray());
+		}
+		return null;
 	}
 
 	public static String jsonify(String input) {
@@ -43,12 +47,12 @@ public class JSONUtilities {
 	}
 
 	public static <T> String toJsonPrettyPrint(T object, Class<T> clazz) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        return gson.toJson(object, clazz);
-    }
-	
-	public static <T> T jsonToClass(String jsonTxt, Class<T> clazz){
+		return gson.toJson(object, clazz);
+	}
+
+	public static <T> T jsonToClass(String jsonTxt, Class<T> clazz) {
 		Gson gson = new Gson();
 		return gson.fromJson(jsonTxt, clazz);
 	}
