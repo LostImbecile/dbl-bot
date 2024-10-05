@@ -14,22 +14,27 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="745.0" stylesheets="@/css/borderpane.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.egubot.gui.controllers.SendMessagesController">
 	<center>
-		<ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-border-color: black;" BorderPane.alignment="CENTER">
-			<content>
-				<TextArea fx:id="textArea" onKeyPressed="#textAreaOnKeyPressed" prefHeight="349.0" prefWidth="425.0" promptText="Press enter to send, or shift-enter for a newline" style="-fx-background-color: white;" wrapText="true" />
-			</content>
-		</ScrollPane>
+      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+         <children>
+      		<ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-border-color: black;" VBox.vgrow="ALWAYS">
+      			<content>
+      				<TextArea fx:id="textArea" onKeyPressed="#textAreaOnKeyPressed" prefHeight="349.0" prefWidth="425.0" promptText="Press enter to send, or shift-enter for a newline" style="-fx-background-color: white;" wrapText="true" />
+      			</content>
+      		</ScrollPane>
+            <TextField fx:id="attachmentTextField" promptText="No Attachments" />
+         </children>
+      </VBox>
 	</center>
 	<right>
       <SplitPane dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="344.0" prefWidth="289.0" stylesheets="@../css/splitpane.css" BorderPane.alignment="CENTER">
          <items>
-				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="58.0" style="-fx-border-color: transparent black transparent transparent;">
+				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="58.0" style="-fx-border-color: transparent black transparent transparent; -fx-background-color: white;">
 					<children>
 						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" VBox.vgrow="SOMETIMES" />
 						<ListView fx:id="emojiList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="337.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
 					</children>
 				</VBox>
-				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="342.0" prefWidth="131.0" style="-fx-border-color: transparent black transparent transparent;">
+				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="342.0" prefWidth="131.0" style="-fx-border-color: transparent black transparent transparent; -fx-background-color: white;">
 					<children>
 						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" VBox.vgrow="ALWAYS" />
 						<ListView fx:id="channelList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="126.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />

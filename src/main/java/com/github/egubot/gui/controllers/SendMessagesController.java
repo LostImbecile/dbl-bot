@@ -1,7 +1,10 @@
 package com.github.egubot.gui.controllers;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -23,8 +26,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.TransferMode;
 
 public class SendMessagesController {
 	private Map<String, ServerTextChannel> channelMap = new HashMap<>();
@@ -58,6 +65,11 @@ public class SendMessagesController {
 
 	@FXML
 	private TextArea textArea;
+
+	@FXML
+	private TextField attachmentTextField;
+
+	private List<File> attachedFiles;
 
 	@FXML
 	void messageSendTypeChange(ActionEvent event) {
@@ -114,7 +126,51 @@ public class SendMessagesController {
 				textArea.deleteText(caretPosition - 1, caretPosition);
 				submitMessage();
 			}
+		} else if (event.isControlDown() && event.getCode() == KeyCode.V) {
+			Clipboard clipboard = Clipboard.getSystemClipboard();
+			if (clipboard.hasFiles()) {
+				if (attachedFiles == null)
+					attachedFiles = new ArrayList<>();
+				attachedFiles.addAll(clipboard.getFiles());
+				updateAttachmentTextField();
+				event.consume();
+			}
 		}
+	}
+
+	private void updateAttachmentTextField() {
+		StringBuilder fileNames = new StringBuilder();
+
+		if (attachedFiles != null && !attachedFiles.isEmpty()) {
+			for (File file : attachedFiles) {
+				if (fileNames.length() > 0)
+					fileNames.append(", ");
+				fileNames.append(file.getName());
+			}
+		}
+
+		attachmentTextField.setText(fileNames.toString());
+	}
+
+	private void handleDragOver(DragEvent event) {
+		if (event.getDragboard().hasFiles()) {
+			event.acceptTransferModes(TransferMode.COPY);
+		}
+		event.consume();
+	}
+
+	private void handleDragDropped(DragEvent event) {
+		Dragboard db = event.getDragboard();
+		boolean success = false;
+		if (db.hasFiles()) {
+			if (attachedFiles == null)
+				attachedFiles = new ArrayList<>();
+			attachedFiles.addAll(db.getFiles());
+			updateAttachmentTextField();
+			success = true;
+		}
+		event.setDropCompleted(success);
+		event.consume();
 	}
 
 	private void submitMessage() {
@@ -122,14 +178,16 @@ public class SendMessagesController {
 		textArea.clear();
 
 		try {
-			if (messageType.equals("normal")) {
-				channel.sendMessage(message);
-				return;
-			}
-
 			Message msg = getMessage();
-
 			switch (messageType) {
+			case "normal":
+				if (attachedFiles != null && !attachedFiles.isEmpty() ) {
+					channel.sendMessage(message, attachedFiles.toArray(new File[0]));
+					clearAttachments();
+				} else {
+					channel.sendMessage(message);
+				}
+				break;
 			case "delete":
 				msg.delete();
 				break;
@@ -143,16 +201,25 @@ public class SendMessagesController {
 				msg.edit(message);
 				break;
 			default:
-
+				// Do nothing
 			}
 			messageTypeCombo.getSelectionModel().select("normal");
+			clearAttachments();
 		} catch (Exception e) {
 			textArea.setText("Failed.");
+			e.printStackTrace();
 		}
+	}
 
+	private void clearAttachments() {
+		attachedFiles = null;
+		attachmentTextField.clear();
 	}
 
 	public Message getMessage() throws InterruptedException, ExecutionException {
+		if (messageIDTextField.getText().isBlank()) {
+			return null;
+		}
 		return Bot.getApi().getMessageById(messageIDTextField.getText(), channel).get();
 	}
 
@@ -180,6 +247,9 @@ public class SendMessagesController {
 				Platform.runLater(() -> textArea.requestFocus());
 			}
 		});
+
+		textArea.setOnDragOver(this::handleDragOver);
+		textArea.setOnDragDropped(this::handleDragDropped);
 	}
 
 	public void initialiseDefaultChannel() {
