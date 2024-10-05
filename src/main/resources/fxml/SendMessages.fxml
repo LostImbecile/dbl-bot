@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -8,6 +9,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -21,28 +23,10 @@
       				<TextArea fx:id="textArea" onKeyPressed="#textAreaOnKeyPressed" prefHeight="349.0" prefWidth="425.0" promptText="Press enter to send, or shift-enter for a newline" style="-fx-background-color: white;" wrapText="true" />
       			</content>
       		</ScrollPane>
-            <TextField fx:id="attachmentTextField" promptText="No Attachments" />
+            <TextField fx:id="attachmentTextField" promptText="No Attachments" style="-fx-border-color: black;" />
          </children>
       </VBox>
 	</center>
-	<right>
-      <SplitPane dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="344.0" prefWidth="289.0" stylesheets="@../css/splitpane.css" BorderPane.alignment="CENTER">
-         <items>
-				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="58.0" style="-fx-border-color: transparent black transparent transparent; -fx-background-color: white;">
-					<children>
-						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" VBox.vgrow="SOMETIMES" />
-						<ListView fx:id="emojiList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="337.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
-					</children>
-				</VBox>
-				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="342.0" prefWidth="131.0" style="-fx-border-color: transparent black transparent transparent; -fx-background-color: white;">
-					<children>
-						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" VBox.vgrow="ALWAYS" />
-						<ListView fx:id="channelList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="126.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
-					</children>
-				</VBox>
-         </items>
-      </SplitPane>
-	</right>
 	<bottom>
 		<HBox prefHeight="24.0" prefWidth="600.0" style="-fx-border-color: black; -fx-background-color: white;" BorderPane.alignment="CENTER">
 			<children>
@@ -62,4 +46,60 @@
 			</children>
 		</HBox>
 	</top>
+   <right>
+      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+         <children>
+            <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="18.0" prefWidth="306.0" VBox.vgrow="NEVER">
+               <children>
+                  <TextField fx:id="emojiSearchField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Search Emoji" HBox.hgrow="ALWAYS" />
+                  <TextField fx:id="channelSearchField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Search Channel" HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
+            <Accordion style="-fx-background-color: white; -fx-border-color: black;" stylesheets="@../css/accordion.css">
+              <panes>
+                <TitledPane animated="false" style="-fx-border-color: black;" text="Saved">
+                  <content>
+                        <SplitPane dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="221.0" prefWidth="257.0" style="-fx-border-width: 0;" stylesheets="@../css/splitpane.css">
+                           <items>
+                  				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="58.0" style="-fx-border-color: transparent; -fx-background-color: white; -fx-border-width: 0;">
+                  					<children>
+                  						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" VBox.vgrow="SOMETIMES" />
+                  						<ListView fx:id="emojiList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="337.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+                  					</children>
+                  				</VBox>
+                  				<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="342.0" prefWidth="131.0" style="-fx-border-color: transparent black transparent transparent; -fx-background-color: white; -fx-border-width: 0;">
+                  					<children>
+                  						<Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" VBox.vgrow="ALWAYS" />
+                  						<ListView fx:id="channelList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="126.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+                  					</children>
+                  				</VBox>
+                           </items>
+                        </SplitPane>
+                  </content>
+                </TitledPane>
+                <TitledPane animated="false" expanded="false" style="-fx-border-color: black;" text="All">
+                     <content>
+                        <SplitPane dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="344.0" prefWidth="289.0" stylesheets="@../css/splitpane.css">
+                           <items>
+                              <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="343.0" prefWidth="58.0" style="-fx-border-width: 0; -fx-background-color: white;">
+                                 <children>
+                                    <Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Emojis" VBox.vgrow="SOMETIMES" />
+                                    <ListView fx:id="emojiListAll" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="337.0" prefWidth="110.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+                              <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="342.0" prefWidth="131.0" style="-fx-border-width: 0; -fx-background-color: white;">
+                                 <children>
+                                    <Label maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="19.0" prefWidth="109.0" style="-fx-border-color: transparent transparent black transparent;" text="Channels" VBox.vgrow="ALWAYS" />
+                                    <ListView fx:id="channelListAll" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="322.0" prefWidth="126.0" style="-fx-background-color: white;" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+                           </items>
+                        </SplitPane>
+                     </content>
+                </TitledPane>
+              </panes>
+            </Accordion>
+         </children>
+      </VBox>
+   </right>
 </BorderPane>

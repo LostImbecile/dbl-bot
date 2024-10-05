@@ -7,15 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.gui.helpers.ListManager;
 import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.main.Bot;
-import com.github.egubot.managers.EmojiManager;
 import com.github.egubot.managers.SendMessageChannelManager;
 import com.github.egubot.objects.Abbreviations;
 import javafx.application.Platform;
@@ -35,9 +34,21 @@ import javafx.scene.input.TransferMode;
 
 public class SendMessagesController {
 	private Map<String, ServerTextChannel> channelMap = new HashMap<>();
-	private Abbreviations emojis;
+	private Abbreviations savedEmojis;
+	private Abbreviations allEmojis;
 	private ServerTextChannel channel;
 	private String messageType = "normal";
+
+	private List<File> attachedFiles;
+	private ListManager listManager;
+	private List<String> allChannels;
+	private List<String> savedChannels;
+
+	@FXML
+	private TextField emojiSearchField;
+
+	@FXML
+	private TextField channelSearchField;
 
 	@FXML
 	private ResourceBundle resources;
@@ -67,9 +78,13 @@ public class SendMessagesController {
 	private TextArea textArea;
 
 	@FXML
-	private TextField attachmentTextField;
+	private ListView<String> emojiListAll;
 
-	private List<File> attachedFiles;
+	@FXML
+	private ListView<String> channelListAll;
+
+	@FXML
+	private TextField attachmentTextField;
 
 	@FXML
 	void messageSendTypeChange(ActionEvent event) {
@@ -84,25 +99,6 @@ public class SendMessagesController {
 
 		Platform.runLater(() -> textArea.requestFocus());
 
-	}
-
-	public void updateChannel(String channelID) {
-
-		Bot.getApi().getTextChannelById(channelID).ifPresent(textChannel -> {
-			channel = Bot.getApi().getServerTextChannelById(channelID).get();
-			String name = getChannelName(channel);
-			if (channelMap.get(name) == null) {
-				channelMap.put(name, channel);
-				channelList.getItems().add(0, name);
-				channelList.getSelectionModel().selectFirst();
-
-				SendMessageChannelManager.addChannel(channel.getId());
-			} else {
-				channelList.getSelectionModel().select(name);
-			}
-		});
-
-		channelIDTextField.clear();
 	}
 
 	public static String getChannelName(ServerTextChannel channel) {
@@ -181,7 +177,7 @@ public class SendMessagesController {
 			Message msg = getMessage();
 			switch (messageType) {
 			case "normal":
-				if (attachedFiles != null && !attachedFiles.isEmpty() ) {
+				if (attachedFiles != null && !attachedFiles.isEmpty()) {
 					channel.sendMessage(message, attachedFiles.toArray(new File[0]));
 					clearAttachments();
 				} else {
@@ -195,7 +191,9 @@ public class SendMessagesController {
 				msg.reply(message);
 				break;
 			case "react":
-				msg.addReaction(emojis.replaceReactionIds(Abbreviations.getReactionId(message)));
+				String replaced = savedEmojis.replaceReactionIds(message);
+				replaced = allEmojis.replaceReactionIds(replaced);
+				msg.addReaction(replaced);
 				break;
 			case "edit":
 				msg.edit(message);
@@ -228,46 +226,134 @@ public class SendMessagesController {
 		messageTypeCombo.getItems().addAll("normal", "reply", "react", "edit", "delete");
 		messageTypeCombo.getSelectionModel().select(0);
 
-		channelList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null) {
-				channel = channelMap.get(newValue);
-				channelNameLabel.setText(newValue);
-			}
-			Platform.runLater(() -> textArea.requestFocus());
-		});
-
-		emojis = EmojiManager.getAllEmojis();
-
-		emojiList.getItems().addAll(emojis.getAbbreviationMap().keySet());
-
-		emojiList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null) {
-				textArea.appendText(emojis.get(newValue));
-				Platform.runLater(() -> emojiList.getSelectionModel().clearSelection());
-				Platform.runLater(() -> textArea.requestFocus());
-			}
-		});
+		initialiseLists();
 
 		textArea.setOnDragOver(this::handleDragOver);
 		textArea.setOnDragDropped(this::handleDragDropped);
+
+	}
+
+	private void initialiseLists() {
+		List<String> savedEmojiNames;
+		List<String> allEmojiNames;
+		listManager = new ListManager(Bot.getApi());
+		allEmojiNames = listManager.getAllEmojis();
+		savedEmojiNames = listManager.getSavedEmojis();
+		allChannels = listManager.getAllChannels();
+		savedChannels = listManager.getSavedChannels();
+		channelMap = listManager.getChannelMap();
+		savedEmojis = listManager.getSavedEmojisAbbreviations();
+		allEmojis = listManager.getAllEmojisAbbreviations();
+
+		emojiList.getItems().addAll(savedEmojiNames);
+		emojiListAll.getItems().addAll(allEmojiNames);
+		channelListAll.getItems().addAll(allChannels);
+		channelList.getItems().addAll(savedChannels);
+
+		setupEmojiSearch();
+		setupChannelSearch();
+		setupEmojiSelection();
+		setupAllEmojiSelection();
+		setupChannelSelection();
+		setupSavedChannelSelection();
+	}
+
+	private void setupEmojiSearch() {
+		emojiSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
+			emojiListAll.getItems().clear();
+			emojiListAll.getItems().addAll(
+					listManager.filterList(allEmojis.getAbbreviationMap().keySet().stream().toList(), newValue));
+
+			emojiList.getItems().clear();
+			emojiList.getItems().addAll(
+					listManager.filterList(savedEmojis.getAbbreviationMap().keySet().stream().toList(), newValue));
+		});
+	}
+
+	private void setupChannelSearch() {
+		channelSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
+			channelListAll.getItems().clear();
+			channelListAll.getItems().addAll(listManager.filterList(allChannels, newValue));
+
+			channelList.getItems().clear();
+			channelList.getItems().addAll(listManager.filterList(savedChannels, newValue));
+		});
+	}
+
+	private void setupEmojiSelection() {
+		emojiList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				textArea.appendText(savedEmojis.get(newValue));
+				Platform.runLater(() -> {
+					emojiList.getSelectionModel().clearSelection();
+					textArea.requestFocus();
+				});
+			}
+		});
+	}
+
+	private void setupAllEmojiSelection() {
+		emojiListAll.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				textArea.appendText(allEmojis.get(newValue));
+				Platform.runLater(() -> {
+					emojiListAll.getSelectionModel().clearSelection();
+					textArea.requestFocus();
+				});
+			}
+		});
+	}
+
+	private void setupChannelSelection() {
+		channelListAll.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				updateChannelFromName(newValue);
+				Platform.runLater(() -> {
+					textArea.requestFocus();
+				});
+			}
+		});
+	}
+
+	private void setupSavedChannelSelection() {
+		channelList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				updateChannelFromName(newValue);
+				Platform.runLater(() -> textArea.requestFocus());
+			}
+		});
+	}
+
+	private void updateChannelFromName(String channelName) {
+	    ServerTextChannel selectedChannel = channelMap.get(channelName);
+	    if (selectedChannel != null) {
+	        channel = selectedChannel;
+	        channelNameLabel.setText(channelName);
+	        if (!savedChannels.contains(channelName)) {
+	            savedChannels.add(channelName);
+	            channelList.getItems().add(channelName);
+	            SendMessageChannelManager.addChannel(channel.getId());
+	        }
+	    } else {
+	        // Remove the channel from lists if it's no longer accessible
+	        allChannels.remove(channelName);
+	        savedChannels.remove(channelName);
+	        channelList.getItems().remove(channelName);
+	    }
+	}
+
+	public void updateChannel(String channelID) {
+		Bot.getApi().getTextChannelById(channelID).ifPresent(textChannel -> {
+			channel = (ServerTextChannel) textChannel;
+			String name = listManager.getChannelName(channel);
+			updateChannelFromName(name);
+		});
+
+		channelIDTextField.clear();
 	}
 
 	public void initialiseDefaultChannel() {
-		Set<Long> channels = SendMessageChannelManager.getAllChannels();
-
-		if (!channels.isEmpty()) {
-			// Load channels for the servers
-			for (Long channelID : channels) {
-				Bot.getApi().getServerTextChannelById(channelID).ifPresentOrElse(temp -> {
-					String channelName = getChannelName(temp);
-					channelMap.put(channelName, temp);
-					channelList.getItems().add(channelName);
-				}, () -> SendMessageChannelManager.removeChannel(channelID));
-			}
-
-		}
-
-		if (!channelList.getItems().isEmpty()) {
+		if (!savedChannels.isEmpty()) {
 			channelList.getSelectionModel().selectFirst();
 		}
 	}
