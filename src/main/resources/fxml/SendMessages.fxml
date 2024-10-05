@@ -55,7 +55,7 @@
                   <TextField fx:id="channelSearchField" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Search Channel" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
-            <Accordion style="-fx-background-color: white; -fx-border-color: black;" stylesheets="@../css/accordion.css">
+            <Accordion style="-fx-background-color: white; -fx-border-color: black;" stylesheets="@../css/accordion.css" VBox.vgrow="ALWAYS">
               <panes>
                 <TitledPane animated="false" style="-fx-border-color: black;" text="Saved">
                   <content>
