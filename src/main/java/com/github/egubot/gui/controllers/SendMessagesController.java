@@ -175,16 +175,19 @@ public class SendMessagesController {
 		textArea.clear();
 
 		try {
-			Message msg = getMessage();
-			switch (messageType) {
-			case "normal":
+
+			if (messageType.equals("normal")) {
 				if (attachedFiles != null && !attachedFiles.isEmpty()) {
 					channel.sendMessage(message, attachedFiles.toArray(new File[0]));
 					clearAttachments();
 				} else {
 					channel.sendMessage(message);
 				}
-				break;
+				return;
+			}
+
+			Message msg = getMessage();
+			switch (messageType) {
 			case "delete":
 				msg.delete();
 				break;
@@ -216,9 +219,6 @@ public class SendMessagesController {
 	}
 
 	public Message getMessage() throws InterruptedException, ExecutionException {
-		if (messageIDTextField.getText().isBlank()) {
-			return null;
-		}
 		return Bot.getApi().getMessageById(messageIDTextField.getText(), channel).get();
 	}
 
@@ -294,24 +294,24 @@ public class SendMessagesController {
 	}
 
 	private void setupAllEmojiSelection() {
-	    emojiListAll.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-	        if (newValue != null) {
-	            String emojiValue = allEmojis.get(newValue);
-	            textArea.appendText(emojiValue);
-	            
-	            // Save the emoji if it's not already in the saved list
-	            if (!savedEmojis.getAbbreviationMap().containsKey(newValue)) {
-	                savedEmojis.put(newValue, emojiValue);
-	                emojiList.getItems().add(newValue);
-	                EmojiManager.addEmoji(newValue, emojiValue);
-	            }
+		emojiListAll.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				String emojiValue = allEmojis.get(newValue);
+				textArea.appendText(emojiValue);
 
-	            Platform.runLater(() -> {
-	                emojiListAll.getSelectionModel().clearSelection();
-	                textArea.requestFocus();
-	            });
-	        }
-	    });
+				// Save the emoji if it's not already in the saved list
+				if (!savedEmojis.getAbbreviationMap().containsKey(newValue)) {
+					savedEmojis.put(newValue, emojiValue);
+					emojiList.getItems().add(newValue);
+					EmojiManager.addEmoji(newValue, emojiValue);
+				}
+
+				Platform.runLater(() -> {
+					emojiListAll.getSelectionModel().clearSelection();
+					textArea.requestFocus();
+				});
+			}
+		});
 	}
 
 	private void setupChannelSelection() {
@@ -335,21 +335,21 @@ public class SendMessagesController {
 	}
 
 	private void updateChannelFromName(String channelName) {
-	    ServerTextChannel selectedChannel = channelMap.get(channelName);
-	    if (selectedChannel != null) {
-	        channel = selectedChannel;
-	        channelNameLabel.setText(channelName);
-	        if (!savedChannels.contains(channelName)) {
-	            savedChannels.add(channelName);
-	            channelList.getItems().add(channelName);
-	            SendMessageChannelManager.addChannel(channel.getId());
-	        }
-	    } else {
-	        // Remove the channel from lists if it's no longer accessible
-	        allChannels.remove(channelName);
-	        savedChannels.remove(channelName);
-	        channelList.getItems().remove(channelName);
-	    }
+		ServerTextChannel selectedChannel = channelMap.get(channelName);
+		if (selectedChannel != null) {
+			channel = selectedChannel;
+			channelNameLabel.setText(channelName);
+			if (!savedChannels.contains(channelName)) {
+				savedChannels.add(channelName);
+				channelList.getItems().add(channelName);
+				SendMessageChannelManager.addChannel(channel.getId());
+			}
+		} else {
+			// Remove the channel from lists if it's no longer accessible
+			allChannels.remove(channelName);
+			savedChannels.remove(channelName);
+			channelList.getItems().remove(channelName);
+		}
 	}
 
 	public void updateChannel(String channelID) {
