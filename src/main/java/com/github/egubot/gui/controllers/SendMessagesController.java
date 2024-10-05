@@ -15,6 +15,7 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.gui.helpers.ListManager;
 import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.main.Bot;
+import com.github.egubot.managers.EmojiManager;
 import com.github.egubot.managers.SendMessageChannelManager;
 import com.github.egubot.objects.Abbreviations;
 import javafx.application.Platform;
@@ -293,15 +294,24 @@ public class SendMessagesController {
 	}
 
 	private void setupAllEmojiSelection() {
-		emojiListAll.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null) {
-				textArea.appendText(allEmojis.get(newValue));
-				Platform.runLater(() -> {
-					emojiListAll.getSelectionModel().clearSelection();
-					textArea.requestFocus();
-				});
-			}
-		});
+	    emojiListAll.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+	        if (newValue != null) {
+	            String emojiValue = allEmojis.get(newValue);
+	            textArea.appendText(emojiValue);
+	            
+	            // Save the emoji if it's not already in the saved list
+	            if (!savedEmojis.getAbbreviationMap().containsKey(newValue)) {
+	                savedEmojis.put(newValue, emojiValue);
+	                emojiList.getItems().add(newValue);
+	                EmojiManager.addEmoji(newValue, emojiValue);
+	            }
+
+	            Platform.runLater(() -> {
+	                emojiListAll.getSelectionModel().clearSelection();
+	                textArea.requestFocus();
+	            });
+	        }
+	    });
 	}
 
 	private void setupChannelSelection() {
