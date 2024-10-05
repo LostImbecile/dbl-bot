@@ -26,8 +26,8 @@ import java.util.Collections;
 
 import com.github.egubot.shared.Shared;
 import com.github.egubot.shared.utils.ConvertObjects;
-import com.github.egubot.shared.utils.JSONUtilities;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects, TimerUpdateListener {
@@ -285,9 +285,8 @@ public class ScheduledTasks extends DataManagerHandler implements UpdatableObjec
 	public void updateDataFromObjects() {
 		if (timers == null)
 			return;
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String jsonData = gson.toJson(new TimerObjectList(timers), TimerObjectList.class);
-		jsonData = JSONUtilities.prettify(jsonData);
 		setData(ConvertObjects.textToList(jsonData));
 	}
 
