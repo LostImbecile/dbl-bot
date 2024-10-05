@@ -320,6 +320,7 @@ public class SendMessagesController {
 				updateChannelFromName(newValue);
 				Platform.runLater(() -> {
 					textArea.requestFocus();
+					channelList.getSelectionModel().clearSelection();
 				});
 			}
 		});
@@ -330,6 +331,7 @@ public class SendMessagesController {
 			if (newValue != null) {
 				updateChannelFromName(newValue);
 				Platform.runLater(() -> textArea.requestFocus());
+				channelListAll.getSelectionModel().clearSelection();
 			}
 		});
 	}
