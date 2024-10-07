@@ -2,12 +2,15 @@ package com.github.egubot.info;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.user.User;
+
+import com.github.egubot.main.Bot;
 
 public class UserInfoUtilities {
-	
+
 	private UserInfoUtilities() {
 	}
-	
+
 	public static boolean isOwner(Message msg) {
 		boolean isOwner = false;
 		if (msg.getAuthor().isBotOwner() || msg.getAuthor().isTeamMember()) {
@@ -23,19 +26,19 @@ public class UserInfoUtilities {
 	public static boolean isPrivilegedOwner(Message msg) {
 		return isServerOwner(msg) || isOwner(msg);
 	}
-	
+
 	public static boolean isAdmin(Message msg) {
 		return msg.getAuthor().isServerAdmin();
 	}
-	
+
 	public static boolean canManageServer(Message msg) {
 		return msg.getAuthor().canManageServer();
 	}
-	
+
 	public static boolean canManageRoles(Message msg) {
 		return msg.getAuthor().canManageRolesOnServer();
 	}
-	
+
 	public static boolean canManageChannels(Message msg) {
 		return msg.getAuthor().canCreateChannelsOnServer();
 	}
@@ -46,5 +49,16 @@ public class UserInfoUtilities {
 
 	public static boolean isUserEqual(MessageAuthor author, String id2) {
 		return author.getIdAsString().equals(id2);
+	}
+
+	public static User getUserById(String id) {
+		User user;
+		try {
+			user = Bot.getApi().getUserById(id).get();
+		} catch (Exception e) {
+			user = null;
+		}
+
+		return user;
 	}
 }
