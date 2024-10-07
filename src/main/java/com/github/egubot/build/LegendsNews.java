@@ -1,16 +1,12 @@
 package com.github.egubot.build;
 
 import java.util.List;
-import java.util.regex.Pattern;
-
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.storage.DataManagerHandler;
 
 public class LegendsNews extends DataManagerHandler {
-	public static final Pattern channelPattern = Pattern.compile("<#(\\d+)>");
-	public static final Pattern pingPattern = Pattern.compile("(<@&?\\d+>)");
 
 	public LegendsNews(){
 		super("Legends News", false);
