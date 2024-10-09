@@ -4,9 +4,9 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.regex.*;
 
 import com.github.egubot.shared.Shared;
+import com.github.egubot.shared.utils.DateUtils;
 import com.google.gson.annotations.SerializedName;
 
 public class TimerObject {
@@ -41,7 +41,6 @@ public class TimerObject {
 
 	public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d-M-yyyy, H:mm");
 	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private static final Pattern timePattern = Pattern.compile("(\\d+)([Mwdhms])");
 	private static int maxMissTolerancePercent = 10;
 	private static int minMissTolerancePercent = 1;
 
@@ -88,7 +87,7 @@ public class TimerObject {
 	}
 
 	public void setDelay(String delay) {
-		if (isValidDelay(delay)) {
+		if (DateUtils.isValidDelay(delay)) {
 			this.delay = delay;
 		} else {
 			throw new IllegalArgumentException("Invalid delay format: " + delay);
@@ -169,18 +168,18 @@ public class TimerObject {
 
 	public void setMissTolerance(String missTolerance) {
 		if ("0".equals(missTolerance)) {
-			this.missTolerance = formatDuration(Duration.ZERO);
-		} else if (isValidDelay(missTolerance)) {
+			this.missTolerance =  DateUtils.formatDurationAsDelay(Duration.ZERO);
+		} else if (DateUtils.isValidDelay(missTolerance)) {
 			// 10% of the delay duration
 			Duration maxTolerance = getDelayDuration().dividedBy(100 / maxMissTolerancePercent);
 			// 1% of the delay duration
 			Duration minTolerance = getDelayDuration().dividedBy(100 / minMissTolerancePercent);
-			Duration tolerance = parseDelayString(missTolerance);
+			Duration tolerance =  DateUtils.parseDelayString(missTolerance);
 
 			if (tolerance.compareTo(maxTolerance) > 0) {
-				this.missTolerance = formatDuration(maxTolerance);
+				this.missTolerance =  DateUtils.formatDurationAsDelay(maxTolerance);
 			} else if (tolerance.compareTo(minTolerance) < 0) {
-				this.missTolerance = formatDuration(minTolerance);
+				this.missTolerance =  DateUtils.formatDurationAsDelay(minTolerance);
 			} else {
 				this.missTolerance = missTolerance;
 			}
@@ -203,52 +202,8 @@ public class TimerObject {
 		}
 	}
 
-	private boolean isValidDelay(String delayString) {
-		return delayString.matches("(?:\\d+[smhdwM]){1,6}");
-	}
-
-	private Duration parseDelayString(String delayString) {
-		int months = 0;
-		int weeks = 0;
-		int days = 0;
-		int hours = 0;
-		int minutes = 0;
-		int seconds = 0;
-
-		Matcher matcher = timePattern.matcher(delayString);
-		while (matcher.find()) {
-			int value = Integer.parseInt(matcher.group(1));
-			switch (matcher.group(2)) {
-			case "M":
-				months = value;
-				break;
-			case "w":
-				weeks = value;
-				break;
-			case "d":
-				days = value;
-				break;
-			case "h":
-				hours = value;
-				break;
-			case "m":
-				minutes = value;
-				break;
-			case "s":
-				seconds = value;
-				break;
-			default:
-				seconds = 1;
-			}
-		}
-
-		Duration totalDuration = Duration.ofDays((long) months * 30 + weeks * 7 + days).plusHours(hours)
-				.plusMinutes(minutes).plusSeconds(seconds);
-		return totalDuration.compareTo(Duration.ofSeconds(1)) < 0 ? Duration.ofSeconds(1) : totalDuration;
-	}
-
 	public Duration getMissToleranceDuration() {
-		return missTolerance.equals("0") ? parseDelayString(delay).dividedBy(2) : parseDelayString(missTolerance);
+		return missTolerance.equals("0") ?  DateUtils.parseDelayString(delay).dividedBy(2) :  DateUtils.parseDelayString(missTolerance);
 	}
 
 	public ZonedDateTime getNextExecutionTime() {
@@ -260,7 +215,7 @@ public class TimerObject {
 	}
 
 	public Duration getDelayDuration() {
-		return parseDelayString(delay);
+		return DateUtils.parseDelayString(delay);
 	}
 
 	public void adjustTimesForSummerTime() {
@@ -286,17 +241,6 @@ public class TimerObject {
 		ZonedDateTime now = ZonedDateTime.now(Shared.getZoneID());
 		boolean isCurrentlySummerTime = now.getZone().getRules().isDaylightSavings(now.toInstant());
 		summerTime = isCurrentlySummerTime;
-	}
-
-	public static String formatDuration(Duration duration) {
-		long seconds = duration.toSeconds();
-		long days = seconds / (24 * 3600);
-		seconds %= (24 * 3600);
-		long hours = seconds / 3600;
-		seconds %= 3600;
-		long minutes = seconds / 60;
-		seconds %= 60;
-		return String.format("%dw%dd%dh%dm%ds", days / 7, days % 7, hours, minutes, seconds);
 	}
 
 	public ZonedDateTime getStartDateTime() {

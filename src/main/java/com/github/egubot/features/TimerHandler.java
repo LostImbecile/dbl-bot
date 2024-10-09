@@ -22,6 +22,7 @@ import com.github.egubot.interfaces.DiscordTimerTask;
 import com.github.egubot.interfaces.TimerUpdateListener;
 import com.github.egubot.objects.TimerObject;
 import com.github.egubot.shared.Shared;
+import com.github.egubot.shared.utils.DateUtils;
 
 public class TimerHandler {
 	private static final Logger logger = LogManager.getLogger(TimerHandler.class.getName());
@@ -256,7 +257,7 @@ public class TimerHandler {
 			Duration timeDifference = Duration.between(lastCheckTime, now).minus(Duration.ofSeconds(5));
 
 			if (Math.abs(timeDifference.toMinutes()) > 1) {
-				logger.debug("System time changed by {}", TimerObject.formatDuration(timeDifference));
+				logger.debug("System time changed by {}", DateUtils.formatDurationAsDelay(timeDifference));
 				adjustTimers();
 			}
 
