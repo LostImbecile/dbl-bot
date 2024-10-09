@@ -2,7 +2,6 @@ package com.github.egubot.managers;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,7 +25,7 @@ public class ShutdownManager {
 	public synchronized void initiateShutdown(int exitCode) {
 		logger.info("Shutdown Sequence Initiated");
 		// Some classes need to shutdown last to avoid trouble
-		Collections.sort(shutdownables, Comparator.comparingInt(Shutdownable::getShutdownPriority));
+		Collections.sort(shutdownables);
 
 		// Uses its own thread to avoid being run by a thread it's terminating
 		CompletableFuture.runAsync(() -> {
