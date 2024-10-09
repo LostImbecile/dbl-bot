@@ -53,17 +53,21 @@ public class ServerFinanceData {
 		return baseTransferLimit;
 	}
 
-	public void setBaseTransferLimit(double baseTransferLimit) {
+	public synchronized void setBaseTransferLimit(double baseTransferLimit) {
 		this.baseTransferLimit = baseTransferLimit;
 	}
 
-	public void addTotalWon(double amount) {
+	public synchronized void addToPrizePool(double amount) {
+		this.prizePool += amount;
+	}
+
+	public synchronized void addTotalWon(double amount) {
 		this.totalWon += amount;
 	}
 
-	public void addTotalLost(double amount) {
+	public synchronized void addTotalLost(double amount) {
 		this.totalLost += amount;
-		this.prizePool -= amount;
+		addToPrizePool(-amount);
 	}
 
 }

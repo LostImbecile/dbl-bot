@@ -48,7 +48,7 @@ public class UserLoanProcessor implements BalanceInterceptor, UserLoanIntercepto
 
 	@Override
 	public boolean canLoan(UserFinanceData lender, UserFinanceData borrower, double amount) {
-		return lender.getBalance() >= amount && borrower.getUserLoan() == null;
+		return lender.getBalance() >= amount && borrower.getUserLoan() == null && amount > 0;
 	}
 
 	@Override

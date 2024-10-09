@@ -10,7 +10,7 @@ public class EarningStatsInterceptor implements BalanceInterceptor {
 	public double apply(UserBalance serverData, UserFinanceData data, double amount) {
 		if (amount > 0) {
 			data.addEarnings(amount);
-			serverData.getServerFinanceData().addTotalWon(amount);;
+			serverData.getServerFinanceData().addTotalWon(amount);
 		} else if (amount < 0) {
 			data.addLoss(Math.abs(amount));
 			serverData.getServerFinanceData().addTotalLost(amount);

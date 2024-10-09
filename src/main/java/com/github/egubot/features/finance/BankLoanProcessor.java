@@ -15,7 +15,7 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 
 	@Override
 	public double apply(UserBalance serverData, UserFinanceData data, double amount) {
-		if(amount <= 0)
+		if (amount <= 0)
 			return 0;
 		BankLoan bankLoan = data.getBankLoan();
 		if (bankLoan != null && DateUtils.hasPassed(bankLoan.getDueDate())) {
@@ -27,8 +27,8 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 	private double calculateDeduction(BankLoan bankLoan, double amount) {
 		double percentCut = amount * 0.1;
 		if (bankLoan.getAmount() > percentCut)
-			return - percentCut;
-		return - bankLoan.getAmount();
+			return -percentCut;
+		return -bankLoan.getAmount();
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 	}
 
 	private int calculateMinLoanAmount(int creditScore) {
-		return creditScore * 5; // half the max
+		return calculateMaxLoanAmount(creditScore) / 2; // half the max
 	}
 
 	private double calculateInterestRate(int creditScore) {
@@ -83,7 +83,7 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 	private int calculateCreditScoreGain(int currentScore, double amount) {
 		double loanPercent = (amount / calculateMaxLoanAmount(currentScore)) + 0.01;
 		// Min of 3, grows by 1 every 20 points starting at 40 with full loans
-		return Math.max(3, (int) ((currentScore / 20.0 + 2) * loanPercent)); 
+		return Math.max(3, (int) ((currentScore / 20.0 + 2) * loanPercent));
 	}
 
 	@Override

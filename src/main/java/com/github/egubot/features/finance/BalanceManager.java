@@ -116,7 +116,9 @@ public class BalanceManager {
 		UserPair userPair = null;
 		for (UserLoanInterceptor loanInterceptor : userLoanInterceptors) {
 			if (loanInterceptor.canLoan(lender, borrower, amount)) {
-				loanInterceptor.applyLoan(lender, borrower, amount, dueDate, penaltyRate);
+				double tax = amount * 0.15;
+				loanInterceptor.applyLoan(lender, borrower, amount - tax, dueDate, penaltyRate);
+				serverData.getServerFinanceData().addToPrizePool(tax);
 				userPair = new UserPair(lender, borrower);
 			}
 		}
