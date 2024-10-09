@@ -142,15 +142,20 @@ public class BalanceManager {
 	public static UserFinanceData applyDaily(UserBalance serverData, Message msg) {
 		UserFinanceData user = getUserDataCopy(serverData, msg);
 		double amount = DailyClaimManager.apply(user);
-		if (amount != 0)
+		if (amount != 0) {
+			user.setBalance(user.getBalance() + amount);
 			return user;
+		}
 		return null;
 	}
 
 	public static UserFinanceData applyHourly(UserBalance serverData, Message msg) {
 		UserFinanceData user = getUserDataCopy(serverData, msg);
-		if (HourlyClaimManager.apply(user) != 0)
+		double amount = HourlyClaimManager.apply(user);
+		if (amount != 0) {
+			user.setBalance(user.getBalance() + amount);
 			return user;
+		}
 		return null;
 	}
 
