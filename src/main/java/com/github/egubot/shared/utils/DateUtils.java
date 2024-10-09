@@ -159,6 +159,10 @@ public class DateUtils {
 	public static long daysSinceEpoch() {
 		return Instant.now().toEpochMilli() / 86400000L;
 	}
+	
+	public static long hoursSinceEpoch() {
+	    return Instant.now().toEpochMilli() / 3600000L;
+	}
 
 	/**
 	 * 

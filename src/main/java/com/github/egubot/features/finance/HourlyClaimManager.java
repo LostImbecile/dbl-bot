@@ -1,13 +1,14 @@
 package com.github.egubot.features.finance;
 
 import com.github.egubot.objects.finance.UserFinanceData;
+import com.github.egubot.shared.utils.DateUtils;
 
 public class HourlyClaimManager {
 
 	public static double apply(UserFinanceData data) {
 		double amount = 0;
 		if (canClaimHourly(data)) {
-			data.setLastHourlyClaim(System.currentTimeMillis());
+			data.setLastHourlyClaim(DateUtils.hoursSinceEpoch());
 			amount = calculateAmount(data);
 		}
 		return amount;
@@ -22,7 +23,7 @@ public class HourlyClaimManager {
 		if (lastClaim == 0) {
 			return true;
 		}
-		return System.currentTimeMillis() - lastClaim >= 60 * 60 * 1000; // 1 hour
+		return DateUtils.hoursSinceEpoch() - lastClaim >= 1;
 	}
 
 }
