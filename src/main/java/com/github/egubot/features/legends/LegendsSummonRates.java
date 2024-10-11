@@ -14,7 +14,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.features.MessageFormats;
 import com.github.egubot.objects.legends.Characters;
 import com.github.egubot.objects.legends.SummonBanner;
 import com.github.egubot.objects.legends.SummonCharacter;
@@ -54,11 +53,11 @@ public class LegendsSummonRates {
 			results.setCustomRotation(customRotation);
 			results.setNumOfRotationsToGetFocusCharacter(numOfRotationsToGetFocusCharacter);
 
-			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(results));
-			embeds.add(MessageFormats.buildSummonTotalEmbed(results));
+			embeds.addAll(LegendsEmbedBuilder.buildSummonCharacterEmbeds(results));
+			embeds.add(LegendsEmbedBuilder.buildSummonTotalEmbed(results));
 		} else {
-			embeds.addAll(MessageFormats.buildSummonCharacterEmbeds(results));
-			embeds.add(MessageFormats.buildSummonTotalEmbed(results));
+			embeds.addAll(LegendsEmbedBuilder.buildSummonCharacterEmbeds(results));
+			embeds.add(LegendsEmbedBuilder.buildSummonTotalEmbed(results));
 		}
 		return embeds;
 	}

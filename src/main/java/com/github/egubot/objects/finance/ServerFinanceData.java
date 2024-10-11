@@ -15,6 +15,10 @@ public class ServerFinanceData {
 	private double prizePool;
 	@SerializedName("base_transfer_limit")
 	private double baseTransferLimit = 100.0;
+	@SerializedName("base_daily")
+	private int baseDaily = 100;
+	@SerializedName("base_hourly")
+	private int baseHourly = 30;
 
 	// Getters and Setters
 	public List<UserFinanceData> getUsers() {
@@ -49,7 +53,7 @@ public class ServerFinanceData {
 		this.prizePool = prizePool;
 	}
 
-	public double getBaseTransferLimit() {
+	public synchronized double getBaseTransferLimit() {
 		return baseTransferLimit;
 	}
 
@@ -58,16 +62,36 @@ public class ServerFinanceData {
 	}
 
 	public synchronized void addToPrizePool(double amount) {
-		this.prizePool += amount;
+		this.prizePool += round(amount);
 	}
 
 	public synchronized void addTotalWon(double amount) {
-		this.totalWon += amount;
+		this.totalWon += round(amount);
+	}
+
+	private double round(double amount) {
+		return Math.round(amount * 10.0) / 10.0;
 	}
 
 	public synchronized void addTotalLost(double amount) {
-		this.totalLost += amount;
-		addToPrizePool(-amount);
+		this.totalLost += round(amount);
+		addToPrizePool(amount);
+	}
+
+	public int getBaseDaily() {
+		return baseDaily;
+	}
+
+	public void setBaseDaily(int baseDaily) {
+		this.baseDaily = baseDaily;
+	}
+
+	public int getBaseHourly() {
+		return baseHourly;
+	}
+
+	public void setBaseHourly(int baseHourly) {
+		this.baseHourly = baseHourly;
 	}
 
 }

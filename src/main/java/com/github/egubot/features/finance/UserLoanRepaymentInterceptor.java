@@ -7,20 +7,27 @@ import com.github.egubot.objects.finance.UserFinanceData.UserLoan;
 
 public class UserLoanRepaymentInterceptor implements TransferInterceptor {
 	@Override
-	public boolean canTransfer(UserFinanceData sender, UserFinanceData receiver, double amount, double baseTransferLimit) {
+	public boolean canTransfer(UserFinanceData sender, UserFinanceData receiver, double amount,
+			double baseTransferLimit) {
 		// Always allow transfers for loan repayment
-		return sender.getUserLoan() != null && receiver != null && sender.getUserLoan().getLenderId() == receiver.getUserID();
+		return sender.getUserLoan() != null && receiver != null
+				&& sender.getUserLoan().getLenderId() == receiver.getUserID();
 	}
-	
+
 	@Override
-	public void afterTransfer(UserFinanceData sender, UserFinanceData receiver, double amount) {
+	public double afterTransfer(UserFinanceData sender, UserFinanceData receiver, double amount) {
 		UserLoan userLoan = sender.getUserLoan();
-		double remaining = userLoan.getAmount();
+		double deducted = userLoan.getAmount();
+		double remaining = deducted;
 		remaining -= amount;
 		if (remaining <= 0) {
 			sender.setUserLoan(null);
+			sender.getLastTransaction().add(0, "-$" + amount + " for user loan.  Loan is fully paid off.");
+			return deducted;
 		} else {
 			userLoan.setAmount(remaining);
+			sender.getLastTransaction().add(0, "-$" + amount + " for bank loan. Remaining: $" + userLoan.getAmount());
+			return amount;
 		}
 	}
 

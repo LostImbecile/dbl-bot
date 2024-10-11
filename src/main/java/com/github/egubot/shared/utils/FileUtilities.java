@@ -1,5 +1,6 @@
 package com.github.egubot.shared.utils;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,6 +15,8 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -83,7 +86,7 @@ public class FileUtilities {
 			return null;
 		}
 	}
-	
+
 	public static String readFile(String fileName) {
 		return readInputStream(getFileInputStream(fileName, false), "\n");
 	}
@@ -179,6 +182,15 @@ public class FileUtilities {
 
 	public static BufferedInputStream toBufferedInputStream(InputStream is) {
 		return new BufferedInputStream(is);
+	}
+
+	public static BufferedImage loadImageFromResources(String imageName) throws IOException {
+		try (InputStream imageStream = FileUtilities.class.getClassLoader().getResourceAsStream("images/" + imageName)) {
+			if (imageStream == null) {
+				throw new IOException("Image not found in resources/images: " + imageName);
+			}
+			return ImageIO.read(imageStream);
+		}
 	}
 
 	public static void main(String[] args) {

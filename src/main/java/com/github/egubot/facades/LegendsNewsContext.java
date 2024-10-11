@@ -13,7 +13,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsMaintenance;
 import com.github.egubot.build.LegendsNews;
-import com.github.egubot.features.MessageFormats;
+import com.github.egubot.features.legends.LegendsEmbedBuilder;
 import com.github.egubot.features.legends.LegendsNewsScraper;
 import com.github.egubot.interfaces.NewsScraper;
 import com.github.egubot.interfaces.Shutdownable;
@@ -89,7 +89,7 @@ public class LegendsNewsContext implements Shutdownable {
 		logger.debug("Sending {} Legends News Pieces for {} Servers", pieces.size(), newsServers.size());
 		List<EmbedBuilder> newsEmbeds = new ArrayList<>();
 		for (LegendsNewsPiece piece : pieces) {
-			newsEmbeds.add(MessageFormats.buildLegendsNewsEmbed(piece));
+			newsEmbeds.add(LegendsEmbedBuilder.buildLegendsNewsEmbed(piece));
 		}
 		for (String server : newsServers) {
 			List<Messageable> channels = MessageUtils.getChannels(server);
@@ -109,7 +109,7 @@ public class LegendsNewsContext implements Shutdownable {
 			List<String> maintenanceServers = registeredMaintenanceServers.getData();
 			logger.debug("Sending Legends Maintenance Notice for {}", maintenanceServers.size());
 
-			EmbedBuilder maintenanceEmbed = MessageFormats.buildLegendsNewsEmbed(maintenance);
+			EmbedBuilder maintenanceEmbed = LegendsEmbedBuilder.buildLegendsNewsEmbed(maintenance);
 			for (String server : maintenanceServers) {
 				List<Messageable> channels = MessageUtils.getChannels(server);
 				String pings = MessageUtils.getPings(server);

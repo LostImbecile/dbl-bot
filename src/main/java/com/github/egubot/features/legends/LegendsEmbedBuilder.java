@@ -1,4 +1,4 @@
-package com.github.egubot.features;
+package com.github.egubot.features.legends;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -12,19 +12,18 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.features.legends.LegendsSummonRates;
 import com.github.egubot.objects.legends.Characters;
 import com.github.egubot.objects.legends.LegendsNewsPiece;
 import com.github.egubot.objects.legends.SummonCharacter;
 import com.github.egubot.objects.legends.SummonResults;
 
-public class MessageFormats {
+public class LegendsEmbedBuilder {
 	// This replaces spaces with an invisible character
 	public static final String EQUALISE = String.format("%n%80s", "‏‏‎ ").replace(" ", "\u2005");
 	public static final String INLINE_EQUALISE = String.format("%n%35s", "‏‏‎ ").replace(" ", "\u2005");
 	private static Random rng = new Random();
 
-	private MessageFormats() {
+	private LegendsEmbedBuilder() {
 	}
 
 	public static void animateRolledCharacters(List<Characters> pool, Message msg, EmbedBuilder[] embeds,
@@ -74,10 +73,11 @@ public class MessageFormats {
 		msg.edit("Finished <a:saikyo:792521951100796958><a:da:792522031601287218>", embeds);
 
 	}
-	
+
 	public static EmbedBuilder buildLegendsNewsEmbed(LegendsNewsPiece piece) {
 		return new EmbedBuilder().setAuthor(piece.getTitle(), piece.getUrl(), "").setImage(piece.getBannerUrl())
-				.setColor(Color.RED).setFooter(piece.getStartTime() + " ～ " + piece.getEndTime()).setDescription(piece.getDescription());
+				.setColor(Color.RED).setFooter(piece.getStartTime() + " ～ " + piece.getEndTime())
+				.setDescription(piece.getDescription());
 	}
 
 	public static EmbedBuilder createCharacterEmbed(Characters unit) {

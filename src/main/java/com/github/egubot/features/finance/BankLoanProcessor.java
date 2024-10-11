@@ -4,13 +4,14 @@ import java.time.Instant;
 import java.util.Random;
 
 import com.github.egubot.build.UserBalance;
-import com.github.egubot.interfaces.finance.BalanceInterceptor;
+import com.github.egubot.interfaces.finance.EarningLossInterceptor;
+import com.github.egubot.interfaces.finance.BalanceUseInterceptor;
 import com.github.egubot.interfaces.finance.BankLoanInterceptor;
 import com.github.egubot.objects.finance.UserFinanceData;
 import com.github.egubot.objects.finance.UserFinanceData.BankLoan;
 import com.github.egubot.shared.utils.DateUtils;
 
-public class BankLoanProcessor implements BalanceInterceptor, BankLoanInterceptor {
+public class BankLoanProcessor implements EarningLossInterceptor, BankLoanInterceptor, BalanceUseInterceptor {
 	public static final Random rng = new Random();
 
 	@Override
@@ -34,15 +35,17 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 	@Override
 	public UserFinanceData afterApply(UserBalance serverData, UserFinanceData data, double amount, double deduction) {
 		BankLoan bankLoan = data.getBankLoan();
-		if (bankLoan != null) {
-			bankLoan.setAmount(bankLoan.getAmount() + deduction);
-			if (bankLoan.getAmount() <= 0) {
-				data.setCreditScore(Math.max(bankLoan.getCreditScoreGainOnRepayment() + data.getCreditScore(), 5));
-				data.setBankLoan(null);
-			} else {
-				int penalty = rng.nextInt(2);
-				bankLoan.setCreditScoreGainOnRepayment(bankLoan.getCreditScoreGainOnRepayment() - penalty);
-			}
+		bankLoan.setAmount(bankLoan.getAmount() + deduction);
+		if (bankLoan.getAmount() <= 0) {
+			data.setCreditScore(Math.max(bankLoan.getCreditScoreGainOnRepayment() + data.getCreditScore(), 5));
+			data.setBankLoan(null);
+			data.getLastTransaction().add(0,
+					"-$" + (-deduction) + " from bank loan. New Credit Score: " + data.getCreditScore());
+		} else {
+			int penalty = rng.nextInt(2);
+			bankLoan.setCreditScoreGainOnRepayment(bankLoan.getCreditScoreGainOnRepayment() - penalty);
+			data.getLastTransaction().add(0,
+					"-$" + (-deduction) + " from bank loan. Remaining amount: $" + bankLoan.getAmount());
 		}
 		return null;
 	}
@@ -60,27 +63,29 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 		int creditScore = user.getCreditScore();
 		BankLoan loan = new BankLoan();
 		loan.setInterestRate(calculateInterestRate(creditScore));
-		loan.setAmount(amount * loan.getInterestRate());
+		loan.setAmount(amount);
+		loan.setOriginalAmount(amount);
+		loan.applyInterest();
 		loan.setIssueDate(DateUtils.getDateTimeNow());
-		loan.setDueDate(Instant.now().toEpochMilli() + (1000 * 60 * 60 * 1000)); // 1 day
+		loan.setDueDate(Instant.now().toEpochMilli() + (1000 * 60 * 60 * 24)); // 1 day
 		loan.setCreditScoreGainOnRepayment(calculateCreditScoreGain(creditScore, amount));
 		user.setBankLoan(loan);
 		user.setBalance(user.getBalance() + amount);
 	}
 
-	private int calculateMaxLoanAmount(int creditScore) {
+	public static int calculateMaxLoanAmount(int creditScore) {
 		return creditScore * 10;
 	}
 
-	private int calculateMinLoanAmount(int creditScore) {
+	public static int calculateMinLoanAmount(int creditScore) {
 		return calculateMaxLoanAmount(creditScore) / 2; // half the max
 	}
 
-	private double calculateInterestRate(int creditScore) {
+	private static double calculateInterestRate(int creditScore) {
 		return Math.max(15 - creditScore / 10, 5); // Min of 5, starts at 14
 	}
 
-	private int calculateCreditScoreGain(int currentScore, double amount) {
+	private static int calculateCreditScoreGain(int currentScore, double amount) {
 		double loanPercent = (amount / calculateMaxLoanAmount(currentScore)) + 0.01;
 		// Min of 3, grows by 1 every 20 points starting at 40 with full loans
 		return Math.max(3, (int) ((currentScore / 20.0 + 2) * loanPercent));
@@ -89,5 +94,19 @@ public class BankLoanProcessor implements BalanceInterceptor, BankLoanIntercepto
 	@Override
 	public int getPriority() {
 		return 1;
+	}
+
+	@Override
+	public void processBalanceUse(UserBalance serverData, UserFinanceData data, double amount) {
+		if (data.getBankLoan() != null) {
+			data.getBankLoan().addAmountUsedBeforeRepayment(amount);
+		}
+	}
+
+	@Override
+	public void processBalanceRetract(UserBalance serverData, UserFinanceData data, double amount) {
+		if (data.getBankLoan() != null) {
+			data.getBankLoan().addAmountUsedBeforeRepayment(-amount);
+		}
 	}
 }

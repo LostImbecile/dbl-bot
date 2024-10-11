@@ -12,7 +12,7 @@ import com.github.egubot.interfaces.Shutdownable;
 public class UserBalanceContext implements Shutdownable {
     private static Map<Long, UserBalance> balanceMap = new ConcurrentHashMap<>();
 
-    public static UserBalance getUserBalance(Message msg) {
+    public static UserBalance getServerBalance(Message msg) {
         long serverID = ServerInfoUtilities.getServerID(msg);
         if (serverID == -1) {
             return null;

@@ -11,7 +11,6 @@ import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.features.MessageFormats;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.legends.CharacterHash;
 import com.github.egubot.objects.legends.Characters;
@@ -67,7 +66,7 @@ public class LegendsRoll extends LegendsPool {
 			for (int i = 0; i < rolledCharacters.size(); i++) {
 				unit = rolledCharacters.get(i);
 
-				embeds[i] = MessageFormats.createCharacterEmbed(unit);
+				embeds[i] = LegendsEmbedBuilder.createCharacterEmbed(unit);
 
 			}
 
@@ -76,7 +75,7 @@ public class LegendsRoll extends LegendsPool {
 			if (isAnimated) {
 				Message m = msg.setContent("`Rolling...‎‎‏‏‎`").send(e).join();
 
-				MessageFormats.animateRolledCharacters(pool, m, embeds, rolledCharacters.size());
+				LegendsEmbedBuilder.animateRolledCharacters(pool, m, embeds, rolledCharacters.size());
 			} else {
 				msg.setEmbeds(embeds).send(e);
 			}

@@ -17,7 +17,7 @@ public class HourlyCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		UserBalance serverData = UserBalanceContext.getUserBalance(msg);
+		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 		UserFinanceData userOld = serverData.getUserData(msg);
 		UserFinanceData userNew = BalanceManager.applyHourly(serverData, msg);
 		if (userNew == null)

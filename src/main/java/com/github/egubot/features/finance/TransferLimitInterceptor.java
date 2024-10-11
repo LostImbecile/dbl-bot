@@ -11,15 +11,16 @@ public class TransferLimitInterceptor implements TransferInterceptor {
 		if (receiver == null)
 			return false;
 		double transferLimit = calculateTransferLimit(sender, baseTransferLimit);
-		return amount <= transferLimit && amount > 0;
+		return amount <= transferLimit && amount > 0 && sender.getUserID() != receiver.getUserID();
 	}
 
 	@Override
-	public void afterTransfer(UserFinanceData sender, UserFinanceData receiver, double amount) {
+	public double afterTransfer(UserFinanceData sender, UserFinanceData receiver, double amount) {
 		sender.setDailyTransferred(sender.getDailyTransferred() + amount);
+		return amount;
 	}
 
-	private double calculateTransferLimit(UserFinanceData sender, double baseTransferLimit) {
+	public static double calculateTransferLimit(UserFinanceData sender, double baseTransferLimit) {
 		double limit = baseTransferLimit;
 		limit += calculateCreditScoreGain(sender.getCreditScore());
 		limit -= sender.getDailyTransferred();
@@ -29,7 +30,7 @@ public class TransferLimitInterceptor implements TransferInterceptor {
 		return limit;
 	}
 
-	private int calculateCreditScoreGain(int creditScore) {
+	public static int calculateCreditScoreGain(int creditScore) {
 		return creditScore * 10;
 	}
 

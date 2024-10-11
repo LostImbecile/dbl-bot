@@ -3,7 +3,7 @@ package com.github.egubot.facades;
 import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
-import com.github.egubot.features.MessageFormats;
+import com.github.egubot.features.legends.LegendsEmbedBuilder;
 import com.weatherapi.forecast.Weather;
 import com.weatherapi.forecast.WeatherForecast;
 
@@ -90,7 +90,7 @@ public class WeatherFacade {
 		stringBuilder.append("%\nChance of Snow: ");
 		stringBuilder.append(weather.getAfterTomorrowChanceOfSnow());
 		stringBuilder.append("%");
-		stringBuilder.append(MessageFormats.EQUALISE);
+		stringBuilder.append(LegendsEmbedBuilder.EQUALISE);
 		description = stringBuilder.toString();
 		return description;
 	}
@@ -114,7 +114,7 @@ public class WeatherFacade {
 			stringBuilder.append("%\nChance of Snow: ");
 			stringBuilder.append(weather.getTomorrowChanceOfSnow());
 			stringBuilder.append("%");
-			stringBuilder.append(MessageFormats.EQUALISE);
+			stringBuilder.append(LegendsEmbedBuilder.EQUALISE);
 			description = stringBuilder.toString();
 		} else {
 			StringBuilder stringBuilder = new StringBuilder();
@@ -131,7 +131,7 @@ public class WeatherFacade {
 			stringBuilder.append("%, Snow: ");
 			stringBuilder.append(weather.getTomorrowChanceOfSnow());
 			stringBuilder.append("%");
-			stringBuilder.append(MessageFormats.EQUALISE);
+			stringBuilder.append(LegendsEmbedBuilder.EQUALISE);
 			description = stringBuilder.toString();
 		}
 		return description;
@@ -161,7 +161,7 @@ public class WeatherFacade {
 			stringBuilder.append("%\nChance of Snow: ");
 			stringBuilder.append(weather.getAfterTomorrowChanceOfSnow());
 			stringBuilder.append("%");
-			stringBuilder.append(MessageFormats.EQUALISE);
+			stringBuilder.append(LegendsEmbedBuilder.EQUALISE);
 			description = stringBuilder.toString();
 		} else {
 			StringBuilder stringBuilder = new StringBuilder();
@@ -179,7 +179,7 @@ public class WeatherFacade {
 			stringBuilder.append("%, Snow: ");
 			stringBuilder.append(weather.getAfterTomorrowChanceOfSnow());
 			stringBuilder.append("%");
-			stringBuilder.append(MessageFormats.EQUALISE);
+			stringBuilder.append(LegendsEmbedBuilder.EQUALISE);
 			description = stringBuilder.toString();
 		}
 		return description;

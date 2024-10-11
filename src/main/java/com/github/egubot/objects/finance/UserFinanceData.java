@@ -48,7 +48,7 @@ public class UserFinanceData {
 	@SerializedName("daily_transferred")
 	private double dailyTransferred = 0.0;
 	@SerializedName("last_transaction")
-	private List<String> lastTransaction = null;
+	private List<String> lastTransaction = new ArrayList<>();
 
 	public UserFinanceData(long userID) {
 		this.userID = userID;
@@ -61,18 +61,20 @@ public class UserFinanceData {
 	// Methods to update earnings and losses averages
 	public void addEarnings(double amount) {
 		resetDaily(DateUtils.daysSinceEpoch());
+		amount = round(amount);
 		earningsSum += amount;
 		earningsCount++;
 		totalEarnings += amount;
-		dailyAverageEarnings = earningsSum / earningsCount;
+		dailyAverageEarnings = round(earningsSum / earningsCount);
 	}
 
 	public void addLoss(double amount) {
 		resetDaily(DateUtils.daysSinceEpoch());
+		amount = round(amount);
 		lossesSum += amount;
 		lossesCount++;
 		totalLosses += amount;
-		dailyAverageLosses = lossesSum / lossesCount;
+		dailyAverageLosses = round(lossesSum / lossesCount);
 	}
 
 	public void resetDaily() {
@@ -80,7 +82,7 @@ public class UserFinanceData {
 	}
 
 	private void resetDaily(long daysSinceEpoch) {
-		if (lastEarningsUpdate < daysSinceEpoch) {
+		if (lastEarningsUpdate != 0 && lastEarningsUpdate < daysSinceEpoch) {
 			lossesSum = 0.0;
 			lossesCount = 0;
 			earningsSum = 0.0;
@@ -105,7 +107,11 @@ public class UserFinanceData {
 	}
 
 	public void setBalance(double balance) {
-		this.balance = Math.round(balance * 100.0) / 100.0;
+		this.balance = round(balance);
+	}
+
+	private static double round(double num) {
+		return Math.round(num * 100.0) / 100.0;
 	}
 
 	public double getTotalEarnings() {
@@ -215,6 +221,8 @@ public class UserFinanceData {
 	public static class BankLoan {
 		@SerializedName("amount")
 		private double amount;
+		@SerializedName("original_amount")
+		private double originalAmount;
 		@SerializedName("interest_rate")
 		private double interestRate;
 		@SerializedName("issue_date")
@@ -223,6 +231,8 @@ public class UserFinanceData {
 		private long dueDate;
 		@SerializedName("credit_score_gain")
 		private int creditScoreGainOnRepayment;
+		@SerializedName("amount_used_before_repayment")
+		private double amountUsedBeforeRepayment = 0.0;
 
 		public BankLoan() {
 		}
@@ -236,7 +246,7 @@ public class UserFinanceData {
 		}
 
 		public void setAmount(double amount) {
-			this.amount = amount;
+			this.amount = round(amount);
 		}
 
 		public double getInterestRate() {
@@ -277,6 +287,36 @@ public class UserFinanceData {
 			this.issueDate = bankLoan.issueDate;
 			this.dueDate = bankLoan.dueDate;
 			this.creditScoreGainOnRepayment = bankLoan.creditScoreGainOnRepayment;
+			this.amountUsedBeforeRepayment = bankLoan.amountUsedBeforeRepayment;
+			this.originalAmount = bankLoan.originalAmount;
+		}
+
+		public double getOriginalAmount() {
+			return originalAmount;
+		}
+
+		public void setOriginalAmount(double originalAmount) {
+			this.originalAmount = round(originalAmount);
+		}
+
+		public double getAmountUsedBeforeRepayment() {
+			return amountUsedBeforeRepayment;
+		}
+
+		public void setAmountUsedBeforeRepayment(double amountUsedBeforeRepayment) {
+			this.amountUsedBeforeRepayment = round(amountUsedBeforeRepayment);
+		}
+
+		public void addAmountUsedBeforeRepayment(double amount) {
+			this.amountUsedBeforeRepayment += round(amount);
+		}
+
+		public boolean isOverdue() {
+			return DateUtils.hasPassed(dueDate);
+		}
+
+		public double leftBeforeAllowingPayback() {
+			return round(getOriginalAmount() - getAmountUsedBeforeRepayment());
 		}
 
 	}
@@ -305,7 +345,7 @@ public class UserFinanceData {
 		}
 
 		public void setAmount(double amount) {
-			this.amount = amount;
+			this.amount = round(amount);
 		}
 
 		public double getPenaltyRate() {

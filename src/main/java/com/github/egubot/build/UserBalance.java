@@ -1,6 +1,7 @@
 package com.github.egubot.build;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,7 +43,6 @@ public class UserBalance extends DataManagerHandler {
 		return false;
 	}
 
-
 	public synchronized void resetBalance(Message msg) {
 		getUserData(getUserID(msg)).setBalance(0);
 		writeData(msg.getChannel());
@@ -71,7 +71,7 @@ public class UserBalance extends DataManagerHandler {
 		setUserData(getUserID(msg), userData);
 	}
 
-	private void setUserData(long userID, UserFinanceData userData) {
+	public void setUserData(long userID, UserFinanceData userData) {
 		balanceMap.put(userID, userData);
 		writeData(null);
 	}
@@ -110,7 +110,7 @@ public class UserBalance extends DataManagerHandler {
 		if (serverFinanceData == null) {
 			return;
 		}
-		serverFinanceData.setUsers(balanceMap.values().stream().toList());
+		serverFinanceData.setUsers(new ArrayList<>(balanceMap.values().stream().toList()));
 		Gson gson = new Gson();
 		String jsonData = gson.toJson(serverFinanceData);
 		jsonData = JSONUtilities.prettify(jsonData);

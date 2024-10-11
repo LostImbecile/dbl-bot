@@ -20,11 +20,11 @@ public class DateUtils {
 	public static ZonedDateTime getNowObject() {
 		return ZonedDateTime.now(getZoneID());
 	}
-	
+
 	public static boolean isValidDelay(String delayString) {
-	    return DELAY_VALIDATION_Pattern.matcher(delayString).matches();
+		return DELAY_VALIDATION_Pattern.matcher(delayString).matches();
 	}
-	
+
 	public static String formatDurationAsDelay(Duration duration) {
 		long seconds = duration.toSeconds();
 		long days = seconds / (24 * 3600);
@@ -35,7 +35,16 @@ public class DateUtils {
 		seconds %= 60;
 		return String.format("%dw%dd%dh%dm%ds", days / 7, days % 7, hours, minutes, seconds);
 	}
-	
+
+	public static String epochMillisToDiscordRelativeTimeStamp(long millis) {
+		return epochMillisToDiscordTimeStamp(millis).replace(":f", ":R");
+	}
+
+	public static String epochMillisToDiscordTimeStamp(long millis) {
+		long epochSeconds = Instant.ofEpochMilli(millis).getEpochSecond();
+		return "<t:" + epochSeconds + ":f>";
+	}
+
 	public static Duration parseDelayString(String delayString) {
 		int months = 0;
 		int weeks = 0;
@@ -75,29 +84,27 @@ public class DateUtils {
 				.plusMinutes(minutes).plusSeconds(seconds);
 		return totalDuration.compareTo(Duration.ofSeconds(1)) < 0 ? Duration.ofSeconds(1) : totalDuration;
 	}
-	
+
 	public static long addDurationToEpochMillis(long epochMillis, Duration duration) {
-	    return epochMillis + duration.toMillis();
+		return epochMillis + duration.toMillis();
 	}
 
 	public static long addDelayStringToEpochMillis(long epochMillis, String durationString) {
-	    if (!isValidDelay(durationString)) {
-	        throw new IllegalArgumentException("Invalid duration string format.");
-	    }
-	    Duration duration = parseDelayString(durationString);
-	    return addDurationToEpochMillis(epochMillis, duration);
+		if (!isValidDelay(durationString)) {
+			throw new IllegalArgumentException("Invalid duration string format.");
+		}
+		Duration duration = parseDelayString(durationString);
+		return addDurationToEpochMillis(epochMillis, duration);
 	}
 
-	
 	public static String timeLeftAsDelay(long epochMillis) {
-	    long currentTimeMillis = System.currentTimeMillis();
-	    if (currentTimeMillis >= epochMillis) {
-	        return "0";  // Time has passed
-	    }
-	    Duration remainingDuration = Duration.ofMillis(epochMillis - currentTimeMillis);
-	    return formatDurationAsDelay(remainingDuration);
+		long currentTimeMillis = System.currentTimeMillis();
+		if (currentTimeMillis >= epochMillis) {
+			return "0"; // Time has passed
+		}
+		Duration remainingDuration = Duration.ofMillis(epochMillis - currentTimeMillis);
+		return formatDurationAsDelay(remainingDuration);
 	}
-
 
 	public static ZoneId getZoneID() {
 		if (Shared.getTimeZone() != null)
@@ -159,9 +166,9 @@ public class DateUtils {
 	public static long daysSinceEpoch() {
 		return Instant.now().toEpochMilli() / 86400000L;
 	}
-	
+
 	public static long hoursSinceEpoch() {
-	    return Instant.now().toEpochMilli() / 3600000L;
+		return Instant.now().toEpochMilli() / 3600000L;
 	}
 
 	/**

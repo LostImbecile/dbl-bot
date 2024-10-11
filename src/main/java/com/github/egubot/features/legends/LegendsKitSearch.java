@@ -17,7 +17,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.features.MessageFormats;
 import com.github.egubot.handlers.GenericPaginationHandler;
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.legends.Characters;
@@ -80,8 +79,8 @@ public class LegendsKitSearch {
 	}
 
 	private EmbedBuilder createCustomEmbed(SearchResult searchResult) {
-		EmbedBuilder embed = MessageFormats.createCharacterEmbed(searchResult.character);
-		embed.setDescription(searchResult.result + MessageFormats.EQUALISE);
+		EmbedBuilder embed = LegendsEmbedBuilder.createCharacterEmbed(searchResult.character);
+		embed.setDescription(searchResult.result + LegendsEmbedBuilder.EQUALISE);
 		return embed;
 	}
 

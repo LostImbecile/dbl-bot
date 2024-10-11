@@ -6,7 +6,6 @@ import java.util.Set;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.Messageable;
 import com.github.egubot.build.LegendsDatabase;
-import com.github.egubot.features.MessageFormats;
 import com.github.egubot.handlers.GenericPaginationHandler;
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.legends.CharacterHash;
@@ -26,7 +25,7 @@ public class LegendsSearch extends LegendsPool {
 		}
 
 		GenericPaginationHandler<Characters> handler = new GenericPaginationHandler<>(Bot.getApi(), pool,
-				MessageFormats::createCharacterEmbed,
+				LegendsEmbedBuilder::createCharacterEmbed,
 				(currentPage, totalPages) -> String.format("Page %d of %d", currentPage, totalPages), 10, 15);
 
 		MessageBuilder initialMessage = new MessageBuilder()

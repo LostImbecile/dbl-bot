@@ -4,7 +4,7 @@ import com.github.egubot.build.UserBalance;
 import com.github.egubot.interfaces.HasPriority;
 import com.github.egubot.objects.finance.UserFinanceData;
 
-public interface BalanceInterceptor extends HasPriority {
+public interface EarningLossInterceptor extends HasPriority {
 	
 	/**
 	 * Note that amount may be negative or 0
