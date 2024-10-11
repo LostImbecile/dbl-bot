@@ -56,6 +56,21 @@ DBLegends News
 - b-news remove
 - b-news update \*(channel tags) \*(user or role tags)
 
+Financial System:
+- b-balance \*(user)
+- b-balance short
+- b-balance server
+- b-loan
+- b-loan (user) (amount) \*(M0w0d0h0m0s) \*(deduction from earnings percentage `[0.1-1 (10%-100%)]`) 
+- b-bank loan
+- b-bank loan (amount)
+- b-bank loan pay (amount)
+- b-bet (amount) (colour) `[red, black, green]`
+- b-bet (amount) `[group bet with more incentives but a base bet amount]`
+- b-transfer (user) (amount) `[also used to pay back user loans]`
+- b-daily
+- b-hourly
+
 Automatic Responses:
 
  `[Types: contain, equal, match]`
