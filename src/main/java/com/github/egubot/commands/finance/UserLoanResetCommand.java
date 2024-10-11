@@ -9,11 +9,11 @@ import com.github.egubot.interfaces.Command;
 import com.github.egubot.objects.finance.UserFinanceData;
 import com.github.egubot.shared.utils.MessageUtils;
 
-public class BankLoanResetCommand implements Command {
+public class UserLoanResetCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "bank loan reset";
+		return "loan reset";
 	}
 
 	@Override
@@ -26,9 +26,9 @@ public class BankLoanResetCommand implements Command {
 				userID = Long.parseLong(MessageUtils.getPingedUsers(arguments).get(0));
 			}
 			UserFinanceData userData = serverData.getUserData(userID);
-			userData.setBankLoan(null);
+			userData.setUserLoan(null);
 			serverData.setUserData(userID, userData);
-			msg.getChannel().sendMessage("Bank Loan Reset!");
+			msg.getChannel().sendMessage("User Loan Reset!");
 		} else {
 			msg.getChannel().sendMessage("<:huh:1184466187938185286>");
 		}

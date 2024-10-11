@@ -70,6 +70,14 @@ Financial System:
 - b-transfer (user) (amount) `[also used to pay back user loans]`
 - b-daily
 - b-hourly
+`[Server Owner only]`
+- b-daily set (amount)
+- b-hourly set (amount)
+- b-transfer set (amount)
+- b-balance set (amount)
+- b-balance set (user) (amount)
+- b-bank loan reset *\(user)
+- b-loan reset *\(user)
 
 Automatic Responses:
 
