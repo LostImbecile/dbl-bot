@@ -61,7 +61,8 @@ public class UserLoanCommand implements Command {
 		} catch (Exception e) {
 		}
 		if (deductionPercent < 0.1 || deductionPercent > 1) {
-			deductionPercent = 0.1;
+			sendFormatMessage(msg);
+			return true;
 		}
 		String delay = "1d";
 		long dueDate;
@@ -69,8 +70,10 @@ public class UserLoanCommand implements Command {
 			delay = args[2];
 		} catch (Exception e) {
 		}
-		if (!DateUtils.isValidDelay(delay)) {
-			delay = "1d";
+		if (!DateUtils.isValidDelay(delay) || DateUtils.parseDelayString(delay).toDays() > 2
+				|| DateUtils.parseDelayString(delay).toHours() < 1) {
+			sendFormatMessage(msg);
+			return true;
 		}
 		dueDate = DateUtils.addDelayStringToEpochMillis(Instant.now().toEpochMilli(), delay);
 
@@ -104,11 +107,14 @@ public class UserLoanCommand implements Command {
 						return;
 					}
 					serverData.setUserData(userPair);
-					msg.getChannel().sendMessage(
+					msg.getChannel().sendMessage("Loan given to <@" + borrowerId + "> successfully!",
 							FinanceEmbedBuilder.buildUserLoanEmbed(serverData.getUserData(borrowerId).getUserLoan()));
+					confirmationMsg.delete();
 				}
 			}).removeAfter(1, TimeUnit.MINUTES).addRemoveHandler(() -> {
-				msg.getChannel().sendMessage("Loan request timed out or was not accepted.");
+				if (serverData.getUserData(borrowerId).getUserLoan() == null)
+					msg.getChannel().sendMessage("Loan request timed out or was not accepted.");
+				confirmationMsg.delete();
 			});
 		});
 
@@ -117,7 +123,7 @@ public class UserLoanCommand implements Command {
 
 	private void sendFormatMessage(Message msg) {
 		msg.getChannel().sendMessage("""
-				**Format**: loan @user amount 0M0w0d0h0s percentDeductionOnOverdue\
+				**Format**: loan @user amount 0d0h percentDeductionOnOverdue\
 
 				**Example**: loan @user 30 1d 0.5\
 
@@ -127,7 +133,9 @@ public class UserLoanCommand implements Command {
 
 				**Notes**:
 				- you only need user and amount, the rest are 1d and 0.1 (10%) by default
-				- deduction is 0.1-1 (10%-100%)""");
+				- deduction is 0.1-1 (10%-100%)
+				- max delay is 2days, min is 1 hour
+				- you will get this message if you go beyond any limits""");
 	}
 
 	private void sendLoanDetails(Message msg) {

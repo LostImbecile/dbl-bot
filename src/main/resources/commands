@@ -28,7 +28,7 @@ Financial System:
 - b-balance short
 - b-balance server
 - b-loan
-- b-loan (user) (amount) \*(M0w0d0h0m0s) \*(deduction from earnings percentage `[0.1-1 (10%-100%)]`) 
+- b-loan (user) (amount) \*(0d0h0) \*(deduction from earnings percentage `[deduction: 0.1-1 (10%-100%) & 1h < due date < 2d]`) 
 - b-bank loan
 - b-bank loan (amount)
 - b-bank loan pay (amount)
