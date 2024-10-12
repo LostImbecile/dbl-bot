@@ -25,20 +25,21 @@ public class WorkManager {
 	public static double getRewardFactor() {
 		double rand = random.nextDouble() * 100;
 
+		// at a $10k prize pool
 		if (rand < 40.0) {
-			return 0.0; // 40% chance
-		} else if (rand < 75.0) {
-			return 0.0001; // 35% chance
-		} else if (rand < 90.0) {
-			return 0.0005; // 15% chance
-		} else if (rand < 95.0) {
-			return 0.001; // 5% chance
-		} else if (rand < 98.0) {
-			return 0.002; // 3%
+			return 0.0; // 40% chance, $0
+		} else if (rand < 86.0) {
+			return 0.00005; // 46% chance, $0.5
+		} else if (rand < 96.0) {
+			return 0.0001; // 10% chance, $1
+		} else if (rand < 99.0) {
+			return 0.0005; // 3% chance, $5
 		} else if (rand < 99.9) {
-			return 0.01; // 1.9%
+			return 0.001; // 0.9%, $10
+		} else if (rand < 99.999) {
+			return 0.001; // 0.099%, $100
 		} else {
-			return 1.0; // 0.1% chance (99.9 + 0.1)
+			return 1.0; // 0.001% chance, all
 		}
 	}
 
@@ -49,17 +50,17 @@ public class WorkManager {
 		// Messages for 0 reward
 		if (reward == 0) {
 			String[] zeroRewardMessages = {
-					"Well, look at that! You've earned a grand total of **0**! Congratulations on your remarkable talent for achieving absolutely nothing",
-					"Ah, the illustrious **0**! You must be a master of the art of doing absolutely nothing.",
-					"Oh, the sweet taste of **0**! A reward so insignificant, it’s practically a magician's trick—now you see it, now you don't.",
+					"Well, look at that! You've earned a grand total of **$0**! Congratulations on your remarkable talent for achieving absolutely nothing",
+					"Ah, the illustrious **$0**! You must be a master of the art of doing absolutely nothing.",
+					"Oh, the sweet taste of **$0**! A reward so insignificant, it’s practically a magician's trick—now you see it, now you don't.",
 					"Zero! Zip! Nada! At this rate, you're the undisputed champion of the **Zero Reward League**. Should I send you a trophy made of air?",
-					"A round of applause for your spectacular **0**! Truly a feat that defies the laws of productivity. Keep up the excellent non-effort!",
-					"Bravo! A magnificent **0**! You’ve outdone yourself this time. They say every journey begins with a single step; but you have exclusively decided to stay put!",
-					"Well, would you look at that? A shining **0**.",
+					"A round of applause for your spectacular **$0**! Truly a feat that defies the laws of productivity. Keep up the excellent non-effort!",
+					"Bravo! A magnificent **$0**! You’ve outdone yourself this time. They say every journey begins with a single step; but you have exclusively decided to stay put!",
+					"Well, would you look at that? A shining **$0**.",
 					"You have just unlocked the exclusive **‘No Effort**’ achievement :clown:",
 					"Perhaps it’s time to write a book on the art of **inaction**?",
-					"A glorious **0**, and a lifetime of fame and fortune!",
-					"A spectacular **0**! Just think, with that kind of reward, you could almost buy a *single* pixel on a computer screen! Such wealth, much envy!",
+					"A glorious **$0**, and a lifetime of fame and fortune!",
+					"A spectacular **$0**! Just think, with that kind of reward, you could almost buy a *single* pixel on a computer screen! Such wealth, much envy!",
 					"Congratulations! You might just win the prestigious ‘Nothing Award’! " };
 			message = zeroRewardMessages[random.nextInt(zeroRewardMessages.length)];
 			return message;
