@@ -216,6 +216,18 @@ public class BalanceManager {
 		return applyBalanceRetract(serverData, msg.getAuthor().getId(), amount);
 	}
 
+	public static boolean canUseAmount(UserFinanceData user, double amount) {
+		return user.getBalance() > 0 || user.getBalance() >= amount;
+	}
+
+	public static boolean canUseAmount(UserBalance serverData, Message msg, double amount) {
+		return canUseAmount(serverData, msg.getAuthor().getId(), amount);
+	}
+
+	public static boolean canUseAmount(UserBalance serverData, long userID, double amount) {
+		return canUseAmount(serverData.getUserData(userID), amount);
+	}
+
 	public static UserFinanceData applyDaily(UserBalance serverData, Message msg) {
 		UserFinanceData user = getUserDataCopy(serverData, msg);
 		double amount = DailyClaimManager.apply(user, serverData.getServerFinanceData());
