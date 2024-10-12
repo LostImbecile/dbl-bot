@@ -34,7 +34,7 @@ public class ServerFinanceData {
 	}
 
 	public void setTotalWon(double totalWon) {
-		this.totalWon = totalWon;
+		this.totalWon = round(totalWon);
 	}
 
 	public double getTotalLost() {
@@ -42,7 +42,7 @@ public class ServerFinanceData {
 	}
 
 	public void setTotalLost(double totalLost) {
-		this.totalLost = totalLost;
+		this.totalLost = round(totalLost);
 	}
 
 	public double getPrizePool() {
@@ -50,7 +50,7 @@ public class ServerFinanceData {
 	}
 
 	public void setPrizePool(double prizePool) {
-		this.prizePool = prizePool;
+		this.prizePool = round(prizePool);
 	}
 
 	public synchronized double getBaseTransferLimit() {
@@ -58,15 +58,15 @@ public class ServerFinanceData {
 	}
 
 	public synchronized void setBaseTransferLimit(double baseTransferLimit) {
-		this.baseTransferLimit = baseTransferLimit;
+		this.baseTransferLimit = round(baseTransferLimit);
 	}
 
 	public synchronized void addToPrizePool(double amount) {
-		this.prizePool += round(amount);
+		this.prizePool = round(amount + prizePool);
 	}
 
 	public synchronized void addTotalWon(double amount) {
-		this.totalWon += round(amount);
+		this.totalWon = round(amount + totalWon);
 	}
 
 	private double round(double amount) {
@@ -74,7 +74,7 @@ public class ServerFinanceData {
 	}
 
 	public synchronized void addTotalLost(double amount) {
-		this.totalLost += round(amount);
+		this.totalLost = round(amount + totalLost);
 		addToPrizePool(amount);
 	}
 
