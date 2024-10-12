@@ -85,7 +85,7 @@ public class BankLoanProcessor implements EarningLossInterceptor, BankLoanInterc
 		return Math.max(15 - creditScore / 10, 5); // Min of 5, starts at 14
 	}
 
-	private static int calculateCreditScoreGain(int currentScore, double amount) {
+	public static int calculateCreditScoreGain(int currentScore, double amount) {
 		double loanPercent = (amount / calculateMaxLoanAmount(currentScore)) + 0.01;
 		// Min of 3, grows by 1 every 20 points starting at 40 with full loans
 		return Math.max((int) (3 * loanPercent), (int) ((currentScore / 20.0 + 2) * loanPercent));
