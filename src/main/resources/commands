@@ -37,6 +37,7 @@ Financial System:
 - b-transfer (user) (amount) `[also used to pay back user loans]`
 - b-daily
 - b-hourly
+- b-work
 `[Server Owner only]`
 - b-daily set (amount)
 - b-hourly set (amount)

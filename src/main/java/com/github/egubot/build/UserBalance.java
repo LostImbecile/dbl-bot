@@ -37,7 +37,7 @@ public class UserBalance extends DataManagerHandler {
 			}
 			writeData(null);
 			return true;
-		} catch (NumberFormatException e) {
+		} catch (Exception e) {
 			msg.getChannel().sendMessage("Invalid amount");
 		}
 		return false;
