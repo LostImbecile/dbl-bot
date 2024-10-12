@@ -22,7 +22,7 @@ public class UserBalance extends DataManagerHandler {
 	private ServerFinanceData serverFinanceData;
 
 	public UserBalance(long serverID) {
-		super(serverID + File.separator + "User_Balance", false);
+		super(serverID + File.separator + "User_Balance", true);
 	}
 
 	public synchronized boolean setBalance(Message msg, String msgText) {
