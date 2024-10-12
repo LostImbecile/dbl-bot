@@ -60,21 +60,24 @@ public class UserFinanceData {
 
 	// Methods to update earnings and losses averages
 	public void addEarnings(double amount) {
-		resetDaily(DateUtils.daysSinceEpoch());
+		resetDaily();
 		amount = round(amount);
 		earningsSum += amount;
 		earningsCount++;
 		totalEarnings += amount;
-		dailyAverageEarnings = round(earningsSum / earningsCount);
+		// Not a necessary check but just in case
+		if (earningsCount > 0)
+			dailyAverageEarnings = round(earningsSum / earningsCount);
 	}
 
 	public void addLoss(double amount) {
-		resetDaily(DateUtils.daysSinceEpoch());
+		resetDaily();
 		amount = round(amount);
 		lossesSum += amount;
 		lossesCount++;
 		totalLosses += amount;
-		dailyAverageLosses = round(lossesSum / lossesCount);
+		if (lossesCount > 0)
+			dailyAverageLosses = round(lossesSum / lossesCount);
 	}
 
 	public void resetDaily() {
@@ -82,13 +85,14 @@ public class UserFinanceData {
 	}
 
 	private void resetDaily(long daysSinceEpoch) {
-		if (lastEarningsUpdate != 0 && lastEarningsUpdate < daysSinceEpoch) {
+		if (lastEarningsUpdate < daysSinceEpoch) {
 			lossesSum = 0.0;
 			lossesCount = 0;
 			earningsSum = 0.0;
 			earningsCount = 0;
 			dailyAverageEarnings = 0.0;
 			dailyAverageLosses = 0.0;
+			dailyTransferred = 0.0;
 			lastEarningsUpdate = daysSinceEpoch;
 		}
 
@@ -131,6 +135,7 @@ public class UserFinanceData {
 	}
 
 	public double getEarningsSum() {
+		resetDaily();
 		return earningsSum;
 	}
 
@@ -139,6 +144,7 @@ public class UserFinanceData {
 	}
 
 	public double getLossesSum() {
+		resetDaily();
 		return lossesSum;
 	}
 
@@ -147,6 +153,7 @@ public class UserFinanceData {
 	}
 
 	public int getEarningsCount() {
+		resetDaily();
 		return earningsCount;
 	}
 
@@ -155,6 +162,7 @@ public class UserFinanceData {
 	}
 
 	public int getLossesCount() {
+		resetDaily();
 		return lossesCount;
 	}
 
@@ -163,6 +171,7 @@ public class UserFinanceData {
 	}
 
 	public double getDailyAverageEarnings() {
+		resetDaily();
 		return dailyAverageEarnings;
 	}
 
@@ -171,6 +180,7 @@ public class UserFinanceData {
 	}
 
 	public double getDailyAverageLosses() {
+		resetDaily();
 		return dailyAverageLosses;
 	}
 
@@ -211,6 +221,7 @@ public class UserFinanceData {
 	}
 
 	public double getDailyTransferred() {
+		resetDaily();
 		return dailyTransferred;
 	}
 
