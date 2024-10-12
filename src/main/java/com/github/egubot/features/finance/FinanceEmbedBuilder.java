@@ -42,17 +42,27 @@ public class FinanceEmbedBuilder {
 			MessageAuthor user) {
 		String earnings = "Total: $" + userData.getTotalEarnings() + "\nToday: $" + userData.getEarningsSum()
 				+ "\nAvg Today: $" + userData.getDailyAverageEarnings();
+
 		String losses = "Total: $" + userData.getTotalLosses() + "\nToday: $" + userData.getLossesSum()
 				+ "\nAvg Today: $" + userData.getDailyAverageLosses();
+
 		String claims = "Daily: $" + DailyClaimManager.calculateAmount(userData, server) + "\nHourly: $"
 				+ HourlyClaimManager.calculateAmount(userData, server);
-		String transfers = "Remaining: $"
-				+ TransferLimitInterceptor.calculateTransferLimit(userData, server.getBaseTransferLimit())
-				+ "\nTransferred Today: $" + userData.getDailyTransferred();
+
+		double remainingLimit = TransferLimitInterceptor.calculateTransferLimit(userData,
+				server.getBaseTransferLimit());
+		String transfers = "Max: $" + (remainingLimit + userData.getDailyTransferred()) + "\nRemaining: $"
+				+ remainingLimit + "\nTransferred Today: $" + userData.getDailyTransferred();
+
+		double maxLoan = BankLoanProcessor.calculateMaxLoanAmount(userData.getCreditScore());
+		double minLoan = BankLoanProcessor.calculateMinLoanAmount(userData.getCreditScore());
+		String loan = "Max: $" + maxLoan + "\nMin: $" + minLoan + "\nMax Credit Gain: +"
+				+ BankLoanProcessor.calculateCreditScoreGain(userData.getCreditScore(), maxLoan);
+
 		EmbedBuilder embed = new EmbedBuilder().addInlineField("Balance", "$" + userData.getBalance())
 				.addInlineField("Credit Score", userData.getCreditScore() + " points")
 				.addField("Recurring Claims", claims).addField("User Transfer Details", transfers)
-				.addInlineField("Earnings", earnings).addInlineField("Losses", losses);
+				.addField("Loan Details", loan).addInlineField("Earnings", earnings).addInlineField("Losses", losses);
 		if (user != null)
 			embed.setAuthor(user);
 		if (!userData.getLastTransaction().isEmpty())
