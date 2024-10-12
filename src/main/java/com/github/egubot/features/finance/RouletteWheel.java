@@ -277,7 +277,7 @@ public class RouletteWheel {
 	private static boolean removeUserBalance(double amount, Message message, User user) {
 		UserBalance serverData = UserBalanceContext.getServerBalance(message);
 		UserFinanceData userData = serverData.getUserData(user.getId());
-		if (userData.getBalance() >= amount) {
+		if (BalanceManager.canUseAmount(userData, amount)) {
 			userData = BalanceManager.applyBalanceUse(serverData, user.getId(), amount);
 			serverData.setUserData(user.getId(), userData);
 			return true;

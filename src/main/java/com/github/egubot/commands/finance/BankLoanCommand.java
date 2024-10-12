@@ -44,7 +44,11 @@ public class BankLoanCommand implements Command {
 		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 		UserFinanceData user = serverData.getUserData(msg);
 		if (user.getBankLoan() == null) {
-			msg.getChannel().sendMessage("You don't have a loan! Write an amount to get one.");
+			int maxAmount = BankLoanProcessor.calculateMaxLoanAmount(user.getCreditScore());
+			int minAmount = BankLoanProcessor.calculateMinLoanAmount(user.getCreditScore());
+			msg.getChannel().sendMessage(
+					"You don't have a loan! Request one with `bank loan <amount>`\nRange for your credit score: $"
+							+ minAmount + " - $" + maxAmount);
 		} else {
 			msg.getChannel().sendMessage(FinanceEmbedBuilder.buildBankLoanEmbed(user.getBankLoan()));
 		}

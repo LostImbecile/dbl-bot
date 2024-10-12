@@ -64,8 +64,8 @@ Financial System:
 - b-loan (user) (amount) \*(0d0h0) \*(deduction from earnings percentage `[deduction: 0.1-1 (10%-100%) & 1h < due date < 2d]`) 
 - b-bank loan
 - b-bank loan (amount)
-- b-bank loan pay (amount)
-- b-bet (amount) (colour) `[red, black, green]`
+- b-bank loan pay (amount/all)
+- b-bet (amount/all) (colour) `[red, black, green]`
 - b-bet (amount) `[group bet with more incentives but a base bet amount]`
 - b-transfer (user) (amount) `[also used to pay back user loans]`
 - b-daily

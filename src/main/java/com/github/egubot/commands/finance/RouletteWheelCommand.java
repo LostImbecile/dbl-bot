@@ -20,11 +20,17 @@ public class RouletteWheelCommand implements Command {
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		double amount = 0;
-		try {
-			amount = Double.parseDouble(arguments.split(" ")[0]);
-		} catch (Exception e) {
-			msg.getChannel().sendMessage("Invalid amount!");
-			return true;
+		boolean isAll = false;
+
+		if (arguments.contains("all")) {
+			isAll = true;
+		} else {
+			try {
+				amount = Double.parseDouble(arguments.split(" ")[0]);
+			} catch (Exception e) {
+				msg.getChannel().sendMessage("Invalid amount!");
+				return true;
+			}
 		}
 		arguments = arguments.toLowerCase();
 
@@ -44,13 +50,20 @@ public class RouletteWheelCommand implements Command {
 				msg.getChannel().sendMessage("Format: bet amount red/black/green");
 				return true;
 			}
-			double reward = RouletteWheel.handleIndividualBet(msg, amount, color);
+
 			UserBalance serverData = UserBalanceContext.getServerBalance(msg);
-			UserFinanceData userData = BalanceManager.applyBalanceUse(serverData, msg, amount);
-			if (userData == null) {
+			UserFinanceData userData = serverData.getUserData(msg);
+
+			if (isAll) {
+				amount = userData.getBalance();
+			}
+			if (!BalanceManager.canUseAmount(userData, amount)) {
 				msg.getChannel().sendMessage("You don't have enough balance!");
 				return true;
 			}
+
+			userData = BalanceManager.applyBalanceUse(serverData, msg, amount);
+			double reward = RouletteWheel.handleIndividualBet(msg, amount, color);
 			serverData.setUserData(msg, userData);
 			if (reward > 0) {
 				UserPair userPair = BalanceManager.updateBalance(serverData, msg, reward);
@@ -61,8 +74,10 @@ public class RouletteWheelCommand implements Command {
 				userData = BalanceManager.registerLoss(serverData, msg, amount);
 				serverData.setUserData(msg, userData);
 			}
-		} else {
+		} else if (!isAll) {
 			RouletteWheel.sendEmbedWithReactions(msg.getChannel(), amount);
+		} else {
+			msg.getChannel().sendMessage("Invalid for this type of bet");
 		}
 		return true;
 	}
