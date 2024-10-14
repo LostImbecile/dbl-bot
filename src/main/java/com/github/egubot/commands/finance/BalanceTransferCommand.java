@@ -36,7 +36,7 @@ public class BalanceTransferCommand implements Command {
 		else
 			arguments = args[0];
 		long recieverId = Long.parseLong(receiver);
-		if (recieverId == msg.getId()) {
+		if (recieverId == msg.getAuthor().getId()) {
 			msg.getChannel().sendMessage("<:huh:1184466187938185286>");
 			return true;
 		}
@@ -44,10 +44,17 @@ public class BalanceTransferCommand implements Command {
 			UserPair userPair = BalanceManager.transferMoney(serverData, msg, recieverId,
 					Double.parseDouble(arguments));
 			if (userPair == null) {
-				msg.getChannel()
-						.sendMessage(String.format("This transfer exceeds the remaining $%s limit.",
-								TransferLimitInterceptor.calculateTransferLimit(serverData.getUserData(msg),
-										serverData.getServerFinanceData().getBaseTransferLimit())));
+				double senderLimit = TransferLimitInterceptor.calculateTransferLimit(serverData.getUserData(msg),
+						serverData.getServerFinanceData().getBaseTransferLimit());
+				double receiverLimit = TransferLimitInterceptor.calculateTransferLimit(
+						serverData.getUserData(recieverId), serverData.getServerFinanceData().getBaseTransferLimit());
+				if (receiverLimit < senderLimit) {
+					msg.getChannel().sendMessage(String.format(
+							"This transfer exceeds the remaining $%s limit of <@%s>.", receiverLimit, receiver));
+				} else {
+					msg.getChannel()
+							.sendMessage(String.format("This transfer exceeds your remaining $%s limit.", senderLimit));
+				}
 				return true;
 			}
 

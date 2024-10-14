@@ -10,13 +10,16 @@ public class TransferLimitInterceptor implements TransferInterceptor {
 			double baseTransferLimit) {
 		if (receiver == null)
 			return false;
-		double transferLimit = calculateTransferLimit(sender, baseTransferLimit);
-		return amount <= transferLimit && amount > 0 && sender.getUserID() != receiver.getUserID();
+		double transferLimitSender = calculateTransferLimit(sender, baseTransferLimit);
+		double transferLimitReceiver = calculateTransferLimit(receiver, baseTransferLimit);
+		return amount > 0 && amount <= transferLimitSender && amount <= transferLimitReceiver
+				&& sender.getUserID() != receiver.getUserID();
 	}
 
 	@Override
 	public double afterTransfer(UserFinanceData sender, UserFinanceData receiver, double amount) {
 		sender.setDailyTransferred(sender.getDailyTransferred() + amount);
+		receiver.setDailyTransferred(receiver.getDailyTransferred() + amount);
 		return amount;
 	}
 

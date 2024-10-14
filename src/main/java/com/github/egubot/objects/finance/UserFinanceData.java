@@ -60,7 +60,7 @@ public class UserFinanceData {
 
 	// Methods to update earnings and losses averages
 	public void addEarnings(double amount) {
-		resetDaily();
+		resetDailyStats();
 		amount = round(amount);
 		earningsSum += amount;
 		earningsCount++;
@@ -71,7 +71,7 @@ public class UserFinanceData {
 	}
 
 	public void addLoss(double amount) {
-		resetDaily();
+		resetDailyStats();
 		amount = round(amount);
 		lossesSum += amount;
 		lossesCount++;
@@ -80,12 +80,13 @@ public class UserFinanceData {
 			dailyAverageLosses = round(lossesSum / lossesCount);
 	}
 
-	public void resetDaily() {
+	public void resetDailyStats() {
 		resetDaily(DateUtils.daysSinceEpoch());
 	}
 
 	private void resetDaily(long daysSinceEpoch) {
 		if (lastEarningsUpdate < daysSinceEpoch) {
+			System.out.println(lastEarningsUpdate);
 			lossesSum = 0.0;
 			lossesCount = 0;
 			earningsSum = 0.0;
@@ -135,7 +136,7 @@ public class UserFinanceData {
 	}
 
 	public double getEarningsSum() {
-		resetDaily();
+		resetDailyStats();
 		return earningsSum;
 	}
 
@@ -144,7 +145,7 @@ public class UserFinanceData {
 	}
 
 	public double getLossesSum() {
-		resetDaily();
+		resetDailyStats();
 		return lossesSum;
 	}
 
@@ -153,7 +154,7 @@ public class UserFinanceData {
 	}
 
 	public int getEarningsCount() {
-		resetDaily();
+		resetDailyStats();
 		return earningsCount;
 	}
 
@@ -162,7 +163,7 @@ public class UserFinanceData {
 	}
 
 	public int getLossesCount() {
-		resetDaily();
+		resetDailyStats();
 		return lossesCount;
 	}
 
@@ -171,7 +172,7 @@ public class UserFinanceData {
 	}
 
 	public double getDailyAverageEarnings() {
-		resetDaily();
+		resetDailyStats();
 		return dailyAverageEarnings;
 	}
 
@@ -180,7 +181,7 @@ public class UserFinanceData {
 	}
 
 	public double getDailyAverageLosses() {
-		resetDaily();
+		resetDailyStats();
 		return dailyAverageLosses;
 	}
 
@@ -221,12 +222,12 @@ public class UserFinanceData {
 	}
 
 	public double getDailyTransferred() {
-		resetDaily();
+		resetDailyStats();
 		return dailyTransferred;
 	}
 
 	public void setDailyTransferred(double transferLimit) {
-		this.dailyTransferred = transferLimit;
+		this.dailyTransferred = round(transferLimit);
 	}
 
 	public static class BankLoan {
@@ -456,13 +457,15 @@ public class UserFinanceData {
 		this.dailyAverageEarnings = userFinanceData.dailyAverageEarnings;
 		this.dailyAverageLosses = userFinanceData.dailyAverageLosses;
 		this.creditScore = userFinanceData.creditScore;
+		this.dailyTransferred = userFinanceData.dailyTransferred;
+		this.lastEarningsUpdate = userFinanceData.lastEarningsUpdate;
+		
 		if (userFinanceData.userLoan != null)
 			this.userLoan = new UserLoan(userFinanceData.userLoan);
 		if (userFinanceData.bankLoan != null)
 			this.bankLoan = new BankLoan(userFinanceData.bankLoan);
 		if (userFinanceData.assets != null)
 			this.assets = userFinanceData.copyAssets();
-		this.dailyTransferred = userFinanceData.dailyTransferred;
 		if (userFinanceData.lastTransaction != null)
 			this.lastTransaction = new ArrayList<>(userFinanceData.lastTransaction);
 	}

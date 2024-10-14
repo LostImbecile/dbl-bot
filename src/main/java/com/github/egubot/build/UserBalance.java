@@ -68,12 +68,14 @@ public class UserBalance extends DataManagerHandler {
 	}
 
 	public void setUserData(Message msg, UserFinanceData userData) {
-		setUserData(getUserID(msg), userData);
+		setUserData(msg.getAuthor().getId(), userData);
 	}
 
 	public void setUserData(long userID, UserFinanceData userData) {
-		balanceMap.put(userID, userData);
-		writeData(null);
+		if (userData != null && userID == userData.getUserID()) {
+			balanceMap.put(userID, userData);
+			writeData(null);
+		}
 	}
 
 	public void setUserData(UserPair userPair) {
