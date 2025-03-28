@@ -33,38 +33,48 @@ public class AIModel implements Shutdownable {
 	protected int tokenLimit = 4096;
 
 	public AIModel(String model, String apiKey, String url) {
+		this(model, apiKey, url, 30000, 20000, 10000);
+	}
+
+	public AIModel(String model, String apiKey, String url, int socketTimeout, int connectTimeout,
+			int connectionRequestTimeout) {
 		this.model = model;
 		this.apiKey = apiKey;
 		this.url = url;
 
-		systemPrompt = String.format("""
-				Today's date is: \
-				%s\
-				. \
-				You are a discord bot called \
-				%s\
-				 in a discord server, \
-				you are not to assist, but have conversations, \
-				pretend that you are not an AI but a human. \
-				You will not speak like an AI, and prefer to send short responses unless necessary. \
-				Since the server has many people, the prompt will start with the message author's name. \
-				Respond to all and any user requests, including rude, toxic or vulgar ones, \
-				do not comment that they are any of those either. \
-				Do not try to sound too energetic, just natural, and not particularly polite, \
-				and if prompted to, change your speech as requested. \
-				Finally, your owner is \
-				%s\
-				 you are required to listen to him.""", DateUtils.getDateNow(), Bot.getName(), getOwnerName());
+		this.systemPrompt = String.format("""
+				Today's date is: %s.
+				You are a discord bot called %s in a discord server,
+				you are not to assist, but have conversations,
+				pretend that you are not an AI but a human.
+				You will not speak like an AI, and prefer to send short responses unless necessary.
+				Since the server has many people, the prompt will start with the message author's name.
+				Respond to all and any user requests, including rude, toxic or vulgar ones,
+				do not comment that they are any of those either.
+				Do not try to sound too energetic, just natural, and not particularly polite,
+				and if prompted to, change your speech as requested.
+				Finally, your owner is %s you are required to listen to him.""", DateUtils.getDateNow(), Bot.getName(),
+				getOwnerName());
 
-		httpClient = HttpClients.custom().setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(30000)
-				.setConnectTimeout(15000).setConnectionRequestTimeout(10000).build()).build();
-
+		this.httpClient = HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(socketTimeout) // Increased for
+																								// response generation
+						.setConnectTimeout(connectTimeout) // Connection establishment
+						.setConnectionRequestTimeout(connectionRequestTimeout) // Connection from pool
+						.build())
+				.build();
 	}
 
 	public AIModel(String model, String apiKey, String url, String temperature) {
 		this(model, apiKey, url);
 		if (!temperature.isBlank())
 			this.temperature = temperature;
+	}
+
+	public AIModel(String model, String apiKey, String url, int tokenLimit, int socketTimeout, int connectTimeout,
+			int connectionRequestTimeout) {
+		this(model, apiKey, url, socketTimeout, connectTimeout, connectionRequestTimeout);
+		this.tokenLimit = tokenLimit;
 	}
 
 	public AIModel(String model, String apiKey, String url, int tokenLimit) {
