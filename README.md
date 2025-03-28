@@ -1,4 +1,4 @@
-# Egubot (DBLegends - Discord Bot)
+# Egubot (Discord Bot)
 
 Discord bot I've made for a specific server, covers various tasks (90+ commands).
 
