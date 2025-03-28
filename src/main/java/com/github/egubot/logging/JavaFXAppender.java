@@ -42,8 +42,9 @@ public class JavaFXAppender extends AbstractAppender {
 
 	@Override
 	public void append(LogEvent event) {
+		if (event != null && getLayout() != null && event.getLoggerName() != null) {
 		try {
-			if (event != null && getLayout() != null && event.getLoggerName() != null) {
+			
 				Level eventLevel = event.getLevel();
 				Map<String, TextArea> levelTextAreas = getLevelTextAreas(eventLevel);
 				if (!levelTextAreas.isEmpty()) {
@@ -56,9 +57,10 @@ public class JavaFXAppender extends AbstractAppender {
 								() -> matchedTextArea.appendText(message));
 					}
 				}
-			}
+			
 		} catch (Exception e) {
-			logger.error("Couldn't append log event. Logger name: {}", event.getLoggerName() + "", e);
+				logger.error("Couldn't append log event. Logger name: {}", event.getLoggerName() + "", e);
+			}
 		}
 	}
 
