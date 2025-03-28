@@ -168,18 +168,18 @@ public class TimerObject {
 
 	public void setMissTolerance(String missTolerance) {
 		if ("0".equals(missTolerance)) {
-			this.missTolerance =  DateUtils.formatDurationAsDelay(Duration.ZERO);
+			this.missTolerance = DateUtils.formatDurationAsDelay(Duration.ZERO);
 		} else if (DateUtils.isValidDelay(missTolerance)) {
 			// 10% of the delay duration
 			Duration maxTolerance = getDelayDuration().dividedBy(100 / maxMissTolerancePercent);
 			// 1% of the delay duration
 			Duration minTolerance = getDelayDuration().dividedBy(100 / minMissTolerancePercent);
-			Duration tolerance =  DateUtils.parseDelayString(missTolerance);
+			Duration tolerance = DateUtils.parseDelayString(missTolerance);
 
 			if (tolerance.compareTo(maxTolerance) > 0) {
-				this.missTolerance =  DateUtils.formatDurationAsDelay(maxTolerance);
+				this.missTolerance = DateUtils.formatDurationAsDelay(maxTolerance);
 			} else if (tolerance.compareTo(minTolerance) < 0) {
-				this.missTolerance =  DateUtils.formatDurationAsDelay(minTolerance);
+				this.missTolerance = DateUtils.formatDurationAsDelay(minTolerance);
 			} else {
 				this.missTolerance = missTolerance;
 			}
@@ -203,7 +203,8 @@ public class TimerObject {
 	}
 
 	public Duration getMissToleranceDuration() {
-		return missTolerance.equals("0") ?  DateUtils.parseDelayString(delay).dividedBy(2) :  DateUtils.parseDelayString(missTolerance);
+		return missTolerance.equals("0") ? DateUtils.parseDelayString(delay).dividedBy(2)
+				: DateUtils.parseDelayString(missTolerance);
 	}
 
 	public ZonedDateTime getNextExecutionTime() {
@@ -225,6 +226,7 @@ public class TimerObject {
 		setNextExecution(formatTimeString(nextExecutionTime));
 
 		// Adjust startDate
+		// Next execution time is always the same or after startDate if present
 		if (startDate != null) {
 			ZonedDateTime startDateTime = getStartDateTime();
 			startDateTime = applySummerTimeAdjustment(startDateTime);
@@ -233,14 +235,15 @@ public class TimerObject {
 
 		// Adjust exitTime
 		if (exitTime != null) {
+			// Note that it is intended that exit time may not change in cases
+			// where next execution does as it's for delay (Instant) based timers
 			ZonedDateTime exitDateTime = getExitTimeAsDateTime();
 			exitDateTime = applySummerTimeAdjustment(exitDateTime);
 			exitTime = formatTimeString(exitDateTime);
 		}
-
-		ZonedDateTime now = ZonedDateTime.now(Shared.getZoneID());
-		boolean isCurrentlySummerTime = now.getZone().getRules().isDaylightSavings(now.toInstant());
-		summerTime = isCurrentlySummerTime;
+		boolean isSummerTimeAtThatDate = nextExecutionTime.getZone().getRules()
+				.isDaylightSavings(nextExecutionTime.toInstant());
+		summerTime = isSummerTimeAtThatDate;
 	}
 
 	public ZonedDateTime getStartDateTime() {
@@ -261,11 +264,13 @@ public class TimerObject {
 	}
 
 	private ZonedDateTime applySummerTimeAdjustment(ZonedDateTime zonedDateTime) {
-		boolean isCurrentlySummerTime = zonedDateTime.getZone().getRules().isDaylightSavings(zonedDateTime.toInstant());
-		if (summerTime && !isCurrentlySummerTime) {
-			return zonedDateTime.plusHours(1);
-		} else if (!summerTime && isCurrentlySummerTime) {
-			return zonedDateTime.minusHours(1);
+		boolean isSummerTimeAtThatDate = zonedDateTime.getZone().getRules()
+				.isDaylightSavings(zonedDateTime.toInstant());
+		if (summerTime && !isSummerTimeAtThatDate) {
+			// to have it remain at the same time of day (else it'll be an hour earlier)
+			zonedDateTime = zonedDateTime.plusHours(1);
+		} else if (!summerTime && isSummerTimeAtThatDate) {
+			zonedDateTime = zonedDateTime.minusHours(1);
 		}
 		return zonedDateTime;
 	}

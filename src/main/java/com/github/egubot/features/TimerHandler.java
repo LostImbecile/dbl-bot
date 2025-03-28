@@ -162,7 +162,7 @@ public class TimerHandler {
 				if (now.isAfter(adjustedNextExecutionTime)) {
 					ZonedDateTime exitTime = timer.getExitTimeAsDateTime();
 					Duration remainingDelay = Duration.between(exitTime, nextExecutionTime);
-					delay = Duration.between(getNow(), getNow().plus(remainingDelay));
+					delay = remainingDelay;
 
 					// Reset exit time
 					timer.setExitTime(null);
