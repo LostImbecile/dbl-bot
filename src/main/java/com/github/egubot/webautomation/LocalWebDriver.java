@@ -50,7 +50,7 @@ public class LocalWebDriver implements AutoCloseable {
 		if (isEager)
 			options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
-		options.addArguments("--window-size=1920x1080");
+		options.addArguments("--window-size=1920,1080");
 		options.addArguments("--enable-javascript");
 		options.addArguments("--no-proxy-server");
 		options.addArguments("--disable-notifications");
@@ -63,10 +63,10 @@ public class LocalWebDriver implements AutoCloseable {
 		options.addArguments("--disable-features=NetworkService");
 		options.addArguments("--disable-features=SidePanelPinning");
 		options.addArguments("--disable-dev-shm-usage");
-		options.addArguments("-–disable-hang-monitor");
+		options.addArguments("--disable-hang-monitor");
 		
 		options.addArguments("--disable-blink-features=AutomationControlled");
-		options.addArguments("-–disable-features=TranslateUI,BlinkGenPropertyTrees");
+		options.addArguments("--disable-features=TranslateUI,BlinkGenPropertyTrees");
 		options.addArguments("--disable-ipc-flooding-protection");
 		
 		System.setProperty("webdriver.chrome.silentOutput", "true"); // Suppress WebDriver logs
@@ -89,7 +89,7 @@ public class LocalWebDriver implements AutoCloseable {
 		if (isHeadless) {
 			// Some pages will be blank in headless mode, this is to circumvent it
 			options.addArguments(
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+					"--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
 
 			options.addArguments("--headless=new");
 			if (userDataDirectory != null && userProfile != null) {
