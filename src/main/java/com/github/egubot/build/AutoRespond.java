@@ -13,7 +13,6 @@ import org.javacord.api.entity.message.Messageable;
 
 import com.github.egubot.info.ServerInfoUtilities;
 import com.github.egubot.info.UserInfoUtilities;
-import com.github.egubot.interfaces.UpdatableObjects;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.objects.Abbreviations;
 import com.github.egubot.objects.Attributes;
@@ -25,7 +24,7 @@ import com.github.egubot.storage.DataManagerHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class AutoRespond extends DataManagerHandler implements UpdatableObjects {
+public class AutoRespond extends DataManagerHandler {
 	private ResponseList autoRespondData;
 	private List<Response> responses;
 
@@ -278,6 +277,7 @@ public class AutoRespond extends DataManagerHandler implements UpdatableObjects 
 		}
 	}
 
+	@SuppressWarnings("null")
 	public void updateResponse(String msgText, Messageable e, boolean isOwner) {
 		try {
 			int startIndex = getLockedDataEndIndex();

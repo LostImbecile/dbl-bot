@@ -17,7 +17,6 @@ import org.javacord.api.entity.message.Message;
 import com.github.egubot.features.TimerHandler;
 import com.github.egubot.interfaces.DiscordTimerTask;
 import com.github.egubot.interfaces.TimerUpdateListener;
-import com.github.egubot.interfaces.UpdatableObjects;
 import com.github.egubot.objects.TimerObject;
 import com.github.egubot.storage.DataManagerHandler;
 
@@ -30,7 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-public class ScheduledTasks extends DataManagerHandler implements UpdatableObjects, TimerUpdateListener {
+public class ScheduledTasks extends DataManagerHandler implements TimerUpdateListener {
 	private static final Logger logger = LogManager.getLogger(ScheduledTasks.class.getName());
 	private TimerHandler timerHandler;
 	private List<TimerObject> timers;

@@ -10,9 +10,9 @@ public class BotMessageDeleteCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "message delete";
 	}
+
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
@@ -29,8 +29,8 @@ public class BotMessageDeleteCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
+
 
 }

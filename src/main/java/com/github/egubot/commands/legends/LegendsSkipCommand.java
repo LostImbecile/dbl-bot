@@ -9,7 +9,6 @@ public class LegendsSkipCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "skip";
 	}
 
@@ -27,8 +26,8 @@ public class LegendsSkipCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return false;
 	}
+
 
 }

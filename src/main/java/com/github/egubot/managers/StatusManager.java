@@ -228,7 +228,6 @@ public class StatusManager implements Shutdownable {
 
 	@Override
 	public int getShutdownPriority() {
-		// TODO Auto-generated method stub
 		return 50;
 	}
 }

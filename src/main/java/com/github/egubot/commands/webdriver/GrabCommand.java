@@ -9,7 +9,6 @@ public class GrabCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "grab";
 	}
 
@@ -22,7 +21,6 @@ public class GrabCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

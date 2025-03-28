@@ -10,7 +10,6 @@ public class MusicResumeCommand implements Command{
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "resume";
 	}
 
@@ -22,7 +21,6 @@ public class MusicResumeCommand implements Command{
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

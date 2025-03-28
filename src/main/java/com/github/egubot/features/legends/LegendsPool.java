@@ -256,6 +256,7 @@ public abstract class LegendsPool {
 
 	}
 
+	@SuppressWarnings("null")
 	private Set<Characters> getSubPool(String[] subPoolFilter, Set<Characters> subPool1, Set<Characters> subPool2,
 			String operation) {
 

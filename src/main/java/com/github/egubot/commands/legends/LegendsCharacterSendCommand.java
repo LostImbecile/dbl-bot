@@ -11,9 +11,9 @@ public class LegendsCharacterSendCommand implements Command {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "character send";
 	}
+
 
 	@Override
 	public boolean execute(Message msg, String arguments) {
@@ -26,8 +26,8 @@ public class LegendsCharacterSendCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
+
 
 }

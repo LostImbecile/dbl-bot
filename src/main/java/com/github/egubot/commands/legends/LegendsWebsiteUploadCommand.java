@@ -8,8 +8,7 @@ import com.github.egubot.interfaces.Command;
 public class LegendsWebsiteUploadCommand implements Command {
 
 	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
+	public String getName() { 
 		return "website upload";
 	}
 
@@ -25,8 +24,8 @@ public class LegendsWebsiteUploadCommand implements Command {
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
+
 
 }

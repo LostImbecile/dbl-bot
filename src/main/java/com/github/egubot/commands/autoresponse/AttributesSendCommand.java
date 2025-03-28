@@ -11,7 +11,6 @@ public class AttributesSendCommand implements Command{
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "send attributes";
 	}
 
@@ -25,8 +24,8 @@ public class AttributesSendCommand implements Command{
 
 	@Override
 	public boolean isStartsWithPrefix() {
-		// TODO Auto-generated method stub
 		return true;
 	}
+
 
 }
