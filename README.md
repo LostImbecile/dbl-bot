@@ -1,26 +1,27 @@
 # Egubot (DBLegends - Discord Bot)
 
-Discord bot I've made for a specific server. Its features mostly have to do with a mobile game called "Dragon Ball Legends", but there are some other useful things.
+Discord bot I've made for a specific server, covers various tasks (90+ commands).
 
 Public so server members can look at it or add to it.
 
-Uses [Javacord](https://github.com/Javacord/Javacord) with [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html). Works on Windows and Linux.
+Uses [Javacord](https://github.com/Javacord/Javacord) with [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html). Works on Windows and Linux. 
+
+Note that Javacord will end its support in 2025 and a refactor to JDK could be necessary, but the code only relies on basic features of the library and it's rare for discord to introduce breaking changes.
 
 Get your bot token from [here](https://discord.com/developers/applications).
 
 Notes:
 ---------------------------------
-Some of the classes are implementation specific, you might want to change some as needed, the rest should work as is, but you should modify their messages, clear them up, completely remove or add more to them. You can also change the thread counts if I/O locks them frequently.
+Some of the classes are specific to my needs, you might want to change some to fit yours, the rest should work as is. You can also change the main thread counts in the message handler if I/O (Network) locks them frequently.
 
-You want to have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
-but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot.
+You must have an "IDs.txt" and a "Tokens.txt" file, they'll be automatically created and filled for certain things, 
+but you might have to add the keys manually for others, look for KeyManager references to find the ones I used for my bot. Missing a token or an ID isn't breaking and will not cause problems.
 
-This bot can store its data in SQLite or locally, and you can switch between them during run-time. Most of it is server-specific or channel-specific when needed. Prefix can be changed in config.properties.
+Data can be stored with SQLite or locally, and you can switch between them during run-time. Most of it is saved per server or channel and is cached in memory when called for specifically. Prefix can be changed in config.properties or the GUI settings.
 
 The bot comes with a GUI, you can run it as CMD only if you change it in settings and restart, the main class is "Run.java".
  
-Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended as javacord is switching 
-to java 11 soon.
+Compiled with java 17 but can be very easily made to run with java 11. Any older is not recommended to maintain compatibility with modern frameworks.
 
 Some API keys used (Optional):
 [`OpenAI`](https://beta.openai.com/account/api-keys)
@@ -28,6 +29,43 @@ Some API keys used (Optional):
 [`Youtube`](https://console.developers.google.com/apis/credentials)
 [`Azure Translate`](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/)
 [`Weather`](https://www.weatherapi.com/)
+
+### Message Flow:
+
+- Messages are received in the "MessageCreateEventHandler"
+- The CommandManager checks for prefixes matching any present in classes that implement the "Command" interface
+- On a match, the command class processes the text either directly or through a facade that interacts with the database or other services
+- If no match, the text is checked for auto-reponses, AI conversation responses, or auto-translate based on what's toggled
+
+### Background Tasks:
+These start on run-time and will always be on as long as a timer is active or a newsfeed was subscribed to.
+- Newsfeed schedulers
+- Timers
+
+Device sleep/shutdown or summer-time transitions are tracked and accounted for, accuracy is maintained across multiple years from my testing.
+
+### Cached Objects:
+- Server IDs and Details
+- Channel IDs, Parent Servers and Details
+- Command specific data per server/channel when called by a user there
+- Newsfeed article titles or IDs
+- Timers
+- Server media players for channels where bot was summoned
+- Some websites used for database building/lookup
+
+Cache is updated on a command-call basis and is maintained throughout the lifetime of the bot, no real case where the amount of objects will be too large (even with tens of thousands of active servers), but it's easy to add timeouts/limits if necessary (inside the Facades). Commands that are never called by a server will simply not cache anything for it.
+
+### Expensive Tasks:
+Disable or limit them if necessary.
+- AI model interactions (rate limits + cost)
+- Web Browser automated tasks (Entire browser instance is created)
+- Github details fetch (rate limits, slow response times)
+- Music Player (Network)
+- Translate (rate limits + cost)
+- TenorLink fetch (response time)
+- DBLegends commands (online search/fetch)
+
+Mostly tasks that rely on APIs or online data they need to fetch when called. Local tasks rely on caches and primitive operations and are processed within a few nanoseconds, so network will be the bottleneck for the most part as local storage is rarely in-need of an update.
 
 Bot commands:
 ---------------------------------
@@ -106,7 +144,7 @@ Automatic Embed Fix For Popular Sites:
 - b-fixembed toggle `[on by default]`
 - b-fix (link)/(reply to the message)
 
-Get Media URLs from Message:
+Get Media URLs from Message (for download):
 - b-dl (reply to the message)/(embed)
 
 Music Player:
@@ -162,158 +200,3 @@ Bot Control (Owner):
 - b-message edit (messageId) (message)
 - b-message delete (messageId)
 - b-toggle manager `[Toggles storage]`
-
-### Active
-**1) b-roll(n) (filters)** 
-- n is a 1 digit number, max of 6 characters are rolled, which is also the default.
-- This gets all units and tags from the DBlegends website and rolls n random characters from the pool it creates.
-- If you don't specify a filter it pulls from a pool of all units in the game.
-- You can control the pool by passing tags to filter it out.
-- You can use any brackets, +, - and &.
-- &  is there by default, you don't need to type it.
-- In case the tag doesn't exist it's ignored, and in case the equation you wrote is wrong, an error message will be sent.
-- Names are links to the characters' dblegends.net page.
-- Disable or enable roll animation by typing that.
-
-Example:
-
-b-roll6 sparking old + (zenkai - extreme) & blu
-
-=> Pool is all old (year1 + year2) sparking characters, as well as all the blue non-extreme zenkais
-‏‏‎
-
-**2) b-template create (name) (filters)**
-- This creates a new template that you can substitute as a tag or set of tags in b-roll or b-search.
-- Brackets surrounding it are added automatically.
-- Template name can't be a tag or another template, and has to be one word.
-- Template must contain real tags or other templates.
-
-Examples:
-
-b-template create t1 sparking old + (zenkai - extreme) blu
-
-b-roll6 t1
-
-=> Equivalent to the example in #1 with added brackets at the start and end
-
-b-template create t2 LoE + ginyu_force
-
-where LoE is a template, ginyu force is a tag
-
-
-**3) b-template remove (name)**
-- Removes an existing template if there is one with the same name (case insensitive).
-- Default templates can't be removed. You'll be told they don't exist if you try to.
-
-**4) b-template send**
-- Sends a file with all templates.
-
-**5) gpt (message)**
-- Gets response from chatgpt.
-- Conversation is saved up to 3300 tokens, where it starts getting deleted (non-channel specific).
-- Use "gpt activate channel" to keep gpt active for current channel without using invocation.
-- Use "gpt deactivate" to go back to using invocation.
-
-**6) b-response create (type) >> (msg) >> (response) >> (reaction) >> (reaction)...**
-- Adds a new automatic response (whether message or reaction).
-- Reactions are optional, there's no limit for their use.
-- Standard (unicode) emojis can't be directly used. If you want to use them in a message, do :&lt;thumbsup&gt;:.
-- Unicode emojis can't be used in reactions.
-- There are 3 types: match, equal & contain.
-- "Contain" doesn't trigger if invocation is part of a word or is connected to one.
-- Regex can be used for "match" and "contain" (you can type it as is to remove it, or anything that it matches).
-- For a random response use "??" to separate options.
-Example:
-
-b-response create equal >> test >> :&lt;ok_hand&gt;: >> <:emoji:1142482242589950083>
-
-b-response create contain >> test >> op1 ?? op2 ?? op3
-
-=> Responds with op1 or op2 or op3
-
-**7) b-response remove (message)**
-- Removes an automatic response.
-- You need to know the exact invocation message unless you get special rights.
-- Default responses can't be removed unless you're me.
-
-**8) b-search (name/game_id) (filters)**
-- Looks for characters that match the specified name, game ID or filters.
-- Underscores must be entered instead of spaces for names.
-- If no name is found, it's ignored and filters are checked.
-- It's recommended to use the character's main name as a filter.
-- Names are links to the characters' <https://dblegends.net/> page.
-- Game IDs don't need to have - or "DBL" in them, but can have them.
-- You can use -1 in place of a name to only check the filters.
-- Search sees if each word in the name is inside the one being checked. 
-- Order in names doesn't matter due to the above.
-- Max of 10 embeds are shown per page, no page limit, however, you
-only have 15 minutes to navigate pages.
-
-Examples:
-
-b-search goku_ssb goku ssb future melee red
-
-=> Finds characters that match the above filters and name
-
-
-b-search -1 goku vegeta
-
-=> Finds tag units of goku and vegeta
-
-
-b-search goku_vegeta
-
-=> Equivalent to previous
-
-
-b-search DBL41-01S
-
-=> Finds ssb goku and vegeta
-
-
-b-search 21
-
-=> Finds all android 21s
-
-**9) b-character send**
-- Like #4 but a file with all characters instead.
-- Prints the ID of the unit as well.
-
-**10) b-tag send**
-- Like #4 but a file with all tags instead.
-- Prints the number of units with the tag.
-
-**11) b-grab (link)**
-- Sends a link of the video file to download it locally.
-- Accepts youtube links.
-- Instagram, tiktok, and twitter may be added.
-
-**12) b-grab mp3 (link)**
-- Sends a link of the audio to download it locally.
-- Accepts youtube links.
-
-**13) b-convert \*(gif/video)**
-- Converts gifs to videos and back.
-- Tries to automatically detect which is which, but appending the type is recommended.
-- Checks embeds and attachments, if the video/gif doesn't embed, or takes long to, it's ignored.
-- You can reply to the message that contains the file, or it can check yours.
-
-**14) b-weather (city) \*detailed**
-- Sends an embed with info on the city's weather for today and tomorrow.
-- If "detailed" is added, it includes more info and after tomorrow.
-
-**15) b-translate (text)/(reply to the message)/(embed)**
-- Translates the text in your message, the reply, or the embed in your message or the reply
-- Automatically detects language and translates to English unless set.
-- b-translate set (to/from-to) to manually set the language.
-- Uses an AI no better than google translate, with the same weaknesses.
-- Language is in its shortened form (i.e, en for English, fr for French).
-- Do b-translate languages to get all languages and their shortened forms
-
-**16) b-summon (banner_url)**
-- Calculates the rates to get the important characters of the banner.
-- Also calculates total rates and the cost.
-- Calculates amount of rotations needed to have an 80% to get the character.
-- Includes chance to get the character to red 2.
-- Includes one rotation, three rotations, and 80% chance worth of rotations.
-- Get the banner url from <https://dblegends.net/>.
