@@ -72,14 +72,14 @@ public class Ezgif extends LocalWebDriver {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofMinutes(2));
 		WebElement outputElement = wait
 				.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".outfile > img")));
-		return outputElement.getAttribute("src");
+		return outputElement.getDomAttribute("src");
 	}
 
 	private String getVideo() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofMinutes(2));
 		WebElement outputElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("video")));
 		WebElement sourceElement = outputElement.findElement(By.tagName("source"));
-		return sourceElement.getAttribute("src");	
+		return sourceElement.getDomAttribute("src");	
 	}
 
 	private WebElement getNewFileSize() {

@@ -56,7 +56,7 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 
 	private String getThumbnail() {
 		try {
-			return driver.findElement(By.cssSelector(".thumbnail > img")).getAttribute("src");
+			return driver.findElement(By.cssSelector(".thumbnail > img")).getDomAttribute("src");
 		} catch (Exception e) {
 			return null;
 		}
@@ -85,14 +85,15 @@ public class GrabYoutubeVideo extends LocalWebDriver {
 	private String getAudioDownloadLink() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		WebElement downloadLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Download .mp3")));
-		return downloadLink.getAttribute("href");
+		return downloadLink.getDomAttribute("href");
 	}
 
 	private String getVideoDownloadLink() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		WebElement downloadLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Download .mp4")));
-		return downloadLink.getAttribute("href");
+		return downloadLink.getDomAttribute("href");
 	}
+
 
 	private void clickOnVideoDownload() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
