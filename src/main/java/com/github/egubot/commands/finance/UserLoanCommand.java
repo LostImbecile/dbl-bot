@@ -26,7 +26,7 @@ public class UserLoanCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		String[] args = arguments.split(" ");
+		String[] args = arguments.split("\\s+");
 		if (arguments.isBlank()) {
 			sendLoanDetails(msg);
 			return true;

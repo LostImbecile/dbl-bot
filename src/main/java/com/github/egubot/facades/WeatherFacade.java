@@ -13,7 +13,7 @@ public class WeatherFacade {
 	}
 
 	public static void sendWeather(Messageable e, String text) {
-		String[] args = text.toLowerCase().split(" ");
+		String[] args = text.toLowerCase().split("\\s+");
 		String city;
 		String detailed = "";
 		boolean isCelsius = true;

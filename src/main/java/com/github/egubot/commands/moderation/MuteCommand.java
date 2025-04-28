@@ -33,7 +33,7 @@ public class MuteCommand implements Command {
 				return true;
 			}
 			
-			String[] args = arguments.split(" ");
+			String[] args = arguments.split("\\s+");
 			if (args.length < 2) {
 				msg.getChannel().sendMessage("Timing out user for 10m (default).");
 				server.timeoutUser(UserInfoUtilities.getUserById(userIDs.get(0)), Duration.ofMinutes(10));

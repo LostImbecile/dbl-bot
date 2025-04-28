@@ -182,7 +182,7 @@ public class LegendsDatabase {
 	}
 
 	private static void setTags(String line, Characters character) {
-		String[] token = line.split(" ");
+		String[] token = line.split("\\s+");
 
 		tags.get(25).getCharacters().put(character);
 		if (character.getCharacterName().toLowerCase().contains("assist"))

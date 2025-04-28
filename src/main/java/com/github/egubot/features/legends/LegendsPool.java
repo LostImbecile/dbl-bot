@@ -24,7 +24,7 @@ public abstract class LegendsPool {
 		try {
 			input = preprocess(input);
 
-			String[] filters = input.split(" ");
+			String[] filters = input.split("\\s+");
 			LinkedList<String> opStack = new LinkedList<>();
 			LinkedList<String> conStack = new LinkedList<>();
 			LinkedList<Set<Characters>> pools = new LinkedList<>();
@@ -32,7 +32,7 @@ public abstract class LegendsPool {
 			// Turn to postfix from infix (5 + 3 to 3 5 + or so)
 			turnToPostfix(filters, opStack, conStack);
 
-			filters = conStack.get(0).split(" ");
+			filters = conStack.get(0).split("\\s+");
 			conStack.clear();
 
 			// Evaluate the -now- postfix filters

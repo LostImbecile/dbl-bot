@@ -31,7 +31,7 @@ public class UserBalance extends DataManagerHandler {
 				double balance = Double.parseDouble(msgText);
 				getUserData(msg).setBalance(balance);
 			} else {
-				double balance = Double.parseDouble(msgText.split(" ")[1]);
+				double balance = Double.parseDouble(msgText.split("\\s+")[1]);
 				long userID = getUserID(msg);
 				getUserData(userID).setBalance(balance);
 			}

@@ -20,7 +20,7 @@ public class BalanceTransferCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (arguments.isBlank() || arguments.split(" ").length != 2
+		if (arguments.isBlank() || arguments.split("\\s+").length != 2
 				|| MessageUtils.getPingedUsers(arguments).isEmpty()) {
 			msg.getChannel().sendMessage("Please provide a user and an amount.");
 			return true;
@@ -29,7 +29,7 @@ public class BalanceTransferCommand implements Command {
 		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 
 		String receiver = MessageUtils.getPingedUsers(arguments).get(0);
-		String[] args = arguments.split(" ");
+		String[] args = arguments.split("\\s+");
 
 		if (args[0].contains(receiver))
 			arguments = args[1];

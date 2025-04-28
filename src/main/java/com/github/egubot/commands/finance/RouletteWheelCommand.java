@@ -26,7 +26,7 @@ public class RouletteWheelCommand implements Command {
 			isAll = true;
 		} else {
 			try {
-				amount = Double.parseDouble(arguments.split(" ")[0]);
+				amount = Double.parseDouble(arguments.split("\\s+")[0]);
 			} catch (Exception e) {
 				msg.getChannel().sendMessage("Invalid amount!");
 				return true;
@@ -35,7 +35,7 @@ public class RouletteWheelCommand implements Command {
 		arguments = arguments.toLowerCase();
 
 		if (arguments.contains("red") || arguments.contains("black") || arguments.contains("green")) {
-			String color = arguments.split(" ")[1];
+			String color = arguments.split("\\s+")[1];
 			switch (color) {
 			case "red":
 				color = RouletteWheel.RED;

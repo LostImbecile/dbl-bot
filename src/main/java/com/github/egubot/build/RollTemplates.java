@@ -72,7 +72,7 @@ public class RollTemplates extends DataManagerHandler {
 
 			msgText = msgText.replaceAll("[-()&|+\n\t]", " ").trim().replaceAll("\\s+", " ");
 
-			String[] tokens = msgText.split(" ");
+			String[] tokens = msgText.split("\\s+");
 			boolean isTag = false;
 			boolean isNameExist = false;
 
