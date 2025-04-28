@@ -13,6 +13,7 @@ public class MessageUtils {
 	public static final Pattern channelPattern = Pattern.compile("<#(\\d+)>");
 	public static final Pattern pingPattern = Pattern.compile("(<@&?\\d+>)");
 	public static final Pattern userIDPattern = Pattern.compile("<@(\\d+)>");
+	public static final Pattern roleIDPattern = Pattern.compile("<@&(\\d+)>");
 	
 	private MessageUtils() {
 	}
@@ -35,6 +36,15 @@ public class MessageUtils {
 			pings.append(" ");
 		}
 		return pings.toString();
+	}
+	
+	public static List<String> getPingedRoles(String st){
+		List<String> ids = new ArrayList<>();
+		Matcher matcher = roleIDPattern.matcher(st);
+		while (matcher.find()) {
+			ids.add(matcher.group(1));
+		}
+		return ids;
 	}
 	
 	public static List<String> getPingedUsers(String st){

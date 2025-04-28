@@ -2,6 +2,12 @@ Everything is case insensitive. Invocation has to be at the beginning of your me
 
 Round Brackets indicate operand, stars mean optional, square brackets for comments, everything else needs to be there.
 
+Moderation:
+- b-kick @user1 @user2 ...
+- b-ban @user1 @user2 ...
+- b-mute @user1 0w0d0h0m0s `[28d max]`
+- b-clear amount `[100 recent messages at once, 10 old at once]`
+
 DBLegends Random Roll:
 - b-roll(n) \*(filters)
 - b-template create (name) (filters)
