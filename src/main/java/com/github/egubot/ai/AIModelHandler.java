@@ -1,6 +1,8 @@
 package com.github.egubot.ai;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.objects.APIResponse;
+import com.github.egubot.objects.ModelData;
 import com.github.egubot.shared.Shared;
 
 public class AIModelHandler {
@@ -60,6 +63,23 @@ public class AIModelHandler {
 			}
 		}
 		return false;
+	}
+	
+	public List<String> getModelList() {
+		if (model != null) {
+			try {
+				ArrayList<String> modelList = new ArrayList<>();
+				for (ModelData modelData : model.getModelsList().getData()) {
+					if(modelData.getObject().equals("model")) {
+						modelList.add(modelData.getId());
+					}
+				}
+				return modelList;
+			} catch (IOException e) {
+				return Collections.emptyList();
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	public boolean respond(Message msg, String msgText) {

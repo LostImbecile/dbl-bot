@@ -110,6 +110,8 @@ OpenAI Model:
 - gpt clear
 - gpt tokens
 - gpt change model (model) `[owner]`
+- gpt model `[returns model name]`
+- gpt list `[lists models]`
 
 Groq Model:
 - same as gpt but "aa"

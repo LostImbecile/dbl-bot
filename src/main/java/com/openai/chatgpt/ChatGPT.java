@@ -7,10 +7,12 @@ import com.github.egubot.storage.ConfigManager;
 
 public class ChatGPT extends AIModel {
 	static final String GPT_URL = "https://api.openai.com/v1/chat/completions";
+	private static final String GPT_MODEL_LIST_URL = "https://api.openai.com/v1/models";
 	static final String API_KEY = KeyManager.getToken("ChatGPT_API_Key");
 
 	public ChatGPT() {
 		super(getConfigModel(), API_KEY, GPT_URL, 4096);
+		this.setListModelsURL(GPT_MODEL_LIST_URL);
 	}
 
 	public static String getConfigModel() {

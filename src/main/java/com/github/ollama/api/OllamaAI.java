@@ -8,10 +8,12 @@ import java.util.List;
 
 public class OllamaAI extends AIModel {
 	private static final String OLLAMA_URL = "http://localhost:11434/v1/chat/completions";
+	private static final String OLLAMA_MODEL_LIST_URL = "http://localhost:11434/v1/models";
 	static final String OLLAMA_API_KEY = KeyManager.getToken("Ollama_API_Key"); // none usually
 
 	public OllamaAI() {
 		super(getConfigModel(), OLLAMA_API_KEY, OLLAMA_URL, 128000, 120000, 10000, 10000); // 128k, 120k, 10k, 10k
+		this.setListModelsURL(OLLAMA_MODEL_LIST_URL);
 	}
 
 	public static String getConfigModel() {

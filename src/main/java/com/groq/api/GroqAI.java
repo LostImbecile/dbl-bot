@@ -8,10 +8,12 @@ import java.io.IOException;
 
 public class GroqAI extends AIModel {
 	private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+	private static final String GROQ_MODEL_LIST_URL = "https://api.groq.com/openai/v1/models";
 	static final String GROQ_API_KEY = KeyManager.getToken("Groq_API_Key");
 
 	public GroqAI() {
 		super(getConfigModel(), GROQ_API_KEY, GROQ_URL, "1.2", 8196);
+		this.setListModelsURL(GROQ_MODEL_LIST_URL);
 	}
 
 	public static String getConfigModel() {

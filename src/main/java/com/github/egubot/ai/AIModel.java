@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.APIResponse;
+import com.github.egubot.objects.ModelListResponse;
 import com.github.egubot.shared.utils.DateUtils;
 import com.github.egubot.shared.utils.JSONUtilities;
 import com.google.gson.Gson;
@@ -28,6 +30,7 @@ public class AIModel implements Shutdownable {
 	protected String model;
 	protected String apiKey;
 	protected String url;
+	protected String listModelsURL = null;
 	protected String temperature = "1";
 	protected String systemPrompt;
 	protected int tokenLimit = 4096;
@@ -57,10 +60,9 @@ public class AIModel implements Shutdownable {
 				getOwnerName());
 
 		this.httpClient = HttpClients.custom()
-				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(socketTimeout) // Increased for
-																								// response generation
-						.setConnectTimeout(connectTimeout) // Connection establishment
-						.setConnectionRequestTimeout(connectionRequestTimeout) // Connection from pool
+				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(socketTimeout)
+						.setConnectTimeout(connectTimeout) 
+						.setConnectionRequestTimeout(connectionRequestTimeout) 
 						.build())
 				.build();
 	}
@@ -157,6 +159,28 @@ public class AIModel implements Shutdownable {
 
 		return "{\"role\": \"user\", \"content\": \"" + author + ": " + txt + "\"}";
 	}
+	
+	public ModelListResponse getModelsList() throws IOException {
+		if (this.listModelsURL == null || this.listModelsURL.isBlank()) {
+			logger.warn("listModelsURL is not configured for AIModel.");
+			return null;
+		}
+
+		HttpGet getRequest = new HttpGet(this.listModelsURL);
+		getRequest.addHeader("Authorization", "Bearer " + this.apiKey);
+		
+		HttpResponse response = getHttpClient().execute(getRequest);
+		int statusCode = response.getStatusLine().getStatusCode();
+		String responseBody = EntityUtils.toString(response.getEntity());
+
+		if (statusCode == 200) {
+			Gson gson = new Gson();
+			return gson.fromJson(responseBody, ModelListResponse.class);
+		} else {
+			logger.error("Failed to get models list. Status: {}, Body: {}", statusCode, responseBody);
+			return null; 
+		}
+	}
 
 	public static String getOwnerName() {
 		if (Bot.getOwnerUser() != null)
@@ -204,5 +228,13 @@ public class AIModel implements Shutdownable {
 
 	public CloseableHttpClient getHttpClient() {
 		return httpClient;
+	}
+
+	public String getListModelsURL() {
+		return listModelsURL;
+	}
+
+	public void setListModelsURL(String listModelsURL) {
+		this.listModelsURL = listModelsURL;
 	}
 }
