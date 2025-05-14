@@ -114,6 +114,10 @@ public class LegendsSummonRates {
 		for (SummonCharacter summonCharacter : focusCharacters) {
 			Characters character = LegendsDatabase.getCharacterHash().get(summonCharacter.getCharacter().getSiteID());
 			double rate = rotation.get(1).get(character.getSiteID());
+			if (rate <= 0) {
+				System.out.println(character);
+			    continue; // Avoid potential infinite loop
+			}
 			double newRate = rate;
 			for (int i = 2; newRate < targetChance; i++) {
 				newRate = 1 - Math.pow((1 - rate), i);
@@ -153,7 +157,6 @@ public class LegendsSummonRates {
 				if (character < (minRate - tolerance))
 					minIndex = i;
 			}
-
 			SummonCharacter maxCharacter = potentialCharacters.get(maxIndex);
 			if (maxIndex == minIndex) {
 				focusCharacters.add(maxCharacter);
@@ -165,8 +168,7 @@ public class LegendsSummonRates {
 				foundFocus = true;
 			}
 		}
-
-		if (!foundFocus)
+		if (!foundFocus && !featuredUnits.isEmpty())
 			focusCharacters.add(featuredUnits.get(0));
 
 		return focusCharacters;
@@ -255,15 +257,15 @@ public class LegendsSummonRates {
 				continue;
 			character.setCharacter(databaseSavedCharacter);
 
-			Element summonRateElement = element.selectFirst("div.mx-2 > div:first-child");
-			String summonRate = summonRateElement.text();
-			character.setzPowerAmount(summonRate);
-
-			Element zPowerElement = element.selectFirst("div.mx-2 > div:last-child");
+			Element zPowerElement = element.selectFirst("div.mx-2 > div:first-child");
 			String zPower = zPowerElement.text();
-			character.setSummonRate(zPower);
-
-			Element isNewElement = element.selectFirst("div.isNew");
+			character.setzPowerAmount(zPower);
+			
+			Element summonRateElement = element.selectFirst("div.mx-2 > div:last-child");
+			String summonRate = summonRateElement.text();
+			character.setSummonRate(summonRate);
+			
+			Element isNewElement = element.selectFirst(".isNew");
 			character.setNew(isNewElement != null);
 			banner.getFeaturedUnits().add(character);
 
@@ -444,5 +446,13 @@ public class LegendsSummonRates {
 	}
 
 	public static void main(String[] args) {
+		try {
+			LegendsDatabase.initialise();
+			getBannerRates("https://dblegends.net/banner/2034100");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

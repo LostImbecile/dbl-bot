@@ -1,5 +1,8 @@
 package com.github.egubot.objects.legends;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SummonStep {
 	private int currencyNeeded = 0;
 	private String currencyType = "";
@@ -74,8 +77,15 @@ public class SummonStep {
 		this.numberOfPulls = numberOfPulls;
 	}
 
+	private static final Pattern PULLS_PATTERN = Pattern.compile("acquire (\\d+) character");
+
 	public void setNumberOfPulls(String text) {
-		if (text.contains("ten")) {
+		if (text == null)
+			return;
+		Matcher matcher = PULLS_PATTERN.matcher(text);
+		if (matcher.find()) {
+			this.numberOfPulls = Integer.parseInt(matcher.group(1));
+		} else if (text.contains("ten")) {
 			this.numberOfPulls = 10;
 		} else if (text.contains("seven")) {
 			this.numberOfPulls = 7;

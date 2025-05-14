@@ -40,7 +40,7 @@ public class SummonCharacter {
 	}
 
 	public void setSummonRate(String summonRate) {
-		String st = summonRate.replaceFirst("x", "").replaceFirst("%", "");
+		String st = summonRate.replace("x", "").replace("%", "").trim();
 		try {
 			this.summonRate = Double.parseDouble(st) / 100;
 		} catch (Exception e) {
