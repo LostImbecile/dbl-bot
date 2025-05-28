@@ -88,7 +88,11 @@ public class AIModelHandler {
 			conversations.putIfAbsent(channelId, new LinkedList<>());
 			List<String> conversation = conversations.get(channelId);
 
-			APIResponse response = getModel().sendRequest(msgText, msg.getAuthor().getName(), conversation);
+			String userNameField = "Username (" + msg.getAuthor().getName() + ")";
+			if(!msg.getAuthor().getName().equalsIgnoreCase(msg.getAuthor().getDisplayName()))
+				userNameField += ", Display Name(" + msg.getAuthor().getDisplayName() + ")";
+			
+			APIResponse response = getModel().sendRequest(msgText, userNameField, conversation);
 
 			if (!response.isError()) {
 				conversation.add(model.reformatInput(msgText, "user"));
