@@ -265,7 +265,7 @@ public class LegendsSummonRates {
 			String summonRate = summonRateElement.text();
 			character.setSummonRate(summonRate);
 			
-			Element isNewElement = element.selectFirst(".isNew");
+			Element isNewElement = element.selectFirst(".character-thumb .isNew");
 			character.setNew(isNewElement != null);
 			banner.getFeaturedUnits().add(character);
 
@@ -413,10 +413,18 @@ public class LegendsSummonRates {
 			Characters character = summonCharacter.getCharacter();
 			characterRate = summonCharacter.getSummonRate();
 
-			if (character.isLF() && step.isLFDouble())
-				characterRate *= 2;
-			if (character.isUltra() && step.isUltraDouble())
-				characterRate *= 2;
+			if (character.isLF()) {
+				if(step.isLFDouble())
+					characterRate *= 2;
+				else if(step.isLFTriple())
+					characterRate *= 3;
+			}
+			if (character.isUltra()) {
+				if(step.isUltraDouble())
+					characterRate *= 2;
+				else if(step.isUltraTriple())
+					characterRate *= 3;
+			}
 
 			if (character.isLF() && step.isOneLFGuaranteed()) {
 				initialPulls -= 1;

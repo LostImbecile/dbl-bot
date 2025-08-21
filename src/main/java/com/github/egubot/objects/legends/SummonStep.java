@@ -68,9 +68,17 @@ public class SummonStep {
 	public boolean isLFDouble() {
 		return this.specialAttributeString.contains("LL_Double");
 	}
+	
+	public boolean isLFTriple() {
+		return this.specialAttributeString.contains("LL_Triple");
+	}
 
 	public boolean isUltraDouble() {
 		return this.specialAttributeString.contains("UL_Double");
+	}
+	
+	public boolean isUltraTriple() {
+		return this.specialAttributeString.contains("UL_Triple");
 	}
 
 	public void setNumberOfPulls(int numberOfPulls) {
