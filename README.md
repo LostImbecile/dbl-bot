@@ -124,6 +124,11 @@ Financial System:
 - b-bank loan reset *\(user)
 - b-loan reset *\(user)
 
+Message Highlights:
+- b-highlight
+- b-highlight toggle
+- b-highlight (emoji) (channel) (threshold `[1-50]`)
+
 Automatic Responses:
 
  `[Types: contain, equal, match]`
