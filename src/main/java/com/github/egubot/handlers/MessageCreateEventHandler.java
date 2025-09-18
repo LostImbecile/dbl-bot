@@ -27,6 +27,9 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 	private static boolean readBotMessages = false;
 	private static boolean readOwnMessages = false;
 
+	// The underlying library is multi-threaded, these are mostly to deal with some I/O;
+	// whether local or over the network that some commands do, the heaviest of which are
+	// async either way. Change as needed or add it to the config.
 	public static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 	private static ShutdownManager shutdownManager = Shared.getShutdown();
 	private static boolean isTestActive = false;
@@ -76,7 +79,6 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			// No real purpose besides avoiding character limits currently
 			if (lowCaseTxt.contains("[attachment text replace]") && !msg.getAttachments().isEmpty()) {
 				msgText = replaceAttachmentText(msg, msgText);
-				lowCaseTxt = msgText.toLowerCase();
 			}
 
 			// Check commands

@@ -10,6 +10,7 @@ import com.github.egubot.features.SendMessagesFromConsole;
 import com.github.egubot.gui.GUIApplication;
 import com.github.egubot.handlers.LostConnectionHandler;
 import com.github.egubot.handlers.MessageCreateEventHandler;
+import com.github.egubot.handlers.ReactionEventHandler;
 import com.github.egubot.handlers.ReconnectEventHandler;
 import com.github.egubot.handlers.ResumeEventHandler;
 import com.github.egubot.logging.StreamRedirector;
@@ -93,7 +94,7 @@ public class Main {
 			String token = KeyManager.getToken("Discord_API_Key");
 			// For info about intents check the links at the start of the class
 			Bot.setApi(new DiscordApiBuilder().setToken(token)
-					.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES).login().join());
+					.addIntents(Intent.MESSAGE_CONTENT, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_MESSAGE_REACTIONS).login().join());
 		} catch (Exception e1) {
 			logger.error("Invalid token. Exiting.");
 			KeyManager.updateKeys("Discord_API_Key", KeyManager.getToken("Discord_API_Key"), KeyManager.tokensFileName);
@@ -170,6 +171,11 @@ public class Main {
 		Bot.getApi().addReconnectListener(new ReconnectEventHandler());
 		Bot.getApi().addResumeListener(new ResumeEventHandler());
 		Bot.getApi().addLostConnectionListener(new LostConnectionHandler());
+		
+		// Create a single instance of the reaction handler for both adding and removing reactions
+		ReactionEventHandler reactionHandler = new ReactionEventHandler();
+		Bot.getApi().addReactionAddListener(reactionHandler);
+		Bot.getApi().addReactionRemoveListener(reactionHandler);
 	}
 
 	private static boolean checkDBLegendsMode(String arguments) {
