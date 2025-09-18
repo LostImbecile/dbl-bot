@@ -4,6 +4,7 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.features.HighlightsFeature;
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 
 public class HighlightsCommand implements Command {
@@ -24,6 +25,11 @@ public class HighlightsCommand implements Command {
 		
 		if (parts.length == 1 && parts[0].equalsIgnoreCase("status")) {
 			showStatus(msg);
+			return true;
+		}
+
+		if (!UserInfoUtilities.canManageServer(msg)) {
+			msg.getChannel().sendMessage("❌ You need **Manage Server** permission to configure highlights.");
 			return true;
 		}
 
