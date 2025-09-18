@@ -20,7 +20,7 @@ public class HighlightsFeature {
 		
 		for (String line : dataManager.getData()) {
 			try {
-				String[] parts = line.split(":");
+				String[] parts = line.split("\\|");
 				if (parts.length >= 4) {
 					long serverID = Long.parseLong(parts[0]);
 					boolean enabled = Boolean.parseBoolean(parts[1]);
@@ -117,8 +117,8 @@ public class HighlightsFeature {
 	}
 
 	private static void saveConfig(long serverID, ServerHighlightsConfig config) {
-		dataManager.getData().removeIf(line -> line.startsWith(serverID + ":"));
-		String configLine = serverID + ":" + config.enabled + ":" + config.emoji + ":" + config.channelID + ":" + config.threshold;
+		dataManager.getData().removeIf(line -> line.startsWith(serverID + "|"));
+		String configLine = serverID + "|" + config.enabled + "|" + config.emoji + "|" + config.channelID + "|" + config.threshold;
 		dataManager.getData().add(configLine);
 		dataManager.writeData(null);
 	}
