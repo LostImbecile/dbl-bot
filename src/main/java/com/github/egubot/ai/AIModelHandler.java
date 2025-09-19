@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
@@ -16,6 +15,7 @@ import com.github.egubot.facades.SystemPromptContext;
 import com.github.egubot.objects.APIResponse;
 import com.github.egubot.objects.ModelData;
 import com.github.egubot.shared.Shared;
+import com.google.gemini.GeminiAI;
 
 public class AIModelHandler {
 	private static final Logger logger = LogManager.getLogger(AIModelHandler.class.getName());
@@ -94,6 +94,8 @@ public class AIModelHandler {
 			if(!msg.getAuthor().getName().equalsIgnoreCase(msg.getAuthor().getDisplayName()))
 				userNameField += ", Display Name(" + msg.getAuthor().getDisplayName() + ")";
 			
+			clearConversationIfTooLarge(channelId, getModel().getTokenLimit() - 2000);
+			
 			APIResponse response = getModel().sendRequest(msgText, userNameField, conversation, serverId);
 
 			if (!response.isError()) {
@@ -102,20 +104,51 @@ public class AIModelHandler {
 				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
 
 				lastTokens.put(channelId, response.getTotalTokens());
-				
-				if (response.getTotalTokens() > getModel().getTokenLimit() - 1000) {
-					int deleteCount = Math.min(conversation.size() / 2, Math.max(1, getModel().getTokenLimit() / 1000));
-					if (deleteCount > 0 && deleteCount < conversation.size()) {
-						try {
-							conversation.subList(0, deleteCount).clear();
-							logger.info("Cleared {} conversation entries for channel {} due to token limit", deleteCount, channelId);
-						} catch (Exception e) {
-							logger.error("Failed to clear conversation entries: ", e);
-							conversation.clear();
-							logger.info("Cleared entire conversation for channel {} as fallback", channelId);
-						}
-					}
-				}
+			} else {
+				String errorMsg = "API Error: " + response.getResponse();
+				msg.getChannel().sendMessage(errorMsg);
+				logger.warn("API error for channel {}: Status {}, Message: {}", channelId, response.getStatusCode(), response.getResponse());
+			}
+			return true;
+		} catch (java.net.SocketTimeoutException e) {
+			msg.getChannel().sendMessage("Request timed out - the AI service took too long to respond.");
+			logger.error("Socket timeout for channel {}: {}", msg.getChannel().getId(), e.getMessage());
+		} catch (java.net.ConnectException e) {
+			msg.getChannel().sendMessage("Connection failed - unable to reach AI service.");
+			logger.error("Connection error for channel {}: {}", msg.getChannel().getId(), e.getMessage());
+		} catch (IOException e) {
+			msg.getChannel().sendMessage("Network error - please try again later.");
+			logger.error("IO Exception for channel {}: ", msg.getChannel().getId(), e);
+		}
+		return false;
+	}
+
+	public boolean respond(Message msg, String msgText, List<String> attachmentLinks) {
+		try {
+			Long channelId = msg.getChannel().getId();
+			Long serverId = msg.getServer().map(server -> server.getId()).orElse(null);
+			conversations.putIfAbsent(channelId, new LinkedList<>());
+			List<String> conversation = conversations.get(channelId);
+
+			String userNameField = "Username (" + msg.getAuthor().getName() + ")";
+			if(!msg.getAuthor().getName().equalsIgnoreCase(msg.getAuthor().getDisplayName()))
+				userNameField += ", Display Name(" + msg.getAuthor().getDisplayName() + ")";
+			
+			clearConversationIfTooLarge(channelId, getModel().getTokenLimit() - 2000);
+			
+			APIResponse response;
+			if (attachmentLinks != null && !attachmentLinks.isEmpty() && model instanceof GeminiAI) {
+				GeminiAI gemini = (GeminiAI) model;
+				response = gemini.sendRequestWithImage(msgText, attachmentLinks.get(0), userNameField, conversation, serverId);
+			} else {
+				response = getModel().sendRequest(msgText, userNameField, conversation, serverId);
+			}
+			
+			if (!response.isError()) {
+				conversation.add(model.reformatInput(msgText, "user"));
+				msg.getChannel().sendMessage(response.getResponse().replaceAll("<think>(?s).*</think>", ""));
+				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
+				lastTokens.put(channelId, response.getTotalTokens());
 			} else {
 				String errorMsg = "API Error: " + response.getResponse();
 				msg.getChannel().sendMessage(errorMsg);

@@ -119,10 +119,13 @@ OpenAI Model:
 
 Groq Model:
 - same as gpt but "aa"
-- b-vision (text prompt) (reply to the message)/(embed)
 
 Ollama Model:
 - same but "qq"
+
+Gemini Model:
+- same but "gem" `[image support]`
+- b-vision (text prompt) (reply to the message)/(embed)
 
 System Prompt Management:
 - sys toggle `[Toggles between system and user message delivery]`
