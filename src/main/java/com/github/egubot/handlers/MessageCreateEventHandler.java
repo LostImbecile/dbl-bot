@@ -84,7 +84,9 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			// Check commands
 			if (CommandManager.processContent(msg, msgText))
 				return;
-
+			
+			// An interceptor interface like with reactions and finance can be used
+			// if needed
 			if (AIContext.getChatGPT().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
@@ -94,6 +96,10 @@ public class MessageCreateEventHandler implements MessageCreateListener, Shutdow
 			}
 
 			if (AIContext.getOllama().respondIfChannelActive(msg, msgText)) {
+				return;
+			}
+			
+			if (AIContext.getGemini().respondIfChannelActive(msg, msgText)) {
 				return;
 			}
 
