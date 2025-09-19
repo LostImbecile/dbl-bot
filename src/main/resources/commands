@@ -124,6 +124,15 @@ Groq Model:
 Ollama Model:
 - same but "qq"
 
+System Prompt Management:
+- sys toggle `[Toggles between system and user message delivery]`
+- sys get `[View current server's system prompt]`
+- sys set (prompt) `[Set custom system prompt for server - Admin only]`
+- sys reset `[Reset server's prompt to default - Admin only]`
+- sys default get `[View global default prompt - Owner only]`
+- sys default set (prompt) `[Change global default prompt - Owner only]`
+- sys default reload `[Reload default from file - Owner only]`
+
 Timers: `[Tasks: weather, parrot, verse]`
 - b-timer \*every \*(0M0w0d0h0m0s) \*(2024-7-13, 20:00) "(task) \*(arguments)" \*(send on miss/terminate on miss) \*(channels)
 - b-timer remove ^^^

@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.Message;
 
+import com.github.egubot.facades.SystemPromptContext;
 import com.github.egubot.objects.APIResponse;
 import com.github.egubot.objects.ModelData;
 import com.github.egubot.shared.Shared;
@@ -85,6 +86,7 @@ public class AIModelHandler {
 	public boolean respond(Message msg, String msgText) {
 		try {
 			Long channelId = msg.getChannel().getId();
+			Long serverId = msg.getServer().map(server -> server.getId()).orElse(null);
 			conversations.putIfAbsent(channelId, new LinkedList<>());
 			List<String> conversation = conversations.get(channelId);
 
@@ -92,7 +94,7 @@ public class AIModelHandler {
 			if(!msg.getAuthor().getName().equalsIgnoreCase(msg.getAuthor().getDisplayName()))
 				userNameField += ", Display Name(" + msg.getAuthor().getDisplayName() + ")";
 			
-			APIResponse response = getModel().sendRequest(msgText, userNameField, conversation);
+			APIResponse response = getModel().sendRequest(msgText, userNameField, conversation, serverId);
 
 			if (!response.isError()) {
 				conversation.add(model.reformatInput(msgText, "user"));
@@ -100,16 +102,35 @@ public class AIModelHandler {
 				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
 
 				lastTokens.put(channelId, response.getTotalTokens());
-				if (lastTokens.get(channelId) > getModel().getTokenLimit() - 1000) {
-					int deleteCount = Math.min(getModel().getTokenLimit() / 4096, 5);
-					conversations.get(channelId).subList(0, deleteCount).clear();
+				
+				if (response.getTotalTokens() > getModel().getTokenLimit() - 1000) {
+					int deleteCount = Math.min(conversation.size() / 2, Math.max(1, getModel().getTokenLimit() / 1000));
+					if (deleteCount > 0 && deleteCount < conversation.size()) {
+						try {
+							conversation.subList(0, deleteCount).clear();
+							logger.info("Cleared {} conversation entries for channel {} due to token limit", deleteCount, channelId);
+						} catch (Exception e) {
+							logger.error("Failed to clear conversation entries: ", e);
+							conversation.clear();
+							logger.info("Cleared entire conversation for channel {} as fallback", channelId);
+						}
+					}
 				}
-			} else
-				msg.getChannel().sendMessage("Error: " + response.getResponse());
+			} else {
+				String errorMsg = "API Error: " + response.getResponse();
+				msg.getChannel().sendMessage(errorMsg);
+				logger.warn("API error for channel {}: Status {}, Message: {}", channelId, response.getStatusCode(), response.getResponse());
+			}
 			return true;
+		} catch (java.net.SocketTimeoutException e) {
+			msg.getChannel().sendMessage("Request timed out - the AI service took too long to respond.");
+			logger.error("Socket timeout for channel {}: {}", msg.getChannel().getId(), e.getMessage());
+		} catch (java.net.ConnectException e) {
+			msg.getChannel().sendMessage("Connection failed - unable to reach AI service.");
+			logger.error("Connection error for channel {}: {}", msg.getChannel().getId(), e.getMessage());
 		} catch (IOException e) {
-			msg.getChannel().sendMessage("Timed out.");
-			logger.error(e);
+			msg.getChannel().sendMessage("Network error - please try again later.");
+			logger.error("IO Exception for channel {}: ", msg.getChannel().getId(), e);
 		}
 		return false;
 	}
@@ -154,5 +175,59 @@ public class AIModelHandler {
 			logger.error("Model test failed. Model is not functional.");
 			isAIOn = false;
 		}
+	}
+
+	public void clearConversationIfTooLarge(Long channelId, int maxTokens) {
+		if (conversations.containsKey(channelId)) {
+			List<String> conversation = conversations.get(channelId);
+			int estimatedTokens = lastTokens.getOrDefault(channelId, 0);
+			
+			if (estimatedTokens > maxTokens) {
+				int removeCount = conversation.size() / 3;
+				if (removeCount > 0 && removeCount < conversation.size()) {
+					try {
+						conversation.subList(0, removeCount).clear();
+						logger.info("Proactively cleared {} conversation entries for channel {} (estimated {} tokens)", 
+								removeCount, channelId, estimatedTokens);
+						lastTokens.put(channelId, estimatedTokens / 2);
+					} catch (Exception e) {
+						logger.error("Failed to proactively clear conversation: ", e);
+						conversation.clear();
+						lastTokens.put(channelId, 0);
+					}
+				}
+			}
+		}
+	}
+
+	public boolean isChannelActive(Long channelId) {
+		return Boolean.TRUE.equals(isActive.getOrDefault(channelId, false));
+	}
+
+	public void setChannelActive(Long channelId, boolean active) {
+		isActive.put(channelId, active);
+	}
+
+	public void setSystemPromptAsUser(boolean asUser) {
+		// This method is now deprecated as it's handled per-server
+		// Consider removing or updating to work with a specific server
+	}
+
+	public boolean isSystemPromptAsUser() {
+		// This method is now deprecated as it's handled per-server
+		// Consider removing or updating to work with a specific server
+		return false;
+	}
+
+	public String getProcessedSystemPrompt() {
+		return getProcessedSystemPrompt(null);
+	}
+	
+	public String getProcessedSystemPrompt(Long serverId) {
+		if (model != null) {
+			String systemPrompt = SystemPromptContext.getSystemPrompt(serverId);
+			return model.processPlaceholders(systemPrompt, serverId);
+		}
+		return "";
 	}
 }

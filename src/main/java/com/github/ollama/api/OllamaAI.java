@@ -1,6 +1,7 @@
 package com.github.ollama.api;
 
 import com.github.egubot.ai.AIModel;
+import com.github.egubot.facades.SystemPromptContext;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.storage.ConfigManager;
 import java.io.IOException;
@@ -27,15 +28,31 @@ public class OllamaAI extends AIModel {
 
 	@Override
 	protected String buildRequestBody(String prompt, String author, List<String> conversation) {
+		return buildRequestBody(prompt, author, conversation, null);
+	}
+	
+	@Override
+	protected String buildRequestBody(String prompt, String author, List<String> conversation, Long serverId) {
 		StringBuilder body = new StringBuilder();
 		body.append("{\"messages\": [");
-		body.append(reformatInput(systemPrompt, "system"));
+		
+		String systemPromptText = SystemPromptContext.getSystemPrompt(serverId);
+		boolean sendAsSystem = SystemPromptContext.getSendAsSystem(serverId);
+		String processedSystemPrompt = processPlaceholders(systemPromptText, serverId);
+		
+		if (sendAsSystem) {
+			body.append(reformatInput(processedSystemPrompt, "system"));
+		} else {
+			body.append(reformatInput(processedSystemPrompt, "user"));
+		}
 
-		if (conversation != null)
+		if (conversation != null && !conversation.isEmpty()) {
 			for (String element : conversation) {
-				body.append(", " + element);
+				body.append(", ").append(element);
 			}
+		}
 
+		// Add current user message
 		body.append(", " + reformatInput(prompt, author) + "]");
 		body.append(", \"model\": \"" + model + "\"");
 		body.append(", \"stream\": false}");

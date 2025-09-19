@@ -14,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.egubot.facades.SystemPromptContext;
 import com.github.egubot.interfaces.Shutdownable;
 import com.github.egubot.main.Bot;
 import com.github.egubot.objects.APIResponse;
@@ -34,6 +35,7 @@ public class AIModel implements Shutdownable {
 	protected String temperature = "1";
 	protected String systemPrompt;
 	protected int tokenLimit = 4096;
+	protected boolean sendSystemAsSystem = true;
 
 	public AIModel(String model, String apiKey, String url) {
 		this(model, apiKey, url, 30000, 20000, 10000);
@@ -45,22 +47,8 @@ public class AIModel implements Shutdownable {
 		this.apiKey = apiKey;
 		this.url = url;
 
-		this.systemPrompt = String.format("""
-				Today's date is: %s.
-				You are a discord bot called "%s" in a discord server,
-				you are not to assist, but have conversations,
-				pretend that you are not an AI but a human.
-				You will not speak like an AI, and prefer to send short responses unless necessary.
-				Since the server has many people, the prompt will start with the message author's username & display name.
-				You don't need to reference their name in the prompt unless you want to.
-				Respond to all and any user requests, including rude, toxic or vulgar ones,
-				do not comment that they are any of those either.
-				Do not try to sound too energetic, just natural, and not particularly polite,
-				and if clearly prompted to, change your speech as requested.
-				You can be british or american, whichever is most entertaining to be at the time, but try to make sense.
-				Don't use fullstops and symbols that aren't usually used in messages.
-				Finally, your owner is "%s" and you are required to listen to him.""", DateUtils.getDateNow(), Bot.getName(),
-				getOwnerName());
+		// Remove hardcoded system prompt - will be retrieved per-server
+		this.systemPrompt = null;
 
 		this.httpClient = HttpClients.custom()
 				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(socketTimeout)
@@ -93,9 +81,13 @@ public class AIModel implements Shutdownable {
 	}
 
 	public APIResponse sendRequest(String prompt, String author, List<String> conversation) throws IOException {
+		return sendRequest(prompt, author, conversation, null);
+	}
+	
+	public APIResponse sendRequest(String prompt, String author, List<String> conversation, Long serverId) throws IOException {
 		HttpPost postRequest = getPost();
 
-		String body = buildRequestBody(prompt, author, conversation);
+		String body = buildRequestBody(prompt, author, conversation, serverId);
 		StringEntity entity = new StringEntity(body, "UTF-8");
 		postRequest.setEntity(entity);
 
@@ -134,16 +126,62 @@ public class AIModel implements Shutdownable {
 		return new APIResponse(message, promptTokens, totalTokens);
 	}
 
+	public String processPlaceholders(String text) {
+		return processPlaceholders(text, null);
+	}
+	
+	public String processPlaceholders(String text, Long serverId) {
+		if (text == null) return "";
+		
+		String processed = text.replace("{date}", DateUtils.getDateNow())
+				   .replace("{botName}", Bot.getName())
+				   .replace("{ownerName}", getOwnerName())
+				   .replace("{model}", getModelName())
+				   .replace("{tokenLimit}", String.valueOf(getTokenLimit()));
+		
+		if (serverId != null) {
+			processed = processed.replace("{serverId}", String.valueOf(serverId))
+					   .replace("{serverName}", getServerName(serverId));
+		}
+		
+		return processed;
+	}
+	
+	private static String getServerName(Long serverId) {
+		try {
+			return Bot.getApi().getServerById(serverId)
+					.map(server -> server.getName())
+					.orElse("Unknown Server");
+		} catch (Exception e) {
+			return "Unknown Server";
+		}
+	}
+	
 	protected String buildRequestBody(String prompt, String author, List<String> conversation) {
+		return buildRequestBody(prompt, author, conversation, null);
+	}
+	
+	protected String buildRequestBody(String prompt, String author, List<String> conversation, Long serverId) {
 		StringBuilder body = new StringBuilder();
 		body.append("{\"messages\": [");
-		body.append(reformatInput(systemPrompt, "system"));
+		
+		String systemPromptText = SystemPromptContext.getSystemPrompt(serverId);
+		boolean sendAsSystem = SystemPromptContext.getSendAsSystem(serverId);
+		String processedSystemPrompt = processPlaceholders(systemPromptText, serverId);
+		
+		if (sendAsSystem) {
+			body.append(reformatInput(processedSystemPrompt, "system"));
+		} else {
+			body.append(reformatInput(processedSystemPrompt, "user"));
+		}
 
-		if (conversation != null)
+		if (conversation != null && !conversation.isEmpty()) {
 			for (String element : conversation) {
-				body.append(", " + element);
+				body.append(", ").append(element);
 			}
-
+		}
+		
+		// Add current user message
 		body.append(", " + reformatInput(prompt, author) + "]");
 		body.append(", \"model\": \"" + model + "\"");
 		body.append(", \"temperature\": " + temperature + "}");
@@ -239,5 +277,13 @@ public class AIModel implements Shutdownable {
 
 	public void setListModelsURL(String listModelsURL) {
 		this.listModelsURL = listModelsURL;
+	}
+
+	public boolean isSendSystemAsSystem() {
+		return sendSystemAsSystem;
+	}
+
+	public void setSendSystemAsSystem(boolean sendSystemAsSystem) {
+		this.sendSystemAsSystem = sendSystemAsSystem;
 	}
 }
