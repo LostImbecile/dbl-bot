@@ -7,11 +7,44 @@ import org.javacord.api.entity.message.Message;
 public interface Command {
 	public static final Logger logger = LogManager.getLogger(Command.class.getName());
 
+	public enum PermissionLevel {
+		EVERYONE("Everyone"),
+		MOD("Moderator"), 
+		ADMIN("Administrator"),
+		OWNER("Owner");
+		
+		private final String displayName;
+		
+		PermissionLevel(String displayName) {
+			this.displayName = displayName;
+		}
+		
+		public String getDisplayName() {
+			return displayName;
+		}
+	}
+
 	public String getName();
 
 	public boolean execute(Message msg, String arguments) throws Exception;
 
 	public default boolean isStartsWithPrefix() {
 		return true;
+	}
+	
+	public default String getDescription() {
+		return null;
+	}
+	
+	public default String getUsage() {
+		return null;
+	}
+	
+	public default String getCategory() {
+		return "General";
+	}
+	
+	public default PermissionLevel getPermissionLevel() {
+		return PermissionLevel.EVERYONE;
 	}
 }

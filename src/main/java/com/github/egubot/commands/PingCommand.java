@@ -14,6 +14,21 @@ public class PingCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Measures and displays the bot's response time";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Utility";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		Instant timeStamp = msg.getCreationTimestamp();
 		Instant now = Instant.now();
