@@ -15,6 +15,26 @@ public class ChatGPTChangeModelCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Change the ChatGPT model used for AI responses";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <model_name>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (UserInfoUtilities.isOwner(msg)) {
 			AIModelHandler handler = AIContext.getChatGPT();

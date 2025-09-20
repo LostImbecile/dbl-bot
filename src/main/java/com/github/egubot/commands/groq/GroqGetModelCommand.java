@@ -24,4 +24,19 @@ public class GroqGetModelCommand implements Command {
 	public boolean isStartsWithPrefix() {
 		return false;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Get the currently active Groq AI model information";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }

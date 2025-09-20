@@ -24,4 +24,19 @@ public class ChatGPTGetModelCommand implements Command {
 	public boolean isStartsWithPrefix() {
 		return false;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Get the currently active ChatGPT model information";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }

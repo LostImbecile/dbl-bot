@@ -24,4 +24,18 @@ public class GroqConversationClearCommand implements Command{
 		return false;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Clear the current Groq AI conversation history and context";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }

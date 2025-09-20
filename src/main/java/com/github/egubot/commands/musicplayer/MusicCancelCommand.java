@@ -13,6 +13,20 @@ public class MusicCancelCommand implements Command {
 		return "cancel";
 	}
 
+	@Override
+	public String getDescription() {
+		return "Cancel and stop all tracks";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {

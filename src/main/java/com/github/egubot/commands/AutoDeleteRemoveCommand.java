@@ -14,6 +14,26 @@ public class AutoDeleteRemoveCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "disable auto-delete for that message";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + "(message)";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Features";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		AutoRespondContext.getAutoRespond(msg).removeResponse(arguments, msg.getChannel(), UserInfoUtilities.isPrivilegedOwner(msg));
 		return true;

@@ -14,6 +14,26 @@ public class BotMessageEditCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Edit a specific bot message by ID with new content";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <message_id> <new_content>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isOwner(msg)) {
 			String id = arguments.substring(0, arguments.indexOf(" "));

@@ -13,6 +13,26 @@ public class GroqChannelToggleCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle Groq AI always active mode on or off for specific channels";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " [#channel]";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		AIContext.getGroq().toggleChannel(msg);
 		return true;

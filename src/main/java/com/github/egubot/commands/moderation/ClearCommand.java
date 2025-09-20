@@ -21,6 +21,26 @@ public class ClearCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Delete multiple messages from the channel";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <number>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Moderation";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.MOD;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isAdmin(msg)) {
 			if (arguments.isEmpty()) {

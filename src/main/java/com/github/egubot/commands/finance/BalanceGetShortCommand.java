@@ -13,6 +13,21 @@ public class BalanceGetShortCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Quick shorthand to check your current balance";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " [@user]";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 		msg.getChannel().sendMessage("Balance: $" + serverData.getBalance(msg));

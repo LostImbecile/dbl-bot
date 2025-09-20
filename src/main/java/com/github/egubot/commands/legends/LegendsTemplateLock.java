@@ -15,6 +15,26 @@ public class LegendsTemplateLock implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Lock a Dragon Ball Legends template to prevent unauthorized modifications";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <amount locked>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

@@ -18,7 +18,8 @@ import com.github.egubot.managers.commands.CommandRegistry;
 
 public class HelpCommand implements Command {
 
-	public static final String EQUALISE = String.format("%n%80s", "‏‏‎ ").replace(" ", "\u2005");
+	public static final String EQUALISE = String.format("%n%100s", "‏‏‎ ").replace(" ", "\u2005");
+	public static final int LINE_SIZE = 60;
 
 	@Override
 	public String getName() {
@@ -95,9 +96,9 @@ public class HelpCommand implements Command {
 		
 		String availableCategories = getAvailableCategories(allCommands);
 		MessageBuilder messageBuilder = new MessageBuilder()
-			.append("**" + title + "**" + EQUALISE)
-			.append("Use `" + Bot.getPrefix() + "help [category|permission|page]` to filter commands." + EQUALISE)
-			.append("Categories: " + availableCategories + EQUALISE)
+			.append("**" + title + "**\n")
+			.append("Use `" + Bot.getPrefix() + "help [category|permission|page]` to filter commands.\n")
+			.append("Categories: " + availableCategories + "\n")
 			.append("Permissions: everyone, mod, admin, owner");
 		
 		handler.sendInitialMessage(messageBuilder, msg.getChannel());
@@ -110,8 +111,13 @@ public class HelpCommand implements Command {
 			.addField("Category", command.getCategory(), true)
 			.addField("Permission", command.getPermissionLevel().getDisplayName(), true);
 		
+		String description = "";
 		if (command.getDescription() != null && !command.getDescription().trim().isEmpty()) {
-			embed.setDescription(command.getDescription());
+			description = formatMultiLineDescription(command.getDescription());
+		}
+		
+		if (!description.isEmpty()) {
+			embed.setDescription(description);
 		}
 		
 		if (command.getUsage() != null && !command.getUsage().trim().isEmpty()) {
@@ -121,6 +127,35 @@ public class HelpCommand implements Command {
 		embed.setColor(getColorForPermission(command.getPermissionLevel()));
 		
 		return embed;
+	}
+	
+	private String formatMultiLineDescription(String description) {
+		if (description.length() <= LINE_SIZE) {
+			return description + EQUALISE;
+		}
+		
+		StringBuilder formatted = new StringBuilder();
+		String[] words = description.split("\\s+");
+		String currentLine = "";
+		
+		for (String word : words) {
+			if ((currentLine + word).length() > LINE_SIZE) {
+				if (!currentLine.isEmpty()) {
+					formatted.append(currentLine.trim()).append("\n");
+					currentLine = word + " ";
+				} else {
+					formatted.append(word).append("\n");
+				}
+			} else {
+				currentLine += word + " ";
+			}
+		}
+		
+		if (!currentLine.isEmpty()) {
+			formatted.append(currentLine.trim());
+		}
+		
+		return formatted.toString() + EQUALISE;
 	}
 	
 	private Color getColorForPermission(PermissionLevel level) {

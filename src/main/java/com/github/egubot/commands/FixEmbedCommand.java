@@ -13,6 +13,26 @@ public class FixEmbedCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Fixes the embed for some popular site links";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <link>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Features";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		msg.getReferencedMessage().ifPresentOrElse(
 				t -> FixPopularSiteEmbeds.fixEmbed(t, t.getContent(), false, false, false),

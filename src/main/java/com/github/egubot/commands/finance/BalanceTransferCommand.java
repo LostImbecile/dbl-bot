@@ -19,6 +19,21 @@ public class BalanceTransferCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Transfer money from your balance to another user";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user> <amount>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (arguments.isBlank() || arguments.split("\\s+").length != 2
 				|| MessageUtils.getPingedUsers(arguments).isEmpty()) {

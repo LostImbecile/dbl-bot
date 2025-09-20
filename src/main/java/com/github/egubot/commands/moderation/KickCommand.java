@@ -23,6 +23,26 @@ public class KickCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Kick a user from the server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Moderation";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.MOD;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isAdmin(msg)) {
 			List<String> userIDs = MessageUtils.getPingedUsers(arguments);

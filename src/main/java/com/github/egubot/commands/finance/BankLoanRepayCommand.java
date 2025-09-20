@@ -17,6 +17,21 @@ public class BankLoanRepayCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Repay your outstanding bank loan with your current balance";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <amount>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		double amount = 0;
 		boolean isAll = false;

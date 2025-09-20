@@ -15,6 +15,26 @@ public class BalanceSetCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Set a user's balance to a specific amount in the server economy";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user> <amount>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!arguments.isBlank() && UserInfoUtilities.isPrivilegedOwner(msg)) {
 			UserBalance userBalance = UserBalanceContext.getServerBalance(msg);

@@ -13,6 +13,26 @@ public class RemoveTimerCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Remove a scheduled timer from the system";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Timers";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		return ScheduledTasksContext.remove(msg, arguments);
 	}

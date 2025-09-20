@@ -13,6 +13,26 @@ public class ScheduleRecurringTimerCommand implements Command{
 	}
 
 	@Override
+	public String getDescription() {
+		return "Schedule a recurring timer that executes commands at specified intervals";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <delay> <interval> \"<command>\"";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Timers";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+	
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		return ScheduledTasksContext.scheduleRecurring(msg, arguments);
 	}

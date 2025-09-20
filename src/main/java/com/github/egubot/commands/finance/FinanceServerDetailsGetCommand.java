@@ -16,6 +16,26 @@ public class FinanceServerDetailsGetCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "View server economy details and configuration settings";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 		msg.getChannel().sendMessage(FinanceEmbedBuilder.buildServerDetailsEmbed(serverData.getServerFinanceData(),

@@ -24,4 +24,18 @@ public class GrabCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Grab youtube video link for download";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <url>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Web Automation";
+	}
 }

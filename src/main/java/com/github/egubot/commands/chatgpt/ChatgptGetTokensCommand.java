@@ -23,4 +23,18 @@ public class ChatgptGetTokensCommand implements Command {
 		return false;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Get current token usage statistics for ChatGPT interactions";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }

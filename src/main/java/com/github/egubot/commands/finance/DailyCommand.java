@@ -16,6 +16,21 @@ public class DailyCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Earn money by working in the server economy";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 		UserFinanceData userOld = serverData.getUserData(msg);

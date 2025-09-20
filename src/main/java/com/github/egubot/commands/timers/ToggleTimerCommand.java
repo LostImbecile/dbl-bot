@@ -22,4 +22,23 @@ public class ToggleTimerCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Toggle a specific timer on or off";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Timers";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
 }

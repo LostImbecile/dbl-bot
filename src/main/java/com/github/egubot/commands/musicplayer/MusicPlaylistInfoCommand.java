@@ -23,4 +23,18 @@ public class MusicPlaylistInfoCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Display information about the current music playlist";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 }

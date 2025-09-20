@@ -13,6 +13,21 @@ public class GeminiGetTokensCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Get current token usage statistics for Gemini AI interactions";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		msg.getChannel().sendMessage("```java\nTokens Used: \"" + AIContext.getGemini().getLastTokens(msg) + "\"```");
 		return true;

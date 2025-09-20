@@ -19,6 +19,21 @@ public class TranslateCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Translate text between different languages";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <text>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Translation";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		Translate translate = TranslateFacade.getTranslate();
 		try {

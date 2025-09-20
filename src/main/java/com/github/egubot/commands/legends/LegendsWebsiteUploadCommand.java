@@ -27,5 +27,23 @@ public class LegendsWebsiteUploadCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Save Dragon Ball Legends data and content";
+	}
 
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
 }

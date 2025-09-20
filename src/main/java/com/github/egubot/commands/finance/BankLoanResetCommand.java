@@ -17,6 +17,26 @@ public class BankLoanResetCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Reset a user's bank loan status (admin only)";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (UserInfoUtilities.isPrivilegedOwner(msg)) {
 			long userID = msg.getId();

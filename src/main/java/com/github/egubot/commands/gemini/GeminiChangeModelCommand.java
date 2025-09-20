@@ -15,6 +15,26 @@ public class GeminiChangeModelCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Change the Gemini AI model used for responses";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <model_name>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (UserInfoUtilities.isOwner(msg)) {
 			AIModelHandler handler = AIContext.getGemini();

@@ -17,6 +17,21 @@ public class GeminiResponseCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Send a message to Gemini AI and get an AI-generated response";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <message>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		CompletableFuture<List<String>> linksFuture;
 		if (msg.getReferencedMessage().isPresent()) {

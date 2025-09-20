@@ -14,6 +14,21 @@ public class LegendsSummonCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Perform a Dragon Ball Legends summon simulation with specified parameters";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <banner link>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

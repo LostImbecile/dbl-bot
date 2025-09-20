@@ -10,7 +10,27 @@ public class HighlightsToggleCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "highlights toggle";
+		return "highlight toggle";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Toggle the highlights feature on or off for the server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Features";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
 	}
 
 	@Override

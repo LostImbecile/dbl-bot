@@ -23,4 +23,23 @@ public class ChatgptToggleCommand implements Command {
 		return false;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Toggle ChatGPT functionality on or off globally";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
 }

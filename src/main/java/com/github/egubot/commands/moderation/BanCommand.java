@@ -24,6 +24,26 @@ public class BanCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Ban a user from the server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Moderation";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isAdmin(msg)) {
 			List<String> userIDs = MessageUtils.getPingedUsers(arguments);

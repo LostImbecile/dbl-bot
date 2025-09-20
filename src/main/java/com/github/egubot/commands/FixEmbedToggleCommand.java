@@ -13,6 +13,26 @@ public class FixEmbedToggleCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle the fix embed feature on or off for the server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Features";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (FixPopularSiteEmbeds.isServerDisabled(msg)) {
 			FixPopularSiteEmbeds.enableServer(msg);

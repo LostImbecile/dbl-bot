@@ -14,6 +14,21 @@ public class GetGithubFileStructureCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Get the file structure of a GitHub repository";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <github_repo_url>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Development";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		InputStream contents = ConvertObjects
 				.stringToInputStream(GitHubDetailsGrabber.getGitHubFileStructure(arguments));

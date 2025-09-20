@@ -14,6 +14,26 @@ public class MusicBufferSizeCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Set the music buffer size for audio playback optimization";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <size>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (arguments.equals("big")) {
 			SoundPlayback.updateBufferDuration(3 * MINUTE);

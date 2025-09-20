@@ -25,4 +25,18 @@ public class ConvertCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Convert gif to video and back";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + "(vid/gif/to vid/to gif) <input>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Web Automation";
+	}
 }

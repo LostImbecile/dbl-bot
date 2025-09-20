@@ -16,6 +16,21 @@ public class DLCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Download files from message links or attachments";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " [reply to message with links/attachments]";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Utility";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		CompletableFuture<List<String>> linksFuture;
 		if (msg.getReferencedMessage().isPresent()) {

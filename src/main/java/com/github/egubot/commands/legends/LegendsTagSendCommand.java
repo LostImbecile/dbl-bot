@@ -15,6 +15,21 @@ public class LegendsTagSendCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Display character tags and categories for Dragon Ball Legends database";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

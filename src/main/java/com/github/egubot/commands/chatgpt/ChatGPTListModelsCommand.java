@@ -17,6 +17,26 @@ public class ChatGPTListModelsCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "List all available ChatGPT models that can be used";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		AIModelHandler handler = AIContext.getChatGPT();
 		List<String> list = handler.getModelList();

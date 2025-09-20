@@ -23,4 +23,18 @@ public class MusicPlayCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Play music from a URL or search for a track to play";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <url or search terms>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 }

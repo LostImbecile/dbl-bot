@@ -14,6 +14,21 @@ public class GetGithubFileContentsCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Get the contents of a file from a GitHub repository";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <github_file_url>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Development";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		String fileName = GitHubDetailsGrabber.getFileNameFromUrl(arguments);
 		if (fileName == null) {

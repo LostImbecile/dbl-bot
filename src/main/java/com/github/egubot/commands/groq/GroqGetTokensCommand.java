@@ -23,4 +23,18 @@ public class GroqGetTokensCommand implements Command {
 		return false;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Get current token usage statistics for Groq AI interactions";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }

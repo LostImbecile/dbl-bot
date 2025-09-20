@@ -23,4 +23,18 @@ public class GeminiGetModelCommand implements Command {
 		return false;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Get the currently active Gemini AI model information";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }

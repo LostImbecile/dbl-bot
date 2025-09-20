@@ -18,6 +18,21 @@ public class BankLoanCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Request a loan from the server bank with interest";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <amount>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (arguments.isBlank()) {
 			sendLoanDetails(msg);

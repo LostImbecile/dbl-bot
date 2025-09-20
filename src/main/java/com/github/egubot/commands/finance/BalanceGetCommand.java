@@ -19,6 +19,21 @@ public class BalanceGetCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Check your current balance in the server economy system";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " [@user]";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		UserBalance serverData = UserBalanceContext.getServerBalance(msg);
 		MessageAuthor author = msg.getAuthor();

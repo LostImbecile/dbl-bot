@@ -13,6 +13,25 @@ public class BotMessageDeleteCommand implements Command {
 		return "message delete";
 	}
 
+	@Override
+	public String getDescription() {
+		return "Delete a specific bot message by ID";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <message_id>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
 
 	@Override
 	public boolean execute(Message msg, String arguments) {

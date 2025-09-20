@@ -26,4 +26,23 @@ public class LegendsUpdateNewsCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Update news channel";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <channels>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
 }

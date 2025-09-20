@@ -24,4 +24,18 @@ public class MusicPauseCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Pause the currently playing music track";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 }

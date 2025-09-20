@@ -14,6 +14,26 @@ public class GeminiToggleCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle Gemini AI functionality on or off globally";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (UserInfoUtilities.isOwner(msg)) {
 			AIContext.getGemini().toggle();

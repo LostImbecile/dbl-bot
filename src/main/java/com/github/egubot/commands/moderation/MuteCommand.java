@@ -20,6 +20,26 @@ public class MuteCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Temporarily mute a user in the server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user> <duration>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Moderation";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.MOD;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isAdmin(msg)) {
 			List<String> userIDs = MessageUtils.getPingedUsers(arguments);

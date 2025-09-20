@@ -24,4 +24,18 @@ public class MusicResumeCommand implements Command{
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Resume the paused music track";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 }

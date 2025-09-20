@@ -11,7 +11,27 @@ public class HighlightsCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "highlights";
+		return "highlight";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Manage message highlights feature for channels";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Features";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.MOD;
 	}
 
 	@Override

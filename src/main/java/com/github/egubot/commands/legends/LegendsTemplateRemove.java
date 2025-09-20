@@ -15,6 +15,26 @@ public class LegendsTemplateRemove implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Remove a Dragon Ball Legends template from the system";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <template_name>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

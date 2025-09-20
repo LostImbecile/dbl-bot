@@ -14,6 +14,26 @@ public class AutoDeleteCreateCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "auto delete messages containing the word (regex supported)";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + "msg >> (message)";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Features";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		arguments = arguments.replaceFirst("msg\\s?>>", "msg delete >>").replaceFirst("user\\s>>", "user delete >>");
 		AutoRespondContext.getAutoRespond(msg).writeResponse(arguments, msg, UserInfoUtilities.isPrivilegedOwner(msg));

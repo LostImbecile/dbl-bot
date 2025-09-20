@@ -22,4 +22,18 @@ public class GroqResponseCommand implements Command {
 		return false;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Send a message to Groq AI and get an AI-generated response";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <message>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
 }
