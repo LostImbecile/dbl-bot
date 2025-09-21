@@ -23,4 +23,18 @@ public class InsultCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Generate creative insults using web-based content generation";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Fun";
+	}
 }

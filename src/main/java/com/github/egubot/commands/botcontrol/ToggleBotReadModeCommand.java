@@ -14,6 +14,26 @@ public class ToggleBotReadModeCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle whether the bot reads and processes bot messages";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isOwner(msg))
 			MessageCreateEventHandler.toggleBotReadMode();

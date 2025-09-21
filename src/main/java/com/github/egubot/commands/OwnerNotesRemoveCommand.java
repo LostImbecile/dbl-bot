@@ -13,6 +13,26 @@ public class OwnerNotesRemoveCommand implements Command {
 		return "note remove";
 	}
 
+	@Override
+	public String getDescription() {
+		return "Remove a note from the owner's personal notes";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <note index>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Owner";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
 	@Override 
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (UserInfoUtilities.isOwner(msg)) {
@@ -32,6 +52,11 @@ public class OwnerNotesRemoveCommand implements Command {
 
 		msg.getChannel().sendMessage("Only the bot owner can use this command.");
 		return false;
+	}
+
+	@Override
+	public boolean isStartsWithPrefix() {
+		return true;
 	}
 
 }

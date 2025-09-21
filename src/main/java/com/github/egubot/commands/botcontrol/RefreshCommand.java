@@ -17,6 +17,26 @@ public class RefreshCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Refresh the bot's internal state and reload configuration settings";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isOwner(msg)) {
 			msg.getChannel().sendMessage("Refreshing...").join();

@@ -16,6 +16,21 @@ public class VerseCommand implements Command, DiscordTimerTask {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Get a random Bible verse (Quran will be added if a good API/Site is found)";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Utility";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		sendVerse(msg.getChannel());
 		return true;

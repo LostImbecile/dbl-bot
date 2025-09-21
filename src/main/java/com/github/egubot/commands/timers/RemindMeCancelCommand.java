@@ -13,6 +13,21 @@ public class RemindMeCancelCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Cancel an existing reminder that you previously set";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Timers";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		String authorTag = "<@" + msg.getAuthor().getIdAsString() + ">";
 		String reformatted = arguments + " \"parrot " + authorTag + "\"";

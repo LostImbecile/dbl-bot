@@ -14,6 +14,26 @@ public class OwnerNotesAddCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Add a note to the owner's personal notes";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <note text>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Owner";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if(UserInfoUtilities.isOwner(msg)) {
 			OwnerNotes.addNote(msg, arguments);
@@ -22,6 +42,11 @@ public class OwnerNotesAddCommand implements Command {
 
 		msg.getChannel().sendMessage("Only the bot owner can use this command.");
 		return false;
+	}
+
+	@Override
+	public boolean isStartsWithPrefix() {
+		return true;
 	}
 
 }

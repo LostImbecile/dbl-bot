@@ -14,6 +14,26 @@ public class SetSystemPromptCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Set a custom system prompt for AI interactions in this server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <prompt text>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!msg.getAuthor().asUser().isPresent()) {
 			return false;

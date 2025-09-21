@@ -29,4 +29,18 @@ public class LegendsNewsCommand implements Command{
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Display the latest Dragon Ball Legends newspiece";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
 }

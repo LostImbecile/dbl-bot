@@ -31,4 +31,18 @@ public class MusicSkipCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Skip to the next track in the music queue";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 }

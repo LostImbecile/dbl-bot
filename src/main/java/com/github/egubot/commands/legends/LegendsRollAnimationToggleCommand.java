@@ -13,6 +13,26 @@ public class LegendsRollAnimationToggleCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle roll animations on or off for Dragon Ball Legends summons";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+	
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

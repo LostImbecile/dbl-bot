@@ -25,6 +25,21 @@ public class UserLoanCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Request a loan from another user with agreed terms";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <@user> <amount>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		String[] args = arguments.split("\\s+");
 		if (arguments.isBlank()) {

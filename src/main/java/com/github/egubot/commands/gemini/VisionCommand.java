@@ -18,6 +18,21 @@ public class VisionCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Analyze images using Gemini AI vision capabilities with optional text prompt";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " [prompt] (with image attachment or reply to image)";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		CompletableFuture<List<String>> linksFuture;
 		if (msg.getReferencedMessage().isPresent()) {

@@ -23,4 +23,18 @@ public class MusicTrackInfoCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Display detailed information about the currently playing track";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Music";
+	}
 }

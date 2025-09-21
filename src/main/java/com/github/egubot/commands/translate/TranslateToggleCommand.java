@@ -23,4 +23,23 @@ public class TranslateToggleCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Toggle automatic translation feature on or off for the server";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Translation";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
 }

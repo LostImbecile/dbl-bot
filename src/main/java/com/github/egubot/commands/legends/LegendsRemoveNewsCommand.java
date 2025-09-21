@@ -22,4 +22,23 @@ public class LegendsRemoveNewsCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Remove news notifications for Dragon Ball Legends";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
 }

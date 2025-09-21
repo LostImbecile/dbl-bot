@@ -14,6 +14,26 @@ public class ToggleSystemPromptModeCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle between sending the system prompt as a message or as system for AI interactions";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!msg.getAuthor().asUser().isPresent()) {
 			return false;

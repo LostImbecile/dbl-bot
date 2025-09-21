@@ -16,6 +16,26 @@ public class TerminateCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Safely terminate the bot application";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (arguments.isBlank() || arguments.equals(Bot.getYourself().getMentionTag())) {
 			boolean isOwner = UserInfoUtilities.isOwner(msg);

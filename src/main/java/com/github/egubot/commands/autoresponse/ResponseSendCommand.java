@@ -10,7 +10,27 @@ public class ResponseSendCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "response send";
+		return "responses";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Display all auto-responses";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Auto-Response";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
 	}
 
 	@Override

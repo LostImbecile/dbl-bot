@@ -28,4 +28,18 @@ public class RemindMeRecurringCommand implements Command{
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Set a recurring personal reminder that repeats at specified intervals";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <delay> <time> <message>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Timers";
+	}
 }

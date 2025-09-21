@@ -12,6 +12,26 @@ public class LegendsRemoveMaintenanceCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Remove maintenance notifications for Dragon Ball Legends";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		LegendsNewsContext.removeMaintenanceServer(msg);
 		return true;

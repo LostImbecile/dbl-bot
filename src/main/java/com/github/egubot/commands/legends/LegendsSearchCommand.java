@@ -13,6 +13,21 @@ public class LegendsSearchCommand implements Command{
 	}
 
 	@Override
+	public String getDescription() {
+		return "Search for Dragon Ball Legends characters using various filters and criteria";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <character_names> <template/tags>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+	
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

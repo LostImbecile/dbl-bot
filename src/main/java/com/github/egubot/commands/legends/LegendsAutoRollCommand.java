@@ -7,9 +7,25 @@ import com.github.egubot.interfaces.Command;
 
 public class LegendsAutoRollCommand implements Command {
 
+	// this is without prefix for reference
 	@Override
 	public String getName() {
 		return "roll";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Roll for random Dragon Ball Legends characters";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + "<count> <template/tags>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
 	}
 
 	@Override

@@ -10,7 +10,27 @@ public class ResponseEditCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "response edit";
+		return "reponse edit";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Edit an existing trigger response or attributes";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Auto-Response";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
 	}
 
 	@Override

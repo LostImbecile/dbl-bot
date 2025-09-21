@@ -14,6 +14,26 @@ public class ToggleStorageManagerCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle storage manager type (local/sqlite)";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isOwner(msg)) {
 			DataManagerHandler.toggleSQLite();

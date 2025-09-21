@@ -16,6 +16,21 @@ public class WeatherCommand implements Command, DiscordTimerTask {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Get current weather information for a specified location";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <location_name/zipcode>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Utility";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		sendWeather(msg.getChannel(), arguments);
 		return true;

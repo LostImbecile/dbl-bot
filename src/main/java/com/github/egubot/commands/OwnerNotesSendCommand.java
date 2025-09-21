@@ -15,6 +15,26 @@ public class OwnerNotesSendCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Display all owner's personal notes";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Owner";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if(UserInfoUtilities.isOwner(msg)) {
 			msg.getChannel().sendMessage(ConvertObjects.stringToInputStream(OwnerNotes.formatNotes()), "notes.md");

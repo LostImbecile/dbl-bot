@@ -14,6 +14,26 @@ public class ResetSystemPromptCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Reset the server's system prompt to the default system prompt";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!msg.getAuthor().asUser().isPresent()) {
 			return false;

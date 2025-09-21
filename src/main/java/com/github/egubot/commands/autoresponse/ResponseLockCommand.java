@@ -14,6 +14,26 @@ public class ResponseLockCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Lock or unlock the first (n) auto-response triggers to prevent unauthorized modifications";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <count>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Auto-Response";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (UserInfoUtilities.isPrivilegedOwner(msg)) {
 			int x = Integer.parseInt(arguments.replaceAll("\\D", ""));

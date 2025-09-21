@@ -16,6 +16,21 @@ public class TranslateGetLanguagesCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Get list of all available languages for translation";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Translation";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		try {
 			msg.getChannel().sendMessage(FileUtilities.toInputStream(Translate.getTranslateLanguages()),

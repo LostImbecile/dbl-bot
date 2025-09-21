@@ -14,6 +14,21 @@ public class LegendsTemplateSend implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Display all available Dragon Ball Legends templates";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

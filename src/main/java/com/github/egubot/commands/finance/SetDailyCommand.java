@@ -15,6 +15,26 @@ public class SetDailyCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Set the daily reward amount for the server economy";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <amount>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!arguments.isBlank() && UserInfoUtilities.isPrivilegedOwner(msg)) {
 			UserBalance serverData = UserBalanceContext.getServerBalance(msg);

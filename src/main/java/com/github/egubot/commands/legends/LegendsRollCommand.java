@@ -13,6 +13,21 @@ public class LegendsRollCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Manually roll for Dragon Ball Legends characters with specified parameters";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <count> <templates/tags>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())
 			return false;

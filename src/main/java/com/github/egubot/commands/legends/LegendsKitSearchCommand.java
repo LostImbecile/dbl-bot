@@ -15,6 +15,21 @@ public class LegendsKitSearchCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Search for keywords in Dragon Ball Legends kits and movesets";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <comma seperated keywords>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		try {
 			if (!arguments.isBlank()) {

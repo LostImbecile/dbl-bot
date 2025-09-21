@@ -3,14 +3,34 @@ package com.github.egubot.commands.ai;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.DefaultSystemPromptContext;
-import com.github.egubot.main.Bot;
 import com.github.egubot.interfaces.Command;
+import com.github.egubot.main.Bot;
 
 public class SetDefaultSystemPromptCommand implements Command {
 
 	@Override
 	public String getName() {
 		return "sys default set";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Set a new default system prompt for all AI interactions across servers";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <prompt text>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "AI";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
 	}
 
 	@Override

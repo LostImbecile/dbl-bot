@@ -14,7 +14,21 @@ public class LegendsCharacterSendCommand implements Command {
 		return "character send";
 	}
 
+	@Override
+	public String getDescription() {
+		return "Display all characters in Dragon Ball Legends";
+	}
 
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "DB Legends";
+	}
+	
 	@Override
 	public boolean execute(Message msg, String arguments) {
 		if (!LegendsCommandsContext.isLegendsMode())

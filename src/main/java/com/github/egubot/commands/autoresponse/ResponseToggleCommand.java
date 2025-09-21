@@ -14,6 +14,26 @@ public class ResponseToggleCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Toggle the auto-response feature on or off";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Auto-Response";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		AutoRespond resp = AutoRespondContext.getAutoRespond(msg);
 		resp.setDisabled(!resp.isDisabled());

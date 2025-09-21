@@ -18,6 +18,21 @@ public class RouletteWheelCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Play roulette with your money for a chance to win or lose";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <amount> <red|black|green>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Economy";
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		double amount = 0;
 		boolean isAll = false;

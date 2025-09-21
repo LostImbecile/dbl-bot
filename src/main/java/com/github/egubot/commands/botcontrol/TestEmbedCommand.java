@@ -13,6 +13,26 @@ public class TestEmbedCommand implements Command {
 	}
 
 	@Override
+	public String getDescription() {
+		return "Test embed functionality with sample content";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Development";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
+	}
+
+	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
 		if (!arguments.isBlank()) {
 			try {

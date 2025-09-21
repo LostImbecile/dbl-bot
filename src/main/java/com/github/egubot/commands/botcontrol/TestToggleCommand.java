@@ -9,7 +9,27 @@ public class TestToggleCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "test toggle";
+		return "testtoggle";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Toggle test mode functionality on or off";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Development";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
 	}
 
 	@Override

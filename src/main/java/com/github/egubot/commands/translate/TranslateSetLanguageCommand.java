@@ -32,4 +32,23 @@ public class TranslateSetLanguageCommand implements Command {
 		return true;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Set the target language for automatic translation";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " <language_code>";
+	}
+
+	@Override
+	public String getCategory() {
+		return "Translation";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.ADMIN;
+	}
 }

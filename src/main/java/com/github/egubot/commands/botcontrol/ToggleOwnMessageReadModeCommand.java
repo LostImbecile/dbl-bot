@@ -10,7 +10,27 @@ public class ToggleOwnMessageReadModeCommand implements Command {
 
 	@Override
 	public String getName() {
-		return "toggle bot own message read mode";
+		return "toggle own message read mode";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Toggle whether the bot processes messages from itself";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getCategory() {
+		return "Bot Control";
+	}
+
+	@Override
+	public PermissionLevel getPermissionLevel() {
+		return PermissionLevel.OWNER;
 	}
 
 	@Override
