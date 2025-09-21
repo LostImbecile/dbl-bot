@@ -14,7 +14,7 @@ public class SystemPromptManager {
 	public SystemPromptManager(long serverId) {
 		this.serverId = serverId;
 		this.dataManager = new LocalDataManager(serverId + File.separator + "System_Prompt");
-		this.dataManager.initialise(true);
+		this.dataManager.initialise(false);
 		loadServerData();
 	}
 
