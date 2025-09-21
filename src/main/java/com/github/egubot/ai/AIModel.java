@@ -141,7 +141,10 @@ public class AIModel implements Shutdownable {
 		
 		if (serverId != null) {
 			processed = processed.replace("{serverId}", String.valueOf(serverId))
-					   .replace("{serverName}", getServerName(serverId));
+					   .replace("{serverName}", getServerName(serverId))
+					   .replace("{botNickname}", getBotNickname(serverId))
+					   .replace("{memberCount}", getMemberCount(serverId))
+					   .replace("{serverOwner}", getServerOwner(serverId));
 		}
 		
 		return processed;
@@ -154,6 +157,36 @@ public class AIModel implements Shutdownable {
 					.orElse("Unknown Server");
 		} catch (Exception e) {
 			return "Unknown Server";
+		}
+	}
+	
+	private static String getBotNickname(Long serverId) {
+		try {
+			return Bot.getApi().getServerById(serverId)
+					.map(server -> server.getNickname(Bot.getApi().getYourself()).orElse(Bot.getName()))
+					.orElse(Bot.getName());
+		} catch (Exception e) {
+			return Bot.getName();
+		}
+	}
+	
+	private static String getMemberCount(Long serverId) {
+		try {
+			return Bot.getApi().getServerById(serverId)
+					.map(server -> String.valueOf(server.getMemberCount()))
+					.orElse("Unknown");
+		} catch (Exception e) {
+			return "Unknown";
+		}
+	}
+	
+	private static String getServerOwner(Long serverId) {
+		try {
+			return Bot.getApi().getServerById(serverId)
+					.map(server -> server.getOwner().map(user -> user.getName()).orElse("Unknown"))
+					.orElse("Unknown");
+		} catch (Exception e) {
+			return "Unknown";
 		}
 	}
 	

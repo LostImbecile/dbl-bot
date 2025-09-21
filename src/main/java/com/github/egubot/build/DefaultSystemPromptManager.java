@@ -1,13 +1,11 @@
 package com.github.egubot.build;
 
-import java.util.List;
+import com.github.egubot.storage.LocalDataManager;
 
-import com.github.egubot.storage.DataManagerHandler;
-
-public class DefaultSystemPromptManager extends DataManagerHandler {
+public class DefaultSystemPromptManager {
 	private static final String DEFAULT_FALLBACK_PROMPT = """
 			Today's date is: {date}.
-			You are a discord bot called "{botName}" in the discord server "{serverName}",
+			You are a discord bot called "{botNickname}" in the discord server "{serverName}",
 			you are not to assist, but have conversations,
 			pretend that you are not an AI but a human.
 			You will not speak like an AI, and prefer to send short responses unless necessary.
@@ -19,32 +17,33 @@ public class DefaultSystemPromptManager extends DataManagerHandler {
 			and if clearly prompted to, change your speech as requested.
 			You can be british or american, whichever is most entertaining to be at the time, but try to make sense.
 			Don't use fullstops and symbols that aren't usually used in messages.
-			Finally, your owner is "{ownerName}" and you are required to listen to him.""";
+			Finally, your owner is "{ownerName}" and you are required to listen to him.
+			This server has {memberCount} members and is owned by {serverOwner}.""";
 
-	public DefaultSystemPromptManager() {
-		super("Default_System_Prompt", true);
+	private static final LocalDataManager dataManager = new LocalDataManager("Default_System_Prompt");
+	
+	static {
+		dataManager.initialise(true);
 	}
 
 	public String getDefaultSystemPrompt() {
-		List<String> data = getData();
-		if (data.isEmpty()) {
+		if (dataManager.getData().isEmpty()) {
 			setDefaultSystemPrompt(DEFAULT_FALLBACK_PROMPT);
 			return DEFAULT_FALLBACK_PROMPT;
 		}
-		return String.join("\n", data);
+		return String.join("\n", dataManager.getData());
 	}
 
 	public void setDefaultSystemPrompt(String prompt) {
-		List<String> data = getData();
-		data.clear();
+		dataManager.getData().clear();
 		String[] lines = prompt.split("\n");
 		for (String line : lines) {
-			data.add(line);
+			dataManager.getData().add(line);
 		}
-		writeData(null);
+		dataManager.writeData(null);
 	}
 
 	public void reloadDefaultPrompt() {
-		readData();
+		dataManager.readData();
 	}
 }

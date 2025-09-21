@@ -50,7 +50,7 @@ public class SystemPromptContext implements Shutdownable {
 			return getDefaultSystemPrompt();
 		}
 		SystemPromptManager manager = getSystemPromptManager(serverID);
-		return manager != null ? manager.getSystemPrompt((long) serverID) : getDefaultSystemPrompt();
+		return manager != null ? manager.getSystemPrompt(serverID) : getDefaultSystemPrompt();
 	}
 
 	public static String getSystemPrompt(Long serverId) {
@@ -66,7 +66,7 @@ public class SystemPromptContext implements Shutdownable {
 		if (serverID != -1) {
 			SystemPromptManager manager = getSystemPromptManager(serverID);
 			if (manager != null) {
-				manager.setSystemPrompt((long) serverID, systemPrompt);
+				manager.setSystemPrompt(serverID, systemPrompt);
 			}
 		}
 	}
@@ -86,7 +86,7 @@ public class SystemPromptContext implements Shutdownable {
 			return true;
 		}
 		SystemPromptManager manager = getSystemPromptManager(serverID);
-		return manager != null ? manager.getSendAsSystem((long) serverID) : true;
+		return manager == null || manager.getSendAsSystem();
 	}
 
 	public static boolean getSendAsSystem(Long serverId) {
@@ -94,7 +94,7 @@ public class SystemPromptContext implements Shutdownable {
 			return true;
 		}
 		SystemPromptManager manager = getSystemPromptManager(serverId);
-		return manager != null ? manager.getSendAsSystem(serverId) : true;
+		return manager == null || manager.getSendAsSystem();
 	}
 
 	public static void setSendAsSystem(Message msg, boolean sendAsSystem) {
@@ -102,7 +102,7 @@ public class SystemPromptContext implements Shutdownable {
 		if (serverID != -1) {
 			SystemPromptManager manager = getSystemPromptManager(serverID);
 			if (manager != null) {
-				manager.setSendAsSystem((long) serverID, sendAsSystem);
+				manager.setSendAsSystem(serverID, sendAsSystem);
 			}
 		}
 	}
@@ -121,13 +121,13 @@ public class SystemPromptContext implements Shutdownable {
 		if (serverID != -1) {
 			SystemPromptManager manager = getSystemPromptManager(serverID);
 			if (manager != null) {
-				manager.resetToDefault((long) serverID);
+				manager.resetToDefault(serverID);
 			}
 		}
 	}
 
 	public static SystemPromptManager getSystemPromptManager(long serverID) {
-		return systemPromptMap.computeIfAbsent(serverID, k -> new SystemPromptManager());
+		return systemPromptMap.computeIfAbsent(serverID, SystemPromptManager::new);
 	}
 
 	private static String getDefaultSystemPrompt() {
