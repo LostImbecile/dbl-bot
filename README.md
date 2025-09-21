@@ -2,9 +2,9 @@
 
 Discord bot I've made for a specific server, covers various tasks (90+ commands).
 
-Public so server members can look at it or add to it.
+Public so server members can look at it or add to it, or see how something is done as an example. Not meant for professionals, and not meant to be updated.
 
-Uses [Javacord](https://github.com/Javacord/Javacord) with [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html). Works on Windows and Linux. 
+Uses [Javacord](https://github.com/Javacord/Javacord) with [JDK 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html). Works on Windows and Linux as far as I'm aware. 
 
 Note that Javacord will end its support in 2025 and a refactor to JDK could be necessary, but the code only relies on basic features of the library and it's rare for discord to introduce breaking changes.
 
@@ -26,6 +26,7 @@ Compiled with java 17 but can be very easily made to run with java 11. Any older
 Some API keys used (Optional):
 [`OpenAI`](https://beta.openai.com/account/api-keys)
 [`Groq`](https://console.groq.com/keys)
+[`Gemini`](https://aistudio.google.com/app/apikey)
 [`Youtube`](https://console.developers.google.com/apis/credentials)
 [`Azure Translate`](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/)
 [`Weather`](https://www.weatherapi.com/)
@@ -36,6 +37,7 @@ Some API keys used (Optional):
 - The CommandManager checks for prefixes matching any present in classes that implement the "Command" interface
 - On a match, the command class processes the text either directly or through a facade that interacts with the database or other services
 - If no match, the text is checked for auto-reponses, AI conversation responses, or auto-translate based on what's toggled
+- If you find yourself needing to add stuff here, use interceptors with priority I guess
 
 ### Background Tasks:
 These start on run-time and will always be on as long as a timer is active or a newsfeed was subscribed to.
@@ -66,6 +68,13 @@ Disable or limit them if necessary.
 - DBLegends commands (online search/fetch)
 
 Mostly tasks that rely on APIs or online data they need to fetch when called. Local tasks rely on caches and primitive operations and are processed within a few nanoseconds, so network will be the bottleneck for the most part as local storage is rarely in-need of an update.
+
+### Adding commands:
+- As simple as implementing the "Command" interface and giving it a name and the rest is all in the execute method.
+- You can use facades or contexts or store stuff with the data managers or per your own solutions really.
+
+Dependency injection (for facades commands need) isn't something I used, since there weren't and won't be many, and the static methods are straightforward, but it might make sense to go for it if you're doing unit testing or find it easier
+
 
 Bot commands:
 ---------------------------------
@@ -115,7 +124,7 @@ Financial System:
 - b-daily
 - b-hourly
 - b-work
-`[Server Owner only]`
+- `[Server Owner only]`
 - b-daily set (amount)
 - b-hourly set (amount)
 - b-transfer set (amount)
