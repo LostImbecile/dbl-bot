@@ -97,7 +97,7 @@ public class HelpCommand implements Command {
 		String availableCategories = getAvailableCategories(allCommands);
 		MessageBuilder messageBuilder = new MessageBuilder()
 			.append("**" + title + "**\n")
-			.append("Use `" + Bot.getPrefix() + "help [category|permission|page]` to filter commands.\n")
+			.append("Use `" + getPrefix(this) + "help [category|permission|page]` to filter commands.\n")
 			.append("Categories: " + availableCategories + "\n")
 			.append("Permissions: everyone, mod, admin, owner");
 		
@@ -107,7 +107,7 @@ public class HelpCommand implements Command {
 	
 	private EmbedBuilder createCommandEmbed(Command command) {
 		EmbedBuilder embed = new EmbedBuilder()
-			.setTitle(Bot.getPrefix() + command.getName())
+			.setTitle(getPrefix(command) + command.getName())
 			.addField("Category", command.getCategory(), true)
 			.addField("Permission", command.getPermissionLevel().getDisplayName(), true);
 		
@@ -121,12 +121,16 @@ public class HelpCommand implements Command {
 		}
 		
 		if (command.getUsage() != null && !command.getUsage().trim().isEmpty()) {
-			embed.addField("Usage", "`" + Bot.getPrefix() + command.getUsage() + "`", false);
+			embed.addField("Usage", "`" + getPrefix(command) + command.getUsage() + "`", false);
 		}
 		
 		embed.setColor(getColorForPermission(command.getPermissionLevel()));
 		
 		return embed;
+	}
+
+	private String getPrefix(Command command) {
+		return command.isStartsWithPrefix() ? Bot.getPrefix() : "";
 	}
 	
 	private String formatMultiLineDescription(String description) {
