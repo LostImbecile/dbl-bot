@@ -13,6 +13,7 @@ import com.github.egubot.handlers.MessageCreateEventHandler;
 import com.github.egubot.handlers.ReactionEventHandler;
 import com.github.egubot.handlers.ReconnectEventHandler;
 import com.github.egubot.handlers.ResumeEventHandler;
+import com.github.egubot.handlers.ServerMemberEventHandler;
 import com.github.egubot.logging.StreamRedirector;
 import com.github.egubot.managers.KeyManager;
 import com.github.egubot.managers.StatusManager;
@@ -176,6 +177,10 @@ public class Main {
 		ReactionEventHandler reactionHandler = new ReactionEventHandler();
 		Bot.getApi().addReactionAddListener(reactionHandler);
 		Bot.getApi().addReactionRemoveListener(reactionHandler);
+		
+		ServerMemberEventHandler serverMemberHandler = new ServerMemberEventHandler();
+		Bot.getApi().addServerMemberJoinListener(serverMemberHandler);
+		Bot.getApi().addServerMemberLeaveListener(serverMemberHandler);
 	}
 
 	private static boolean checkDBLegendsMode(String arguments) {
