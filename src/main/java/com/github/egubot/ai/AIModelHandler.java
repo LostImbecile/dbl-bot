@@ -100,12 +100,24 @@ public class AIModelHandler {
 
 			if (!response.isError()) {
 				conversation.add(model.reformatInput(msgText, "user"));
-				msg.getChannel().sendMessage(response.getResponse().replaceAll("<think>(?s).*</think>", ""));
+				String resp = response.getResponse().replaceAll("<think>(?s).*</think>", "");
+				if (resp.length() > 2000) {
+					int start = 0;
+					int len = resp.length();
+					while (start < len) {
+						int end = Math.min(start + 2000, len);
+						int split = resp.lastIndexOf('\n', end);
+						if (split <= start) split = end;
+						msg.getChannel().sendMessage(resp.substring(start, split));
+						start = split;
+					}
+				} else {
+					msg.getChannel().sendMessage(resp);
+				}
 				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
-
 				lastTokens.put(channelId, response.getTotalTokens());
 			} else {
-				String errorMsg = "API Error: " + response.getResponse();
+				String errorMsg = "API - " + response.getResponse();
 				msg.getChannel().sendMessage(errorMsg);
 				logger.warn("API error for channel {}: Status {}, Message: {}", channelId, response.getStatusCode(), response.getResponse());
 			}
@@ -146,7 +158,20 @@ public class AIModelHandler {
 			
 			if (!response.isError()) {
 				conversation.add(model.reformatInput(msgText, "user"));
-				msg.getChannel().sendMessage(response.getResponse().replaceAll("<think>(?s).*</think>", ""));
+				String resp = response.getResponse().replaceAll("<think>(?s).*</think>", "");
+				if (resp.length() > 2000) {
+					int start = 0;
+					int len = resp.length();
+					while (start < len) {
+						int end = Math.min(start + 2000, len);
+						int split = resp.lastIndexOf('\n', end);
+						if (split <= start) split = end;
+						msg.getChannel().sendMessage(resp.substring(start, split));
+						start = split;
+					}
+				} else {
+					msg.getChannel().sendMessage(resp);
+				}
 				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
 				lastTokens.put(channelId, response.getTotalTokens());
 			} else {
