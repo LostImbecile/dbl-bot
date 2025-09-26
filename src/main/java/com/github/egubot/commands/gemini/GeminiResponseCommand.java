@@ -33,15 +33,15 @@ public class GeminiResponseCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		CompletableFuture<List<String>> linksFuture;
+		CompletableFuture<List<String>> imageLinks;
 		if (msg.getReferencedMessage().isPresent()) {
-			linksFuture = MessageInfoUtilities.getReferencedMessageLinks(msg)
+			imageLinks = MessageInfoUtilities.getReferencedMessageImageLinks(msg)
 					.thenApply(optionalLinks -> optionalLinks.orElse(List.of()));
 		} else {
-			linksFuture = MessageInfoUtilities.getMessageLinks(msg);
+			imageLinks = MessageInfoUtilities.getImageLinks(msg);
 		}
 		
-		linksFuture.thenAccept(links -> {
+		imageLinks.thenAccept(links -> {
 			AIContext.getGemini().respond(msg, arguments, links.isEmpty() ? null : links);
 		}).exceptionally(ex -> {
 			AIContext.getGemini().respond(msg, arguments, null);

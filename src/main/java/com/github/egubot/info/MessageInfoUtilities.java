@@ -66,6 +66,24 @@ public class MessageInfoUtilities {
 		});
 	}
 
+	public static CompletableFuture<List<String>> getImageLinks(Message msg) {
+		return CompletableFuture.supplyAsync(() -> {
+			return getImageLinksFromMessage(msg);
+		});
+	}
+	
+	public static CompletableFuture<Optional<List<String>>> getReferencedMessageImageLinks(Message msg) {
+		return CompletableFuture.supplyAsync(() -> {
+			Optional<Message> referencedMessage = msg.getReferencedMessage();
+			if (referencedMessage.isPresent()) {
+				List<String> imageLinks = getImageLinksFromMessage(referencedMessage.get());
+				return imageLinks.isEmpty() ? Optional.empty() : Optional.of(imageLinks);
+			} else {
+				return Optional.empty();
+			}
+		});
+	}
+	
 	private static List<String> getLinksFromMessage(Message message, boolean ignoreVideo, boolean ignoreImage) {
 		List<Embed> embeds = message.getEmbeds();
 		List<MessageAttachment> attachments = message.getAttachments();
@@ -91,5 +109,39 @@ public class MessageInfoUtilities {
 		}
 
 		return links;
+	}
+	
+	private static List<String> getImageLinksFromMessage(Message message) {
+		List<Embed> embeds = message.getEmbeds();
+		List<MessageAttachment> attachments = message.getAttachments();
+		List<String> imageLinks = new ArrayList<>();
+
+		for (Embed embed : embeds) {
+			if (embed.getImage().isPresent()) {
+				imageLinks.add(embed.getImage().get().getUrl().toString());
+			}
+			if (embed.getThumbnail().isPresent()) {
+				imageLinks.add(embed.getThumbnail().get().getUrl().toString());
+			}
+		}
+
+		for (MessageAttachment attachment : attachments) {
+			if (isImageAttachment(attachment)) {
+				imageLinks.add(attachment.getUrl().toString());
+			}
+		}
+
+		return imageLinks;
+	}
+	
+	private static boolean isImageAttachment(MessageAttachment attachment) {
+		String filename = attachment.getFileName().toLowerCase();
+		return filename.endsWith(".jpg") || 
+		       filename.endsWith(".jpeg") || 
+		       filename.endsWith(".png") || 
+		       filename.endsWith(".gif") || 
+		       filename.endsWith(".webp") || 
+		       filename.endsWith(".bmp") || 
+		       filename.endsWith(".svg");
 	}
 }
