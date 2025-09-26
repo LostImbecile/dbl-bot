@@ -31,6 +31,7 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 
 public class SendMessagesController {
@@ -124,14 +125,78 @@ public class SendMessagesController {
 				submitMessage();
 			}
 		} else if (event.isControlDown() && event.getCode() == KeyCode.V) {
-			Clipboard clipboard = Clipboard.getSystemClipboard();
-			if (clipboard.hasFiles()) {
-				if (attachedFiles == null)
-					attachedFiles = new ArrayList<>();
-				attachedFiles.addAll(clipboard.getFiles());
-				updateAttachmentTextField();
+			handleClipboardPaste(event);
+		} else if (event.getCode() == KeyCode.DELETE && attachedFiles != null && !attachedFiles.isEmpty()) {
+			clearAttachments();
+			event.consume();
+		}
+	}
+
+	@FXML
+	void attachmentTextFieldClicked(MouseEvent event) {
+		if (attachedFiles != null && !attachedFiles.isEmpty()) {
+			clearAttachments();
+		}
+	}
+
+	private void handleClipboardPaste(KeyEvent event) {
+		Clipboard clipboard = Clipboard.getSystemClipboard();
+		
+		if (clipboard.hasFiles()) {
+			if (attachedFiles == null)
+				attachedFiles = new ArrayList<>();
+			attachedFiles.addAll(clipboard.getFiles());
+			updateAttachmentTextField();
+			event.consume();
+		} else if (clipboard.hasImage()) {
+			try {
+				javafx.scene.image.Image image = clipboard.getImage();
+				File tempFile = saveImageDirectlyToFile(image);
+				if (tempFile != null) {
+					if (attachedFiles == null)
+						attachedFiles = new ArrayList<>();
+					attachedFiles.add(tempFile);
+					updateAttachmentTextField();
+				}
+				event.consume();
+			} catch (Exception e) {
+				textArea.appendText("[Image detected but couldn't save - " + e.getMessage() + "]");
 				event.consume();
 			}
+		}
+	}
+
+	private File saveImageDirectlyToFile(javafx.scene.image.Image image) {
+		try {
+			File tempFile = File.createTempFile("clipboard_image_", ".png");
+			tempFile.deleteOnExit();
+			
+			javafx.scene.image.WritableImage writableImage = new javafx.scene.image.WritableImage(
+				(int)image.getWidth(), (int)image.getHeight());
+			
+			javafx.scene.image.PixelReader pixelReader = image.getPixelReader();
+			javafx.scene.image.PixelWriter pixelWriter = writableImage.getPixelWriter();
+			
+			for (int x = 0; x < image.getWidth(); x++) {
+				for (int y = 0; y < image.getHeight(); y++) {
+					pixelWriter.setArgb(x, y, pixelReader.getArgb(x, y));
+				}
+			}
+			
+			java.awt.image.BufferedImage bufferedImage = new java.awt.image.BufferedImage(
+				(int)image.getWidth(), (int)image.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+			
+			for (int x = 0; x < image.getWidth(); x++) {
+				for (int y = 0; y < image.getHeight(); y++) {
+					bufferedImage.setRGB(x, y, pixelReader.getArgb(x, y));
+				}
+			}
+			
+			javax.imageio.ImageIO.write(bufferedImage, "png", tempFile);
+			return tempFile;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -140,10 +205,11 @@ public class SendMessagesController {
 
 		if (attachedFiles != null && !attachedFiles.isEmpty()) {
 			for (File file : attachedFiles) {
-				if (fileNames.length() > 0)
+				if (!fileNames.isEmpty())
 					fileNames.append(", ");
 				fileNames.append(file.getName());
 			}
+			fileNames.append(" (click here or press DEL to remove)");
 		}
 
 		attachmentTextField.setText(fileNames.toString());
@@ -231,7 +297,6 @@ public class SendMessagesController {
 
 		textArea.setOnDragOver(this::handleDragOver);
 		textArea.setOnDragDropped(this::handleDragDropped);
-
 	}
 
 	private void initialiseLists() {

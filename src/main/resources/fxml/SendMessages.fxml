@@ -23,7 +23,7 @@
       				<TextArea fx:id="textArea" onKeyPressed="#textAreaOnKeyPressed" prefHeight="349.0" prefWidth="425.0" promptText="Press enter to send, or shift-enter for a newline" style="-fx-background-color: white;" wrapText="true" />
       			</content>
       		</ScrollPane>
-            <TextField fx:id="attachmentTextField" promptText="No Attachments" style="-fx-border-color: black;" />
+            <TextField fx:id="attachmentTextField" onMouseClicked="#attachmentTextFieldClicked" promptText="No Attachments" style="-fx-border-color: black;" />
          </children>
       </VBox>
 	</center>
