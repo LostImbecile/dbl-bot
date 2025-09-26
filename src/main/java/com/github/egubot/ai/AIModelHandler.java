@@ -84,58 +84,14 @@ public class AIModelHandler {
 	}
 
 	public boolean respond(Message msg, String msgText) {
-		try {
-			Long channelId = msg.getChannel().getId();
-			Long serverId = msg.getServer().map(server -> server.getId()).orElse(null);
-			conversations.putIfAbsent(channelId, new LinkedList<>());
-			List<String> conversation = conversations.get(channelId);
-
-			String userNameField = "Username (" + msg.getAuthor().getName() + ")";
-			if(!msg.getAuthor().getName().equalsIgnoreCase(msg.getAuthor().getDisplayName()))
-				userNameField += ", Display Name(" + msg.getAuthor().getDisplayName() + ")";
-			
-			clearConversationIfTooLarge(channelId, getModel().getTokenLimit() - 2000);
-			
-			APIResponse response = getModel().sendRequest(msgText, userNameField, conversation, serverId);
-
-			if (!response.isError()) {
-				conversation.add(model.reformatInput(msgText, "user"));
-				String resp = response.getResponse().replaceAll("<think>(?s).*</think>", "");
-				if (resp.length() > 2000) {
-					int start = 0;
-					int len = resp.length();
-					while (start < len) {
-						int end = Math.min(start + 2000, len);
-						int split = resp.lastIndexOf('\n', end);
-						if (split <= start) split = end;
-						msg.getChannel().sendMessage(resp.substring(start, split));
-						start = split;
-					}
-				} else {
-					msg.getChannel().sendMessage(resp);
-				}
-				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
-				lastTokens.put(channelId, response.getTotalTokens());
-			} else {
-				String errorMsg = "API - " + response.getResponse();
-				msg.getChannel().sendMessage(errorMsg);
-				logger.warn("API error for channel {}: Status {}, Message: {}", channelId, response.getStatusCode(), response.getResponse());
-			}
-			return true;
-		} catch (java.net.SocketTimeoutException e) {
-			msg.getChannel().sendMessage("Request timed out - the AI service took too long to respond.");
-			logger.error("Socket timeout for channel {}: {}", msg.getChannel().getId(), e.getMessage());
-		} catch (java.net.ConnectException e) {
-			msg.getChannel().sendMessage("Connection failed - unable to reach AI service.");
-			logger.error("Connection error for channel {}: {}", msg.getChannel().getId(), e.getMessage());
-		} catch (IOException e) {
-			msg.getChannel().sendMessage("Network error - please try again later.");
-			logger.error("IO Exception for channel {}: ", msg.getChannel().getId(), e);
-		}
-		return false;
+		return respondWithRetry(msg, msgText, null, false);
 	}
 
 	public boolean respond(Message msg, String msgText, List<String> attachmentLinks) {
+		return respondWithRetry(msg, msgText, attachmentLinks, false);
+	}
+
+	private boolean respondWithRetry(Message msg, String msgText, List<String> attachmentLinks, boolean isRetry) {
 		try {
 			Long channelId = msg.getChannel().getId();
 			Long serverId = msg.getServer().map(server -> server.getId()).orElse(null);
@@ -175,7 +131,7 @@ public class AIModelHandler {
 				conversation.add(model.reformatInput(response.getResponse(), "assistant"));
 				lastTokens.put(channelId, response.getTotalTokens());
 			} else {
-				String errorMsg = "API Error: " + response.getResponse();
+				String errorMsg = attachmentLinks != null ? "API Error: " + response.getResponse() : "API - " + response.getResponse();
 				msg.getChannel().sendMessage(errorMsg);
 				logger.warn("API error for channel {}: Status {}, Message: {}", channelId, response.getStatusCode(), response.getResponse());
 			}
@@ -184,11 +140,20 @@ public class AIModelHandler {
 			msg.getChannel().sendMessage("Request timed out - the AI service took too long to respond.");
 			logger.error("Socket timeout for channel {}: {}", msg.getChannel().getId(), e.getMessage());
 		} catch (java.net.ConnectException e) {
+			if (!isRetry) {
+				logger.info("Connection failed on first attempt for channel {}, retrying once...", msg.getChannel().getId());
+				return respondWithRetry(msg, msgText, attachmentLinks, true);
+			}
 			msg.getChannel().sendMessage("Connection failed - unable to reach AI service.");
-			logger.error("Connection error for channel {}: {}", msg.getChannel().getId(), e.getMessage());
+			logger.error("Connection error for channel {} (after retry): {}", msg.getChannel().getId(), e.getMessage());
 		} catch (IOException e) {
+			if (!isRetry && (e.getMessage().contains("Connection reset") || e.getMessage().contains("Broken pipe") || 
+							 e.getMessage().contains("Socket closed") || e.getMessage().contains("Connection refused"))) {
+				logger.info("Network error on first attempt for channel {}, retrying once: {}", msg.getChannel().getId(), e.getMessage());
+				return respondWithRetry(msg, msgText, attachmentLinks, true);
+			}
 			msg.getChannel().sendMessage("Network error - please try again later.");
-			logger.error("IO Exception for channel {}: ", msg.getChannel().getId(), e);
+			logger.error("IO Exception for channel {}{}: ", msg.getChannel().getId(), isRetry ? " (after retry)" : "", e);
 		}
 		return false;
 	}

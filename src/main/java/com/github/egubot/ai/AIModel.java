@@ -2,6 +2,7 @@ package com.github.egubot.ai;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -10,6 +11,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,13 +53,39 @@ public class AIModel implements Shutdownable {
 		this.apiKey = apiKey;
 		this.url = url;
 
-		// Remove hardcoded system prompt - will be retrieved per-server
 		this.systemPrompt = null;
 
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+		connectionManager.setMaxTotal(20);
+		connectionManager.setDefaultMaxPerRoute(10);
+		connectionManager.setValidateAfterInactivity(30000);
+
+		ConnectionKeepAliveStrategy keepAliveStrategy = (response, context) -> {
+			HeaderElementIterator it = new BasicHeaderElementIterator(
+					response.headerIterator("Keep-Alive"));
+			while (it.hasNext()) {
+				HeaderElement he = it.nextElement();
+				String param = he.getName();
+				String value = he.getValue();
+				if (value != null && param.equalsIgnoreCase("timeout")) {
+					try {
+						return Long.parseLong(value) * 1000;
+					} catch (NumberFormatException ignored) {
+					}
+				}
+			}
+			return 30000;
+		};
+
 		this.httpClient = HttpClients.custom()
-				.setDefaultRequestConfig(RequestConfig.custom().setSocketTimeout(socketTimeout)
+				.setConnectionManager(connectionManager)
+				.setKeepAliveStrategy(keepAliveStrategy)
+				.evictIdleConnections(60, TimeUnit.SECONDS)
+				.evictExpiredConnections()
+				.setDefaultRequestConfig(RequestConfig.custom()
+						.setSocketTimeout(socketTimeout)
 						.setConnectTimeout(connectTimeout) 
-						.setConnectionRequestTimeout(connectionRequestTimeout) 
+						.setConnectionRequestTimeout(connectionRequestTimeout)
 						.build())
 				.build();
 	}
