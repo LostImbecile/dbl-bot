@@ -3,8 +3,8 @@ package com.github.egubot.commands.ai;
 import org.javacord.api.entity.message.Message;
 
 import com.github.egubot.facades.DefaultSystemPromptContext;
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
-import com.github.egubot.main.Bot;
 
 public class GetDefaultSystemPromptCommand implements Command {
 
@@ -35,13 +35,8 @@ public class GetDefaultSystemPromptCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (!msg.getAuthor().asUser().isPresent()) {
+		if (!UserInfoUtilities.isOwner(msg)) {
 			return false;
-		}
-		
-		if (!msg.getAuthor().asUser().get().equals(Bot.getOwnerUser())) {
-			msg.getChannel().sendMessage("Only the bot owner can view the default system prompt.");
-			return true;
 		}
 		
 		String defaultPrompt = DefaultSystemPromptContext.getDefaultSystemPrompt();

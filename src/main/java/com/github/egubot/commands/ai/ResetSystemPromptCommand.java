@@ -1,9 +1,11 @@
 package com.github.egubot.commands.ai;
 
 import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.entity.server.Server;
 
 import com.github.egubot.facades.SystemPromptContext;
+import com.github.egubot.info.ServerInfoUtilities;
+import com.github.egubot.info.UserInfoUtilities;
 import com.github.egubot.interfaces.Command;
 
 public class ResetSystemPromptCommand implements Command {
@@ -35,16 +37,14 @@ public class ResetSystemPromptCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (!msg.getAuthor().asUser().isPresent()) {
-			return false;
-		}
+		Server server = ServerInfoUtilities.getServer(msg);
 		
-		if (!msg.getServer().isPresent()) {
+		if (server == null) {
 			msg.getChannel().sendMessage("This command can only be used in a server.");
 			return true;
 		}
 		
-		if (!msg.getServer().get().hasPermission(msg.getAuthor().asUser().get(), PermissionType.ADMINISTRATOR)) {
+		if (!UserInfoUtilities.isAdmin(msg)) {
 			msg.getChannel().sendMessage("You need administrator permissions to reset the system prompt.");
 			return true;
 		}
