@@ -24,18 +24,18 @@ public class FixPopularSiteEmbeds {
 
 	public static void disableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
-		if (disabledServers.contains(serverID)) {
+		if (!disabledServers.contains(serverID)) {
 			disabledServers.add(serverID);
-			dataManager.getData().remove(serverID + "");
+			dataManager.getData().add(serverID + "");
 			dataManager.writeData(null);
 		}
 	}
 
 	public static void enableServer(Message msg) {
 		long serverID = ServerInfoUtilities.getServerID(msg);
-		if (!disabledServers.contains(serverID)) {
+		if (disabledServers.contains(serverID)) {
 			disabledServers.remove(serverID);
-			dataManager.getData().add(serverID + "");
+			dataManager.getData().remove(serverID + "");
 			dataManager.writeData(null);
 		}
 	}
@@ -58,7 +58,7 @@ public class FixPopularSiteEmbeds {
 			newText = msgText.replace("https://x.com", "https://fixupx.com");
 		} else if (msgText.contains("www.instagram.com")) {
 			foundReplaceableLink = true;
-			newText = msgText.replace("www.instagram.com", "www.ddinstagram.com");
+			newText = msgText.replace("www.instagram.com", "www.kkinstagram.com");
 		} else if (msgText.contains("www.tiktok.com")) {
 			foundReplaceableLink = true;
 			newText = msgText.replace("www.tiktok.com", "www.tnktok.com");
