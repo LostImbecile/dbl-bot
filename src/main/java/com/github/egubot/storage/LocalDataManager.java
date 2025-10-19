@@ -77,7 +77,11 @@ public class LocalDataManager extends BaseDataManager {
 	@Override
 	public void sendData(Messageable e) {
 		try {
-			e.sendMessage(FileUtilities.toBufferedInputStream(getData()), fileName).join();
+			if (getData() != null) {
+				e.sendMessage(FileUtilities.toBufferedInputStream(getData()), fileName);
+			} else {
+	            e.sendMessage("No data available.");
+	        }
 		} catch (Exception e1) {
 			e.sendMessage("Failed");
 			logger.error("Failed to send data online.", e1);

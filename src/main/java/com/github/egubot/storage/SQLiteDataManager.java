@@ -6,6 +6,8 @@ import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import org.javacord.api.entity.message.Messageable;
+
+import com.github.egubot.shared.utils.FileUtilities;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -84,8 +86,8 @@ public class SQLiteDataManager extends BaseDataManager {
 
     @Override
     public void sendData(Messageable e) {
-        if (data != null) {
-            e.sendMessage(String.join("\n", data));
+        if (getData() != null) {
+            e.sendMessage(FileUtilities.toBufferedInputStream(getData()), fileName);
         } else {
             e.sendMessage("No data available.");
         }
