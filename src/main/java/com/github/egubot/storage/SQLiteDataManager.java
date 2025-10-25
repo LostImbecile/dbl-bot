@@ -87,7 +87,7 @@ public class SQLiteDataManager extends BaseDataManager {
     @Override
     public void sendData(Messageable e) {
         if (getData() != null) {
-            e.sendMessage(FileUtilities.toBufferedInputStream(getData()), fileName);
+            e.sendMessage(FileUtilities.toBufferedInputStream(getData()), fileName.substring(0, fileName.lastIndexOf(".")) + ".txt");
         } else {
             e.sendMessage("No data available.");
         }
