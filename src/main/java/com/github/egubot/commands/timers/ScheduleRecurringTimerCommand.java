@@ -34,7 +34,8 @@ public class ScheduleRecurringTimerCommand implements Command{
 	
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		return ScheduledTasksContext.scheduleRecurring(msg, arguments);
+		String args = arguments.replaceAll("[“”]", "\"");
+		return ScheduledTasksContext.scheduleRecurring(msg, args);
 	}
 
 	@Override

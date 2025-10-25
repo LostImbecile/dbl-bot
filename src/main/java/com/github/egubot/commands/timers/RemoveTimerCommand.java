@@ -34,7 +34,8 @@ public class RemoveTimerCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		return ScheduledTasksContext.remove(msg, arguments);
+		String args = arguments.replaceAll("[“”]", "\"");
+		return ScheduledTasksContext.remove(msg, args);
 	}
 
 	@Override

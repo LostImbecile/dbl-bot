@@ -29,8 +29,9 @@ public class RemindMeCancelCommand implements Command {
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
+		String args = arguments.replaceAll("[“”]", "\"");
 		String authorTag = "<@" + msg.getAuthor().getIdAsString() + ">";
-		String reformatted = arguments + " \"parrot " + authorTag + "\"";
+		String reformatted = args + " \"parrot " + authorTag + "\"";
 		return ScheduledTasksContext.remove(msg, reformatted);
 	}
 

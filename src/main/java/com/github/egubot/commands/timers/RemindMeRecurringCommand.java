@@ -14,12 +14,13 @@ public class RemindMeRecurringCommand implements Command{
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		if (!arguments.contains("\"")) {
-			msg.getChannel().sendMessage("Please provide a message!");
+		String args = arguments.replaceAll("[“”]", "\"");
+		if (!args.contains("\"")) {
+			msg.getChannel().sendMessage("Please provide a message in quotes!");
 			return true;
 		}
 		String authorTag = "<@" + msg.getAuthor().getIdAsString() + ">";
-		String reformatted = arguments.replaceFirst("\"", "\"parrot " + authorTag + " ");
+		String reformatted = args.replaceFirst("\"", "\"parrot " + authorTag + " ");
 		return ScheduledTasksContext.scheduleRecurring(msg, reformatted);
 	}
 

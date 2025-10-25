@@ -14,7 +14,8 @@ public class ScheduleTimerCommand implements Command{
 
 	@Override
 	public boolean execute(Message msg, String arguments) throws Exception {
-		return ScheduledTasksContext.schedule(msg, arguments);
+		String args = arguments.replaceAll("[“”]", "\"");
+		return ScheduledTasksContext.schedule(msg, args);
 	}
 
 	@Override
