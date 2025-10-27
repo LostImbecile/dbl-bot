@@ -160,6 +160,11 @@ Translate:
 Weather:
 - b-weather (city) *detailed
 
+Timezones:
+- b-timezones `[lists current time for configured zones]`
+- b-timezones add (ZoneID)/(zoneName:ZoneID) `[BST,UST+5,GMT-5,Europe/Paris]`
+- b-timezones remove (number)
+
 Automatic Embed Fix For Popular Sites:
 - b-fixembed toggle `[on by default]`
 - b-fix (link)/(reply to the message)

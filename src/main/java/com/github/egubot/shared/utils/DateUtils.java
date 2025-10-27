@@ -14,6 +14,7 @@ public class DateUtils {
 	public static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 	public static final DateTimeFormatter TIME_ONLY = DateTimeFormatter.ofPattern("H:mm");
 	public static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd-MM-yyyy, H:mm");
+	public static final DateTimeFormatter DATE_TIME_TZ = DateTimeFormatter.ofPattern("dd-MM-yyyy, H:mm z");
 	private static final Pattern DELAY_PATTERN = Pattern.compile("(\\d+)([Mwdhms])");
 	private static final Pattern DELAY_VALIDATION_Pattern = Pattern.compile("(?:\\d+[smhdwM]){1,6}");
 
@@ -134,6 +135,10 @@ public class DateUtils {
 
 	public static String getDateTime(ZonedDateTime time) {
 		return time.format(DATE_TIME);
+	}
+
+	public static String getDateTimeWithZone(ZonedDateTime time) {
+		return time.format(DATE_TIME_TZ);
 	}
 
 	public static String getDate(Instant instant) {
